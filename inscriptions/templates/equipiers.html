@@ -1,0 +1,21 @@
+
+<html>
+    <head>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>Nom</th>
+                <th>Prenom</th>
+            </tr>
+            {% for e in equipiers %}
+            <tr>
+                <td>{{ e.nom }}</td>
+                <td>{{ e.prenom }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
+        
+

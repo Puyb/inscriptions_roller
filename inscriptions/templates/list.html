@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <script>
+        var nbcomplet = 0;
+    </script>
+    <div class="panel panel-default">
+        <div class="panel-heading">Inscrits</div>
+        <div class="panel-body">
+            <table>
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Club</th>
+                    <th>Cat.</th>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    {% if user.is_staff %}
+                    <th>☺</th>
+                    <th>Date</th>
+                    <th>€</th>
+                    <th><img alt="None" src="/static/admin/img/icon-yes.gif"></th>
+                    {% endif %}
+                </tr>
+                {% for equipe in equipes %}
+                <tr class="{% cycle 'odd' 'even' %}">
+                    <td>{{ equipe.numero }}</td>
+                    <td>{{ equipe.nom }}</td>
+                    <td>{{ equipe.club }}</td>
+                    <td>{{ equipe.categorie }}</td>
+                    <td>{{ equipe.gerant_ville2.nom }}</td>
+                    <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays.name }}" /></td>
+                    {% if user.is_staff %}
+                    <td>{{ equipe.nombre }}</td>
+                    <td>{{ equipe.date }}</td>
+                    <td>{{ equipe.prix }}€ {% if equipe.paiement_complet %}<img alt="None" src="/static/admin/img/icon-yes.gif">{% endif %}</td>
+                    <td>
+                        {% if equipe.dossier_complet_auto %}<img alt="None" src="/static/admin/img/icon-yes.gif">{% endif %}
+                        <script>
+                            nbcomplet += {{ equipe.dossier_complet_auto|yesno:"1,0,0" }};
+                        </script>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2">{{ stats.count }} inscriptions</td>
+                    <td>{{ stats.club }} clubs</td>
+                    <td></td>
+                    <td>{{ stats.villes }} villes</td>
+                    <td>{{ stats.pays }} pays</td>
+                    {% if user.is_staff %}
+                    <td>{{ stats.equipiers }}</td>
+                    <td colspan="2" style="text-align: right;">{{ stats.paiement }}€ / {{ stats.prix }}€ ({{ stats.nbpaye }}<img alt="None" src="/static/admin/img/icon-yes.gif">)</td>
+                    <td><script>document.write(nbcomplet);</script><img alt="None" src="/static/admin/img/icon-yes.gif"></td>
+                    {% endif %}
+                </tr>
+            </table>
+        </div>
+        <div class="panel-footer">
+            Note: Le nom et le placement des villes est determinée par une recherche automatique. Il est possible que le resultat de cette recherche soit erronné. Votre inscription est prise en compte avec la bonne ville même si ce n'est pas affiché correctement dans cette liste. Contactez nous si vous voyez une erreur que vous souhaitez corriger.
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "Sélectionnez votre course :" %}</h1>
+<ul>
+    {% for course in courses %}
+    <li><a href="/{{ course.uid }}/admin/">{{ course.nom }} {{ course.date }}</a></li>
+    {% endfor %}
+</ul>
+<a href="/course/inscriptions/course/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
+<a href="/course/join/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a>
+{% endblock %}

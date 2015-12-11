@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <style>
+        .container_16 .grid_11 { width: 940px; }
+    </style>
+    <h1>{% trans "Modifier une inscription" %}</h1>
+    <p>{% blocktrans %}
+        Pour recevoir un email contenant les instructions pour modifier votre inscription, veuillez répondre à la question suivante :
+    {% endblocktrans %}</p>
+    <p>{% blocktrans %}
+        Combien font quattre et trois (en chiffre) ?
+    {% endblocktrans %}</p>
+    <form method="post">
+        {% csrf_token %}
+        <input name="question" /><br />
+        <button type="submit">Envoyer</button>
+    </form>
+{% endblock %}

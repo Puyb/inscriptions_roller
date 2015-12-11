@@ -1,0 +1,49 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+
+{% for course in prochaines_courses %}
+{% if forloop.first %}
+      <h1>{% trans "Prochaines courses" %}</h1>
+      <div class="row">{% endif %}
+        <div class="col-md-4">
+          <h2>{{ course.nom }}</h2>
+          <p>
+            {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
+            <a href="{{ course.url }}">{% trans "Site de la course" %}</a>
+            {% if course.ouverte %}
+                <a class="btn btn-default" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
+          </p>
+          <p>
+                {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
+                <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
+                <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
+            {% else %}
+                {% blocktrans with ouverture=course.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}{% endblocktrans %}<br />
+            {% endif %}
+          </p>
+        </div>
+{% if forloop.last %}</div>{% endif %}
+{% endfor %}
+
+{% for course in anciennes_courses %}
+{% if forloop.first %}
+      <h1>{% trans "Anciennes courses" %}</h1>
+      <div class="row">{% endif %}
+        <div class="col-md-4">
+          <h2>{{ course.nom }}</h2>
+          <p>
+            {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
+            <a href="{{ course.url }}">{% trans "Site de la course" %}</a>
+            <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
+            <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
+            {% trans "Résultats" %}
+          </p>
+        </div>
+{% if forloop.last %}</ul>{% endif %}
+{% endfor %}
+            
+{% endblock %}

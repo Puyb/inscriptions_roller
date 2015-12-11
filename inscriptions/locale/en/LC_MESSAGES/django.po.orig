@@ -1,0 +1,1202 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sixhdp\n"
+"Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
+"POT-Creation-Date: 2015-04-15 00:37+0200\n"
+"PO-Revision-Date: 2015-04-15 00:36+0100\n"
+=======
+"POT-Creation-Date: 2015-04-14 23:58+0200\n"
+"PO-Revision-Date: 2014-03-30 20:18+0100\n"
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+"Last-Translator: Puyb <puyb@puyb.net>\n"
+"Language-Team: English <LL@li.org>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.7.5\n"
+
+#: admin_course.py:21
+msgid ""
+"You're not allowed to access this part of the site. Please contact your site "
+"adminstrator."
+msgstr ""
+
+#: admin_course.py:143
+msgid "Statut"
+msgstr ""
+
+#: admin_course.py:147
+msgid "À vérifier"
+msgstr ""
+
+#: admin_course.py:148
+msgid "Complet"
+msgstr ""
+
+#: admin_course.py:149
+msgid "Incomplet"
+msgstr ""
+
+#: admin_course.py:150 models.py:487
+msgid "Erreur"
+msgstr ""
+
+#: admin_course.py:168
+<<<<<<< HEAD
+=======
+#, fuzzy
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Paiement complet"
+msgstr "Payment received"
+
+#: admin_course.py:172
+msgid "Payé"
+msgstr ""
+
+#: admin_course.py:173
+msgid "Impayé"
+msgstr ""
+
+#: admin_course.py:183
+<<<<<<< HEAD
+=======
+#, fuzzy
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Catégories"
+msgstr "Categories"
+
+#: admin_course.py:326
+msgid "Envoyer un mail groupé"
+msgstr ""
+
+#: models.py:23 models.py:28 models.py:488
+msgid "Homme"
+msgstr "Man"
+
+#: models.py:24 models.py:29
+msgid "Femme"
+msgstr "Woman"
+
+#: models.py:30
+msgid "Homme ou Mixte"
+msgstr "Men or Mixed"
+
+#: models.py:31
+msgid "Femme ou Mixte"
+msgstr "Women or Mixed"
+
+#: models.py:32
+msgid "Mixte"
+msgstr "Mixte"
+
+#: models.py:36
+msgid "Licence FFRS 2014"
+msgstr "License FFRS 2014"
+
+#: models.py:37
+msgid "Certificat médical établi après le 3/08/2013"
+msgstr "Medical certificate issued after the 08.03.2013"
+
+#: models.py:41
+msgid "Administrateur"
+msgstr "Administrator"
+
+#: models.py:42 models.py:70
+msgid "Organisateur"
+msgstr "Organisator"
+
+#: models.py:43
+msgid "Validateur"
+msgstr "Validator"
+
+#: models.py:47
+msgid "Site Roller en Ligne.com"
+msgstr "Roller in line.com website"
+
+#: models.py:48
+msgid "Facebook"
+msgstr "Facebook"
+
+#: models.py:49
+msgid "Presse"
+msgstr "Press"
+
+#: models.py:50
+msgid "Bouche à oreille"
+msgstr "Word of mooth"
+
+#: models.py:51
+msgid "Flyer pendant une course"
+msgstr "Flyer during a race"
+
+#: models.py:52
+msgid "Flyer pendant une randonnée"
+msgstr "Flyer during a skating ride"
+
+#: models.py:53
+msgid "Affiche"
+msgstr "Poster"
+
+#: models.py:54
+msgid "Information de la Maire de Paris"
+msgstr "Paris city official informations"
+
+#: models.py:55
+msgid "Autre"
+msgstr "Other"
+
+#: models.py:59
+msgid "XS"
+msgstr "XS"
+
+#: models.py:60
+msgid "S"
+msgstr "S"
+
+#: models.py:61
+msgid "M"
+msgstr "M"
+
+#: models.py:62
+msgid "L"
+msgstr "L"
+
+#: models.py:63
+msgid "XL"
+msgstr "XL"
+
+#: models.py:64
+msgid "XXL"
+msgstr "XXL"
+
+#: models.py:68
+msgid "Gerant d'équipe"
+msgstr "Team leader"
+
+#: models.py:69
+msgid "Equipier"
+msgstr "Teamate "
+
+#: models.py:71
+msgid "Tous"
+msgstr "All"
+
+#: models.py:78 models.py:257 models.py:329 models.py:459 models.py:543
+msgid "Nom"
+msgstr "Last name"
+
+#: models.py:79
+msgid "uid"
+msgstr "uid"
+
+#: models.py:80 models.py:333
+msgid "Ville"
+msgstr "City"
+
+#: models.py:82
+msgid "Date"
+msgstr "Date"
+
+#: models.py:83
+msgid "Date d'ouverture des inscriptionss"
+msgstr "Registration opening date"
+
+#: models.py:84
+msgid "Date d'augmentation dss tarifs"
+msgstr "Price raise date"
+
+#: models.py:85
+msgid "Date de fermeture des inscriptions"
+msgstr "Registration closing date"
+
+#: models.py:86
+msgid "Limite du nombre de participants"
+msgstr ""
+
+#: models.py:87
+msgid "Limite du nombre de solo"
+msgstr ""
+
+#: models.py:88
+msgid "Adresse paypal"
+msgstr "Paypal address"
+
+#: models.py:89
+msgid "Frais paypal inclus"
+msgstr ""
+
+#: models.py:90
+msgid "Ordre des chèques"
+msgstr ""
+
+#: models.py:91 models.py:331 models.py:462 models.py:463
+msgid "Adresse"
+msgstr "Address"
+
+#: models.py:92
+msgid "URL"
+msgstr ""
+
+#: models.py:93
+msgid "URL Réglement"
+msgstr ""
+
+#: models.py:94
+msgid "Email contact"
+msgstr ""
+
+#: models.py:258
+msgid "Code"
+msgstr ""
+
+#: models.py:259
+msgid "Prix normal"
+msgstr ""
+
+#: models.py:260
+msgid "Prix augmenté"
+msgstr ""
+
+#: models.py:261
+msgid "Nombre minimum d'équipiers"
+msgstr "Minimum number of teammate"
+
+#: models.py:262
+msgid "Nombre maximum d'équipiers"
+msgstr "Maximum number of teammate"
+
+#: models.py:263
+msgid "Age minimum"
+msgstr ""
+
+#: models.py:264 models.py:461
+msgid "Sexe"
+msgstr "Sex"
+
+#: models.py:265
+msgid "Validation function (javascript)"
+msgstr ""
+
+#: models.py:266
+msgid "Numero de dossard (début)"
+msgstr ""
+
+#: models.py:267
+msgid "Numero de dossard (fin)"
+msgstr ""
+
+#: models.py:327
+msgid "Nom d'équipe"
+msgstr "Team name"
+
+#: models.py:328
+msgid "Club"
+msgstr "Club"
+
+#: models.py:330 models.py:460
+msgid "Prénom"
+msgstr "First name"
+
+#: models.py:332
+msgid "Adresse 2"
+msgstr "Address 2"
+
+#: models.py:334
+msgid "Code postal"
+msgstr "Postal code"
+
+#: models.py:335 models.py:466
+msgid "Pays"
+msgstr "Country"
+
+#: models.py:336 models.py:467
+msgid "e-mail"
+msgstr "e-mail"
+
+#: models.py:337
+msgid "Mot de passe"
+msgstr "Password"
+
+#: models.py:338
+msgid "Téléphone"
+msgstr "Phone"
+
+#: models.py:341
+msgid "Nombre d'équipiers"
+msgstr "Number of teammate"
+
+#: models.py:342
+msgid "Détails"
+msgstr "Details"
+
+#: models.py:343
+msgid "Prix"
+msgstr "Price"
+
+#: models.py:344
+msgid "Paiement reçu"
+msgstr "Payment received"
+
+#: models.py:345
+msgid "Dossier complet"
+msgstr "File completed"
+
+#: models.py:346
+msgid "Date d'insciption"
+msgstr "Registration date"
+
+#: models.py:347
+msgid "Commentaires"
+msgstr "Comments"
+
+#: models.py:349 models.py:457
+msgid "Numéro"
+msgstr "Number"
+
+#: models.py:350
+msgid "Comment avez vous connu la course ?"
+msgstr "How did you know about the race?"
+
+#: models.py:351
+msgid "Date facture"
+msgstr ""
+
+#: models.py:468
+msgid "Date de naissance"
+msgstr "Birthday"
+
+#: models.py:469
+msgid "Autorisation parentale"
+msgstr "Parental authorization"
+
+#: models.py:470
+msgid "Autorisation parentale valide"
+msgstr "Valid parental authorization"
+
+#: models.py:471
+msgid "Justificatif"
+msgstr "Justificative"
+
+#: models.py:472
+msgid "Numéro de licence"
+msgstr "Licence Number"
+
+#: models.py:473
+msgid "Certificat ou licence"
+msgstr "Certificat or licence"
+
+#: models.py:474
+msgid "Certificat ou licence valide"
+msgstr "Valid certificate or license"
+
+#: models.py:475
+msgid "Lien de parenté"
+msgstr "Family relationship"
+
+#: models.py:476
+msgid "Justificatif entreprise / etudiant"
+msgstr "Enterprise / School justification"
+
+#: models.py:477
+msgid "Justificatif valide"
+msgstr "Valid justificative"
+
+#: models.py:479
+msgid "Code EOSkates"
+msgstr ""
+
+#: models.py:480
+msgid "Transpondeur"
+msgstr "Tag number"
+
+#: models.py:481
+msgid "Taille T-shirt"
+msgstr "Shirt size"
+
+#: models.py:482
+msgid "Verifier"
+msgstr ""
+
+#: models.py:483
+msgid "Licence manquante"
+msgstr ""
+
+#: models.py:484
+<<<<<<< HEAD
+=======
+#, fuzzy
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Certificat manquant"
+msgstr "Medical certificate is missing"
+
+#: models.py:485
+<<<<<<< HEAD
+=======
+#, fuzzy
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Autorisation manquante"
+msgstr "Parental authorization is missing"
+
+#: models.py:486
+<<<<<<< HEAD
+=======
+#, fuzzy
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Valide"
+msgstr "Valide"
+
+#: models.py:537
+msgid "Role"
+msgstr ""
+
+#: models.py:544
+msgid "Destinataire"
+msgstr ""
+
+#: models.py:545
+msgid "Copie cachée à"
+msgstr ""
+
+#: models.py:546
+msgid "Sujet"
+msgstr ""
+
+#: models.py:547
+msgid "Message"
+msgstr ""
+
+#: views.py:105
+msgid "Désolé, il n'y a plus de place dans cette catégorie"
+<<<<<<< HEAD
+msgstr "Sorry, no more seat available in this category"
+=======
+msgstr ""
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/base.html:69
+msgid "Accueil"
+msgstr "Home"
+
+#: templates/base.html:71 templates/index.html:14 templates/index.html.py:28
+msgid "Liste des inscrits"
+msgstr "Registration list"
+
+#: templates/base.html:72 templates/index.html:15 templates/index.html.py:29
+msgid "Statistiques"
+msgstr "Statistics"
+
+#: templates/base.html:73 templates/change_numero.html:8
+#, fuzzy
+msgid "Modifier une inscription"
+msgstr "Modify your registration"
+
+#: templates/change.html:11
+<<<<<<< HEAD
+msgid "Modifier ou payer une inscription"
+msgstr "Modify or pay your registration"
+=======
+#, fuzzy
+msgid "Modifier ou payer une inscription"
+msgstr "Modify your registration"
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/change.html:13
+msgid ""
+"\n"
+"        Un email vient de vous être envoyé. Si vous ne le recevez pas, <a "
+"href=\"http://www.6hdeparis.fr/contact/\">contactez nous</a> en précisant "
+"votre numéro d'équipe.\n"
+"    "
+msgstr ""
+<<<<<<< HEAD
+"\n"
+"        We just send you a mail. If you don't receive it,  <a href=\"http://"
+"www.6hdeparis.fr/contact/\">contact</a> us and give us your team number.\n"
+"    "
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/change.html:17
+msgid ""
+"\n"
+"    Si vous souhaitez modifier ou payer une inscription, utilisez le lien "
+"qui vous a été envoyé dans le mail de confirmation de votre inscription.\n"
+"    "
+msgstr ""
+<<<<<<< HEAD
+"\n"
+"    If you want to modify or pay your registration, use the lonk that we "
+"sent you in the confirmation mail.\n"
+"    "
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/change.html:20
+msgid ""
+"\n"
+"    Si vous avez perdu ce mail, vous pouvez le recevoir a nouveau en "
+"cliquant sur votre équipe dans la liste.\n"
+"    "
+msgstr ""
+<<<<<<< HEAD
+"\n"
+"    If you've lost this mail, you can receive it again by clicking on your "
+"team in this list.\n"
+"    "
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/change_numero.html:9
+msgid ""
+"\n"
+"        Pour recevoir un email contenant les instructions pour modifier "
+"votre inscription, veuillez répondre à la question suivante :\n"
+"    "
+msgstr ""
+<<<<<<< HEAD
+"\n"
+"        To get a mail that 'll tell you how to modify your registration, "
+"please answer the following question:\n"
+"    "
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/change_numero.html:12
+msgid ""
+"\n"
+"        Combien font quattre et trois (en chiffre) ?\n"
+"    "
+msgstr ""
+<<<<<<< HEAD
+"\n"
+"        Multiply four by three (in number) ?\n"
+"    "
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+
+#: templates/closed.html:4 templates/not_opened_yet.html:4
+msgid "Le site d'inscription est fermé."
+msgstr "Registration site is closed."
+
+#: templates/closed.html:5
+msgid ""
+"S'il vous manque encore des certificats, ammenez les le jour de la course."
+msgstr ""
+"If you didn't provide your certificat yet, please bring them on the race day."
+
+#: templates/closed.html:6
+msgid ""
+"Si vous n'avez pas encore payé, ammenez votre chèque le jour de la course."
+msgstr "If you haven't pay yet, bring a check on race day."
+
+#: templates/done.html:5
+msgid "Votre inscription est enregistrée"
+msgstr "Your registration is booked"
+
+#: templates/done.html:7
+msgid "Equipe : "
+msgstr "Team: "
+
+#: templates/done.html:8
+msgid "Numéro d'inscription :"
+msgstr "Registration number:"
+
+#: templates/done.html:12
+msgid "Un email de confirmation vient de vous être envoyé."
+msgstr "A confirmation mail has just been sent."
+
+#: templates/done.html:17
+msgid "Pour régler votre inscription vous pouvez payer par internet :"
+msgstr "You can pay your registration online:"
+
+#: templates/done.html:37
+msgid "Paypal ou Carte bancaire"
+msgstr "Paypal or credit card"
+
+#: templates/done.html:43
+#, python-format
+msgid "Pour tout paiement par internet, %(frais)s € de frais seront ajoutés."
+msgstr "For online payment, € %(frais)s fee will be added."
+
+#: templates/done.html:46
+#, python-format
+msgid "Ou envoyer un chèque de %(prix)s € à l'ordre de \"%(ordre)s\"."
+msgstr "Or send a € %(prix)s check payable to the \"%(ordre)s\"."
+
+#: templates/done.html:47
+#, python-format
+msgid ""
+"Envoyez votre paiement avant le %(date)s. Si nous n'avons pas reçu votre "
+"paiement à cette date, votre inscription sera annulée."
+msgstr ""
+"Send your payment before %(date)s. If you don't, your registrationwill be "
+"canceled."
+
+#: templates/done.html:49
+#, python-format
+msgid "Votre paiement de %(prix)s € à bien été reçu."
+msgstr "Your payment of € %(prix)s was received."
+
+#: templates/done.html:58
+msgid "Il manque les licences de :"
+msgstr "Missing licenses:"
+
+#: templates/done.html:68
+msgid ""
+"Il manque les certificats médicaux de (<a href=\"http://www.6hdeparis.fr/wp-"
+"content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">modèle</"
+"a>):"
+msgstr ""
+"Missing medical certificate (<a href=\"http://www.6hdeparis.fr/wp-content/"
+"uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">model in french</"
+"a>)."
+
+#: templates/done.html:78
+msgid ""
+"Il manque les autorisations parentales (<a href=\"http://www.6hdeparis.fr/wp-"
+"content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank"
+"\">modèle</a>) :"
+msgstr ""
+"Missing parental authorization  (<a href=\"http://www.6hdeparis.fr/wp-"
+"content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">model "
+"in french</a>)."
+
+#: templates/done.html:88
+msgid ""
+"Catégorie Entreprise / Étudiants : Si ce n'est déjà fait, pensez à envoyer "
+"un certificat signé par l'employeur (un seul pour toute l'équipe, <a href="
+"\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/attestation_entreprise."
+"pdf\" target=\"_blank\">modèle</a>) ou une copie des fiches de paies ou une "
+"copie des cartes étudiants."
+msgstr ""
+"Enterprise / School category: Please add a certificate signed by the "
+"employer  (one for the team, <a href=\"http://www.6hdeparis.fr/wp-content/"
+"uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank\">model</a>) or "
+"a copy of your school id cards."
+
+#: templates/done.html:96
+msgid "Vous pouvez envoyer le paiement et les justificatifs à"
+msgstr "You can send paiment and justificatives to"
+
+#: templates/done.html:99
+#, python-format
+msgid ""
+"En précisant le nom de votre équipe et le numéro d'inscription <b>"
+"%(numero)s</b>."
+msgstr ""
+"Specifying the name of your team and the registration number <b>%(numero)s</"
+"b>."
+
+#: templates/done.html:105
+msgid "Partager"
+msgstr "Share"
+
+#: templates/done.html:106
+msgid "Partagez votre inscription sur les réseaux sociaux !"
+msgstr "Share it on the social networks!"
+
+#: templates/done.html:126
+msgid ""
+"Les 6h Roller de Paris sont une course d\\'endurance à roller, en relai par "
+"équipe de 5 ou en solitaire. Ouverte à tous, elle aura lieu le 2 août 2015 "
+"dans le Bois de Boulogne, sur un circuit de 2,6 km fermé à la circulation."
+msgstr ""
+"The 6h of Paris is a roller race, in relay teams up to 5, or in solo. Open "
+"to everyone, in the Bois de Boulogne, in Paris on a 2.6km circuit, on august "
+"the 2nd, 2015."
+
+#: templates/done.html:128
+#, python-format
+msgid "\"%(nom)s\" est inscrit aux 6h de Paris."
+msgstr "\"%(nom)s\" is going to the 6h of Paris."
+
+#: templates/done.html:130
+#, python-format
+msgid "Le duo \"%(nom)s\" est inscrit aux 6h de Paris."
+msgstr "The duo \"%(nom)s\" is going to the 6h of Paris."
+
+#: templates/done.html:132
+#, python-format
+msgid "L\\'équipe \"%(nom)s\" est inscrite aux 6h de Paris."
+msgstr "The team \"%(nom)s\" is going to the 6h of Paris."
+
+#: templates/form.html:6 templates/index.html:12
+msgid "Inscription"
+msgstr "Registration"
+
+#: templates/form.html:7
+msgid "Modification de votre inscription"
+msgstr "Modify your registration"
+
+#: templates/form.html:68
+msgid "Informations générales"
+msgstr "General informations"
+
+#: templates/form.html:75
+#, python-format
+msgid "Équipier %(n)s"
+msgstr "Teammate %(n)s"
+
+#: templates/form.html:83
+msgid ""
+"Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez "
+"vous guider."
+msgstr "Register your team, duo or solo in a few steps."
+
+#: templates/form.html:85
+<<<<<<< HEAD
+=======
+msgid ""
+"Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour "
+"vous communiquer les informations sur la course et pour vous permettre de "
+"modifier votre inscription ultérieurement."
+msgstr ""
+
+#: templates/form.html:87
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous "
+"pouvez payer votre inscription par internet ou par chèque. Une fois votre "
+"inscription terminée, vous recevrez un email de confirmation."
+msgstr ""
+"You can send your certificates online or by mail. You can pay online or by "
+"check. Once your registration is finished, you'll receive a confirmation "
+"email."
+
+<<<<<<< HEAD
+#: templates/form.html:86
+=======
+#: templates/form.html:88
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+#, python-format
+msgid ""
+"Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, "
+"envoyer les certificats, changer de catégorie jusqu'au %(date)s inclus."
+msgstr ""
+"You can modify your registration, add or remove teammates, send your "
+"certificates, change category up to %(date)s included."
+
+<<<<<<< HEAD
+#: templates/form.html:87
+=======
+#: templates/form.html:89
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Si vous rencontrez des problèmes lors de votre inscription, <a href=\"http://"
+"www.6hdeparis.fr/contact/\">contactez nous</a>"
+msgstr ""
+"If you have troubles to register, <a href=\"http://www.6hdeparis.fr/contact/"
+"\">contact us</a>"
+
+<<<<<<< HEAD
+#: templates/form.html:89
+msgid "Information générales"
+msgstr "General informations"
+
+#: templates/form.html:98
+=======
+#: templates/form.html:91
+msgid "Information générales"
+msgstr "General informations"
+
+#: templates/form.html:100
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en "
+"pièce jointe (formats PDF ou JPEG, <a href=\"http://www.6hdeparis.fr/wp-"
+"content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">modèle de "
+"certificat</a>)."
+msgstr ""
+"If you can, scan the certificate or the license and add it (formats PDF or "
+"JPEG, <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+"certificat_medical.pdf\" target=\"_blank\">medial certificat model in "
+"french</a>)."
+
+<<<<<<< HEAD
+#: templates/form.html:98
+msgid "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier."
+msgstr "You alsa can upload it later or send it by mail."
+
+#: templates/form.html:100
+=======
+#: templates/form.html:100
+msgid "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier."
+msgstr "You alsa can upload it later or send it by mail."
+
+#: templates/form.html:102
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+#, python-format
+msgid "Chaque équipier doit avoir plus de %(min_age)s ans au %(date)s."
+msgstr "Each teammate must be %(min_age)s at %(date)s."
+
+<<<<<<< HEAD
+#: templates/form.html:101
+=======
+#: templates/form.html:103
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Chaque équipier doit avoir un certificat médical de moins d'un an ou une "
+"licence FFRS en cours de validité pour participer."
+msgstr ""
+"Each teammate must have a medical certificate or a valid FFRS license to "
+"participate."
+
+<<<<<<< HEAD
+#: templates/form.html:110 templates/form.html.py:115
+=======
+#: templates/form.html:112 templates/form.html.py:117
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"La catégorie que vous avez choisi nécéssite des justificatifs suplémentaires."
+msgstr "The category you choose need additional justificatives."
+
+<<<<<<< HEAD
+#: templates/form.html:111
+=======
+#: templates/form.html:113
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Catégorie Famille : Veuillez le renseigner les liens de parenté pour chaque "
+"équipiers."
+msgstr "Family category: Please inform kinship for each crew."
+
+<<<<<<< HEAD
+#: templates/form.html:116
+=======
+#: templates/form.html:118
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"Catégorie Entreprise / Étudiants : Veuillez ajouter un certificat signé par "
+"l'employeur (un seul pour toute l'équipe, <a href=\"http://www.6hdeparis.fr/"
+"wp-content/uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank"
+"\">modèle</a>) ou une copie des fiches de paies ou une copie des cartes "
+"étudiants."
+msgstr ""
+"Enterprise / School category: Please add a certificate signed by the "
+"employer  (one for the team, <a href=\"http://www.6hdeparis.fr/wp-content/"
+"uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank\">model</a>) or "
+"a copy of your school id cards."
+
+<<<<<<< HEAD
+#: templates/form.html:120
+#, python-format
+=======
+#: templates/form.html:122
+#, fuzzy, python-format
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid ""
+"J'accepte le <a href=\"%(url)s\" target=\"_blank\">règlement de la course</a>"
+msgstr "I accept <a href=\"%(url)s\" target=\"_blank\">race rules</a>"
+
+<<<<<<< HEAD
+#: templates/form.html:126
+msgid "Précédent"
+msgstr "Previous"
+
+#: templates/form.html:127
+msgid "Suivant"
+msgstr "Next"
+
+#: templates/form.html:128
+=======
+#: templates/form.html:128
+msgid "Précédent"
+msgstr "Previous"
+
+#: templates/form.html:129
+msgid "Suivant"
+msgstr "Next"
+
+#: templates/form.html:130
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+msgid "Valider"
+msgstr "Submit"
+
+#: templates/index.html:7
+msgid "Prochaines courses"
+msgstr "Next races"
+
+#: templates/index.html:10 templates/index.html.py:27
+#, python-format
+msgid "le %(date)s à %(ville)s"
+msgstr "the %(date)s at %(ville)s"
+
+#: templates/index.html:13
+#, python-format
+msgid "Fermeture des inscriptions le %(fermeture)s"
+msgstr "Registration 'll close at %(fermeture)s"
+
+#: templates/index.html:17
+#, python-format
+msgid "Ouverture des inscriptions le %(ouverture)s"
+msgstr "Registration opening on %(ouverture)s"
+
+#: templates/index.html:24
+msgid "Anciennes courses"
+msgstr "Past races"
+
+#: templates/index.html:30
+msgid "Résultats"
+msgstr "Results"
+
+#: templates/not_opened_yet.html:5
+#, python-format
+msgid "Ouverture des inscriptions le %(ouverture)s."
+msgstr "Registration opening on %(ouverture)s"
+
+#: templates/stats2.html:221
+msgid "Individuel Homme"
+msgstr "Individual Man"
+
+#: templates/stats2.html:222
+msgid "Individuel Femme"
+msgstr "Individual Woman"
+
+#: templates/stats2.html:223
+msgid "Duo Homme ou Mixte"
+msgstr "Duo Men or Mixed"
+
+#: templates/stats2.html:224
+msgid "Duo Femme"
+msgstr "Duo Woman"
+
+#: templates/stats2.html:225
+msgid "Junior"
+msgstr "Junior"
+
+#: templates/stats2.html:226
+msgid "Sénior Homme ou Mixte"
+msgstr "Senior Men or Mixed"
+
+#: templates/stats2.html:227
+msgid "Sénior Femme"
+msgstr "Senior Woman"
+
+#: templates/stats2.html:228
+msgid "Vétéran"
+msgstr "Veteran"
+
+#: templates/stats2.html:229
+msgid "Famille"
+msgstr "Family"
+
+#: templates/stats2.html:230
+msgid "Entreprise / Étudiants"
+msgstr "Enterprise / School"
+
+<<<<<<< HEAD
+#: templates/admin/base_site.html:4 templates/admin/base_site.html.py:7
+#, fuzzy, python-format
+msgid "Administration %(nom)s"
+msgstr "Administrator"
+
+#: templates/admin/base_site.html:11
+msgid "Course : "
+msgstr ""
+
+=======
+>>>>>>> 436e79282a06154aa151fc9c7a64875d836faeb7
+#: templates/admin/course_choose.html:4
+msgid "Sélectionnez votre course :"
+msgstr ""
+
+#: templates/admin/dashboard.html:22
+msgid "Résumé"
+msgstr ""
+
+#: templates/admin/dashboard.html:112
+msgid "Documents à vérifier"
+msgstr ""
+
+#: templates/admin/dashboard.html:127
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr ""
+
+#: templates/admin/dashboard.html:128
+#, python-format
+msgid "%(name)s"
+msgstr ""
+
+#: templates/admin/dashboard.html:140
+msgid "Add"
+msgstr ""
+
+#: templates/admin/dashboard.html:146
+msgid "Change"
+msgstr ""
+
+#: templates/admin/dashboard.html:156
+msgid "You don't have permission to edit anything."
+msgstr ""
+
+#: templates/admin/dashboard.html:164
+msgid "Recent Actions"
+msgstr ""
+
+#: templates/admin/dashboard.html:165
+msgid "My Actions"
+msgstr ""
+
+#: templates/admin/dashboard.html:169
+msgid "None available"
+msgstr ""
+
+#: templates/admin/dashboard.html:183
+msgid "Unknown content"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:23
+msgid "Expéditeur :"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:25
+msgid "Contact"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:26
+msgid "Moi"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:27
+msgid "À :"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:28
+msgid "Sujet :"
+msgstr ""
+
+#: templates/admin/equipe/send_mail.html:30
+msgid "Envoyer"
+msgstr ""
+
+#: templates/admin/equipe/send_mails.html:24
+msgid "Prévisualiser"
+msgstr ""
+
+#: templates/admin/equipe/send_mails.html:42
+#, python-format
+msgid "Envoyer à %(num)s équipes"
+msgstr ""
+
+#~ msgid ""
+#~ "PUC - 6h Roller de Paris\n"
+#~ "17 avenue Pierre de Coubertin\n"
+#~ "75013 Paris"
+#~ msgstr ""
+#~ "PUC - 6h Roller de Paris\n"
+#~ "17 avenue Pierre de Coubertin\n"
+#~ "75013 Paris"
+
+#~ msgid ""
+#~ "Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
+#~ "(formats PDF ou JPEG)."
+#~ msgstr ""
+#~ "If you can, scan the authorization and add it (formats PDF or JPEG)."
+
+#~ msgid ""
+#~ "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
+#~ "(<a href=\\\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+#~ "autorisation_parentale.pdf\\\" target=\\\"_blank\\\">modèle</a>)."
+#~ msgstr ""
+#~ "You can also upload it later or send it by mail (<a href=\\\"http://"
+#~ "www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\\"
+#~ "\" target=\\\"_blank\\\">model in french</a>)."
+
+#~ msgid "Licence"
+#~ msgstr "License"
+
+#~ msgid "Ce nom d'équipe est déjà utilisé !"
+#~ msgstr "This teamname is allready used!"
+
+#~ msgid "Veuillez corriger les champs en rouge."
+#~ msgstr "Please correct fields in red."
+
+#~ msgid ""
+#~ "Votre équipe n'est éligible dans aucune des catégories proposées pour "
+#~ "cette compétition. Veuillez vous référer au réglement de la course "
+#~ "disponible sur le site pour voir les critères de chaque catégorie."
+#~ msgstr ""
+#~ "Your team is not eligible in any of the categories for this competition. "
+#~ "Please refer to the rules of the race available on the site to see the "
+#~ "criteria for each category."
+
+#~ msgid "Vous devez choisir une catégorie"
+#~ msgstr "Youi must choose a category."
+
+#~ msgid "Vous devez accépter le règlement de la compétition"
+#~ msgstr "You must accept the rules of the race"
+
+#~ msgid ""
+#~ "J'accepte le <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" target=\"_blank"
+#~ "\">règlement de la course</a>"
+#~ msgstr ""
+#~ "I accept the <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" target=\"_blank"
+#~ "\">race rules</a>"
+
+#~ msgid "Merci de vous être inscrit aux"
+#~ msgstr "Thank for registering at"
+
+#~ msgid ""
+#~ "Bonjour,%(gerant_prenom)s %(gerant_nom)s<br />\n"
+#~ "Votre équipe <strong>%(equipe)s</strong> est inscrite aux premiers 6h de "
+#~ "Paris, le 4 août 2013 sous réserve de la réception et de la validation du "
+#~ "paiement et des justificatifs."
+#~ msgstr ""
+#~ "Hi,%(gerant_prenom)s %(gerant_nom)s<br />\n"
+#~ "Your team <strong>%(equipe)s</strong> is booked tothe first 6h de Paris, "
+#~ "on august 4th, 2013 under condition of good reception and validation of "
+#~ "your paiment and justificatives."
+
+#~ msgid ""
+#~ "Nous vous tiendrons au courant dès que votre inscription sera définitive."
+#~ msgstr "You'll be informed as soon your registration is complete."
+
+#~ msgid ""
+#~ "Si vous souhaitez modifier une information ou joindre une licence ou un "
+#~ "certificat médicale manquant, vous pouver le faire en cliquant <a href="
+#~ "\"%(url)s\">ici</a>."
+#~ msgstr ""
+#~ "If you wan't to modify an information or add a missing justificative, you "
+#~ "can do it by clicking <a href=\"%(url)s\">here</a>."
+
+#~ msgid ""
+#~ "Bonjour,%(gerant_prenom)s %(gerant_nom)s<br />\n"
+#~ "Nous avons bien reçu votre paiement de %(paiement)s € pour l'équipe "
+#~ "<strong>%(equipe)s</strong>."
+#~ msgstr ""
+#~ "Hi,%(gerant_prenom)s %(gerant_nom)s<br />\n"
+#~ "We hace received your paiment of € %(paiement)s € for the team <strong>"
+#~ "%(equipe)s</strong>."
+
+#~ msgid ""
+#~ "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
+#~ "(<a href="
+#~ msgstr "You also can upload it later or send it by mail."
+
+#~ msgid "Il manque les certificats médicaux de :"
+#~ msgstr "Missing medical certificate:"
+
+#~ msgid "Il manque les autorisations parentales :"
+#~ msgstr "Missing parental authorization:"
+
+#~ msgid "Duo"
+#~ msgstr "Duo"
+
+#~ msgid "Sénior Mixte"
+#~ msgstr "Senior Mixed"
+
+#~ msgid "Super Vétéran"
+#~ msgstr "Super Veteran"
+
+#~ msgid "Date du certificat médical"
+#~ msgstr "Medical certificate date"

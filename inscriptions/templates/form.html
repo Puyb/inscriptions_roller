@@ -1,0 +1,165 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load bootstrap %}
+{% block body_base %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_available_languages as LANGUAGES %}
+{% if create %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
+{% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
+<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('button_submit').disabled = true; $('button_submit').style.display='none'; return actual_part > parseInt($F('id_nombre')); ">
+    {% if errors %}
+    <div class="panel panel-danger">
+        {% if equipe_form.errors %}
+        <div class="panel-heading">{% blocktrans %}Votre inscription comporte des erreurs :{% endblocktrans %}</div>
+        <div class="panel-body">
+            {% blocktrans %}Veuillez les corriger et valider à nouveau votre inscription.{% endblocktrans %}
+            <h3>{% trans 'Informations générales' %}</h3>
+                {% for k,v in equipe_form.errors.items %}
+                    {% if k != "prix" %}
+                    {{ k }} : {{ v }}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% for equipier_form in equipier_formset %}
+                {% if equipier_form.errors %}
+                <h3>{% blocktrans with n=forloop.counter %}Équipier {{ n }}{% endblocktrans %}</h3>
+                    {% for k,v in equipier_form.errors.items %}
+                        {{ k }} : {{ v }}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    <div id="part0" class="parts">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
+                <br />
+                {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
+                <br />
+                {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous pouvez payer votre inscription par internet ou par chèque. Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
+                {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
+                {% blocktrans %}Si vous rencontrez des problèmes lors de votre inscription, <a href="http://www.6hdeparis.fr/contact/">contactez nous</a>{% endblocktrans%}<br />
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">{%trans 'Information générales' %}</div>
+            <div class="panel-body">{{ equipe_form|bootstrap_horizontal }}</div>
+        </div>
+    </div>
+
+    {% for equipier_form in equipier_formset %}
+    <div id="part{{ forloop.counter }}" style="display: none;" class="parts">
+        <div class="panel panel-default">
+            <div class="panel-heading">{% blocktrans with count=forloop.counter %}Equipier {{ count }}{% endblocktrans %}</div>
+            <div class="panel-body equipier_table">
+                {{ equipier_form|bootstrap_horizontal }}
+                <span data-id="id_form-{{ forloop.counter0 }}-piece_jointe" class="help-block">
+                    {% blocktrans %}Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en pièce jointe (formats PDF ou JPEG).{% endblocktrans %}<br />
+                    {% blocktrans with url="" %}Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (<a href="{{ url }}" target="_blank">modèle de certificat</a>).{% endblocktrans %}
+                </span>
+                <span data-id="id_form-{{ forloop.counter0 }}-autorisation" class="help-block">
+                    {% blocktrans %}Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).{% endblocktrans %}<br />
+                    {% blocktrans with url="" %}Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (<a href="{{ url }}" target="_blank">modèle d'autorisation</a>){% endblocktrans %}
+                </span>
+                <span data-id="id_form-{{ forloop.counter0 }}-date_de_naissance_year" class="help-block">
+                    {% blocktrans with min_age=COURSE.min_age date=COURSE.date %}Chaque équipier doit avoir plus de {{ min_age }} ans au {{ date }}.{% endblocktrans %}<br />
+                    {% trans "Chaque équipier doit avoir un certificat médical de moins d'un an ou une licence FFRS en cours de validité pour participer." %}<br />
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div id="partlast" style="display: none;" class="parts">
+        <div class="panel panel-default">
+            <div class="panel-heading">{% blocktrans %}Choix de la catégorie{% endblocktrans %}</div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10" id="catwrapper">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" name="conditions" id="id_conditions" {% if update %}checked {% endif %}/>
+                            {% blocktrans with url=COURSE.url_reglement %}J'accepte le <a href="{{ url }}" target="_blank">règlement de la course</a>{% endblocktrans %}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ equipier_formset.management_form }}
+    <div class="btn-toolbar pull-right" role="toolbar">
+        <div class="btn-group" role="group">
+            <button class="btn"             id="button_prev"   type="button" style="display: none;">{% trans "Précédent" %}</button>
+            <button class="btn btn-primary" id="button_next"   type="button">{% trans 'Suivant' %}</button>
+            <button class="btn btn-success" id="button_submit" type="submit" style="display: none;">{% trans "Valider" %}</button>
+        </div>
+    </div>
+    {% csrf_token %}
+    
+    <div class="clearfix"></div>
+</form>
+{% endblock %}
+
+{% block extra_body %}
+<script type="text/javascript" src="{% url "django.views.i18n.javascript_catalog" %}"></script>
+<script>
+    var AUGMENTATION_PASSED = new Date("{{ COURSE.date_augmentation|date:'c' }}") <= new Date({% if instance %}"{{ instance.date|date:'c' }}"{% endif %}) 
+    var CATEGORIES = [
+    {% for cat in COURSE.categories.all %}
+        {
+            id:    "{{ cat.id }}",
+            code:  "{{ cat.code|escapejs }}",
+            label: "{{ cat.nom|escapejs }}",
+            prix:  AUGMENTATION_PASSED ? {{ cat.prix2|unlocalize }} : {{ cat.prix1|unlocalize }},
+            min_equipiers: {{ cat.min_equipiers }},
+            max_equipiers: {{ cat.max_equipiers }},
+            min_age: {{ cat.min_age }},
+            sexe: '{{ cat.sexe }}',
+            valid: {{ cat.validation|safe }},
+            numero_debut: {{ cat.numero_debut }},
+            numero_fin: {{ cat.numero_fin }}
+        }{% if not forloop.last %},{% endif %}
+    {% endfor %}];
+    var nombres_par_tranche = { {% for k, v in nombres_par_tranche.items %}"{{ k }}": {{ v }}{% if not forloop.last %},{% endif %}{% endfor %} };
+    {% if not user.is_staff %}
+    CATEGORIES = CATEGORIES.filter(function(categorie) {
+        {% if update %}
+        if(categorie.code === '{{ instance.categorie.code }}') return true;
+        {% endif %}
+        return nombres_par_tranche[categorie.numero_debut + '-' + categorie.numero_fin] < categorie.numero_fin - categorie.numero_debut + 1;
+    });
+    {% endif %}
+    var COURSE = {
+        YEAR: {{ YEAR }},
+        MONTH: {{ MONTH }},
+        DAY: {{ DAY }},
+        CLOSE_DATE: new Date({{ CLOSE_YEAR }},{{ CLOSE_MONTH }}-1,{{ CLOSE_DAY }}),
+        MIN_AGE: {{ MIN_AGE|default:0 }},
+        EQUIPIERS_COUNT: {{ equipiers_count }},
+        MAX_EQUIPIERS: {{ COURSE.limite_participants }},
+        URL: "{{ COURSE.url|escapejs }}"
+    };
+    var INSTANCE = {% if not instance %}{}{% else %}{
+        ID: {{ instance.id }},
+        CATEGORIE: {{ instance.categorie_id }},
+        CATEGORIE_CODE: '{{ instance.categorie.code }}'
+    }{% endif %};
+    var CHECK_URL = '{% url "inscriptions.check_name" course_uid=COURSE.uid %}';
+    var UPDATE = {{ update|yesno:"true,false" }};
+    var STAFF = false;
+    {% if user.is_staff %}
+    UPDATE = false;
+    STAFF = true;
+    {% endif %}
+    var I18N = {};
+    {% if message %} alert("{{ message }}"); location.reload(true); {% endif %}
+</script>
+<script src="{{ STATIC_URL }}form.js"></script>
+{% endblock %}

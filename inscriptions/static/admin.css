@@ -1,0 +1,9 @@
+form .aligned p { font-size: 12px; margin-top: -1px; }
+.field-box.field-nombre label { width: 140px; }
+.field-box.field-nombre { width: 180px; }
+
+.field-box.field-paiement label { color: red; font-weight: bold; }
+.field-box.field-piece_jointe_valide label { color: red; font-weight: bold; }
+.field-box.field-piece_jointe2_valide label { color: red; font-weight: bold; }
+.field-box.field-autorisation_valide label { color: red; font-weight: bold; }
+

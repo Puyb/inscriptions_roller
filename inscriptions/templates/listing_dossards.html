@@ -1,0 +1,69 @@
+{% load stats %}
+<style>
+    @page  { 
+        size: A4 landscape;
+        margin: 10mm;
+    } 
+    body  { margin: 0px;  } 
+    table { width: 100%; border-collapse: collapse; }
+    td { border-left: 1px solid #333; padding: .1cm .5cm; }
+    tr.odd { background: #ddf; }
+    .r { text-align: right; }
+    table { page-break-inside:auto }
+    tr, td{ page-break-inside:avoid; }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group }
+    .nopb { page-break-after: avoid }
+    .pb { page-break-after: auto }
+</style>
+
+{% for k in keys %}
+<h1>Equipes {{ k }}: {% with equipes|get:k as es %}{{ es.count }}{% endwith %} équipes</h1>
+{% endfor %}
+<div style="page-break-before: always"></div>
+{% for k in keys %}
+{% for e in equipes|get:k %}
+{% if forloop.counter0|divisibleby:"10" %}
+<div style="page-break-before: always"></div>
+<div style="float: right; width: 3cm; text-align: right">{{ forloop.counter }}</div>
+<h1 style="width: 10cm">Equipes {{ k }}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nom</tH>
+            <th>Gerant</th>
+            <th>Nombre</tH>
+            <th>Remarques</th>
+            <th>Caution</th>
+        </tr>
+    </thead>
+{% endif %}
+    <tbody>
+        <tr class="{% cycle 'odd' 'even' %} nopb">
+            <td  rowspan="2" class="r">{{ e.numero }}</td>
+            <td>{{ e.nom }}</td>
+            <td>{{ e.gerant_prenom }} {{ e.gerant_nom }}</td>
+            <td class="r">{{ e.nombre }}</td>
+            <td style="color: red">
+                {% if not e.paiement_complet %}{{ e.prix }}€{% endif %}
+            </td>
+            <td></td>
+        </tr>
+        <tr class="{% cycle 'odd' 'even' %} pb">
+            <td colspan="6">
+                {% for e2 in e.equipier_set.all %}
+                <span style="{% if e2.age < 18 %}{% if not e2.autorisation_valide %}color: red;{% endif %}{% endif %}{% if not e2.piece_jointe_valide %}color: red;{% endif %}">
+                    {{ e2.prenom }} {{ e2.nom }}
+                    <b>{% if e2.age < 18 %}{% if not e2.autorisation_valide %}Aut. parentale{% endif %}{% endif %}
+                        {% if not e2.piece_jointe_valide %}Certif.{% endif %}</b>
+                </span>{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+{% if forloop.counter|divisibleby:"10" or forloop.last %}
+</table>
+{% endif %}
+        {% endfor %}
+{% endfor %}

@@ -1,0 +1,462 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load stats %}
+
+{% block main %}
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
+    <![endif]-->
+    <style>
+        table, td, th { border: 1px solid grey; }
+        table { margin: 10px; }
+        tr:nth-child(odd) { background: #F2E5FF; }
+        #map {width: 100%; height: 600px; }
+        #map img { border: none; padding: 0; margin: 0; }
+        hr { clear: both; margin: 30px auto; width: 40%; }
+        .entry-content { overflow: hidden; }
+        #d_canvas_sexe {
+            margin-right:  -120px;
+            margin-left:  -80px;
+            float: left;
+        }
+        #stats>#d_canvas_hommes,
+        #stats>#d_canvas_femmes {
+            clear: none;
+            margin-bottom: 100px;
+            float: left;
+        }
+        #d_canvas_hommes {
+            transform-origin: 50% 50% 0;
+            transform: rotate(270deg);
+            -webkit-transform-origin: 50% 50% 0;
+            -webkit-transform: rotate(270deg);
+            -ms-transform-origin: 50% 50% 0;
+            -ms-transform: rotate(270deg);
+        }
+        #d_canvas_femmes {
+            transform-origin: 50% 50% 0;
+            transform: rotate(270deg) scaleY(-1) translate(0, 100px);
+            -webkit-transform-origin: 50% 50% 0;
+            -webkit-transform: rotate(270deg) scaleY(-1) translate(0, 100px);
+            -ms-transform-origin: 50% 50% 0;
+            -ms-transform: rotate(270deg) scaleY(-1) translate(0, 100px);
+            margin-right: -200px;
+        }
+        #d_canvas_hommes .bluff-text {
+            transform-origin: 50% 50% 0;
+            transform: rotate(90deg);
+            -webkit-transform-origin: 50% 50% 0;
+            -webkit-transform: rotate(90deg);
+            -ms-transform-origin: 50% 50% 0;
+            -ms-transform: rotate(90deg);
+        }
+        #d_canvas_femmes .bluff-text {
+            transform-origin: 50% 50% 0;
+            transform: rotate(270deg) scaleY(-1);
+            -webkit-transform-origin: 50% 50% 0;
+            -webkit-transform: rotate(270deg) scaleY(-1);
+            -ms-transform-origin: 50% 50% 0;
+            -ms-transform: rotate(270deg) scaleY(-1);
+        }
+    </style>
+    <div class="clearfix grid_16">
+        <h1>Origine des participants</h1>
+    </div>
+    <div class="clearfix grid_4">
+        <table>
+            <tr><th>Villes des participants</th><th>#</th><th>%</th></tr>
+            {% for ville in stats.villes|slice:":20" %}
+            <tr><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio ville.count stats.course.equipiers 100 %}%</td></tr>
+            {% endfor %}
+            {% with stats.villes|slice:"20:" as villes %}
+            <tr>
+                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ villes|length }} autres villes</a></td>
+                <td><script>
+                    var num = 0{% for ville in villes %} + {{ ville.count }}{% endfor %};
+                    document.write(num);
+                </script></td>
+                <td><script>
+                    document.write(Math.round(num / {{ stats.course.equipiers }} * 100));
+                </script>%</td>
+            </tr>
+            <tr></tr>
+            {% for ville in villes %}
+            <tr style="display:none"><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio villes.count stats.course.equipiers 100 %}%</td></tr>
+            {% endfor %}
+            {% endwith %}
+        </table>
+    </div>
+    <div class="grid_4">
+        <table>
+            <tr><th>Origine des &eacute;quipes</th><th>#</th><th>%</th></tr>
+            {% with stats.pays|pertinent_values:"equipes" as pays %}
+            {% for key in pays %}
+            <tr><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+            {% endfor %}
+            {% endwith %}
+            {% with stats.pays|other_values:"equipes" as pays %}
+            <tr>
+                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ pays|length }} autres pays / regions</a></td>
+                <td><script>
+                    var num = 0{% for key in pays %} + {{ stats.pays|get:key|get:"equipes" }}{% endfor %};
+                    document.write(num);
+                </script></td>
+                <td><script>
+                    document.write(Math.round(num / {{ stats.course.equipes }} * 100));
+                </script>%</td>
+            </tr>
+            <tr></tr>
+            {% for key in pays %}
+            <tr style="display:none"><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+            {% endfor %}
+            {% endwith %}
+        </table>
+    </div>
+    <div class="grid_8">
+        <canvas id="canvas_pays"></canvas>
+    </div>
+    <div class="clearfix grid_16">
+        <div id="map"></div>
+    </div>
+    <div class="clearfix grid_16">
+        <canvas id="canvas_distance"></canvas>
+    </div>
+
+    <div class="clearfix grid_16">
+        <hr />
+        <h1>Clubs</h1>
+    </div>
+    <div class="clearfix grid_6">
+        <table>
+            <tr><th>Clubs</th><th>#</th><th>%</th></tr>
+            {% with stats.clubs|pertinent_values:"equipes,2%" as clubs %}
+            {% for club in clubs %}
+            <tr><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+            {% endfor %}
+            {% endwith %}
+            {% with stats.clubs|other_values:"equipes,2%" as clubs %}
+            <tr>
+                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ clubs|length }} autres clubs</a></td>
+                <td><script>
+                    var num = 0{% for club in clubs %} + {{ stats.clubs|get:club|get:"equipes" }}{% endfor %};
+                    document.write(num);
+                </script></td>
+                <td><script>
+                    document.write(Math.round(num / {{ stats.course.equipes }} * 100));
+                </script>%</td>
+            </tr>
+            <tr></tr>
+            {% for club in clubs %}
+            <tr style="display:none"><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+            {% endfor %}
+            {% endwith %}
+        </table>
+    </div>
+    <div class="grid_10">
+        <canvas id="canvas_clubs"></canvas>
+    </div>
+
+    <div class="clearfix grid_16">
+        <hr />
+        <h1>Catégories</h1>
+    </div>
+    <div class="clearfix grid_6">
+        <table>
+            <tr><th>Code</th><th>Catégorie</th><th>#</th><th>%</th></tr>
+            {% for cat, value in stats.categories.items %}
+            <tr><td>{{ cat }}</td><td>{{ value.name }} </td><td>{{ value.equipes }}</td><td>{% widthratio value.equipes stats.course.equipes 100 %} %</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="grid_10">
+        <canvas id="canvas_categories"></canvas>
+    </div>
+    <div class="clearfix grid_16">
+        <canvas id="canvas_time"></canvas>
+        <canvas id="canvas_time2"></canvas>
+    </div>
+
+    <div class="clearfix grid_16">
+        <hr />
+        <h1>Autre</h1>
+    </div>
+    <div class="clearfix grid_6">
+        <table>
+            <tr><th>Comment ont-il connu la course</th><th>#</th><th>%</th></tr>
+            {% for connu, count in stats.connu %}
+            <tr><td>{{ connu }}</td><td>{{ count }}</td><td>{% widthratio count stats.course.equipes 100 %} %</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="grid_8">
+        <canvas id="canvas_connu"></canvas>
+    </div>
+    {% if user.is_staff %}
+    <div class="grid_8 clearfix">
+        <canvas id="canvas_paiement"></canvas>
+    </div>
+    <div class="grid_8">
+        <canvas id="canvas_documents"></canvas>
+    </div>
+    <div class="grid_8 clearfix">
+        <canvas id="canvas_licencies"></canvas>
+    </div>
+    {% endif %}
+
+
+    <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+    <script src="{{ STATIC_URL }}/js-class.js"></script>
+    <script src="{{ STATIC_URL }}/bluff-src.js"></script>
+
+    <script>
+        var args = {};
+        var queryStringRegex = /([^&=]+)=?([^&]*)/g;
+        function decode(s) {
+            return decodeURIComponent(s.replace("+", " "));
+        }
+        var qs = location.href.split('?').slice(1).join('?')
+        if (qs) {
+            var parts;
+            while (parts = queryStringRegex.exec(qs)) {
+                var key = decode(parts[1]);
+                args[key] = decode(parts[2]);
+            }
+        }
+
+        
+        // map
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var points = [], point;
+        var distances = {};
+        var tranche = parseFloat(args.tranche) || 10;
+        var origine = new L.LatLng(48.852775, 2.247415);
+        {% localize off %}
+        {% for ville in stats.villes %}
+        {% if ville.lat and ville.lng %}
+        points.push(point=[{{ ville.lat }}, {{ ville.lng }}]);
+        point = new L.LatLng(point[0], point[1]);
+        L.marker(point).addTo(map).bindPopup("{{ ville.nom|escapejs }} : {{ ville.count }}");
+        var distance = Math.ceil(origine.distanceTo(point) / 1000 / tranche);
+        distances[distance] = (distances[distance] || 0) + {{ ville.count }};
+        {% endif %}{% endfor %}
+        {% endlocalize %}
+        var bounds = [[points[0][0], points[0][1]], [points[0][0], points[0][1]]];
+        points.forEach(function(point) {
+            if(point[0] < bounds[0][0])
+                bounds[0][0] = point[0];
+            if(point[1] < bounds[0][1])
+                bounds[0][1] = point[1];
+            if(point[0] > bounds[1][0])
+                bounds[1][0] = point[0];
+            if(point[1] > bounds[1][1])
+                bounds[1][1] = point[1];
+        });
+        var marginX = Math.abs(.1 * (bounds[0][0] - bounds[1][0]));
+        var marginY = Math.abs(.1 * (bounds[0][1] - bounds[1][1]));
+        bounds[0][0] -= marginX;
+        bounds[1][0] += marginX;
+        bounds[0][1] -= marginY;
+        bounds[1][1] += marginY;
+        map.fitBounds(bounds);
+    </script>
+    <script>
+        var colors = {};
+        // pies
+        var g = new Bluff.Pie('canvas_pays', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        var autre = {{ stats.course.equipes }};
+        {% with stats.pays|pertinent_values:"equipes,2%" as pays %}
+        {% for key in pays %}
+        g.data("{{ key }}", {{ stats.pays|get:key|get:"equipes" }}, colors.pays && colors.pays[i["{{ key }}"]]);
+        autre -= {{ stats.pays|get:key|get:"equipes" }};
+        {% endfor %}
+        {% endwith %}
+        if(autre > 0) {
+            g.data('Autres', autre);
+        }
+        g.draw();
+    </script>
+    <script>
+        var colors = { categories: {} };
+        var d = {};
+        var i = 0;
+        {% for cat in course.categories.all %}
+        d["{{ cat.code }}"] = [0,{% for jour in stats.jours.keys|get_max|get_range %}
+            {% if stats.jours|get:jour %}{{ stats.jours|get:jour|get:cat.code }}{% else %}0{% endif %}{% if not forloop.last %},{% endif %}
+        {% endfor %}];
+        {% endfor %}
+
+
+        var g = new Bluff.StackedArea('canvas_time', 900);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.marker_font_size = 12;
+        g.y_axis_increment = 10;
+        var g2 = new Bluff.StackedBar('canvas_time2', 900);
+        g2.theme_pastel();
+        g2.title = '';
+        g2.tooltips = true;
+        g2.marker_font_size = 12;
+        g2.y_axis_increment = 10;
+        var i = 0;
+        for(var k in d) {
+            var cumul = 0;
+            g.data(k, d[k].map(function(value) { return cumul += value; }));
+            g2.data(k, d[k]);
+            colors.categories[k] = g.colors[i];
+            i++;
+        }
+        g.labels = {};
+        for(var i = 0; i < {{ stats.jours.keys|get_max }}; i += 7) {
+            var d = new Date({{ course.date_ouverture.year }}, {{ course.date_ouverture.month }} - 1, {{ course.date_ouverture.day }} + i)
+            g.labels[i] = d.getDate() + '/' + (d.getMonth() + 1);
+        }
+        g2.labels = g.labels;
+        g.draw();
+        g._d.stroke = 'white';
+        g._d.stroke_width = 1;
+        for(var index in g.labels) {
+            var x = g._graph_left + (g._x_increment * index);
+            g._d.line(x, g._graph_bottom, x, g._graph_top);
+        }
+
+
+        g2.draw();
+        g2._d.stroke = '#ccc';
+        g2._d.stroke_width = 1;
+        for(var index in g2.labels) {
+            var x = g2._graph_left + (g2._x_increment * index);
+            g2._d.line(x, g2._graph_bottom, x, g2._graph_top);
+        }
+        var e = document.getElementById('canvas_time').parentNode;
+        var e2 = document.getElementById('canvas_time2').parentNode;
+        e2.style.display = 'none';
+        e.addEventListener('click', function() { e.style.display = 'none', e2.style.display = 'block'; });
+        e2.addEventListener('click', function() { e2.style.display = 'none', e.style.display = 'block'; });
+
+        // pies
+        var g = new Bluff.Pie('canvas_clubs', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        {% with stats.clubs|pertinent_values:"equipes,2%" as clubs %}
+        {% for key in clubs %}
+        g.data("{{ key }}", {{ stats.clubs|get:key|get:"equipes" }}, colors.clubs && colors.clubs["{{ key }}"]);
+        {% endfor %}
+        {% endwith %}
+        {% with stats.clubs|other_values:"equipes,2%" as clubs %}
+        g.data("{{ clubs|length }} autres clubs", 0{% for club in clubs %} + {{ stats.clubs|get:club|get:"equipes" }}{% endfor %});
+        {% endwith %}
+        g.draw();
+        // pies
+        var g = new Bluff.Pie('canvas_categories', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        {% with stats.categories|pertinent_values:"equipes,2%" as categories %}
+        {% for key in categories %}
+        g.data("{{ key }}", {{ stats.categories|get:key|get:"equipes" }}, colors.categories && colors.categories["{{ key }}"]);
+        {% endfor %}
+        {% endwith %}
+        g.draw();
+
+
+        var g = new Bluff.StackedBar('canvas_distance', 900);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.marker_font_size = 12;
+        g.y_axis_increment = 10;
+        var max = Math.max.apply(Math, Object.keys(distances).map(parseFloat));
+        var data = [];
+        g.labels = {};
+        var distanceMax = parseFloat(args.distanceMax) || 500;
+        for(var i = 1; i <= max; i++) {
+            var d = i;
+            if (d * tranche > distanceMax) {
+                d = distanceMax / tranche;
+                data[d - 1] += distances[i] || 0;
+            } else {
+                data.push(distances[i] || 0);
+            }
+            if (d % 5 === 0)
+                g.labels[d - 1] = d * tranche;
+        }
+        //g.labels[d - 2] = (d - 1) * tranche;
+        g.labels[d - 1] = i * tranche;
+        g.data('% / km', data.map(function(i) { return i / {{ stats.course.equipiers }} * 100; }));
+        g.draw();
+    </script>
+    <script>
+        var colors = {};
+        // pies
+        var g = new Bluff.Pie('canvas_connu', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        {% for connu, count in stats.connu %}
+        g.data("{{ connu }}", {{ count }});
+        {% endfor %}
+        g.draw();
+    </script>
+    {% if user.is_staff %}
+    <script>
+        var colors = {};
+        // pies
+        var g = new Bluff.Pie('canvas_paiement', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        g.data("Paypal (" + Math.round( {{ stats.course.paiement_paypal }} / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.paiement_paypal }});
+        g.data("Autre ("  + Math.round(({{ stats.course.p }} - {{ stats.course.paiement_paypal }}) / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.p }} - {{ stats.course.paiement_paypal }});
+        g.data("Impaye (" + Math.round(({{ stats.course.equipes }} - {{ stats.course.p }}) / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.equipes }} - {{ stats.course.p }});
+        g.draw();
+    </script>
+    <script>
+        var colors = {};
+        // pies
+        var g = new Bluff.Pie('canvas_documents', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        g.data("Electronique (" + Math.round({{ stats.course.documents_electroniques }}                                  / ({{ stats.course.documents }} + {{ stats.course.documents_attendus }}) * 100) + "%)", {{ stats.course.documents_electroniques }});
+        g.data("Papier ("       + Math.round(({{ stats.course.documents }} - {{ stats.course.documents_electroniques }}) / ({{ stats.course.documents }} + {{ stats.course.documents_attendus }}) * 100) + "%)", {{ stats.course.documents }} - {{ stats.course.documents_electroniques }});
+        g.data("Attendu ("      + Math.round({{ stats.course.documents_attendus }}                                       / ({{ stats.course.documents }} + {{ stats.course.documents_attendus }}) * 100) + "%)", {{ stats.course.documents_attendus }});
+        g.draw();
+    </script>
+    <script>
+        var colors = {};
+        // pies
+        var g = new Bluff.Pie('canvas_licencies', 400);
+        g.theme_pastel();
+        g.title = '';
+        g.tooltips = true;
+        g.sort = false;
+        g.zero_degree = -90;
+        g.data("Licenciés (" +            Math.round({{ stats.course.licencies }} / {{ stats.course.equipiers }} * 100) + "%)", {{ stats.course.licencies }});
+        g.data("Non licenciés (" + (100 - Math.round({{ stats.course.licencies }} / {{ stats.course.equipiers }} * 100)) + "%)", {{ stats.course.equipiers }} - {{ stats.course.licencies }});
+        g.draw();
+    </script>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,132 @@
+
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% block content %}
+<style>
+    #container {
+        position: absolute;
+        height: 100%;
+    }
+    #content {
+        position: absolute;
+        width: 100%;
+        top: 98px;
+        bottom: 0;
+    }
+</style>
+        
+<div id="content-main">
+    <div>
+        <div style="position: absolute; width: 50%; height: 100%;">
+            <h1>Document {{ index }} / {{ count }}</h1>
+            <form method="post">
+                <fieldset class="module aligned ">
+                    <div class="form-row field-numero field-nom field-club">
+                        <div class="field-box field-numero">
+                            <label>Numéro:</label>
+                            <p>{{ equipier.equipe.numero }}</p>
+                        </div>
+                        <div class="field-box field-nom">
+                            <label class="inline">Nom d'équipe:</label>
+                            <p>{{ equipier.equipe.nom }}</p>
+                        </div>
+                        <div class="field-box field-club">
+                            <label class="inline">Club:</label>
+                            <p>{{ equipier.equipe.club }}</p>
+                        </div>
+                    </div>
+                    <div class="form-row field-categorie field-nombre">
+                        <div class="field-box field-categorie">
+                            <label>Categorie:</label>
+                            <p>{{ equipier.equipe.categorie }}</p>
+                        </div>
+                        <div class="field-box field-nombre">
+                            <label class="inline">Nombre d'équipiers:</label>
+                            <p>{{ equipier.equipe.nombre }}</p>
+                        </div>
+                    </div>
+                    <div class="form-row field-commentaires">
+                        <div>
+                            <label for="id_commentaires">Commentaires&nbsp;:</label>
+                            <textarea rows="10" name="commentaires" id="id_commentaires" cols="40" class="vLargeTextField">{{ equipier.equipe.commentaires }}</textarea>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="inline-group">
+                    <h2>Equipier {{ equipier.numero }} / {{ equipier.equipe.nombre }}</h2>
+                    <fieldset class="module aligned ">
+                        <div class="form-row field-nom field-prenom field-sexe">
+                            <div class="field-box field-nom">
+                                <label>Nom:</label>
+                                <p>{{ equipier.nom }}</p>
+                            </div>
+                            <div class="field-box field-prenom">
+                                <label class="inline">Prénom:</label>
+                                <p>{{ equipier.prenom }}</p>
+                            </div>
+                            <div class="field-box field-sexe">
+                                <label class="inline">Sexe:</label>
+                                <p>{{ equipier.sexe }}</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset class="module aligned wide">
+                        <div class="form-row field-date_de_naissance field-age">
+                            <div class="field-box field-date_de_naissance">
+                                <label>Date de naissance:</label>
+                                <p>{{ equipier.date_de_naissance }}</p>
+                            </div>
+                            <div class="field-box field-age">
+                                <label class="inline">Age:</label>
+                                <p>{{ equipier.age }}</p>
+                            </div>
+                        </div>
+                        <div class="form-row field-justificatif field-num_licence">
+                            <div class="field-box field-justificatif">
+                                <label>Justificatif:</label>
+                                <p>{{ equipier.justificatif }}</p>
+                            </div>
+                            <div class="field-box field-num_licence">
+                                <label class="inline">Numéro de licence:</label>
+                                <p>{{ equipier.num_licence }}</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <input type="hidden" name="id" value="{{ equipier.id }}" />
+                <input type="hidden" name="value" id="id_value" />
+                <input type="hidden" name="skip" value="{{ skip }}" />
+                {% csrf_token %}
+                <div class="submit-row">
+                    <button onclick="yes()">Oui</button>
+                    <button onclick="no()">Non</button>
+                    <button onclick="next()">Suivant</button>
+                </div>
+            </form>
+        </div>
+        <iframe style="position: absolute; left: 50%; width: 50%; height: 100%;" src="{% if equipier.piece_jointe_valide == None %}{% if equipier.piece_jointe %}{{ equipier.piece_jointe.url }}{% endif %}{% else %}{% if equipier.autorisation %}{{ equipier.autorisation.url }}{% endif %}{% endif %}"></iframe>
+    </div>
+</div>
+<script>
+    function yes() {
+        document.getElementById('id_value').value = 'yes';
+        document.getElementsByTagName('form')[0].submit();
+    }
+    function no() {
+        document.getElementById('id_value').value = 'no';
+        document.getElementsByTagName('form')[0].submit();
+    }
+    function next() {
+        document.getElementById('id_value').value = 'unknown';
+        document.getElementsByTagName('form')[0].submit();
+    }
+</script>
+
+{% endblock %}

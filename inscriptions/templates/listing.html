@@ -1,0 +1,49 @@
+{% load stats %}
+<style>
+    @page  { 
+        size: A4;
+        margin: 15mm;
+    } 
+    body  { margin: 0px;  } 
+    table { width: 100%; border-collapse: collapse; }
+    td { border-left: 1px solid #333; padding: .1cm .5cm; }
+    tr.odd { background: #ddf; }
+    .r { text-align: right; }
+    table { page-break-inside:auto }
+    tr, td{ page-break-inside:avoid; }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group }
+    .nopb { page-break-after: avoid }
+    .pb { page-break-after: auto }
+    .nom { text-transform: uppercase; }
+    .prenom { text-transform: capitalize; }
+</style>
+
+{% for e in equipes %}
+{% if forloop.counter0|divisibleby:"30" %}
+{% if not forloop.first %}<div style="page-break-before: always"></div>{% endif %}
+<img style="float: right; height: 3cm; width: 3cm; " src="http://www.6hdeparis.fr/wp-content/uploads/2013/03/logo-6h-paris-small.png" />
+<h1>Liste des inscrits</h1>
+<h2>Trié par {{ order }}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nom</tH>
+            <th>Gérant</th>
+            <th>☺</tH>
+        </tr>
+    </thead>
+    <tbody>
+{% endif %}
+        <tr class="{% cycle 'odd' 'even' %} nopb">
+            <td class="r">{{ e.numero }}</td>
+            <td>{{ e.nom }}</td>
+            <td><span class="prenom">{{ e.gerant_prenom|lower }}</span> <span class="nom">{{ e.gerant_nom }}</span></td>
+            <td class="r">{{ e.nombre }}</td>
+        </tr>
+{% if forloop.counter|divisibleby:"30" or forloop.last %}
+    </tbody>
+</table>
+{% endif %}
+{% endfor %}

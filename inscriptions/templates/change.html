@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    <style>
+        .container_16 .grid_11 { width: 940px; }
+    </style>
+    <script>
+        var nbcomplet = 0;
+    </script>
+    <h1>{% trans "Modifier ou payer une inscription" %}</h1>
+    {% if sent %}
+    <p style="color: red">{% blocktrans %}
+        Un email vient de vous être envoyé. Si vous ne le recevez pas, <a href="http://www.6hdeparis.fr/contact/">contactez nous</a> en précisant votre numéro d'équipe.
+    {% endblocktrans %}</p>
+    {% endif %}
+    <p>{% blocktrans %}
+    Si vous souhaitez modifier ou payer une inscription, utilisez le lien qui vous a été envoyé dans le mail de confirmation de votre inscription.
+    {% endblocktrans %}</p>
+    <p>{% blocktrans %}
+    Si vous avez perdu ce mail, vous pouvez le recevoir a nouveau en cliquant sur votre équipe dans la liste.
+    {% endblocktrans %}</p>
+    <table width="100%">
+        <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Club</th>
+            <th>Cat.</th>
+            <th>Ville</th>
+            <th>Pays</th>
+        </tr>
+        {% for equipe in equipes %}
+        <tr>
+            <td><a href="{{ equipe.numero }}/">{{ equipe.numero }}</a></td>
+            <td><a href="{{ equipe.numero }}/">{{ equipe.nom }}</a></td>
+            <td>{{ equipe.club }}</td>
+            <td>{{ equipe.categorie }}</td>
+            <td>{{ equipe.gerant_ville2.nom }}</td>
+            <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays.name }}" /></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

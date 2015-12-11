@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% block content %}
+<h1>{% trans 'Votre inscription est enregistrée' %}</h1>
+<table>
+    <tr><th>{% trans 'Equipe : ' %}</th><td>{{ instance.nom }}</td></tr>
+    <tr><th>{% trans "Numéro d'inscription :" %}</th><td>{{ instance.numero }}</td></tr>
+</table>
+<br />
+{% if create %}
+{% trans 'Un email de confirmation vient de vous être envoyé.' %}<br />
+{% endif %}
+<br />
+<br />
+{% if not instance.paiement_complet %}
+{% if COURSE.paypal %}
+{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}
+
+{% block payment_form %}
+    <form action="{{ PAYPAL_URL }}" method="post">
+        <input type="hidden" name="business"      value="{{ PAYPAL_BUSINESS }}" />
+        <input type="hidden" name="currency_code" value="EUR" />
+        <input type="hidden" name="return"        value="" id="paypal_return_url" />
+        <input type="hidden" name="cmd"           value="_cart" />
+        <input type="hidden" name="upload"        value="1" />
+        <input type="hidden" name="no_shipping"   value="1" />
+        <input type="hidden" name="item_name_1"   value="{{ COURSE.uid }} - {{ instance.categorie.code }}" />
+        <input type="hidden" name="invoice"       value="{{ instance.id }}{{ hour }}" />
+        <input type="hidden" name="amount_1"      value="{{ instance.prix_paypal|stringformat:".2f" }}" />
+        <input type="hidden" name="quantity_1"    value="1" />
+        {# LEAVE THE HANDLING CHARGE ALONE!  PAYPAL SHIPPING WILL INEVITABLY BE MESSED UP IF YOU USE THEIR SHIPPING METHODS #}
+        {# To work around their bizarre system, we are telling Paypal "no shipping" and adding all shipping charges as handling #}
+        <input type="hidden" name="handling_cart" value="0.00" />
+        <input type="hidden" name="tax_cart"      value="0.00" />
+        <input type="hidden" name="notify_url"    value="{{ paypal_ipn_url }}" />
+
+        <input type="submit" value="{% trans 'Paypal ou Carte bancaire' %}"><br />
+    </form>
+    <script> document.getElementById('paypal_return_url').value = location.href; </script>
+{% endblock %}
+
+{% if instance.frais_paypal > 0 %}
+{% blocktrans with frais=instance.frais_paypal|floatformat:2 %}Pour tout paiement par internet, {{ frais }} € de frais seront ajoutés.{% endblocktrans %}<br />
+{% endif %}
+<br />
+{% blocktrans with prix=instance.prix ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}<br />
+{% else %}
+{% blocktrans with prix=instance.prix ordre=COURSE.ordre %}Pour régler votre inscription vous pouvez envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}<br />
+{% endif %}
+{% blocktrans with date=instance.date_annulation.date %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}
+{% else %}
+{% blocktrans with prix=instance.paiement %}Votre paiement de {{ prix }} € à bien été reçu.{% endblocktrans %}
+{% endif %}
+
+<br />
+<br />
+<br />
+<br />
+{% if instance.licence_manquantes %}
+<div class="clearfix">
+    {% trans 'Il manque les licences de :' %} <ul>
+    {% for e in instance.licence_manquantes %}
+    <li>{{ e.prenom }} {{ e.nom }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if instance.certificat_manquantes %}
+<div class="clearfix">
+    {% blocktrans %}Il manque les certificats médicaux de (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf" target="_blank">modèle</a>):{% endblocktrans %}<ul>
+    {% for e in instance.certificat_manquantes %}
+    <li>{{ e.prenom }} {{ e.nom }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if instance.autorisation_manquantes %}
+<div class="clearfix">
+    {% blocktrans %}Il manque les autorisations parentales (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
+    {% for e in instance.autorisation_manquantes %}
+    <li>{{ e.prenom }} {{ e.nom }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% if instance.categorie == "EPX" %}
+<div class="clearfix">
+{% blocktrans %}Catégorie Entreprise / Étudiants : Si ce n'est déjà fait, pensez à envoyer un certificat signé par l'employeur (un seul pour toute l'équipe, <a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/attestation_entreprise.pdf" target="_blank">modèle</a>) ou une copie des fiches de paies ou une copie des cartes étudiants.{% endblocktrans %}
+</div>
+{% endif %}
+<br />
+<br />
+<br />
+<br />
+{% if not instance.paiement or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
+{% trans 'Vous pouvez envoyer le paiement et les justificatifs à' %} <br />
+<pre>{{ COURSE.adresse }}</pre>
+<br />
+{% blocktrans with numero=instance.numero %}En précisant le nom de votre équipe et le numéro d'inscription <b>{{ numero }}</b>.{% endblocktrans %}
+{% endif %}
+{% endblock %}
+
+{% block sidebar %}
+    <div id="recent-posts-2" class="sidebar-wrap clearfix">
+        <h3>{% trans "Partager" %}</h3>
+        {% trans "Partagez votre inscription sur les réseaux sociaux !" %}<br />
+        <br />
+
+        <div id="fb-root"></div>
+        <script id="facebook-jssdk" src="http://connect.facebook.net/en_US/all.js"></script>
+        <script>
+            window.fbAsyncInit = function() {
+                FB.init({
+                    appId      : '{{ FACEBOOK_APPID }}',
+                    status     : true,
+                    xfbml      : true
+                });
+            };
+        </script>
+        <script> 
+            var obj = {
+                method: 'feed',
+                redirect_uri: '{{ ROOT_URL }}{% url "inscriptions.done" course_uid=instance.course.uid numero=instance.numero %}',
+                link: '{{ ROOT_URL }}{% url "inscriptions.create" course_uid=instance.course.uid %}', 
+                picture: 'http://www.6hdeparis.fr/wp-content/uploads/2013/03/logo-6h-paris-small.png',
+                description: '{% blocktrans %}Les 6h Roller de Paris sont une course d\'endurance à roller, en relai par équipe de 5 ou en solitaire. Ouverte à tous, elle aura lieu le 2 août 2015 dans le Bois de Boulogne, sur un circuit de 2,6 km fermé à la circulation.{% endblocktrans %}',
+                name: {% if instance.nombre == 1 %}
+                    '{% blocktrans with nom=instance.nom %}"{{ nom }}" est inscrit aux 6h de Paris.{% endblocktrans %}'
+                {% else %}{% if instance.nombre == 2 %}
+                    '{% blocktrans with nom=instance.nom %}Le duo "{{ nom }}" est inscrit aux 6h de Paris.{% endblocktrans %}'
+                {% else %}
+                    '{% blocktrans with nom=instance.nom %}L\'équipe "{{ nom }}" est inscrite aux 6h de Paris.{% endblocktrans %}'
+                {% endif %}{% endif %}
+            };
+            function postToFeed() {
+                // calling the API ...
+                function callback(response) {
+                }
+                FB.ui(obj, callback);
+            }
+        </script>
+        <a onclick="postToFeed()" style=" display: block; width: 100px; padding: 3px 5px; background-color: #EEE;
+                        background-image: linear-gradient(#FFF, #DEDEDE);
+                            border: 1px solid #CCC;
+                                border-radius: 3px;
+                                    color: #333;
+                                        font-weight: bold;
+                                            text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.5);
+                                                cursor: pointer;
+                                                    height: 18px;
+                                                        max-width: 98%;
+                                                        overflow: hidden;">
+            <img src="{{ STATIC_URL }}fb.png" style="width: 22px; height: 22px; margin-bottom: -5px;" />
+            Facebook
+        </a><br />
+
+        <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://inscription.6hdeparis.fr/" data-text="" data-via="6hdeparis" data-size="large" data-hashtags="6hdp">
+            <img src="{{ STATIC_URL }}twitter.png" />
+            Tweet
+        </a>
+        <script>document.getElementsByClassName('twitter-share-button')[0].setAttribute('data-text', obj.description);</script>
+        <script  id="twitter-wjs" src="http://platform.twitter.com/widgets.js"></script>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript" src="/static/admin/js/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="/course/inscriptions/equipe/send/">
+    <h1>Envoyer un mail à {{ queryset|length }} equipe{% if queryset|length > 1 %}s{% endif %}.</h1>
+    <input type="hidden" name="id" value="{% for equipe in queryset %}{{ equipe.id }}{% if not forloop.last %},{% endif %}{% endfor %}" />
+    <select name="template">
+        {% for template in templates %}
+        <option value="{{ template.id }}">{{ template.nom }}</option>
+        {% endfor %}
+    </select><br />
+    <select name="preview">
+        {% for equipe in queryset %}
+        <option value="{{ equipe.id }}">{{ equipe.numero }} - {{ equipe.categorie.code }} - {{ equipe.nom }}</option>
+        {% endfor %}
+    </select>
+    <button id="preview_button" type="button">{% trans "Prévisualiser" %}</button>
+    <script>
+        var $ = django.jQuery;
+        $('#preview_button').click(function() {
+            $.ajax('send/preview/', {
+                data: { template: $('[name=template]').val(), id: $('[name=preview]').val() },
+                success: function(r) {
+                    var data = JSON.parse(r);
+                    $('#preview').html(
+                        '<h1>' + data.subject + '</h1>' +
+                        '<h2>' + data.mail + '</h2>' +
+                        '<div>' + data.message + '</div>'
+                    );
+                }
+            });
+        });
+    </script>
+    <div id="preview"></div>
+    <button type="submit">{% blocktrans with num=queryset|length %}Envoyer à {{ num }} équipes{% endblocktrans %}</button>
+    {% csrf_token %}
+</form>
+{% endblock %}

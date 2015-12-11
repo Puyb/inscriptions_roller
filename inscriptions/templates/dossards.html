@@ -1,0 +1,83 @@
+{% extends "easy_pdf/base.html" %}
+
+{% block layout_style %}
+    <style type="text/css">
+        @page {
+            size: A5 landscape;
+            margin-left: .5cm;
+            margin-right: .5cm;
+            margin-top: .5cm;
+            margin-bottom: .5cm;
+            @frame bottom {
+                left: 0.5cm;
+                right: 0.5cm;
+                top: 13cm;
+                height: 3cm;
+            }
+            @frame center {
+                left: 0.5cm; right: 0.5cm;
+                top: 3cm;
+                height: 12.5cm;
+            }
+            @frame center2 {
+                left: 0cm;
+                top: 0;
+                width: 21cm;
+                height: 10cm;
+            }
+            background-image: url("/static/dossard_fond.png");
+        }
+        @font-face {
+            font-family: Impact;
+            src: url("/static/fonts/impact.ttf");
+        }
+        .dossard {
+            font-family: Helvetica;
+            color: black;
+            white-space: normal;
+        }
+        .numero {
+            font-family: Impact;
+            margin-top: 3cm;
+            text-align: center;
+            font-size: 7cm;
+            line-height: 3cm;
+        }
+        .prenom {
+            margin-top: -2cm;
+            text-align: center;
+            font-size: 3cm;
+            line-height: 2.2m;
+        }
+        .info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            bottom: 0;
+            font-size: .5cm;
+        }
+        .IDH .numero,
+        .IDF .numero {
+            color: red;
+        }
+        .DUX .numero,
+        .DUF .numero {
+            color: green;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{% for equipier in equipiers %}
+<div class="dossard {{ equipier.equipe.categorie.code }}">
+    <div class="info">
+        {{ equipier.equipe.numero }} - {{ equipier.equipe.nom}} - {{ equipier.equipe.categorie.code }} {{ equipier.equipe.categorie.nom }}<br />
+        {{ equipier.numero }} - {{ equipier.prenom}} {{ equipier.nom }} - Puce #{{ equipier.transpondeur }}
+    </div>
+    <pdf:nextframe>
+    <div class="numero">{{ equipier.equipe.numero }}{{ equipier.numero }}</div>
+    <div class="prenom">{{ equipier.prenom }}</div>
+</div>
+<pdf:nextpage>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,235 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+{% if not COURSE %}<script>
+location.href = "choose/";
+</script>{% endif %}
+<script src="{% static "admin/js/jquery.js" %}"></script>
+<div id="content-main">
+
+    {% with COURSE.stats as stats %}
+    <div class="module">
+        <table>
+            <caption>
+                {% blocktrans %}Résumé{% endblocktrans %}
+            </caption>
+            <tr>
+                <th>Dossiers</th>
+                <td>
+                    <a href="inscriptions/equipe/?status=complet">
+                        <img alt="None" src="/static/admin/img/icon-yes.gif">
+                        Complet
+                    </a>
+                </th>
+                <td>
+                    <a href="inscriptions/equipe/?status=incomplet">Incomplet</a>
+                </th>
+                <td>
+                    <a href="inscriptions/equipe/?status=erreur">
+                        <img alt="None" src="/static/admin/img/icon-no.gif">
+                        Erreur
+                    </a>
+                </th>
+                <td>
+                    <a href="inscriptions/equipe/?status=verifier">
+                        <img alt="None" src="/static/admin/img/icon-unknown.gif">
+                        A vérifier
+                    </a>
+                </th>
+            </tr>
+            <tr>
+                <th>
+                    <a href="inscriptions/equipe/?paiement_complet=paye">Payé</a>
+                </th>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=paye&status=complet">
+                        {{ stats.course.pc }}
+                        ({% widthratio stats.course.pc stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=paye&status=incomplet">
+                        {{ stats.course.pi }}
+                        ({% widthratio stats.course.pi stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=paye&status=erreur">
+                        {{ stats.course.pe }}
+                        ({% widthratio stats.course.pe stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=paye&status=verifier">
+                        {{ stats.course.pv }}
+                        ({% widthratio stats.course.pv stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye">Impayé</a>
+                </th>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=complet">
+                        {{ stats.course.ipc }}
+                        ({% widthratio stats.course.ipc stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=incomplet">
+                        {{ stats.course.ipi }}
+                        ({% widthratio stats.course.ipi stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=erreur">
+                        {{ stats.course.ipe }}
+                        ({% widthratio stats.course.ipe stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=verifier">
+                        {{ stats.course.ipv }}
+                        ({% widthratio stats.course.ipv stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% endwith %}
+    <div class="module">
+        <table>
+            <caption>
+                {% blocktrans %}Documents à vérifier{% endblocktrans %}
+            </caption>
+            <tr>
+                <th>Documents à vérifier</th>
+                <td>
+                    <a href="document/review/">Vérifier</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+{% if app_list %}
+    {% for app in app_list %}
+        <div class="app-{{ app.app_label }} module">
+        <table>
+        <caption>
+            <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
+                {% blocktrans with name=app.name %}{{ name }}{% endblocktrans %}
+            </a>
+        </caption>
+        {% for model in app.models %}
+            <tr class="model-{{ model.object_name|lower }}">
+            {% if model.admin_url %}
+                <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
+            {% else %}
+                <th scope="row">{{ model.name }}</th>
+            {% endif %}
+
+            {% if model.add_url %}
+                <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
+            {% else %}
+                <td>&nbsp;</td>
+            {% endif %}
+
+            {% if model.admin_url %}
+                <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
+            {% else %}
+                <td>&nbsp;</td>
+            {% endif %}
+            </tr>
+        {% endfor %}
+        </table>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>{% trans "You don't have permission to edit anything." %}</p>
+{% endif %}
+    <div class="module">
+        <table>
+            <caption>
+                {% blocktrans %}Exports{% endblocktrans %}
+            </caption>
+            <tr>
+                <th>Listing (HTML)</th>
+                <td>
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/">Par numéro</a><br />
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=nom">Par nom</a><br />
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=gerant_nom">Par nom du gérant</a>
+                </td>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    Listing retrait dossards
+                </th>
+            </tr>
+            <tr>
+                <td>
+                    <label> Découpage :</label>
+                    <input id="listing_dossards_split" /><br />
+                    (numéro de dossards, séparés par des virgules, ex : "50,100,200")
+                </td>
+                <td>
+                    <a id="listing_dossards_link" target="_blank" href="/{{ COURSE.uid }}/listing_dossards/">HTML</a>
+                    <script>$('#listing_dossards_split').on('keyup', function() {
+                        var href = $('#listing_dossards_link').attr('href').split('?');
+                        href[1] = 'split=' + this.value;
+                        $('#listing_dossards_link').attr('href', href.join('?'));
+                    });</script>
+                </td>
+            </tr>
+            <tr>
+                <th>Chronomètrage (CSV)</th>
+                <td>
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards.csv">Equipes et équipiers</a><br />
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipes.csv">Equipes</a><br />
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipiers.csv">Equipiers</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% trans 'Recent Actions' %}</h2>
+        <h3>{% trans 'My Actions' %}</h3>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+            <p>{% trans 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                    {{ entry.object_repr }}
+                {% else %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br/>
+                {% if entry.content_type %}
+                    <span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span>
+                {% else %}
+                    <span class="mini quiet">{% trans 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}

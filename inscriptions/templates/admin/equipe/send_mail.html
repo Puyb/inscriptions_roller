@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block content %}
+<script src="http://tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+<script>
+    tinymce.init({
+        selector:'textarea',
+        plugins: [
+            "advlist autolink lists link image charmap print preview anchor",
+            "searchreplace visualblocks code fullscreen",
+            "insertdatetime media table contextmenu paste"
+        ],
+        toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+    });
+</script>
+<style>
+    label { display: inline-block; width: 80px }
+    input { width: 400px; }
+</style>
+
+<form method="post">
+    <label for="id_sender">{% trans "Expéditeur :" %}</label>
+    <input name="sender" id="id_sender" value="{{ sender }}" />
+    <button type="button" onclick="document.getElementById('id_sender').value='{{ sender }}';">{% trans "Contact" %}</button>
+    <button type="button" onclick="document.getElementById('id_sender').value='{{ user.email }}';">{% trans "Moi" %}</button><br />
+    <label for="id_mail">{% trans "À :" %}</label><input name="mail" id="id_mail" value="{{ mail }}" /><br />
+    <label for="id_subject">{% trans "Sujet :" %}</label><input name="subject" id="id_subject" value="{{ subject }}" /><br />
+    <textarea name="message" style="height: 600px;">{{ message }}</textarea><br />
+    <button type="submit">{% trans "Envoyer" %}</button>
+    {% csrf_token %}
+</form>
+{% endblock %}

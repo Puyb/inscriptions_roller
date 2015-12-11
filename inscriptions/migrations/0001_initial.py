@@ -1,0 +1,176 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import django_countries.fields
+from django.conf import settings
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Categorie',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('nom', models.CharField(verbose_name='Nom', max_length=200)),
+                ('code', models.CharField(verbose_name='Code', max_length=10)),
+                ('prix1', models.DecimalField(verbose_name='Prix normal', decimal_places=2, max_digits=7)),
+                ('prix2', models.DecimalField(verbose_name='Prix augmenté', decimal_places=2, max_digits=7)),
+                ('min_equipiers', models.IntegerField(verbose_name="Nombre minimum d'équipiers")),
+                ('max_equipiers', models.IntegerField(verbose_name="Nombre maximum d'équipiers")),
+                ('min_age', models.IntegerField(verbose_name='Age minimum', default=12)),
+                ('sexe', models.CharField(verbose_name='Sexe', max_length=2, choices=[('H', 'Homme'), ('F', 'Femme'), ('HX', 'Homme ou Mixte'), ('FX', 'Femme ou Mixte'), ('X', 'Mixte')])),
+                ('validation', models.TextField(verbose_name='Validation function (javascript)')),
+                ('numero_debut', models.IntegerField(verbose_name='Numero de dossard (début)', default=0)),
+                ('numero_fin', models.IntegerField(verbose_name='Numero de dossard (fin)', default=0)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Course',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('nom', models.CharField(verbose_name='Nom', max_length=200)),
+                ('uid', models.CharField(verbose_name='uid', max_length=200)),
+                ('ville', models.CharField(verbose_name='Ville', max_length=200)),
+                ('date', models.DateField(verbose_name='Date')),
+                ('date_ouverture', models.DateField(verbose_name="Date d'ouverture des inscriptionss")),
+                ('date_augmentation', models.DateField(verbose_name="Date d'augmentation dss tarifs")),
+                ('date_fermeture', models.DateField(verbose_name='Date de fermeture des inscriptions')),
+                ('limite_participants', models.DecimalField(verbose_name='Limite du nombre de participants', decimal_places=0, max_digits=6)),
+                ('paypal', models.EmailField(verbose_name='Adresse paypal', max_length=254, blank=True)),
+                ('frais_paypal_inclus', models.BooleanField(verbose_name='Frais paypal inclus')),
+                ('ordre', models.CharField(verbose_name='Ordre des chèques', max_length=200)),
+                ('adresse', models.TextField(verbose_name='Adresse', blank=True)),
+                ('url', models.URLField(verbose_name='URL')),
+                ('url_reglement', models.URLField(verbose_name='URL Réglement')),
+                ('email_contact', models.EmailField(verbose_name='Email contact', max_length=254)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Equipe',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('nom', models.CharField(verbose_name="Nom d'équipe", max_length=30)),
+                ('club', models.CharField(verbose_name='Club', max_length=30, blank=True)),
+                ('gerant_nom', models.CharField(verbose_name='Nom', max_length=200)),
+                ('gerant_prenom', models.CharField(verbose_name='Prénom', max_length=200)),
+                ('gerant_adresse1', models.CharField(verbose_name='Adresse', max_length=200, blank=True)),
+                ('gerant_adress2', models.CharField(verbose_name='Adresse 2', max_length=200, blank=True)),
+                ('gerant_ville', models.CharField(verbose_name='Ville', max_length=200)),
+                ('gerant_code_postal', models.CharField(verbose_name='Code postal', max_length=200)),
+                ('gerant_pays', django_countries.fields.CountryField(verbose_name='Pays', max_length=2, default='FR')),
+                ('gerant_email', models.EmailField(verbose_name='e-mail', max_length=200)),
+                ('password', models.CharField(verbose_name='Mot de passe', max_length=200, blank=True)),
+                ('gerant_telephone', models.CharField(verbose_name='Téléphone', max_length=200, blank=True)),
+                ('nombre', models.IntegerField(verbose_name="Nombre d'équipiers")),
+                ('paiement_info', models.CharField(verbose_name='Détails', max_length=200, blank=True)),
+                ('prix', models.DecimalField(verbose_name='Prix', decimal_places=2, max_digits=5)),
+                ('paiement', models.DecimalField(verbose_name='Paiement reçu', decimal_places=2, blank=True, null=True, max_digits=5)),
+                ('dossier_complet', models.NullBooleanField(verbose_name='Dossier complet')),
+                ('date', models.DateTimeField(verbose_name="Date d'insciption", auto_now_add=True)),
+                ('commentaires', models.TextField(verbose_name='Commentaires', blank=True)),
+                ('numero', models.IntegerField(verbose_name='Numéro')),
+                ('connu', models.CharField(verbose_name='Comment avez vous connu la course ?', max_length=200, choices=[('Site Roller en LIgne.com', 'Site Roller en Ligne.com'), ('Facebook', 'Facebook'), ('Presse', 'Presse'), ('Bouche à oreille', 'Bouche à oreille'), ('Flyer pendant une course', 'Flyer pendant une course'), ('Flyer pendant une randonnée', 'Flyer pendant une randonnée'), ('Affiche', 'Affiche'), ('Informations de la Mairie de Paris', 'Information de la Maire de Paris'), ('Autre', 'Autre')])),
+                ('date_facture', models.DateField(verbose_name='Date facture', blank=True, null=True)),
+                ('categorie', models.ForeignKey(to='inscriptions.Categorie')),
+                ('course', models.ForeignKey(to='inscriptions.Course')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Equipier',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('numero', models.IntegerField(verbose_name='Numéro')),
+                ('nom', models.CharField(verbose_name='Nom', max_length=200)),
+                ('prenom', models.CharField(verbose_name='Prénom', max_length=200, blank=True)),
+                ('sexe', models.CharField(verbose_name='Sexe', max_length=1, choices=[('H', 'Homme'), ('F', 'Femme')])),
+                ('adresse1', models.CharField(verbose_name='Adresse', max_length=200, blank=True)),
+                ('adresse2', models.CharField(verbose_name='Adresse', max_length=200, blank=True)),
+                ('ville', models.CharField(max_length=200)),
+                ('code_postal', models.CharField(max_length=200)),
+                ('pays', django_countries.fields.CountryField(verbose_name='Pays', max_length=2, default='FR')),
+                ('email', models.EmailField(verbose_name='e-mail', max_length=200, blank=True)),
+                ('date_de_naissance', models.DateField(verbose_name='Date de naissance')),
+                ('autorisation', models.FileField(verbose_name='Autorisation parentale', upload_to='certificats', blank=True)),
+                ('autorisation_valide', models.NullBooleanField(verbose_name='Autorisation parentale valide')),
+                ('justificatif', models.CharField(verbose_name='Justificatif', max_length=15, choices=[('licence', 'Licence FFRS'), ('certificat', 'Certificat médical')])),
+                ('num_licence', models.CharField(verbose_name='Numéro de licence', max_length=15, blank=True)),
+                ('piece_jointe', models.FileField(verbose_name='Certificat ou licence', upload_to='certificats', blank=True)),
+                ('piece_jointe_valide', models.NullBooleanField(verbose_name='Certificat ou licence valide')),
+                ('parent', models.CharField(verbose_name='Lien de parenté', max_length=200, blank=True)),
+                ('piece_jointe2', models.FileField(verbose_name='Justificatif entreprise / etudiant', upload_to='certificats', blank=True)),
+                ('piece_jointe2_valide', models.NullBooleanField(verbose_name='Justificatif valide')),
+                ('code_eoskates', models.CharField(verbose_name='Code EOSkates', max_length=20, blank=True)),
+                ('transpondeur', models.CharField(verbose_name='Transpondeur', max_length=20, blank=True)),
+                ('taille_tshirt', models.CharField(verbose_name='Taille T-shirt', max_length=3, blank=True, choices=[('XS', 'XS'), ('S', 'S'), ('M', 'M'), ('L', 'L'), ('XL', 'XL'), ('XXL', 'XXL')])),
+                ('verifier', models.BooleanField(verbose_name='Verifier', editable=False)),
+                ('licence_manquante', models.BooleanField(verbose_name='Licence manquante', editable=False)),
+                ('certificat_manquant', models.BooleanField(verbose_name='Certificat manquant', editable=False)),
+                ('autorisation_manquante', models.BooleanField(verbose_name='Autorisation manquante', editable=False)),
+                ('valide', models.BooleanField(verbose_name='Valide', editable=False)),
+                ('erreur', models.BooleanField(verbose_name='Erreur', editable=False)),
+                ('homme', models.BooleanField(verbose_name='Homme', editable=False)),
+                ('equipe', models.ForeignKey(to='inscriptions.Equipe')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TemplateMail',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('nom', models.CharField(verbose_name='Nom', max_length=200)),
+                ('destinataire', models.CharField(verbose_name='Destinataire', max_length=20, choices=[('Equipe', "Gerant d'équipe"), ('Equipier', 'Equipier'), ('Organisateur', 'Organisateur'), ('Tous', 'Tous')])),
+                ('bcc', models.CharField(verbose_name='Copie cachée à', max_length=1000, blank=True)),
+                ('sujet', models.CharField(verbose_name='Sujet', max_length=200)),
+                ('message', models.TextField(verbose_name='Message')),
+                ('course', models.ForeignKey(to='inscriptions.Course')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='UserProfile',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('role', models.CharField(verbose_name='Role', max_length=20, choices=[('admin', 'Administrateur'), ('organisateur', 'Organisateur'), ('validateur', 'Validateur')])),
+                ('course', models.ManyToManyField(to='inscriptions.Course', related_name='+')),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, unique=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Ville',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
+                ('lat', models.DecimalField(decimal_places=7, max_digits=10)),
+                ('lng', models.DecimalField(decimal_places=7, max_digits=10)),
+                ('nom', models.CharField(max_length=200)),
+                ('region', models.CharField(max_length=200)),
+                ('pays', models.CharField(max_length=200)),
+            ],
+        ),
+        migrations.AddField(
+            model_name='equipier',
+            name='ville2',
+            field=models.ForeignKey(to='inscriptions.Ville', null=True),
+        ),
+        migrations.AddField(
+            model_name='equipe',
+            name='gerant_ville2',
+            field=models.ForeignKey(to='inscriptions.Ville', null=True),
+        ),
+        migrations.AddField(
+            model_name='categorie',
+            name='course',
+            field=models.ForeignKey(related_name='categories', to='inscriptions.Course'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='templatemail',
+            unique_together=set([('course', 'nom')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='equipe',
+            unique_together=set([('course', 'numero')]),
+        ),
+    ]

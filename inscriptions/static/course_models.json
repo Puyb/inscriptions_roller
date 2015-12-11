@@ -1,0 +1,191 @@
+{
+    "vide": {
+        "_name": "Vide"
+    },
+    "paris": {
+        "categories": [
+            {
+                "numero_debut": 301,
+                "nom": "Individuel Homme",
+                "prix1": "40.00",
+                "min_equipiers": 1,
+                "numero_fin": 365,
+                "sexe": "H",
+                "validation": "function(data) { return true; }",
+                "min_age": 18,
+                "max_equipiers": 1,
+                "code": "IDH",
+                "prix2": "50.00"
+            },
+            {
+                "numero_debut": 301,
+                "nom": "Individuel Femme",
+                "prix1": "40.00",
+                "min_equipiers": 1,
+                "numero_fin": 365,
+                "sexe": "F",
+                "validation": "function(data) { return true; }",
+                "min_age": 18,
+                "max_equipiers": 1,
+                "code": "IDF",
+                "prix2": "50.00"
+            },
+            {
+                "numero_debut": 401,
+                "nom": "Duo Homme ou Mixte",
+                "prix1": "50.00",
+                "min_equipiers": 2,
+                "numero_fin": 490,
+                "sexe": "HX",
+                "validation": "function(data) { return true; }",
+                "min_age": 18,
+                "max_equipiers": 2,
+                "code": "DUX",
+                "prix2": "60.00"
+            },
+            {
+                "numero_debut": 401,
+                "nom": "Duo Femme",
+                "prix1": "50.00",
+                "min_equipiers": 2,
+                "numero_fin": 490,
+                "sexe": "F",
+                "validation": "function(data) { return true; }",
+                "min_age": 18,
+                "max_equipiers": 2,
+                "code": "DUF",
+                "prix2": "60.00"
+            },
+            {
+                "numero_debut": 1,
+                "nom": "Junior",
+                "prix1": "75.00",
+                "min_equipiers": 3,
+                "numero_fin": 300,
+                "sexe": "X",
+                "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+                "min_age": 12,
+                "max_equipiers": 5,
+                "code": "JNX",
+                "prix2": "90.00"
+            },
+            {
+                "numero_debut": 1,
+                "nom": "Sénior Homme ou Mixte",
+                "prix1": "75.00",
+                "min_equipiers": 3,
+                "numero_fin": 300,
+                "sexe": "HX",
+                "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+                "min_age": 12,
+                "max_equipiers": 5,
+                "code": "SNX",
+                "prix2": "90.00"
+            },
+            {
+                "numero_debut": 1,
+                "nom": "Sénior Femme",
+                "prix1": "75.00",
+                "min_equipiers": 3,
+                "numero_fin": 300,
+                "sexe": "F",
+                "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+                "min_age": 12,
+                "max_equipiers": 5,
+                "code": "SNF",
+                "prix2": "90.00"
+            },
+            {
+                "numero_debut": 1,
+                "nom": "Vétéran",
+                "prix1": "75.00",
+                "min_equipiers": 3,
+                "numero_fin": 300,
+                "sexe": "X",
+                "validation": "function(data) { return true; }",
+                "min_age": 35,
+                "max_equipiers": 5,
+                "code": "VEX",
+                "prix2": "90.00"
+            },
+            {
+                "numero_debut": 1,
+                "nom": "Entreprise / Étudiants / Famille",
+                "prix1": "75.00",
+                "min_equipiers": 3,
+                "numero_fin": 300,
+                "sexe": "X",
+                "validation": "function(data) { return true; }",
+                "min_age": 12,
+                "max_equipiers": 5,
+                "code": "EFX",
+                "prix2": "90.00"
+            },
+            {
+                "numero_debut": 500,
+                "nom": "Handisport",
+                "prix1": "0.00",
+                "min_equipiers": 0,
+                "numero_fin": 600,
+                "sexe": "X",
+                "validation": "function() { return false; }",
+                "min_age": 12,
+                "max_equipiers": 0,
+                "code": "HND",
+                "prix2": "0.00"
+            }
+        ],
+        "templatemail_set": [
+            {
+                "destinataire": "Equipe",
+                "nom": "paiement",
+                "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
+                "message": "<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Nous avons bien re&ccedil;u votre paiement de {{ instance.paiement }} &euro; pour l'&eacute;quipe <strong>{{ instance.nom }}</strong>.</p>\n<p>Votre facture est téléchargeable en cliquant sur <a href=\"http://inscription.6hdeparis.fr/{{ instance.course.uid }}/{{ instance.numero }}/facture/\">ce lien</a>.</p>\n<p>--<br /> PUC Roller</p>\n<hr />\n<p>Hi, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> We just received your payment of &euro; {{ instance.paiement }} for your team <strong>{{ instance.nom }}</strong>.</p>\n<p>--<br /> PUC Roller</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "inscription",
+                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+                "message": "<p><em>English translation below</em></p>\n<h1>Merci de vous &ecirc;tre inscrit aux {{ instance.course.nom }}</h1>\n<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>\n<p>{% if not instance.paiement_complet %}Pour r&eacute;gler votre inscription vous pouvez payer par internet : <a href=\"{{ ROOT_URL }}{% url \"inscriptions.done\" course_uid=instance.course.uid numero=instance.numero %}\">Paypal ou Carte bancaire</a>.<br />{% if instance.frais_paypal > 0 %} Pour tout paiement par internet, {{ instance.frais_paypal|floatformat:2 }} &euro; de frais seront ajout&eacute;s.<br />{% endif %} <br /> Ou envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de \"{{ instance.course.ordre }}\".</p>\n<p>{% else %}Votre paiement de {{ instance.paiement }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u. {% endif %}</p>\n<p>{% if instance.licence_manquantes %}Il manque les licences de :</p>\n<ul>{% for e in instance.licence_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.certificat_manquantes %} Il manque les certificats m&eacute;dicaux de (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">mod&egrave;le</a>):</p>\n<ul>{% for e in instance.certificat_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.autorisation_manquantes %} Il manque les autorisations parentales (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">mod&egrave;le</a>) :</p>\n<ul>{% for e in instance.autorisation_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}Merci d'envoyer le paiement et les justificatifs &agrave;</p>\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\n<p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>. {% endif %}</p>\n<p>Nous vous tiendrons au courant d&egrave;s que votre inscription sera d&eacute;finitive.</p>\n<p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href=\"{{ ROOT_URL }}{% url \"inscriptions.edit\" course_uid=instance.course.uid numero=instance.numero code=instance.password %}\">cliquant ici</a>.</p>\n<p>--<br /> PUC Roller</p>\n<hr />\n<h1>Thank for registering at {{ instance.course.nom }}</h1>\n<p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />\\nYour team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>\n<p>{% if not instance.paiement_complet %}You can pay your registration online: <a href=\"{{ ROOT_URL }}{% url \"inscriptions.done\" course_uid=instance.course.uid numero=instance.numero %}\">Paypal or credit card</a>.<br />{% if instance.frais_paypal > 0 %} For online payment, &euro; {{ instance.frais_paypal|floatformat:2 }} fee will be added.<br />{% endif %} <br /> Or send a &euro; {{ instance.prix }} check payable to \"{{ instance.course.ordre }}\".</p>\n<p>{% else %}Your payment of &euro; {{ instance.paiement }} was received. {% endif %}</p>\n<p>{% if instance.licence_manquantes %}Missing licenses:</p>\n<ul>{% for e in instance.licence_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.certificat_manquantes %} Missing medical certificate (<a href=\"\\&quot;http:/www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\\&quot;\" target=\"\\&quot;_blank\\&quot;\">model in french</a>):</p>\n<ul>{% for e in instance.certificat_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.autorisation_manquantes %} Missing parental authorizations (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">model in french</a>) :</p>\n<ul>{% for e in instance.autorisation_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}You can send paiment and justificatives to;</p>\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\n<p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. {% endif %}</p>\n<p>You'll be informed as soon your registration is complete.</p>\n<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href=\"{{ ROOT_URL }}{% url \"inscriptions.edit\" course_uid=instance.course.uid numero=instance.numero code=instance.password %}\">clicking herei</a>.</p>\n<p>--<br /> PUC Roller</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Organisateur",
+                "nom": "paiement_admin",
+                "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
+                "message": "<p>Paiement de {{ instance.paiement }} &euro; re&ccedil;u pour l'&eacute;quipe {{ instance.numero }} - {{ instance.nom }} {{ instance.info_paiement }}</p>\n<p>--<br /> PUC Roller</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Organisateur",
+                "nom": "inscription_admin",
+                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+                "message": "<h1>{{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}</h1>\n<table>\n<tbody>\n<tr><th>nom</th>\n<td>{{ instance.nom }}</td>\n</tr>\n<tr><th>club</th>\n<td>{{ instance.club }}</td>\n</tr>\n<tr><th>gerant_nom</th>\n<td>{{ instance.gerant_nom }}</td>\n</tr>\n<tr><th>gerant_prenom</th>\n<td>{{ instance.gerant_prenom }}</td>\n</tr>\n<tr><th>gerant_adresse1</th>\n<td>{{ instance.gerant_adresse1 }}</td>\n</tr>\n<tr><th>gerant_adress2</th>\n<td>{{ instance.gerant_adress2 }}</td>\n</tr>\n<tr><th>gerant_ville</th>\n<td>{{ instance.gerant_ville }}</td>\n</tr>\n<tr><th>gerant_code_postal</th>\n<td>{{ instance.gerant_code_postal }}</td>\n</tr>\n<tr><th>gerant_pays</th>\n<td>{{ instance.gerant_pays }}</td>\n</tr>\n<tr><th>gerant_email</th>\n<td>{{ instance.gerant_email }}</td>\n</tr>\n<tr><th>password</th>\n<td>{{ instance.password }}</td>\n</tr>\n<tr><th>gerant_telephone</th>\n<td>{{ instance.gerant_telephone }}</td>\n</tr>\n<tr><th>categorie</th>\n<td>{{ instance.categorie }}</td>\n</tr>\n<tr><th>course</th>\n<td>{{ instance.course }}</td>\n</tr>\n<tr><th>nombre</th>\n<td>{{ instance.nombre }}</td>\n</tr>\n<tr><th>paiement_info</th>\n<td>{{ instance.paiement_info }}</td>\n</tr>\n<tr><th>prix</th>\n<td>{{ instance.prix }}</td>\n</tr>\n<tr><th>paiement</th>\n<td>{{ instance.paiement }}</td>\n</tr>\n<tr><th>dossier_complet</th>\n<td>{{ instance.dossier_complet }}</td>\n</tr>\n<tr><th>date</th>\n<td>{{ instance.date }}</td>\n</tr>\n<tr><th>commentaires</th>\n<td>{{ instance.commentaires }}</td>\n</tr>\n<tr><th>gerant_ville2</th>\n<td>{{ instance.gerant_ville2 }}</td>\n</tr>\n<tr><th>numero</th>\n<td>{{ instance.numero }}</td>\n</tr>\n<tr><th>connu</th>\n<td>{{ instance.connu }}</td>\n</tr>\n</tbody>\n</table>\n<p>{% for instance in instance.equipier_set.all %}</p>\n<h2>Equipier {{ forloop.count }}</h2>\n<table>\n<tbody>\n<tr><th>nom</th>\n<td>{{ instance.nom }}</td>\n</tr>\n<tr><th>prenom</th>\n<td>{{ instance.prenom }}</td>\n</tr>\n<tr><th>sexe</th>\n<td>{{ instance.sexe }}</td>\n</tr>\n<tr><th>adresse1</th>\n<td>{{ instance.adresse1 }}</td>\n</tr>\n<tr><th>adresse2</th>\n<td>{{ instance.adresse2 }}</td>\n</tr>\n<tr><th>ville</th>\n<td>{{ instance.ville }}</td>\n</tr>\n<tr><th>code_postal</th>\n<td>{{ instance.code_postal }}</td>\n</tr>\n<tr><th>pays</th>\n<td>{{ instance.pays }}</td>\n</tr>\n<tr><th>email</th>\n<td>{{ instance.email }}</td>\n</tr>\n<tr><th>date_de_naissance</th>\n<td>{{ instance.date_de_naissance }}</td>\n</tr>\n<tr><th>justificatif</th>\n<td>{{ instance.justificatif }}</td>\n</tr>\n<tr><th>num_licence</th>\n<td>{{ instance.num_licence }}</td>\n</tr>\n</tbody>\n</table>\n<p>{% endfor %}</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "changement_numero",
+                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
+                "message": "<p><em>English translation below<br /><br /></em>Les modifications que vous venez d'enregistrer nous ont oblig&eacute; &agrave; changer votre num&eacute;ro d'&eacute;quipe.<strong> Votre nouveau num&eacute;ro est le {{ instance.numero }}.</strong><br /><br />The modifications you've just made, imply changing your registration number.<strong> Your new registration number is {{ instance.numero }} </strong></p>\r\n<h1>Merci de vous &ecirc;tre inscrit aux {{ instance.course.nom }}</h1>\r\n<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>\r\n<p>{% if not instance.paiement_complet %}Pour r&eacute;gler votre inscription vous pouvez payer par internet : <a href=\"{{ ROOT_URL }}{% url \"inscriptions.done\" course_uid=instance.course.uid numero=instance.numero %}\">Paypal ou Carte bancaire</a>.<br />{% if instance.frais_paypal > 0 %} Pour tout paiement par internet, {{ instance.frais_paypal|floatformat:2 }} &euro; de frais seront ajout&eacute;s.<br />{% endif %} <br /> Ou envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de \"{{ instance.course.ordre }}\".</p>\r\n<p>{% else %}Votre paiement de {{ instance.paiement }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u. {% endif %}</p>\r\n<p>{% if instance.licence_manquantes %}Il manque les licences de :</p>\r\n<ul>{% for e in instance.licence_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if instance.certificat_manquantes %} Il manque les certificats m&eacute;dicaux de (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">mod&egrave;le</a>):</p>\r\n<ul>{% for e in instance.certificat_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if instance.autorisation_manquantes %} Il manque les autorisations parentales (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">mod&egrave;le</a>) :</p>\r\n<ul>{% for e in instance.autorisation_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}Merci d'envoyer le paiement et les justificatifs &agrave;</p>\r\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\r\n<p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>. {% endif %}</p>\r\n<p>Nous vous tiendrons au courant d&egrave;s que votre inscription sera d&eacute;finitive.</p>\r\n<p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href=\"{{ ROOT_URL }}{% url\">cliquant ici</a>.</p>\r\n<p>--<br /> PUC Roller</p>\r\n<hr />\r\n<h1>Thank for registering at {{ instance.course.nom }}</h1>\r\n<p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />\\nYour team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>\r\n<p>{% if not instance.paiement_complet %}You can pay your registration online: <a href=\"{{ ROOT_URL }}{% url \"inscriptions.done\" course_uid=instance.course.uid numero=instance.numero %}\">Paypal or credit card</a>.<br />{% if instance.frais_paypal > 0 %} For online payment, &euro; {{ instance.frais_paypal|floatformat:2 }} fee will be added.<br />{% endif %} <br /> Or send a &euro; {{ instance.prix }} check payable to \"{{ instance.course.ordre }}\".</p>\r\n<p>{% else %}Your payment of &euro; {{ instance.paiement }} was received. {% endif %}</p>\r\n<p>{% if instance.licence_manquantes %}Missing licenses:</p>\r\n<ul>{% for e in instance.licence_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if instance.certificat_manquantes %} Missing medical certificate (<a href=\"\\&quot;http:/www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\\&quot;\" target=\"\\&quot;_blank\\&quot;\">model in french</a>):</p>\r\n<ul>{% for e in instance.certificat_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if instance.autorisation_manquantes %} Missing parental authorizations (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">model in french</a>) :</p>\r\n<ul>{% for e in instance.autorisation_manquantes %}\r\n<li>{{ e.prenom }} {{ e.nom }}</li>\r\n{% endfor %}</ul>\r\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}You can send paiment and justificatives to;</p>\r\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\r\n<p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. {% endif %}</p>\r\n<p>You'll be informed as soon your registration is complete.</p>\r\n<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href=\"{{ ROOT_URL }}{% url\">clicking herei</a>.</p>\r\n<p>--<br /> PUC Roller</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Organisateur",
+                "nom": "changement_numero_admin",
+                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+                "message": "<h1>{{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}<br />Changement de num&eacute;ro</h1>\n<table>\n<tbody>\n<tr><th>nom</th>\n<td>{{ instance.nom }}</td>\n</tr>\n<tr><th>club</th>\n<td>{{ instance.club }}</td>\n</tr>\n<tr><th>gerant_nom</th>\n<td>{{ instance.gerant_nom }}</td>\n</tr>\n<tr><th>gerant_prenom</th>\n<td>{{ instance.gerant_prenom }}</td>\n</tr>\n<tr><th>gerant_adresse1</th>\n<td>{{ instance.gerant_adresse1 }}</td>\n</tr>\n<tr><th>gerant_adress2</th>\n<td>{{ instance.gerant_adress2 }}</td>\n</tr>\n<tr><th>gerant_ville</th>\n<td>{{ instance.gerant_ville }}</td>\n</tr>\n<tr><th>gerant_code_postal</th>\n<td>{{ instance.gerant_code_postal }}</td>\n</tr>\n<tr><th>gerant_pays</th>\n<td>{{ instance.gerant_pays }}</td>\n</tr>\n<tr><th>gerant_email</th>\n<td>{{ instance.gerant_email }}</td>\n</tr>\n<tr><th>password</th>\n<td>{{ instance.password }}</td>\n</tr>\n<tr><th>gerant_telephone</th>\n<td>{{ instance.gerant_telephone }}</td>\n</tr>\n<tr><th>categorie</th>\n<td>{{ instance.categorie }}</td>\n</tr>\n<tr><th>course</th>\n<td>{{ instance.course }}</td>\n</tr>\n<tr><th>nombre</th>\n<td>{{ instance.nombre }}</td>\n</tr>\n<tr><th>paiement_info</th>\n<td>{{ instance.paiement_info }}</td>\n</tr>\n<tr><th>prix</th>\n<td>{{ instance.prix }}</td>\n</tr>\n<tr><th>paiement</th>\n<td>{{ instance.paiement }}</td>\n</tr>\n<tr><th>dossier_complet</th>\n<td>{{ instance.dossier_complet }}</td>\n</tr>\n<tr><th>date</th>\n<td>{{ instance.date }}</td>\n</tr>\n<tr><th>commentaires</th>\n<td>{{ instance.commentaires }}</td>\n</tr>\n<tr><th>gerant_ville2</th>\n<td>{{ instance.gerant_ville2 }}</td>\n</tr>\n<tr><th>numero</th>\n<td>{{ instance.numero }}</td>\n</tr>\n<tr><th>connu</th>\n<td>{{ instance.connu }}</td>\n</tr>\n</tbody>\n</table>\n<p>{% for instance in instance.equipier_set.all %}</p>\n<h2>Equipier {{ forloop.count }}</h2>\n<table>\n<tbody>\n<tr><th>nom</th>\n<td>{{ instance.nom }}</td>\n</tr>\n<tr><th>prenom</th>\n<td>{{ instance.prenom }}</td>\n</tr>\n<tr><th>sexe</th>\n<td>{{ instance.sexe }}</td>\n</tr>\n<tr><th>adresse1</th>\n<td>{{ instance.adresse1 }}</td>\n</tr>\n<tr><th>adresse2</th>\n<td>{{ instance.adresse2 }}</td>\n</tr>\n<tr><th>ville</th>\n<td>{{ instance.ville }}</td>\n</tr>\n<tr><th>code_postal</th>\n<td>{{ instance.code_postal }}</td>\n</tr>\n<tr><th>pays</th>\n<td>{{ instance.pays }}</td>\n</tr>\n<tr><th>email</th>\n<td>{{ instance.email }}</td>\n</tr>\n<tr><th>date_de_naissance</th>\n<td>{{ instance.date_de_naissance }}</td>\n</tr>\n<tr><th>justificatif</th>\n<td>{{ instance.justificatif }}</td>\n</tr>\n<tr><th>num_licence</th>\n<td>{{ instance.num_licence }}</td>\n</tr>\n</tbody>\n</table>\n<p>{% endfor %}</p>",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "change_request",
+                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+                "message": "<p><em>English translation below<br /><br />Dans ce mail, vous trouverez l'&eacute;tat de votre dossier, ainsi que les liens qui vous permettrons de le modifier ou le payer.<br />In this mail, you'll find the status of your registration, and links that allow you to modify and pay it.<br /></em></p>\n<h1>Merci de vous &ecirc;tre inscrit aux {{ instance.course.nom }}</h1>\n<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>\n<p>{% if not instance.paiement_complet %}Pour r&eacute;gler votre inscription vous pouvez payer par internet : <a href=\"http://inscription.6hdeparis.fr/{{ instance.course.uid }}/{{ instance.numero }}/done/\">Paypal ou Carte bancaire</a>.<br />{% if instance.frais_paypal > 0 %} Pour tout paiement par internet, {{ instance.frais_paypal|floatformat:2 }} &euro; de frais seront ajout&eacute;s.<br />{% endif %} <br /> Ou envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de \"{{ instance.course.ordre }}\".</p>\n<p>{% else %}Votre paiement de {{ instance.paiement }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u. {% endif %}</p>\n<p>{% if instance.licence_manquantes %}Il manque les licences de :</p>\n<ul>{% for e in instance.licence_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.certificat_manquantes %} Il manque les certificats m&eacute;dicaux de (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">mod&egrave;le</a>):</p>\n<ul>{% for e in instance.certificat_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.autorisation_manquantes %} Il manque les autorisations parentales (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">mod&egrave;le</a>) :</p>\n<ul>{% for e in instance.autorisation_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}Merci d'envoyer le paiement et les justificatifs &agrave;</p>\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\n<p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>. {% endif %}</p>\n<p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href=\"http://inscription.6hdeparis.fr/{{ instance.course.uid }}/{{ instance.numero }}/{{ instance.password }}/\">cliquant ici</a>.</p>\n<p>--<br /> PUC Roller</p>\n<hr />\n<h1>Thank for registering at {{ instance.course.nom }}</h1>\n<p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />\\nYour team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>\n<p>{% if not instance.paiement_complet %}You can pay your registration online: <a href=\"http://inscription.6hdeparis.fr/{{ instance.course.uid }}/{{ instance.numero }}/done/\">Paypal or credit card</a>.<br />{% if instance.frais_paypal > 0 %} For online payment, &euro; {{ instance.frais_paypal|floatformat:2 }} fee will be added.<br />{% endif %} <br /> Or send a &euro; {{ instance.prix }} check payable to \"{{ instance.course.ordre }}\".</p>\n<p>{% else %}Your payment of &euro; {{ instance.paiement }} was received. {% endif %}</p>\n<p>{% if instance.licence_manquantes %}Missing licenses:</p>\n<ul>{% for e in instance.licence_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.certificat_manquantes %} Missing medical certificate (<a href=\"\\&quot;http:/www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf\\&quot;\" target=\"\\&quot;_blank\\&quot;\">model in french</a>):</p>\n<ul>{% for e in instance.certificat_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if instance.autorisation_manquantes %} Missing parental authorizations (<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">model in french</a>) :</p>\n<ul>{% for e in instance.autorisation_manquantes %}\n<li>{{ e.prenom }} {{ e.nom }}</li>\n{% endfor %}</ul>\n<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}You can send paiment and justificatives to;</p>\n<p>{{ instance.course.adresse|linebreaksbr }}</p>\n<p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. {% endif %}</p>\n<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href=\"http://inscription.6hdeparis.fr/{{ instance.course.uid }}/{{ instance.numero }}/{{ instance.password }}/\">clicking herei</a>.</p>\n<p>--<br /> PUC Roller</p>",
+                "bcc": ""
+            }
+        ],
+        "_name": "6h de Paris"
+    }
+}

@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block content %}
+<h1>{% trans "Le site d'inscription est fermé." %}</h1>
+<h2>{% blocktrans with ouverture=COURSE.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}.{% endblocktrans %}
+{% endblock %}
