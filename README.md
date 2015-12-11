@@ -1,4 +1,4 @@
-# Inscription Roller
+# Inscriptions Roller
 
 Registration site for 6h roller races by team
 
