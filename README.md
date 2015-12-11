@@ -1,4 +1,6 @@
-# {{ project_name }}
+# Inscription Roller
+
+Registration site for 6h roller races by team
 
 ## Getting Started
 

@@ -1,3 +1,11 @@
 *.pyc
+*.pyo
+*.db
+*.log
+*~
+*.bak
+__pycache__
+static/dist/
 node_modules/
+env/
 inscriptions/settings/local.py
