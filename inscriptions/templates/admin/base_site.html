@@ -11,7 +11,9 @@
 {% if request.user.accreditations.all or request.user.is_superuser %}
 {% trans "Course : " %}<select id="course_chooser">
     {% for accreditation in request.user.accreditations.all %}
+    {% if accreditation.role != '' %}
         <option value="{{ accreditation.course.uid }}" {% if accreditation.course == COURSE %}selected {% endif %}>{{ accreditation.course.nom }}</option>
+    {% endif %}
     {% endfor %}
     </select>
 {% endif %}

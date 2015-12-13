@@ -568,7 +568,7 @@ class Equipier(models.Model):
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations')
     course = models.ForeignKey(Course, related_name='accreditations')
-    role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='')
+    role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='', blank=True)
     class Meta:
         unique_together = (('user', 'course'), )
 

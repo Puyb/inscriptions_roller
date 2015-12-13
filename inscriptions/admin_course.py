@@ -3,10 +3,9 @@ from inscriptions.models import *
 from django.contrib import admin
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
-from django.template import RequestContext
-from django.conf.urls import patterns
+from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.db.models import Sum, Value, F, Q
 from django.db.models.functions import Coalesce
@@ -25,7 +24,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path.endswith('/choose/') or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
+        if request.path.endswith('/choose/') or request.path.endswith('/ask/') or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False
@@ -33,16 +32,42 @@ class CourseAdminSite(admin.sites.AdminSite):
         return request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0
 
     def get_urls(self):
-        urls = patterns('',
-            (r'choose/', self.admin_view(self.course_choose), {}, '%sadmin_choose' % self.name),
-            (r'document/review/', self.admin_view(self.document_review), {}, '%sadmin_documenr_review' % self.name)
-        ) + super().get_urls()
+        from django.conf.urls import url
+        urls = [
+            url(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
+            url(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
+            url(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
+            url(r'^document/review/$', self.admin_view(self.document_review), name='course_documenr_review'),
+        ] + super().get_urls()
         return urls
 
     def course_choose(self, request):
-        return render_to_response('admin/course_choose.html', RequestContext(request, { 'courses': (a.course for a in request.user.accreditations.all()) }))
+        request.current_app = self.name
+        return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
+            courses=(a.course for a in request.user.accreditations.all()),
+        ))
+
+    def course_ask_accreditation(self, request, course_uid=None):
+        request.current_app = self.name
+        if course_uid:
+            course = get_object_or_404(Course, uid=course_uid)
+            Accreditation(
+                user=request.user,
+                course=course,
+            ).save()
+            messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
+            return redirect('../')
+
+        courses = Course.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
+        demandes = Course.objects.filter(accreditations__user=request.user, accreditations__role='')
+        context = dict(self.each_context(request),
+            courses=courses,
+            demandes=demandes,
+        )
+        return TemplateResponse(request, 'admin/course_ask_accreditation.html', context)
 
     def document_review(self, request):
+        request.current_app = self.name
         uid = request.COOKIES['course_uid']
         course = Course.objects.get(uid=uid, accreditations__user=request.user)
         
@@ -70,12 +95,12 @@ class CourseAdminSite(admin.sites.AdminSite):
             return redirect('/course/')
 
 
-        return render_to_response('admin/document_review.html', RequestContext(request, {
-            'count': equipier.count(),
-            'index': len(skip) + 1,
-            'equipier': equipier[0],
-            'skip': ','.join(skip)
-        }))
+        return TemplateResponse(request, 'admin/document_review.html', dict(self.each_context(request),
+            count=equipier.count(),
+            index=len(skip) + 1,
+            equipier=equipier[0],
+            skip=','.join(skip)
+        ))
 
     index_template = 'admin/dashboard.html'
 
@@ -248,18 +273,23 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     dossier_complet_auto2.allow_tags = True
     dossier_complet_auto2.short_description = mark_safe(u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""")
 
+    def has_add_permission(self, request):
+        return False
+
     def get_urls(self):
+        from django.conf.urls import url
         urls = super().get_urls()
-        my_urls = patterns('',
-            (r'^version/$', self.version),
-            (r'^send/$', self.send_mails),
-            (r'^send/preview/$', self.preview_mail),
-            (r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail),
-            (r'^(?P<id>\d+)/autre/$', self.autre),
-        )
+        my_urls = [
+            url(r'^version/$', self.version, name='equipe_version'),
+            url(r'^send/$', self.send_mails, name='equipe_send_mails'),
+            url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
+            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
+            url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
+        ]
         return my_urls + urls
 
     def send_mail(self, request, id, template):
+        request.current_app = self.admin_site.name
         instance = get_object_or_404(Equipe, id=id)
 
         if request.method == 'POST':
@@ -279,12 +309,12 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         except Exception as e:
             message = '<p style="color: red">Error in template: %s</p>' % str(e)
 
-        return render_to_response('admin/equipe/send_mail.html', RequestContext(request, {
-            'message': message,
-            'sender': instance.course.email_contact,
-            'mail': instance.gerant_email,
-            'subject': sujet,
-        }))
+        return TemplateResponse(request, 'admin/equipe/send_mail.html', dict(self.each_context(request),
+            message=message,
+            sender=instance.course.email_contact,
+            mail=instance.gerant_email,
+            subject=sujet,
+        ))
 
     def preview_mail(self, request):
         instance = get_object_or_404(Equipe, id=request.GET['id'])
@@ -309,6 +339,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return HttpResponse(django.__file__ + ' ' + json.dumps(list(django.VERSION)))
 
     def send_mails(self, request, queryset=None):
+        request.current_app = self.admin_site.name
         course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
 
         if 'template' in request.POST and 'id' in request.POST:
@@ -318,18 +349,19 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
             return redirect('/course/inscriptions/equipe/')
 
-        return render_to_response('admin/equipe/send_mails.html', RequestContext(request, {
-            'queryset': queryset,
-            'templates': TemplateMail.objects.filter(course=course),
-        }))
+        return TemplateResponse(request, 'admin/equipe/send_mails.html', dict(self.each_context(request),
+            queryset=queryset,
+            templates=TemplateMail.objects.filter(course=course),
+        ))
     send_mails.short_description = _(u'Envoyer un mail groupé')
 
     def autre(self, request, id):
+        request.current_app = self.admin_site.name
         instance = get_object_or_404(Equipe, id=id)
-        return render_to_response('admin/equipe/autre.html', RequestContext(request, {
-            "templates": instance.course.templatemail_set.all(),
-            "instance": instance,
-        }));
+        return TemplateResponse(request, 'admin/equipe/autre.html', dict(self.each_context(request),
+            templates=instance.course.templatemail_set.all(),
+            instance=instance,
+        ))
 
 
 
@@ -373,7 +405,6 @@ class CourseAdmin(admin.ModelAdmin):
         response.set_cookie('course_id',  obj.id)
         response.set_cookie('course_nom', obj.nom)
         return response
-
 site.register(Course, CourseAdmin)
 
 
@@ -391,4 +422,22 @@ class TemplateMailAdmin(CourseFilteredObjectAdmin):
 site.register(TemplateMail, TemplateMailAdmin)
 
 
+class AccreditationAdmin(CourseFilteredObjectAdmin):
+    list_display = ('user_name', 'user_email', 'role', 'active', )
+    fields = ('user_name', 'user_email', 'role', )
+    readonly_fields = ('user_name', 'user_email', )
 
+    def active(self, obj):
+        return obj.role != '' and u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""" or u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+    active.allow_tags = True
+
+    def user_name(self, obj):
+        return obj.user.username
+
+    def user_email(self, obj):
+        return '<a href="mailto:%s">%s</a>' % (obj.user.email, obj.user.email)
+    user_email.allow_tags = True
+
+    def has_add_permission(self, request):
+        return False
+site.register(Accreditation, AccreditationAdmin)

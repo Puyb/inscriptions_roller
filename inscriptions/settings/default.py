@@ -95,6 +95,7 @@ TEMPLATES = [
                 "django.core.context_processors.tz",
                 "django.core.context_processors.request",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.request",
                 "account.context_processors.account",
                 "pinax_theme_bootstrap.context_processors.theme",
                 "inscriptions.context_processors.import_settings",
@@ -121,6 +122,7 @@ ROOT_URLCONF = "inscriptions.urls"
 WSGI_APPLICATION = "inscriptions.wsgi.application"
 
 INSTALLED_APPS = [
+    #"bootstrap_admin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -192,6 +194,8 @@ ACCOUNT_LOGOUT_REDIRECT_URL = "home"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 2
 ACCOUNT_USE_AUTH_AUTHENTICATE = True
 ACCOUNT_LOGIN_REDIRECT_URL = '/course/choose/'
+
+BOOTSTRAP_ADMIN_SIDEBAR_MENU = True
 
 AUTHENTICATION_BACKENDS = [
     "account.auth_backends.UsernameAuthenticationBackend",
