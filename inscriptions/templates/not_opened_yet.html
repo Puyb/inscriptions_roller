@@ -1,6 +1,16 @@
-{% extends "base.html" %}
+{% extends "site_base.html" %}
 {% load i18n %}
-{% block content %}
-<h1>{% trans "Le site d'inscription est fermé." %}</h1>
-<h2>{% blocktrans with ouverture=COURSE.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}.{% endblocktrans %}
+{% block body %}
+<div class="jumbotron">
+    <div class="media">
+        <div class="media-left">
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+        </div>
+        <div class="media-body">
+            <h2>{% trans "Le site d'inscription est fermé." %}</h2>
+            <h3>{% blocktrans with ouverture=COURSE.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}.{% endblocktrans %}</h3>
+            <p><a class="btn btn-primary btn-lg" href="{{ COURSE.url }}" role="button">{% blocktrans %}Accéder au site de la course{% endblocktrans %}</a></p>
+        </div>
+    </div>
+</div>
 {% endblock %}

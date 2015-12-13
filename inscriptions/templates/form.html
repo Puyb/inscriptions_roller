@@ -35,13 +35,21 @@
     <div id="part0" class="parts">
         <div class="panel panel-default">
             <div class="panel-body">
-                {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
-                <br />
-                {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
-                <br />
-                {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous pouvez payer votre inscription par internet ou par chèque. Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
-                {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
-                {% blocktrans %}Si vous rencontrez des problèmes lors de votre inscription, <a href="http://www.6hdeparis.fr/contact/">contactez nous</a>{% endblocktrans%}<br />
+                <div class="media">
+                    <div class="media-left">
+                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+                    </div>
+                    <div class="media-body">
+                        {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
+                        <br />
+                        {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
+                        <br />
+                        {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous pouvez payer votre inscription par internet ou par chèque. Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
+                        {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
+                        {% url "inscriptions.views.contact" course_uid=COURSE.uid as url_contact %}
+                        {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />
+                    </div>
+                </div>
             </div>
         </div>
         <div class="panel panel-default">

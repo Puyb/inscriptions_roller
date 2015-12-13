@@ -271,3 +271,5 @@ def index(request):
         'anciennes_courses': Course.objects.filter(active=True, date__lte=date.today()).order_by('date'),
     }))
 
+def contact(request, course_uid):
+    raise Http404()

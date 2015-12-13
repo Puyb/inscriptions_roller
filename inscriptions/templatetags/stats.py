@@ -1,4 +1,5 @@
 from django import template
+from functools import reduce
 import sys
 
 register = template.Library()
@@ -13,7 +14,7 @@ def pertinent_values(dictionary, key):
     if ',' in key:
         key, limit = key.split(',')
 
-    keys = dictionary.keys()
+    keys = list(dictionary.keys())
 
     total = reduce(lambda a, b: a + dictionary[b][key], keys, 0)
     if limit[-1:] == '%':
@@ -21,9 +22,7 @@ def pertinent_values(dictionary, key):
     else:
         limit = int(limit)
 
-    print >>sys.stderr, limit
-
-    keys.sort(lambda a, b: cmp(dictionary[b][key], dictionary[a][key]))
+    keys.sort(key=lambda a: dictionary[a][key], reverse=True)
 
     index = len(keys) - 1
     while dictionary[keys[index]][key] < limit and index > 10:
@@ -36,7 +35,7 @@ def other_values(dictionary, key):
     if ',' in key:
         key, limit = key.split(',')
 
-    keys = dictionary.keys()
+    keys = list(dictionary.keys())
 
     total = reduce(lambda a, b: a + dictionary[b][key], keys, 0)
     if limit[-1:] == '%':
@@ -44,9 +43,7 @@ def other_values(dictionary, key):
     else:
         limit = int(limit)
 
-    print >>sys.stderr, limit
-
-    keys.sort(lambda a, b: cmp(dictionary[b][key], dictionary[a][key]))
+    keys.sort(key=lambda a: dictionary[a][key], reverse=True)
 
     index = len(keys) - 1
     while dictionary[keys[index]][key] < limit and index > 10:

@@ -14,6 +14,7 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from .forms import CourseForm
 import json
+import re
 
 
 class CourseAdminSite(admin.sites.AdminSite):
@@ -24,7 +25,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path.endswith('/choose/') or request.path.endswith('/ask/') or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
+        if request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False
@@ -309,7 +310,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         except Exception as e:
             message = '<p style="color: red">Error in template: %s</p>' % str(e)
 
-        return TemplateResponse(request, 'admin/equipe/send_mail.html', dict(self.each_context(request),
+        return TemplateResponse(request, 'admin/equipe/send_mail.html', dict(self.admin_site.each_context(request),
             message=message,
             sender=instance.course.email_contact,
             mail=instance.gerant_email,
@@ -349,7 +350,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
             return redirect('/course/inscriptions/equipe/')
 
-        return TemplateResponse(request, 'admin/equipe/send_mails.html', dict(self.each_context(request),
+        return TemplateResponse(request, 'admin/equipe/send_mails.html', dict(self.admin_site.each_context(request),
             queryset=queryset,
             templates=TemplateMail.objects.filter(course=course),
         ))
@@ -358,7 +359,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def autre(self, request, id):
         request.current_app = self.admin_site.name
         instance = get_object_or_404(Equipe, id=id)
-        return TemplateResponse(request, 'admin/equipe/autre.html', dict(self.each_context(request),
+        return TemplateResponse(request, 'admin/equipe/autre.html', dict(self.admin_site.each_context(request),
             templates=instance.course.templatemail_set.all(),
             instance=instance,
         ))
