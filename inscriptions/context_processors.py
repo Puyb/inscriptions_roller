@@ -1,6 +1,7 @@
 from django.conf import settings
 from .models import Course
 from django.db.models import Min, Max
+from django.contrib.sites.models import Site
 
 def course(request):
     uid = request.path.split('/')[1]
@@ -34,7 +35,6 @@ def course(request):
 def import_settings(request):
     return {
         'PAYPAL_URL':      settings.PAYPAL_URL,
-        #FIXME
-        #'ROOT_URL':        settings.ROOT_URL,
+        'ROOT_URL': 'http://%s' % Site.objects.get_current(),
         'FACEBOOK_APPID':  settings.FACEBOOK_APPID,
     }

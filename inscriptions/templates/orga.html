@@ -1,0 +1,40 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+<div class="jumbotron">
+    <h1>Vous organisez une course ?</h1>
+    <p>Vous organisez une course d'endurence de roller par équipe et vous souhaitez vous simplifier la vie et celle de vos participant ? Vous pouvez gratuitement utiliser ce site pour gérer le sinscriptions et les paiements à votre course.</p>
+    <p>Ce site vous permet de proposer une interface simple et pratique à vos participant pour inscrire les équipes et équipiers, modifier les inscirptions si besoin, payer les inscriptions, etc...</p>
+    <p>En tant qu'organisateur, ce site va simplifier la gestion des inscriptions, des paiements, la vérification des justificatifs et certificats, les demande de modififcations d'équipes, etc...</p>
+</div>
+<div class="row equal">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Nouveau sur le site</h3>
+            </div>
+            <div class="panel-body">
+                <p>Vous n'avez pas encore de compte sur ce site. Inscrivez vous !</p>
+                <p>Une fois inscrit, vous pourrez demander à rejoindre une course ou créer votre propre course.</p>
+                <a class="btn btn-primary" role="button" href="{% url 'account_login' %}">{% trans "Log in" %}</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Connectez vous</h3>
+            </div>
+            <div class="panel-body">
+                <p>Déjà inscrit sur le site ? Connectez vous pour gérer vos courses.</p>
+                <a class="btn btn-primary" role="button" href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

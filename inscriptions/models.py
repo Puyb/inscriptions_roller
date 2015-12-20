@@ -15,6 +15,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum, Value
 from django.db.models.functions import Coalesce
+from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread
 import traceback
 import pytz
@@ -48,14 +49,15 @@ ROLE_CHOICES = (
 )
 
 CONNU_CHOICES = (
-    (u'Site Roller en LIgne.com', _(u'Site Roller en Ligne.com')),
+    (u'Site Roller en Ligne.com', _(u'Site Roller en Ligne.com')),
     (u'Facebook', _('Facebook')),
     (u'Presse', _(u'Presse')),
     (u'Bouche à oreille', _(u'Bouche à oreille')),
     (u'Flyer pendant une course', _(u'Flyer pendant une course')),
     (u'Flyer pendant une randonnée', _(u'Flyer pendant une randonnée')),
     (u'Affiche', _(u'Affiche')),
-    (u'Informations de la Mairie de Paris', _(u'Information de la Maire de Paris')),
+    (u'Informations de la Mairie', _(u'Information de la Maire')),
+    (u'Par mon club', _(u'Par mon club')),
     (u'Autre', _(u'Autre')),
 )
 
@@ -91,6 +93,7 @@ def normalize_club(club):
 class Course(models.Model):
     nom                 = models.CharField(_(u'Nom'), max_length=200)
     uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
+    organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
 #    challenge           = models.ForeignKey(Challenge, blank=True, null=True)
     date                = models.DateField(_(u'Date'))
@@ -599,9 +602,7 @@ class TemplateMail(models.Model):
             
             context = Context({
                 "instance": instance,
-                'PAYPAL_URL': settings.PAYPAL_URL,
-                #FIXME
-                #'ROOT_URL': settings.ROOT_URL, 
+                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
             })
             subject = Template(self.sujet).render(context)
             message = Template(self.message).render(context)

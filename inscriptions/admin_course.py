@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from .forms import CourseForm
+from account.views import LogoutView
 import json
 import re
 

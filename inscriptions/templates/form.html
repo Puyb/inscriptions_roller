@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load bootstrap %}
-{% block body_base %}
+{% block body %}
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
 {% if create %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
@@ -44,7 +44,16 @@
                         <br />
                         {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
                         <br />
-                        {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous pouvez payer votre inscription par internet ou par chèque. Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
+                        {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier.{% endblocktrans %}
+                        {% if course.ordre and course.paypal %}
+                        {% blocktrans %}Vous pouvez payer votre inscription par internet ou par chèque.{% endblocktrans %}
+                        {% else %}{% if course.ordre %}
+                        {% blocktrans %}Vous pouvez payer votre inscription par chèque.{% endblocktrans %}
+                        {% else %}{% if course.paypal %}
+                        {% blocktrans %}Vous pouvez payer votre inscription par internet.{% endblocktrans %}
+                        {% else %}
+                        {% endif %}{% endif %}{% endif %}
+                        {% blocktrans %}Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
                         {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
                         {% url "inscriptions.views.contact" course_uid=COURSE.uid as url_contact %}
                         {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />

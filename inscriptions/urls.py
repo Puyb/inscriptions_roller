@@ -20,6 +20,7 @@ urlpatterns += [
 ]
 urlpatterns += [
     url(r'^$', 'inscriptions.views.index', name='home'),
+    url(r'^organisteurs/$', TemplateView.as_view(template_name='orga.html'), name='orga'),
     url(r'^(?P<course_uid>[^/]+)/vars.js$', TemplateView.as_view(template_name='vars.js')),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/done/$', 'inscriptions.views.done', name='inscriptions.done'),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/(?P<code>\w+)/$', 'inscriptions.views.form', name='inscriptions.edit'),

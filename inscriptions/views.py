@@ -42,9 +42,6 @@ def form(request, course_uid, numero=None, code=None):
                         return redirect('/')
                 equipier_formset = EquipierFormset(request.POST, request.FILES)
 
-            # FIXME: change date naissance years
-            # years=range(course.date.year - course.min_age, course.date.year - 120, -1)
-
             if equipe_form.is_valid() and equipier_formset.is_valid():
                 new_instance = equipe_form.save(commit=False)
                 new_instance.course = course

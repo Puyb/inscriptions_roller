@@ -9,26 +9,30 @@
 {% if forloop.first %}
     <section class="container">
       <h1>{% trans "Prochaines courses" %}</h1>
-      <div class="row">{% endif %}
+      <div class="row equal">{% endif %}
         <div class="col-md-4">
             <div class="thumbnail">
-                <div style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></div>
+                <a href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
                 <div class="caption">
-                    <h3>{{ course.nom }}</h3>
+                    <h3><a href="{{ course.url }}">{{ course.nom }}</a></h3>
                     <p>
                         {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
-                        <a href="{{ course.url }}">{% trans "Site de la course" %}</a>
-                        {% if course.ouverte %}
-                            <a class="btn btn-default" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
+                        {% blocktrans with organisateur=course.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}
                     </p>
+                    {% if course.ouverte %}
+                    <a class="btn btn-lg btn-block {% if course.fermee %}btn-default disabled{% else %}btn-primary{% endif %}" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
+                    {% endif %}
+                    {% if course.ouverte %}
                     <p>
-                            {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
-                            <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
-                            <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
-                        {% else %}
-                            {% blocktrans with ouverture=course.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}{% endblocktrans %}<br />
-                        {% endif %}
+                        {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
+                        <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
+                        <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
                     </p>
+                    {% else %}
+                    <p>
+                        {% blocktrans with ouverture=course.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}{% endblocktrans %}<br />
+                    </p>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -64,7 +68,7 @@
     <p>
         Gérez les inscriptions à votre course. Paramétrez votre course, etc...
     </p>
-    <p><a class="btn btn-primary btn-lg" href="#" role="button">Accéder à la section organisateurs</a></p>
+    <p><a class="btn btn-primary btn-lg" href="{% url "orga" %}" role="button">Accéder à la section organisateurs</a></p>
 </section>
 
 {% endblock %}

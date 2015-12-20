@@ -49,6 +49,7 @@ class CourseForm(ModelForm):
         }
         help_texts = {
             'uid': _("""Code utilisé pour identifier la course. Ce code sera affiché dans l'adresse internet de la page d'inscription. Par exemple, pour les 6h de Paris 2015, le code était 6hdp15. Ce code ne doit contenir que des lettres ou des chiffres."""),
+            'organisateur': _("""Nom du club ou association organisateur"""),
             'url': _("""Adresse internet pointant vers le site présentant la course"""),
             'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
             'email_contact': _("""Email utilisée pour envoyer les emails"""),

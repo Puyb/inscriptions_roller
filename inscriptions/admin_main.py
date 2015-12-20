@@ -38,3 +38,8 @@ class CourseAdmin(admin.ModelAdmin):
     pass
 site.register(Course, CourseAdmin)
 
+class AccreditationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'role', )
+    list_filter = ('user', 'course', 'role', )
+site.register(Accreditation, AccreditationAdmin)
+
