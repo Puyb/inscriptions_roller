@@ -2,11 +2,11 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from inscriptions.models import Course
-from django.contrib.auth.models import User
 from django.db import transaction
 
-def activate_courses(*args, **kwargs):
+def activate_courses(apps, schema_editor):
+    Course = apps.get_model('inscriptions', 'Course')
+    User = apps.get_model('auth', 'User')
     with transaction.atomic():
         for course in Course.objects.all():
             if not course.accreditations.count():
