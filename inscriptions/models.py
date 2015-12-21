@@ -56,7 +56,7 @@ CONNU_CHOICES = (
     (u'Flyer pendant une course', _(u'Flyer pendant une course')),
     (u'Flyer pendant une randonnée', _(u'Flyer pendant une randonnée')),
     (u'Affiche', _(u'Affiche')),
-    (u'Informations de la Mairie', _(u'Information de la Maire')),
+    (u'Informations de la Mairie', _(u'Information de la Mairie')),
     (u'Par mon club', _(u'Par mon club')),
     (u'Autre', _(u'Autre')),
 )

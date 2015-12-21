@@ -19,7 +19,7 @@
             <div class="panel-body">
                 <p>Vous n'avez pas encore de compte sur ce site. Inscrivez vous !</p>
                 <p>Une fois inscrit, vous pourrez demander à rejoindre une course ou créer votre propre course.</p>
-                <a class="btn btn-primary" role="button" href="{% url 'account_login' %}">{% trans "Log in" %}</a>
+                <a class="btn btn-primary" role="button" href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
             </div>
             <div class="panel-body">
                 <p>Déjà inscrit sur le site ? Connectez vous pour gérer vos courses.</p>
-                <a class="btn btn-primary" role="button" href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
+                <a class="btn btn-primary" role="button" href="{% url 'account_login' %}">{% trans "Log in" %}</a>
             </div>
         </div>
     </div>
