@@ -56,7 +56,7 @@ MEDIA_URL = "/uploads/"
 # Don"t put anything in this directory yourself; store your static files
 # in apps" "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PACKAGE_ROOT, "static")
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "_static")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -177,7 +177,6 @@ FIXTURE_DIRS = [
     os.path.join(PROJECT_ROOT, "fixtures"),
 ]
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = 'smtp.mail.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'example@mail.com'

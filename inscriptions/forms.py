@@ -34,7 +34,7 @@ class EquipierForm(ModelForm):
 EquipierFormset = formset_factory(EquipierForm, formset=BaseModelFormSet, extra=settings.MAX_EQUIPIERS)
 EquipierFormset.model = Equipier
 
-with (Path(settings.STATIC_ROOT) / 'course_models.json').open() as f:
+with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
     COURSE_MODELS = json.load(f)
 
 class CourseForm(ModelForm):
