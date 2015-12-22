@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/base_site_common.html" %}
 {% load i18n %}
 {% block content %}
 <h1>{% trans "Sélectionnez une course pour demander à faire partie de l'équipe :" %}</h1>
@@ -14,6 +14,5 @@
     </li>
     {% endfor %}
 </ul>
-<a href="/course/inscriptions/course/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
-<a href="/course/join/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a>
+<a href="/course/choose/"><span>{% trans "Retour" %}</span></a><br />
 {% endblock %}

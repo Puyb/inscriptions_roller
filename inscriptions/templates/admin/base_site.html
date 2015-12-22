@@ -1,22 +1,14 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
 
-{% block title %}{% blocktrans with nom=COURSE.nom %}Administration {{ nom }}{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans with nom=COURSE.nom %}Enduroller - {{ nom }}{% endblocktrans %}{% endblock %}
 
 {% block branding %}
-<h1 id="site-name">{% blocktrans with nom=COURSE.nom %}Administration {{ nom }}{% endblocktrans %}</h1>
+<h1 id="site-name">{% blocktrans with nom=COURSE.nom %}Enduroller - {{ nom }}{% endblocktrans %}</h1>
 {% endblock %}
 
 {% block userlinks %}
-{% if request.user.accreditations.all or request.user.is_superuser %}
-{% trans "Course : " %}<select id="course_chooser">
-    {% for accreditation in request.user.accreditations.all %}
-    {% if accreditation.role != '' %}
-        <option value="{{ accreditation.course.uid }}" {% if accreditation.course == COURSE %}selected {% endif %}>{{ accreditation.course.nom }}</option>
-    {% endif %}
-    {% endfor %}
-    </select>
-{% endif %}
+    <a href="/course/choose/">{% blocktrans %}Changer de course{% endblocktrans %}</a>
     <script src="{{ STATIC_URL }}/admin/js/jquery.js"></script>
     <script src="{{ STATIC_URL }}/admin.js"></script>
     {{ block.super }}
