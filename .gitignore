@@ -9,3 +9,5 @@ static/dist/
 node_modules/
 env/
 inscriptions/settings/local.py
+_styles.html
+_scripts.html
