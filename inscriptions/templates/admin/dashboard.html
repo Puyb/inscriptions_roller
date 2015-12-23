@@ -9,6 +9,8 @@
 
 {% block breadcrumbs %}{% endblock %}
 
+{% block content_title %}{% endblock %}
+
 {% block content %}
 {% if not COURSE %}<script>
 location.href = "choose/";
@@ -107,55 +109,52 @@ location.href = "choose/";
         </table>
     </div>
     {% endwith %}
-    <div class="module">
+    <div class="module icons">
         <table>
             <caption>
-                {% blocktrans %}Documents à vérifier{% endblocktrans %}
+                {% blocktrans %}Dossiers{% endblocktrans %}
             </caption>
             <tr>
-                <th>Documents à vérifier</th>
                 <td>
-                    <a href="document/review/">Vérifier</a>
+                    <a href="inscriptions/equipe/">
+                        <i class="fa fa-group"></i><br />
+                        <label>{% blocktrans %}Equipes inscrites{% endblocktrans %}</label>
+                    </a>
+                    <a href="document/review/">
+                        <i class="fa fa-check-circle"></i><br />
+                        <label>{% blocktrans %}Documents à vérifier{% endblocktrans %}</a>
+                    </a>
                 </td>
             </tr>
         </table>
     </div>
-{% if app_list %}
-    {% for app in app_list %}
-        <div class="app-{{ app.app_label }} module">
+    <div class="module icons">
         <table>
-        <caption>
-            <a href="{{ app.app_url }}" class="section" title="{% blocktrans with name=app.name %}Models in the {{ name }} application{% endblocktrans %}">
-                {% blocktrans with name=app.name %}{{ name }}{% endblocktrans %}
-            </a>
-        </caption>
-        {% for model in app.models %}
-            <tr class="model-{{ model.object_name|lower }}">
-            {% if model.admin_url %}
-                <th scope="row"><a href="{{ model.admin_url }}">{{ model.name }}</a></th>
-            {% else %}
-                <th scope="row">{{ model.name }}</th>
-            {% endif %}
-
-            {% if model.add_url %}
-                <td><a href="{{ model.add_url }}" class="addlink">{% trans 'Add' %}</a></td>
-            {% else %}
-                <td>&nbsp;</td>
-            {% endif %}
-
-            {% if model.admin_url %}
-                <td><a href="{{ model.admin_url }}" class="changelink">{% trans 'Change' %}</a></td>
-            {% else %}
-                <td>&nbsp;</td>
-            {% endif %}
+            <caption>
+                {% blocktrans %}Réglage de la course{% endblocktrans %}
+            </caption>
+            <tr>
+                <td>
+                    <a href="inscriptions/course/">
+                        <i class="fa fa-flag-checkered"></i><br />
+                        <label>{% blocktrans %}Reglages de la course{% endblocktrans %}</label>
+                    </a>
+                    <a href="inscriptions/categorie/">
+                        <i class="fa fa-sitemap"></i><br />
+                        <label>{% blocktrans %}Categories{% endblocktrans %}</label>
+                    </a>
+                    <a href="inscriptions/accreditation/">
+                        <i class="fa fa-unlock-alt"></i><br />
+                        <label>{% blocktrans %}Accreditations{% endblocktrans %}</label>
+                    </a>
+                    <a href="inscriptions/templatemail/">
+                        <i class="fa fa-envelope"></i><br />
+                        <label>{% blocktrans %}Modèles de mail{% endblocktrans %}</label>
+                    </a>
+                </td>
             </tr>
-        {% endfor %}
         </table>
-        </div>
-    {% endfor %}
-{% else %}
-    <p>{% trans "You don't have permission to edit anything." %}</p>
-{% endif %}
+    </div>
     <div class="module">
         <table>
             <caption>
@@ -203,33 +202,4 @@ location.href = "choose/";
 {% endblock %}
 
 {% block sidebar %}
-<div id="content-related">
-    <div class="module" id="recent-actions-module">
-        <h2>{% trans 'Recent Actions' %}</h2>
-        <h3>{% trans 'My Actions' %}</h3>
-            {% load log %}
-            {% get_admin_log 10 as admin_log for_user user %}
-            {% if not admin_log %}
-            <p>{% trans 'None available' %}</p>
-            {% else %}
-            <ul class="actionlist">
-            {% for entry in admin_log %}
-            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
-                {% if entry.is_deletion or not entry.get_admin_url %}
-                    {{ entry.object_repr }}
-                {% else %}
-                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
-                {% endif %}
-                <br/>
-                {% if entry.content_type %}
-                    <span class="mini quiet">{% filter capfirst %}{% trans entry.content_type.name %}{% endfilter %}</span>
-                {% else %}
-                    <span class="mini quiet">{% trans 'Unknown content' %}</span>
-                {% endif %}
-            </li>
-            {% endfor %}
-            </ul>
-            {% endif %}
-    </div>
-</div>
 {% endblock %}

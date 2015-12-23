@@ -7,11 +7,12 @@ var projectTemplatesRoot = "../../inscriptions/templates/";
 module.exports = {
     context: path.resolve(__dirname, "src"),
     entry: {
-        app: "./js/main.js"
+        site: "./js/main.js",
+        admin: "./js/admin.js",
     },
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "js/site.js?[hash]",
+        filename: "js/[name].js?[hash]",
         publicPath: "/static"
     },
     module: {
@@ -40,7 +41,7 @@ module.exports = {
     },
     plugins: [
         new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-        new ExtractTextPlugin("css/site.css?[hash]"),
+        new ExtractTextPlugin("css/[name].css?[hash]"),
         new HtmlWebpackPlugin({
             filename: projectTemplatesRoot + "_styles.html",
             templateContent: function(templateParams, compilation) {
@@ -49,7 +50,8 @@ module.exports = {
                     link += "<link href='" + templateParams.htmlWebpackPlugin.files.css[css]  + "' rel='stylesheet' />\n"
                 }
                 return link;
-            }
+            },
+            chunks: ['site']
         }),
         new HtmlWebpackPlugin({
             filename: projectTemplatesRoot + "_scripts.html",
@@ -59,7 +61,30 @@ module.exports = {
                     script += "<script src='" + templateParams.htmlWebpackPlugin.files.js[js]  + "'></script>\n"
                 }
                 return script;
-            }
+            },
+            chunks: ['site']
+        }),
+        new HtmlWebpackPlugin({
+            filename: projectTemplatesRoot + "admin/_styles.html",
+            templateContent: function(templateParams, compilation) {
+                var link = "";
+                for (var css in templateParams.htmlWebpackPlugin.files.css) {
+                    link += "<link href='" + templateParams.htmlWebpackPlugin.files.css[css]  + "' rel='stylesheet' />\n"
+                }
+                return link;
+            },
+            chunks: ['admin']
+        }),
+        new HtmlWebpackPlugin({
+            filename: projectTemplatesRoot + "admin/_scripts.html",
+            templateContent: function(templateParams, compilation) {
+                var script = "";
+                for (var js in templateParams.htmlWebpackPlugin.files.js) {
+                    script += "<script src='" + templateParams.htmlWebpackPlugin.files.js[js]  + "'></script>\n"
+                }
+                return script;
+            },
+            chunks: ['admin']
         })
     ]
 };

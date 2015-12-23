@@ -11,6 +11,8 @@
     <a href="/course/choose/">{% blocktrans %}Changer de course{% endblocktrans %}</a>
     <script src="{{ STATIC_URL }}/admin/js/jquery.js"></script>
     <script src="{{ STATIC_URL }}/admin.js"></script>
+    {% include "admin/_scripts.html" %}
+    {% include "admin/_styles.html" %}
     {{ block.super }}
 {% endblock %}
 
