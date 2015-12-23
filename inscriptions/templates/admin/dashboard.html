@@ -29,16 +29,16 @@ location.href = "choose/";
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
                         <img alt="None" src="/static/admin/img/icon-yes.gif">
-                        Complet
+                        Complets
                     </a>
                 </th>
                 <td>
-                    <a href="inscriptions/equipe/?status=incomplet">Incomplet</a>
+                    <a href="inscriptions/equipe/?status=incomplet">Incomplets</a>
                 </th>
                 <td>
                     <a href="inscriptions/equipe/?status=erreur">
                         <img alt="None" src="/static/admin/img/icon-no.gif">
-                        Erreur
+                        En Erreurs
                     </a>
                 </th>
                 <td>
@@ -50,7 +50,7 @@ location.href = "choose/";
             </tr>
             <tr>
                 <th>
-                    <a href="inscriptions/equipe/?paiement_complet=paye">Payé</a>
+                    <a href="inscriptions/equipe/?paiement_complet=paye">Payés</a>
                 </th>
                 <td>
                     <a href="inscriptions/equipe/?paiement_complet=paye&status=complet">
@@ -79,7 +79,7 @@ location.href = "choose/";
             </tr>
             <tr>
                 <th>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye">Impayé</a>
+                    <a href="inscriptions/equipe/?paiement_complet=impaye">Impayés</a>
                 </th>
                 <td>
                     <a href="inscriptions/equipe/?paiement_complet=impaye&status=complet">
@@ -124,6 +124,10 @@ location.href = "choose/";
                         <i class="fa fa-check-circle"></i><br />
                         <label>{% blocktrans %}Documents à vérifier{% endblocktrans %}</a>
                     </a>
+                    <a href="/{{ COURSE.uid }}/stats/">
+                        <i class="fa fa-line-chart"></i><br />
+                        <label>{% blocktrans %}Statistiques{% endblocktrans %}</a>
+                    </a>
                 </td>
             </tr>
         </table>
@@ -140,7 +144,7 @@ location.href = "choose/";
                         <label>{% blocktrans %}Reglages de la course{% endblocktrans %}</label>
                     </a>
                     <a href="inscriptions/categorie/">
-                        <i class="fa fa-sitemap"></i><br />
+                        <i class="fa fa-trophy"></i><br />
                         <label>{% blocktrans %}Categories{% endblocktrans %}</label>
                     </a>
                     <a href="inscriptions/accreditation/">
@@ -155,45 +159,52 @@ location.href = "choose/";
             </tr>
         </table>
     </div>
-    <div class="module">
+    <div class="module icons">
         <table>
             <caption>
                 {% blocktrans %}Exports{% endblocktrans %}
             </caption>
             <tr>
-                <th>Listing (HTML)</th>
-                <td>
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/">Par numéro</a><br />
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=nom">Par nom</a><br />
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=gerant_nom">Par nom du gérant</a>
-                </td>
-            </tr>
-            <tr>
-                <th colspan="2">
-                    Listing retrait dossards
-                </th>
+                <th>Listings (pour impressions)</th>
             </tr>
             <tr>
                 <td>
-                    <label> Découpage :</label>
-                    <input id="listing_dossards_split" /><br />
-                    (numéro de dossards, séparés par des virgules, ex : "50,100,200")
-                </td>
-                <td>
-                    <a id="listing_dossards_link" target="_blank" href="/{{ COURSE.uid }}/listing_dossards/">HTML</a>
-                    <script>$('#listing_dossards_split').on('keyup', function() {
-                        var href = $('#listing_dossards_link').attr('href').split('?');
-                        href[1] = 'split=' + this.value;
-                        $('#listing_dossards_link').attr('href', href.join('?'));
-                    });</script>
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/">
+                        <i class="fa fa-sort-numeric-asc"></i><br />
+                        <label>{% blocktrans %}Par numéro{% endblocktrans %}</label>
+                    </a>
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=nom">
+                        <i class="fa fa-sort-alpha-asc"></i><br />
+                        <label>{% blocktrans %}Par nom d'équipe{% endblocktrans %}</label>
+                    </a>
+                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=gerant_nom">
+                        <i class="fa fa-long-arrow-down"></i>
+                        <i class="fa fa-user"></i><br />
+                        <label>{% blocktrans %}Par nom du gérant{% endblocktrans %}</label>
+                    </a>
+                    <a href="listing/dossards/">
+                        <i class="fa fa-sitemap"></i><br />
+                        <label>{% blocktrans %}Retrait dossards{% endblocktrans %}</label>
+                    </a>
                 </td>
             </tr>
             <tr>
-                <th>Chronomètrage (CSV)</th>
+                <th>Fichiers CSV (pour le chronomètrage)</th>
+            </tr>
+            <tr>
                 <td>
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards.csv">Equipes et équipiers</a><br />
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipes.csv">Equipes</a><br />
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipiers.csv">Equipiers</a>
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards.csv">
+                        <i class="fa fa-table"></i><br />
+                        <label>{% blocktrans %}Equipes et équipiers{% endblocktrans %}</label>
+                    </a>
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipes.csv">
+                        <i class="fa fa-table"></i><br />
+                        <label>{% blocktrans %}Equipes{% endblocktrans %}</label>
+                    </a>
+                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipiers.csv">
+                        <i class="fa fa-table"></i><br />
+                        <label>{% blocktrans %}Equipiers{% endblocktrans %}</label>
+                    </a>
                 </td>
             </tr>
         </table>

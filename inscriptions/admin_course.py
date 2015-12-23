@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.contrib import messages
-from django.db.models import Sum, Value, F, Q
+from django.db.models import Sum, Value, F, Q, Max
 from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
@@ -39,7 +39,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
             url(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
             url(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
-            url(r'^document/review/$', self.admin_view(self.document_review), name='course_documenr_review'),
+            url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
+            url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
         ] + super().get_urls()
         return urls
 
@@ -103,6 +104,27 @@ class CourseAdminSite(admin.sites.AdminSite):
             equipier=equipier[0],
             skip=','.join(skip)
         ))
+
+    def listing_dossards(self, request):
+        uid = request.COOKIES['course_uid']
+        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+
+        if request.method == 'POST':
+            equipes = Equipe.objects.filter(course=course).order_by(*request.GET.get('order','numero').split(','))
+            numero_max = equipes.aggregate(Max('numero'))['numero__max'] + 1
+            splits = ('1,' + request.POST.get('split', numero_max)).split(',')
+            splits = [ int(i) for i in splits ]
+            if splits[-1] < numero_max:
+                splits.append(numero_max)
+            datas = {}
+            keys = []
+            for i in range(len(splits) - 1):
+                key = u'%d à %d' % (splits[i], splits[i + 1] - 1)
+                datas[key] = equipes.filter(numero__gte=splits[i],  numero__lt=splits[i + 1])
+                keys.append(key)
+
+            return TemplateResponse(request, 'listing_dossards.html', { 'equipes': datas, 'keys': keys })
+        return TemplateResponse(request, 'admin/listing_dossards_form.html', { 'course': course })
 
     index_template = 'admin/dashboard.html'
 

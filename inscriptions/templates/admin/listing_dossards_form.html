@@ -1,0 +1,102 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block content %}
+<fieldset class="module aligned">
+    <h2>Listing retrait dossards</h2>
+    <div class="description">
+        <p>Afin de simplifier le retrait des dossards avant votre course, vous pouvez générer des listings des inscrit avec les informations importantes comme les certificats manquants ou les paiement manquants.</p>
+        <p>Si vous attendez beaucoup d'équipe, il est recommander de créer plusieurs guichet en fonction du numéro de dossard de l'équipe.</p>
+        <p>Pour un meilleur résultat, imprimez la page générée en mode paysage.</p>
+    </div>
+</fieldset>
+<fieldset class="module aligned">
+    <div class="form-row">
+        <div class="field-box">
+            <label for="nombre">Nombre de files:</label>
+            <input type="number" id="number" value="1" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="field-box">
+            <label>Taille des files</label>
+            <div id="slider" style="width: 575px">
+                <table id="range" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>    
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="field-box">
+            <div id="lines"></div>
+        </div>
+    </div>
+</fieldset>
+<form method="post">
+    <input type="hidden" name="split" />
+    <button type="submit">{% trans "Générer" %}</button>
+    {% csrf_token %}
+</form>
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}rangeSlider.css" />
+<script src="{{ STATIC_URL }}jquery-2.1.4.min.js"></script>
+<script src="{{ STATIC_URL }}colResizable-1.5.min.js"></script>
+<script>
+var dossards = [{% for e in course.equipe_set.all %}{{ e.numero }}{% if not forloop.last %},{% endif %}{% endfor %}];
+dossards.sort(function(a, b) { return a - b; });
+
+$('#number').on('change', function() {
+    var number = parseFloat(this.value);
+    changeNumber(number);
+});	
+function changeNumber(number) {
+    number = number || 1;
+    if(number < 1) number = 1;
+
+    $tr = $('#range tr').empty()
+    for(var i = 0; i < number; i++)
+        $tr.append($('<td>'));
+
+    $('#slider .JCLRgrips').remove();
+    $("#range").colResizable({
+        liveDrag: true, 
+        draggingClass: "rangeDrag", 
+        gripInnerHtml: "<div class='rangeGrip'></div>", 
+        partialRefresh: true,
+        onDrag: calculateLines,
+        minWidth:8
+    });	
+    function calculateLines() {
+        var columns = $tr.find("td");
+        var i, t = 0;
+        var d = dossards.slice(0);
+        var ranges = [];
+        for(i = 0; i < columns.length; i++){
+            var w = columns.eq(i).width() - 10 - (i == 0 ? 1 : 0);
+            ranges.push(w);
+            t += w;
+        }		 
+        
+        var lines = ranges.map(function(r, i) {
+            if (i == ranges.length - 1)
+                return d;
+            return d.splice(0, Math.round(r / t * dossards.length));
+        });
+
+        $("#lines").html('<table>' + lines.map(function(l, i) {
+            return '<tr>' +
+                '<th>File ' + (i + 1) + '</th>' +
+                '<td>' + l.length + ' dossards</td>' +
+                '<td>' + l[0] + ' à ' + l.slice(-1) + '</td>' +
+                '</tr>';
+        }).join('') + '</table>');
+
+        $('[name=split]').val(lines.map(function(l) { return +l.slice(-1) + 1; }).join(','));
+    }
+    calculateLines();
+}
+changeNumber(parseFloat($('#number').val()));
+</script>
+{% endblock %}

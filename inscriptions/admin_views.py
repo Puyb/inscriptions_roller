@@ -4,7 +4,7 @@ import csv, io
 from .models import Equipe, Equipier, TemplateMail
 from .settings import *
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Max
+from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -26,23 +26,6 @@ def listing(request, course_uid, template='listing.html'):
         'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
     }))
-
-@login_required
-def listing_dossards(request, course_uid, template='listing_dossards.html'):
-    equipes = Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(','))
-    numero_max = equipes.aggregate(Max('numero'))['numero__max'] + 1
-    splits = ('1,' + request.GET.get('split', numero_max)).split(',')
-    splits = map(int, splits)
-    if splits[-1] < numero_max:
-        splits.append(numero_max)
-    datas = {}
-    keys = []
-    for i in range(len(splits) - 1):
-        key = u'%d à %d' % (splits[i], splits[i + 1] - 1)
-        datas[key] = equipes.filter(numero__gte=splits[i],  numero__lt=splits[i + 1])
-        keys.append(key)
-
-    return render_to_response(template, RequestContext(request, { 'equipes': datas, 'keys': keys }))
 
 def equipiers(request, course_uid):
     return render_to_response('equipiers.html', RequestContext(request, {

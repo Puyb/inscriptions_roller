@@ -40,7 +40,6 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/dossards.csv$', 'inscriptions.admin_views.dossardsCSV', name='inscriptions.dossardsCSV'),
     url(r'^(?P<course_uid>[^/]+)/dossards_equipes.csv$', 'inscriptions.admin_views.dossardsEquipesCSV', name='inscriptions.dossardsEquipesCSV'),
     url(r'^(?P<course_uid>[^/]+)/dossards_equipiers.csv$', 'inscriptions.admin_views.dossardsEquipiersCSV', name='inscriptions.dossardsEquipiersCSV'),
-    url(r'^(?P<course_uid>[^/]+)/listing_dossards/$', 'inscriptions.admin_views.listing_dossards', name='inscriptions.listing_dossards'),
     url(r'^(?P<course_uid>[^/]+)/listing/$', 'inscriptions.admin_views.listing', name='inscriptions.listing'),
 ]
 
