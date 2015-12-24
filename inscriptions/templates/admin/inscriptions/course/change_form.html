@@ -19,8 +19,6 @@
 {% endblock %}
 
 {% block content %}
-    {% for k, v in adminform.errors.items %}
-      {{ k }}: {{ v|join:", " }}<br />
-    {% endfor %}
+{{ errors.as_ul }
     {{ block.super }}
 {% endblock %}
