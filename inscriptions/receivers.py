@@ -7,7 +7,6 @@ from django.contrib.auth.models import User, Permission
 @receiver(pre_save, sender=User)
 def handle_user_presave(sender, instance, **kwargs):
     instance.is_staff = True
-    print('plop')
 
 @receiver(post_save, sender=User)
 def handle_user_postsave(sender, instance, **kwargs):

@@ -11,3 +11,4 @@ env/
 inscriptions/settings/local.py
 _styles.html
 _scripts.html
+inscriptions/uploads/*

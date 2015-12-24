@@ -575,6 +575,14 @@ class Accreditation(models.Model):
     class Meta:
         unique_together = (('user', 'course'), )
 
+    def save(self, *args, **kwargs):
+        if self.role and self.id  and not Accreditation.objects.get(id=self.id).role:
+            message = EmailMessage('[%s] Accès autorisé' % self.course.uid, """Votre demande d'accès à la course %s est acceptée.
+Connectez vous sur enduroller pour y accéder.
+""" % self.course.nom, self.course.email_contact, [ self.user.email ])
+            MailThread([message]).start()
+        super().save(*args, **kwargs)
+
 class TemplateMail(models.Model):
     course = models.ForeignKey(Course)
     nom = models.CharField(_('Nom'), max_length=200)
