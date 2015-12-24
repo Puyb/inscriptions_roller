@@ -19,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-    {% for k, v in adminForm.errors.items %}
+    {% for k, v in adminform.errors.items %}
       {{ k }}: {{ v|join:", " }}<br />
     {% endfor %}
     {{ block.super }}
