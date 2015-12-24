@@ -17,8 +17,3 @@
 </div>
 {% else %}{{ block.super }}{% endif %}
 {% endblock %}
-
-{% block content %}
-{{ errors.as_ul }}
-    {{ block.super }}
-{% endblock %}

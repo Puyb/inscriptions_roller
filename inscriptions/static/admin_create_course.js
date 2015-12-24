@@ -34,7 +34,8 @@ $(function() {
                 .append($('<td>').append($('<input>').attr('name', c.code + '_prix2').val(c.code in previous ? previous[c.code].prix2 : c.prix2)))    
                 .appendTo($table);
         });
-        $table.find('input').change(function() {
+        $table.find('input').change(updateField());
+        function updateField() {
             d = {};
             $table.find('input').each(function() {
                 n = this.name.split('_');
@@ -42,7 +43,8 @@ $(function() {
                 d[n[0]][n[1]]= parseFloat(this.value) || 0;
             });
             $('[name=course_prix]').val(JSON.stringify(d));
-        });
+        }
+        updateField();
     }
     $('[name=course_model]').click(function() {
         generate_prices(this.value);
