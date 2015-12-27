@@ -34,7 +34,7 @@ $(function() {
                 .append($('<td>').append($('<input>').attr('name', c.code + '_prix2').val(c.code in previous ? previous[c.code].prix2 : c.prix2)))    
                 .appendTo($table);
         });
-        $table.find('input').change(updateField());
+        $table.find('input').change(updateField);
         function updateField() {
             d = {};
             $table.find('input').each(function() {
