@@ -26,14 +26,15 @@ $(function() {
             );
         previous = JSON.parse($('[name=course_prix]').val() || '{}');
         $place.html($table);
-        model.categories.forEach(function(c) {
-            $('<tr>')
-                .append($('<th>').html(c.code))
-                .append($('<td>').html(c.nom))
-                .append($('<td>').append($('<input>').attr('name', c.code + '_prix1').val(c.code in previous ? previous[c.code].prix1 : c.prix1)))    
-                .append($('<td>').append($('<input>').attr('name', c.code + '_prix2').val(c.code in previous ? previous[c.code].prix2 : c.prix2)))    
-                .appendTo($table);
-        });
+        if(model.categories)
+            model.categories.forEach(function(c) {
+                $('<tr>')
+                    .append($('<th>').html(c.code))
+                    .append($('<td>').html(c.nom))
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix1').val(c.code in previous ? previous[c.code].prix1 : c.prix1)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix2').val(c.code in previous ? previous[c.code].prix2 : c.prix2)))    
+                    .appendTo($table);
+            });
         $table.find('input').change(updateField);
         function updateField() {
             d = {};
