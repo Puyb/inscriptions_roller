@@ -9,6 +9,10 @@
 
 {% block userlinks %}
     <a href="/course/choose/">{% blocktrans %}Changer de course{% endblocktrans %}</a> /
+    <script>
+var COURSES_UID = [{% for a in request.user.accreditations.all %}{% if a.role %}"{{ a.course.uid }}"{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}];
+var COURSE_UID = "{{ COURSE.uid }}";
+    </script>
     <script src="{{ STATIC_URL }}/admin/js/jquery.js"></script>
     <script src="{{ STATIC_URL }}/admin.js"></script>
     {% include "admin/_scripts.html" %}
