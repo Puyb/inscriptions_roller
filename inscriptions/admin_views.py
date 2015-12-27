@@ -72,10 +72,10 @@ def dossardsCSV(request, course_uid):
             e.equipe.gerant_code_postal,
             e.equipe.gerant_pays,
         ]
-        row = [ type(i) == unicode and i.encode(code) or i for i in row ]
+        row = [ str(i) for i in row ]
         o.writerow(row)
 
-    r = HttpResponse(out.getvalue(), mimetype='text/csv')
+    r = HttpResponse(out.getvalue().encode(code), content_type='text/csv', charset=code)
     out.close()
     return r
 
@@ -104,10 +104,10 @@ def dossardsEquipesCSV(request, course_uid):
             e.gerant_code_postal,
             e.gerant_pays,
         ]
-        row = [ type(i) == unicode and i.encode(code) or i for i in row ]
+        row = [ str(i) for i in row ]
         o.writerow(row)
 
-    r = HttpResponse(out.getvalue(), mimetype='text/csv')
+    r = HttpResponse(out.getvalue().encode(code), content_type='text/csv', charset=code)
     out.close()
     return r
 
@@ -134,10 +134,10 @@ def dossardsEquipiersCSV(request, course_uid):
             e.date_de_naissance,
             e.num_licence,
         ]
-        row = [ type(i) == unicode and i.encode(code) or i for i in row ]
+        row = [ str(i) for i in row ]
         o.writerow(row)
 
-    r = HttpResponse(out.getvalue(), mimetype='text/csv')
+    r = HttpResponse(out.getvalue().encode(code), content_type='text/csv', charset=code)
     out.close()
     return r
 
