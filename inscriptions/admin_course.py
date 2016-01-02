@@ -12,6 +12,7 @@ from django.db.models.functions import Coalesce
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
+from django.conf import settings
 from .forms import CourseForm
 from account.views import LogoutView
 import json
@@ -317,7 +318,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         instance = get_object_or_404(Equipe, id=id)
 
         if request.method == 'POST':
-            msg = EmailMessage(request.POST['subject'], request.POST['message'], request.POST['sender'], [ request.POST['mail'] ])
+            msg = EmailMessage(request.POST['subject'], request.POST['message'], settings.DEFAULT_FROM_EMAIL, [ request.POST['mail'] ], reply_to=[request.POST['sender'],])
             msg.content_subtype = "html"
             msg.send()
             messages.add_message(request, messages.INFO, u'Message envoyé à %s' % (request.POST['mail'], ))

@@ -125,7 +125,7 @@ class Course(models.Model):
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             message = EmailMessage('Votre course %s est activée' % self.nom, """Votre course %s est activée.
 Les inscriptions pourront commencer à la date que vous avez choisi.
-""" % self.nom, self.email_contact, [ self.email_contact ])
+""" % self.nom, settings.DEFAULT_FROM_EMAIL, [ self.email_contact ])
             MailThread([message]).start()
         super(Course, self).save(*args, **kwargs)
 
@@ -579,7 +579,7 @@ class Accreditation(models.Model):
         if self.role and self.id  and not Accreditation.objects.get(id=self.id).role:
             message = EmailMessage('[%s] Accès autorisé' % self.course.uid, """Votre demande d'accès à la course %s est acceptée.
 Connectez vous sur enduroller pour y accéder.
-""" % self.course.nom, self.course.email_contact, [ self.user.email ])
+""" % self.course.nom, settings.DEFAULT_FROM_EMAIL, [ self.user.email ], reply_to=[self.course.email_contact,])
             MailThread([message]).start()
         super().save(*args, **kwargs)
 
@@ -621,7 +621,7 @@ class TemplateMail(models.Model):
             for dest in dests:
                 if settings.DEBUG:
                     dest = 'puyb@puyb.net'
-                message = EmailMessage(subject, message, self.course.email_contact, [ dest ], bcc)
+                message = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ dest ], bcc, reply_to=[self.course.email_contact,])
                 message.content_subtype = "html"
                 messages.append(message)
         MailThread(messages).start()

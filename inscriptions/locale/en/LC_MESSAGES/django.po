@@ -7,471 +7,2296 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sixhdp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-15 00:49+0200\n"
-"PO-Revision-Date: 2015-04-15 00:58+0100\n"
+"POT-Creation-Date: 2015-12-27 12:27+0100\n"
+"PO-Revision-Date: 2015-12-27 12:31+0100\n"
 "Last-Translator: Puyb <puyb@puyb.net>\n"
 "Language-Team: English <LL@li.org>\n"
-"Language: en\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.8.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin_course.py:21
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:4
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:8
+msgid "Page not found"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:10
+msgid "We're sorry, but the requested page could not be found."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:6
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/app_index.html:10
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:19
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:142
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:22
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:43
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:9
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:9
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:7
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:7
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:12
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:7
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:7
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:7
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:7
+#: inscriptions/templates/admin/inscriptions/course/change_form.html:15
+msgid "Home"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:7
+msgid "Server error"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:11
+msgid "Server error (500)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:14
+msgid "Server Error <em>(500)</em>"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:15
 msgid ""
-"You're not allowed to access this part of the site. Please contact your site "
-"adminstrator."
+"There's been an error. It's been reported to the site administrators via "
+"email and should be fixed shortly. Thanks for your patience."
 msgstr ""
 
-#: admin_course.py:143
-msgid "Statut"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:7
+msgid "Run the selected action"
 msgstr ""
 
-#: admin_course.py:147
-msgid "À vérifier"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:7
+msgid "Go"
 msgstr ""
 
-#: admin_course.py:148
-msgid "Complet"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:20
+msgid "Click here to select the objects across all pages"
 msgstr ""
 
-#: admin_course.py:149
-msgid "Incomplet"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:20
+#, python-format
+msgid "Select all %(total_count)s %(module_name)s"
 msgstr ""
 
-#: admin_course.py:150 models.py:487
-msgid "Erreur"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:22
+msgid "Clear selection"
 msgstr ""
 
-#: admin_course.py:168
-msgid "Paiement complet"
-msgstr "Payment received"
-
-#: admin_course.py:172
-msgid "Payé"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/add_form.html:7
+msgid ""
+"First, enter a username and password. Then, you'll be able to edit more user "
+"options."
 msgstr ""
 
-#: admin_course.py:173
-msgid "Impayé"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/add_form.html:10
+msgid "Enter a username and password."
 msgstr ""
 
-#: admin_course.py:183
-msgid "Catégories"
-msgstr "Categories"
-
-#: admin_course.py:326
-msgid "Envoyer un mail groupé"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:31
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:75
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:122
+msgid "Change password"
 msgstr ""
 
-#: models.py:23 models.py:28 models.py:488
-msgid "Homme"
-msgstr "Man"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:44
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:65
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:69
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:35
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:31
+#, fuzzy
+msgid "Please correct the error below."
+msgstr ""
+"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 
-#: models.py:24 models.py:29
-msgid "Femme"
-msgstr "Woman"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:44
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:65
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:31
+msgid "Please correct the errors below."
+msgstr ""
 
-#: models.py:30
-msgid "Homme ou Mixte"
-msgstr "Men or Mixed"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:50
+#, python-format
+msgid "Enter a new password for the user <strong>%(username)s</strong>."
+msgstr ""
 
-#: models.py:31
-msgid "Femme ou Mixte"
-msgstr "Women or Mixed"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:60
+msgid "Password"
+msgstr ""
 
-#: models.py:32
-msgid "Mixte"
-msgstr "Mixte"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:68
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:57
+msgid "Password (again)"
+msgstr ""
 
-#: models.py:36
-msgid "Licence FFRS 2014"
-msgstr "License FFRS 2014"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:69
+msgid "Enter the same password as above, for verification."
+msgstr ""
 
-#: models.py:37
-msgid "Certificat médical établi après le 3/08/2013"
-msgstr "Medical certificate issued after the 08.03.2013"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:70
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:95
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:98
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:23
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:27
+msgid "Django administration"
+msgstr ""
 
-#: models.py:41
-msgid "Administrateur"
-msgstr "Administrator"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:117
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:131
+msgid "Documentation"
+msgstr ""
 
-#: models.py:42 models.py:70
-msgid "Organisateur"
-msgstr "Organisator"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:126
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:133
+#: inscriptions/templates/_account_bar.html:14
+msgid "Log out"
+msgstr ""
 
-#: models.py:43
-msgid "Validateur"
-msgstr "Validator"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:152
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:68
+msgid "Close"
+msgstr ""
 
-#: models.py:47
-msgid "Site Roller en Ligne.com"
-msgstr "Roller in line.com website"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base_site.html:3
+#: inscriptions/templates/admin/base_site.html:4
+#: inscriptions/templates/admin/base_site.html:7
+#, python-format
+msgid "Enduroller - %(nom)s"
+msgstr ""
 
-#: models.py:48
-msgid "Facebook"
-msgstr "Facebook"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:39
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:65
+msgid "Add"
+msgstr ""
 
-#: models.py:49
-msgid "Presse"
-msgstr "Press"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:114
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:116
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:18
+msgid "History"
+msgstr ""
 
-#: models.py:50
-msgid "Bouche à oreille"
-msgstr "Word of mooth"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:121
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:123
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:20
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:35
+msgid "View on site"
+msgstr ""
 
-#: models.py:51
-msgid "Flyer pendant une course"
-msgstr "Flyer during a race"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:58
+msgid "Filter"
+msgstr ""
 
-#: models.py:52
-msgid "Flyer pendant une randonnée"
-msgstr "Flyer during a skating ride"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:92
+#, python-format
+msgid "Add %(name)s"
+msgstr ""
 
-#: models.py:53
-msgid "Affiche"
-msgstr "Poster"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:154
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:5
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:7
+#: inscriptions/templates/admin/submit_line.html:3
+msgid "Save"
+msgstr ""
 
-#: models.py:54
-msgid "Information de la Maire de Paris"
-msgstr "Paris city official informations"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:13
+msgid "Remove from sorting"
+msgstr ""
 
-#: models.py:55
-msgid "Autre"
-msgstr "Other"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:16
+#, python-format
+msgid "Sorting priority: %(priority_number)s"
+msgstr ""
 
-#: models.py:59
-msgid "XS"
-msgstr "XS"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:17
+msgid "Toggle sorting"
+msgstr ""
 
-#: models.py:60
-msgid "S"
-msgstr "S"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:20
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:34
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:36
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:372
+#: inscriptions/templates/admin/submit_line.html:6
+msgid "Delete"
+msgstr ""
 
-#: models.py:61
-msgid "M"
-msgstr "M"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:29
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
+"related objects, but your account doesn't have permission to delete the "
+"following types of objects:"
+msgstr ""
 
-#: models.py:62
-msgid "L"
-msgstr "L"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:43
+#, python-format
+msgid ""
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
+"following protected related objects:"
+msgstr ""
 
-#: models.py:63
-msgid "XL"
-msgstr "XL"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:57
+#, python-format
+msgid ""
+"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
+"All of the following related items will be deleted:"
+msgstr ""
 
-#: models.py:64
-msgid "XXL"
-msgstr "XXL"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:65
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:67
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:68
+msgid "Yes, I'm sure"
+msgstr ""
 
-#: models.py:68
-msgid "Gerant d'équipe"
-msgstr "Team leader"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:17
+msgid "Delete multiple objects"
+msgstr ""
 
-#: models.py:69
-msgid "Equipier"
-msgstr "Teamate "
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:26
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would result in deleting related "
+"objects, but your account doesn't have permission to delete the following "
+"types of objects:"
+msgstr ""
 
-#: models.py:71
-msgid "Tous"
-msgstr "All"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:40
+#, python-format
+msgid ""
+"Deleting the selected %(objects_name)s would require deleting the following "
+"protected related objects:"
+msgstr ""
 
-#: models.py:78 models.py:257 models.py:329 models.py:459 models.py:543
-msgid "Nom"
-msgstr "Last name"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:54
+#, python-format
+msgid ""
+"Are you sure you want to delete the selected %(objects_name)s? All of the "
+"following objects and their related items will be deleted:"
+msgstr ""
 
-#: models.py:79
-msgid "uid"
-msgstr "uid"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:41
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:82
+msgid "Remove"
+msgstr ""
 
-#: models.py:80 models.py:333
-msgid "Ville"
-msgstr "City"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:42
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:81
+#, python-format
+msgid "Add another %(verbose_name)s"
+msgstr ""
 
-#: models.py:82
-msgid "Date"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:20
+msgid "Delete?"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/filter.html:2
+#, python-format
+msgid " By %(filter_title)s "
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:18
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:31
+msgid "Apps"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:21
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:22
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:80
+msgid "Recent Actions"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:37
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:67
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:11
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:13
+msgid "Search"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:42
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:31
+msgid "Action"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:52
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:58
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:6
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:66
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:346
+msgid "Change"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:80
+msgid "My Actions"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:85
+msgid "None available"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:111
+msgid "Unknown content"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:139
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:12
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:18
+msgid "You don't have permission to edit anything."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/invalid_setup.html:5
+msgid ""
+"Something's wrong with your database installation. Make sure the appropriate "
+"database tables have been created, and make sure the database is readable by "
+"the appropriate user."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:76
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:23
+#: inscriptions/templates/_account_bar.html:17
+#: inscriptions/templates/orga.html:33
+msgid "Log in"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:87
+msgid "Forgotten your password or username?"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:29
+#, fuzzy
+#| msgid "Date"
+msgid "Date/time"
 msgstr "Date"
 
-#: models.py:83
-msgid "Date d'ouverture des inscriptionss"
-msgstr "Registration opening date"
-
-#: models.py:84
-msgid "Date d'augmentation dss tarifs"
-msgstr "Price raise date"
-
-#: models.py:85
-msgid "Date de fermeture des inscriptions"
-msgstr "Registration closing date"
-
-#: models.py:86
-msgid "Limite du nombre de participants"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:30
+msgid "User"
 msgstr ""
 
-#: models.py:87
-msgid "Limite du nombre de solo"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:45
+msgid ""
+"This object doesn't have a change history. It probably wasn't added via this "
+"admin site."
 msgstr ""
 
-#: models.py:88
-msgid "Adresse paypal"
-msgstr "Paypal address"
-
-#: models.py:89
-msgid "Frais paypal inclus"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/pagination.html:19
+msgid "Show all"
 msgstr ""
 
-#: models.py:90
-msgid "Ordre des chèques"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:8
+#, python-format
+msgid "Change selected %(model)s"
 msgstr ""
 
-#: models.py:91 models.py:331 models.py:462 models.py:463
-msgid "Adresse"
-msgstr "Address"
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:15
+#, python-format
+msgid "Add another %(model)s"
+msgstr ""
 
-#: models.py:92
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:22
+#, python-format
+msgid "Delete selected %(model)s"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:4
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:4
+#, python-format
+msgid "%(full_result_count)s total"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:12
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:14
+msgid "Save as new"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:19
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:21
+msgid "Save and add another"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:26
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:28
+msgid "Save and continue editing"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/logged_out.html:18
+msgid "Thanks for spending some quality time with the Web site today."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/logged_out.html:20
+msgid "Log in again"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:10
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:15
+msgid "Password change"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:20
+msgid "Your password was changed."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:37
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:43
+msgid "Old password"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:50
+msgid "New password"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:66
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:46
+msgid "Change my password"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:10
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:10
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:10
+msgid "Password reset"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:20
+msgid "Your password has been set.  You may go ahead and log in now."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:10
+msgid "Password reset confirmation"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:24
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:30
+msgid "New password:"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:37
+msgid "Confirm password:"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:55
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:19
+msgid ""
+"We've emailed you instructions for setting your password. You should be "
+"receiving them shortly."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:21
+msgid ""
+"If you don't receive an email, please make sure you've entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:2
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:4
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:8
+msgid "Your username, in case you've forgotten:"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:10
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:12
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:23
+msgid ""
+"Forgotten your password? Enter your email address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:29
+msgid "Email address:"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:38
+msgid "Reset my password"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/contrib/messages/apps.py:7
+msgid "Messages"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/contrib/sitemaps/apps.py:7
+msgid "Site Maps"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/contrib/staticfiles/apps.py:7
+msgid "Static Files"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/contrib/syndication/apps.py:7
+msgid "Syndication"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/contrib/webdesign/apps.py:7
+msgid "Web Design"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:20
+msgid "Enter a valid value."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:87
+#: env/lib/python3.5/site-packages/django/forms/fields.py:712
+msgid "Enter a valid URL."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:130
+msgid "Enter a valid integer."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:141
+msgid "Enter a valid email address."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:215
+msgid ""
+"Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:220
+#: env/lib/python3.5/site-packages/django/core/validators.py:239
+msgid "Enter a valid IPv4 address."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:225
+#: env/lib/python3.5/site-packages/django/core/validators.py:240
+msgid "Enter a valid IPv6 address."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:235
+#: env/lib/python3.5/site-packages/django/core/validators.py:238
+msgid "Enter a valid IPv4 or IPv6 address."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:263
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1144
+msgid "Enter only digits separated by commas."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:272
+#, python-format
+msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:298
+#, python-format
+msgid "Ensure this value is less than or equal to %(limit_value)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:305
+#, python-format
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:314
+#, python-format
+msgid ""
+"Ensure this value has at least %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at least %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/core/validators.py:325
+#, python-format
+msgid ""
+"Ensure this value has at most %(limit_value)d character (it has "
+"%(show_value)d)."
+msgid_plural ""
+"Ensure this value has at most %(limit_value)d characters (it has "
+"%(show_value)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/db/models/base.py:1130
+#: env/lib/python3.5/site-packages/django/forms/models.py:718
+msgid "and"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/base.py:1132
+#, python-format
+msgid "%(model_name)s with this %(field_labels)s already exists."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:107
+#, python-format
+msgid "Value %(value)r is not a valid choice."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:108
+msgid "This field cannot be null."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:109
+msgid "This field cannot be blank."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:110
+#, python-format
+msgid "%(model_name)s with this %(field_label)s already exists."
+msgstr ""
+
+#. Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
+#. Eg: "Title must be unique for pub_date year"
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:114
+#, python-format
+msgid ""
+"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:132
+#, python-format
+msgid "Field of type: %(field_type)s"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:922
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1832
+msgid "Integer"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:926
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1830
+#, python-format
+msgid "'%(value)s' value must be an integer."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1001
+#, python-format
+msgid "'%(value)s' value must be either True or False."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1003
+msgid "Boolean (Either True or False)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1078
+#, python-format
+msgid "String (up to %(max_length)s)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1139
+msgid "Comma-separated integers"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1188
+#, python-format
+msgid ""
+"'%(value)s' value has an invalid date format. It must be in YYYY-MM-DD "
+"format."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1190
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1340
+#, python-format
+msgid ""
+"'%(value)s' value has the correct format (YYYY-MM-DD) but it is an invalid "
+"date."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1193
+msgid "Date (without time)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1338
+#, python-format
+msgid ""
+"'%(value)s' value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
+"uuuuuu]][TZ] format."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1342
+#, python-format
+msgid ""
+"'%(value)s' value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
+"[TZ]) but it is an invalid date/time."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1346
+msgid "Date (with time)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1498
+#, python-format
+msgid "'%(value)s' value must be a decimal number."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1500
+msgid "Decimal number"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1651
+#, python-format
+msgid ""
+"'%(value)s' value has an invalid format. It must be in [DD] [HH:[MM:]]ss[."
+"uuuuuu] format."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1654
+msgid "Duration"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1705
+msgid "Email address"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1729
+msgid "File path"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1796
+#, python-format
+msgid "'%(value)s' value must be a float."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1798
+msgid "Floating point number"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1899
+msgid "Big (8 byte) integer"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1914
+msgid "IPv4 address"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1950
+#, fuzzy
+#| msgid "Presse"
+msgid "IP address"
+msgstr "Press"
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2029
+#, python-format
+msgid "'%(value)s' value must be either None, True or False."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2031
+msgid "Boolean (Either True, False or None)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2091
+msgid "Positive integer"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2103
+msgid "Positive small integer"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2116
+#, python-format
+msgid "Slug (up to %(max_length)s)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2145
+msgid "Small integer"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2152
+msgid "Text"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2175
+#, python-format
+msgid ""
+"'%(value)s' value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
+"format."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2177
+#, python-format
+msgid ""
+"'%(value)s' value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
+"invalid time."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2180
+msgid "Time"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2308
+#: inscriptions/models.py:100
 msgid "URL"
 msgstr ""
 
-#: models.py:93
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2331
+msgid "Raw binary data"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2375
+#, python-format
+msgid "'%(value)s' is not a valid UUID."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/files.py:239
+msgid "File"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/files.py:389
+msgid "Image"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:1796
+#, python-format
+msgid "%(model)s instance with %(field)s %(value)r does not exist."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:1798
+msgid "Foreign Key (type determined by related field)"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:2028
+msgid "One-to-one relationship"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:2118
+msgid "Many-to-many relationship"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:64
+msgid "This field is required."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:237
+msgid "Enter a whole number."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:280
+#: env/lib/python3.5/site-packages/django/forms/fields.py:317
+msgid "Enter a number."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:319
+#, python-format
+msgid "Ensure that there are no more than %(max)s digit in total."
+msgid_plural "Ensure that there are no more than %(max)s digits in total."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:323
+#, python-format
+msgid "Ensure that there are no more than %(max)s decimal place."
+msgid_plural "Ensure that there are no more than %(max)s decimal places."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:327
+#, python-format
+msgid ""
+"Ensure that there are no more than %(max)s digit before the decimal point."
+msgid_plural ""
+"Ensure that there are no more than %(max)s digits before the decimal point."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:438
+#: env/lib/python3.5/site-packages/django/forms/fields.py:1193
+msgid "Enter a valid date."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:462
+#: env/lib/python3.5/site-packages/django/forms/fields.py:1194
+msgid "Enter a valid time."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:484
+msgid "Enter a valid date/time."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:525
+msgid "Enter a valid duration."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:591
+msgid "No file was submitted. Check the encoding type on the form."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:592
+msgid "No file was submitted."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:593
+msgid "The submitted file is empty."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:595
+#, python-format
+msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid_plural ""
+"Ensure this filename has at most %(max)d characters (it has %(length)d)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:598
+msgid "Please either submit a file or check the clear checkbox, not both."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:660
+msgid ""
+"Upload a valid image. The file you uploaded was either not an image or a "
+"corrupted image."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:827
+#: env/lib/python3.5/site-packages/django/forms/fields.py:921
+#: env/lib/python3.5/site-packages/django/forms/models.py:1234
+#, python-format
+msgid "Select a valid choice. %(value)s is not one of the available choices."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:922
+#: env/lib/python3.5/site-packages/django/forms/fields.py:1037
+#: env/lib/python3.5/site-packages/django/forms/models.py:1233
+msgid "Enter a list of values."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:1038
+msgid "Enter a complete value."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/fields.py:1264
+msgid "Enter a valid UUID."
+msgstr ""
+
+#. Translators: This is the default suffix added to form field labels
+#: env/lib/python3.5/site-packages/django/forms/forms.py:129
+msgid ":"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/forms.py:214
+#, python-format
+msgid "(Hidden field %(name)s) %(error)s"
+msgstr ""
+
+#. Translators: If found as last label character, these punctuation
+#. characters will prevent the default label_suffix to be appended to the label
+#: env/lib/python3.5/site-packages/django/forms/forms.py:659
+msgid ":?.!"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:96
+msgid "ManagementForm data is missing or has been tampered with"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:333
+#, python-format
+msgid "Please submit %d or fewer forms."
+msgid_plural "Please submit %d or fewer forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:340
+#, python-format
+msgid "Please submit %d or more forms."
+msgid_plural "Please submit %d or more forms."
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:368
+#: env/lib/python3.5/site-packages/django/forms/formsets.py:370
+msgid "Order"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:712
+#, python-format
+msgid "Please correct the duplicate data for %(field)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:716
+#, python-format
+msgid "Please correct the duplicate data for %(field)s, which must be unique."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:722
+#, python-format
+msgid ""
+"Please correct the duplicate data for %(field_name)s which must be unique "
+"for the %(lookup)s in %(date_field)s."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:730
+msgid "Please correct the duplicate values below."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:1053
+msgid "The inline foreign key did not match the parent instance primary key."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:1119
+msgid "Select a valid choice. That choice is not one of the available choices."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/models.py:1236
+#, python-format
+msgid "\"%(pk)s\" is not a valid value for a primary key."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/utils.py:165
+#, python-format
+msgid ""
+"%(datetime)s couldn't be interpreted in time zone %(current_timezone)s; it "
+"may be ambiguous or it may not exist."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:345
+msgid "Currently"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:347
+msgid "Clear"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:555
+msgid "Unknown"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:556
+msgid "Yes"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/forms/widgets.py:557
+#, fuzzy
+#| msgid "Nom"
+msgid "No"
+msgstr "Last name"
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:865
+msgid "yes,no,maybe"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:894
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:906
+#, python-format
+msgid "%(size)d byte"
+msgid_plural "%(size)d bytes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:908
+#, python-format
+msgid "%s KB"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:910
+#, python-format
+msgid "%s MB"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:912
+#, python-format
+msgid "%s GB"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:914
+#, python-format
+msgid "%s TB"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:916
+#, python-format
+msgid "%s PB"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:61
+msgid "p.m."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:62
+msgid "a.m."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:67
+#, fuzzy
+#| msgid "M"
+msgid "PM"
+msgstr "M"
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:68
+#, fuzzy
+#| msgid "M"
+msgid "AM"
+msgstr "M"
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:151
+msgid "midnight"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dateformat.py:153
+msgid "noon"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:6
+msgid "Monday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:6
+msgid "Tuesday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:6
+msgid "Wednesday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:6
+msgid "Thursday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:6
+msgid "Friday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:7
+msgid "Saturday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:7
+msgid "Sunday"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:10
+msgid "Mon"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:10
+msgid "Tue"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:10
+msgid "Wed"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:10
+msgid "Thu"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:10
+msgid "Fri"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:11
+#, fuzzy
+#| msgid "Suivant"
+msgid "Sat"
+msgstr "Next"
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:11
+#, fuzzy
+#| msgid "Suivant"
+msgid "Sun"
+msgstr "Next"
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "January"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "February"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "March"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "April"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "May"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:18
+msgid "June"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:19
+msgid "July"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:19
+msgid "August"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:19
+msgid "September"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:19
+msgid "October"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:19
+msgid "November"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:20
+msgid "December"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "jan"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "feb"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "mar"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "apr"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "may"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:23
+msgid "jun"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "jul"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "aug"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "sep"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "oct"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "nov"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:24
+msgid "dec"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:31
+msgctxt "abbrev. month"
+msgid "Jan."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:32
+msgctxt "abbrev. month"
+msgid "Feb."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:33
+msgctxt "abbrev. month"
+msgid "March"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:34
+msgctxt "abbrev. month"
+msgid "April"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:35
+msgctxt "abbrev. month"
+msgid "May"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:36
+msgctxt "abbrev. month"
+msgid "June"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:37
+msgctxt "abbrev. month"
+msgid "July"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:38
+msgctxt "abbrev. month"
+msgid "Aug."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:39
+msgctxt "abbrev. month"
+msgid "Sept."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:40
+msgctxt "abbrev. month"
+msgid "Oct."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:41
+msgctxt "abbrev. month"
+msgid "Nov."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:42
+msgctxt "abbrev. month"
+msgid "Dec."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:45
+msgctxt "alt. month"
+msgid "January"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:46
+msgctxt "alt. month"
+msgid "February"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:47
+msgctxt "alt. month"
+msgid "March"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:48
+msgctxt "alt. month"
+msgid "April"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:49
+msgctxt "alt. month"
+msgid "May"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:50
+msgctxt "alt. month"
+msgid "June"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:51
+msgctxt "alt. month"
+msgid "July"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:52
+msgctxt "alt. month"
+msgid "August"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:53
+msgctxt "alt. month"
+msgid "September"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:54
+msgctxt "alt. month"
+msgid "October"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:55
+msgctxt "alt. month"
+msgid "November"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/dates.py:56
+msgctxt "alt. month"
+msgid "December"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/ipv6.py:10
+msgid "This is not a valid IPv6 address."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/text.py:79
+#, python-format
+msgctxt "String to return when truncating text"
+msgid "%(truncated_text)s..."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/text.py:248
+msgid "or"
+msgstr ""
+
+#. Translators: This string is used as a separator between list elements
+#: env/lib/python3.5/site-packages/django/utils/text.py:267
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:58
+msgid ", "
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:10
+#, python-format
+msgid "%d year"
+msgid_plural "%d years"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:11
+#, python-format
+msgid "%d month"
+msgid_plural "%d months"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:12
+#, python-format
+msgid "%d week"
+msgid_plural "%d weeks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:13
+#, python-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:14
+#, python-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:15
+#, python-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] ""
+msgstr[1] ""
+
+#: env/lib/python3.5/site-packages/django/utils/timesince.py:47
+msgid "0 minutes"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:107
+msgid "Forbidden"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:108
+msgid "CSRF verification failed. Request aborted."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:112
+msgid ""
+"You are seeing this message because this HTTPS site requires a 'Referer "
+"header' to be sent by your Web browser, but none was sent. This header is "
+"required for security reasons, to ensure that your browser is not being "
+"hijacked by third parties."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:117
+msgid ""
+"If you have configured your browser to disable 'Referer' headers, please re-"
+"enable them, at least for this site, or for HTTPS connections, or for 'same-"
+"origin' requests."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:122
+msgid ""
+"You are seeing this message because this site requires a CSRF cookie when "
+"submitting forms. This cookie is required for security reasons, to ensure "
+"that your browser is not being hijacked by third parties."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:127
+msgid ""
+"If you have configured your browser to disable cookies, please re-enable "
+"them, at least for this site, or for 'same-origin' requests."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/csrf.py:132
+msgid "More information is available with DEBUG=True."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/debug.py:583
+msgid "Welcome to Django"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/debug.py:584
+msgid "It worked!"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/debug.py:585
+msgid "Congratulations on your first Django-powered page."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/debug.py:586
+msgid ""
+"Of course, you haven't actually done any work yet. Next, start your first "
+"app by running <code>python manage.py startapp [app_label]</code>."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/debug.py:588
+msgid ""
+"You're seeing this message because you have <code>DEBUG = True</code> in "
+"your Django settings file and you haven't configured any URLs. Get to work!"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:48
+msgid "No year specified"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:104
+msgid "No month specified"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:163
+msgid "No day specified"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:219
+msgid "No week specified"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:378
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:406
+#, python-format
+msgid "No %(verbose_name_plural)s available"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:660
+#, python-format
+msgid ""
+"Future %(verbose_name_plural)s not available because %(class_name)s."
+"allow_future is False."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/dates.py:694
+#, python-format
+msgid "Invalid date string '%(datestr)s' given format '%(format)s'"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/detail.py:55
+#, python-format
+msgid "No %(verbose_name)s found matching the query"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/list.py:76
+msgid "Page is not 'last', nor can it be converted to an int."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/list.py:81
+#, python-format
+msgid "Invalid page (%(page_number)s): %(message)s"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/generic/list.py:172
+#, python-format
+msgid "Empty list and '%(class_name)s.allow_empty' is False."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/static.py:58
+msgid "Directory indexes are not allowed here."
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/static.py:60
+#, python-format
+msgid "\"%(path)s\" does not exist"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/django/views/static.py:100
+#, python-format
+msgid "Index of %(directory)s"
+msgstr ""
+
+#: env/lib/python3.5/site-packages/jsonfield/fields.py:30
+#, python-format
+msgid "'%s' is not a valid JSON string."
+msgstr ""
+
+#: inscriptions/admin_course.py:192
+msgid "Statut"
+msgstr "Status"
+
+#: inscriptions/admin_course.py:196
+msgid "À vérifier"
+msgstr "To check"
+
+#: inscriptions/admin_course.py:197
+msgid "Complet"
+msgstr "Complete"
+
+#: inscriptions/admin_course.py:198
+msgid "Incomplet"
+msgstr "Not complete"
+
+#: inscriptions/admin_course.py:199 inscriptions/models.py:526
+msgid "Erreur"
+msgstr "Error"
+
+#: inscriptions/admin_course.py:217
+msgid "Paiement complet"
+msgstr "Payment received"
+
+#: inscriptions/admin_course.py:221
+msgid "Payé"
+msgstr "Payed"
+
+#: inscriptions/admin_course.py:222
+msgid "Impayé"
+msgstr "Not payed"
+
+#: inscriptions/admin_course.py:232
+msgid "Catégories"
+msgstr "Categories"
+
+#: inscriptions/admin_course.py:380
+msgid "Envoyer un mail groupé"
+msgstr "Send a group mail"
+
+#: inscriptions/forms.py:51
+msgid ""
+"Code utilisé pour identifier la course. Ce code sera affiché dans l'adresse "
+"internet de la page d'inscription. Par exemple, pour les 6h de Paris 2015, "
+"le code était 6hdp15. Ce code ne doit contenir que des lettres ou des "
+"chiffres."
+msgstr ""
+
+#: inscriptions/forms.py:52
+msgid "Nom du club ou association organisateur"
+msgstr ""
+
+#: inscriptions/forms.py:53
+msgid "Adresse internet pointant vers le site présentant la course"
+msgstr ""
+
+#: inscriptions/forms.py:54
+msgid "Adresse internet pointant vers le réglement de la course"
+msgstr ""
+
+#: inscriptions/forms.py:55
+msgid "Email utilisée pour envoyer les emails"
+msgstr ""
+
+#: inscriptions/forms.py:60
+msgid "Model de course"
+msgstr ""
+
+#: inscriptions/models.py:27 inscriptions/models.py:32
+#: inscriptions/models.py:527
+msgid "Homme"
+msgstr "Man"
+
+#: inscriptions/models.py:28 inscriptions/models.py:33
+msgid "Femme"
+msgstr "Woman"
+
+#: inscriptions/models.py:34
+msgid "Homme ou Mixte"
+msgstr "Men or Mixed"
+
+#: inscriptions/models.py:35
+msgid "Femme ou Mixte"
+msgstr "Women or Mixed"
+
+#: inscriptions/models.py:36
+msgid "Mixte"
+msgstr "Mixte"
+
+#: inscriptions/models.py:40
+#, fuzzy
+#| msgid "Licence FFRS 2014"
+msgid "Licence FFRS"
+msgstr "License FFRS 2014"
+
+#: inscriptions/models.py:41
+#, fuzzy
+#| msgid "Date du certificat médical"
+msgid "Certificat médical"
+msgstr "Medical certificate date"
+
+#: inscriptions/models.py:45
+msgid "Accès interdit"
+msgstr ""
+
+#: inscriptions/models.py:46
+msgid "Administrateur"
+msgstr "Administrator"
+
+#: inscriptions/models.py:47 inscriptions/models.py:76
+#: inscriptions/models.py:96
+msgid "Organisateur"
+msgstr "Organisator"
+
+#: inscriptions/models.py:48
+msgid "Validateur"
+msgstr "Validator"
+
+#: inscriptions/models.py:52
+msgid "Site Roller en Ligne.com"
+msgstr "Roller in line.com website"
+
+#: inscriptions/models.py:53
+msgid "Facebook"
+msgstr "Facebook"
+
+#: inscriptions/models.py:54
+msgid "Presse"
+msgstr "Press"
+
+#: inscriptions/models.py:55
+msgid "Bouche à oreille"
+msgstr "Word of mooth"
+
+#: inscriptions/models.py:56
+msgid "Flyer pendant une course"
+msgstr "Flyer during a race"
+
+#: inscriptions/models.py:57
+msgid "Flyer pendant une randonnée"
+msgstr "Flyer during a skating ride"
+
+#: inscriptions/models.py:58
+msgid "Affiche"
+msgstr "Poster"
+
+#: inscriptions/models.py:59
+#, fuzzy
+#| msgid "Information de la Maire de Paris"
+msgid "Information de la Mairie"
+msgstr "Paris city official informations"
+
+#: inscriptions/models.py:60
+msgid "Par mon club"
+msgstr ""
+
+#: inscriptions/models.py:61
+msgid "Autre"
+msgstr "Other"
+
+#: inscriptions/models.py:65
+msgid "XS"
+msgstr "XS"
+
+#: inscriptions/models.py:66
+msgid "S"
+msgstr "S"
+
+#: inscriptions/models.py:67
+msgid "M"
+msgstr "M"
+
+#: inscriptions/models.py:68
+msgid "L"
+msgstr "L"
+
+#: inscriptions/models.py:69
+msgid "XL"
+msgstr "XL"
+
+#: inscriptions/models.py:70
+msgid "XXL"
+msgstr "XXL"
+
+#: inscriptions/models.py:74
+msgid "Gerant d'équipe"
+msgstr "Team leader"
+
+#: inscriptions/models.py:75
+msgid "Equipier"
+msgstr "Teamate "
+
+#: inscriptions/models.py:77
+msgid "Tous"
+msgstr "All"
+
+#: inscriptions/models.py:94 inscriptions/models.py:291
+#: inscriptions/models.py:370 inscriptions/models.py:500
+#: inscriptions/models.py:588
+msgid "Nom"
+msgstr "Last name"
+
+#: inscriptions/models.py:95
+msgid "uid"
+msgstr "uid"
+
+#: inscriptions/models.py:95
+msgid "Ne doit contenir que des lettres ou des chiffres"
+msgstr ""
+
+#: inscriptions/models.py:97 inscriptions/models.py:374
+msgid "Ville"
+msgstr "City"
+
+#: inscriptions/models.py:99
+msgid "Date"
+msgstr "Date"
+
+#: inscriptions/models.py:101
 msgid "URL Réglement"
 msgstr ""
 
-#: models.py:94
+#: inscriptions/models.py:102
 msgid "Email contact"
 msgstr ""
 
-#: models.py:258
+#: inscriptions/models.py:103
+msgid "Logo"
+msgstr ""
+
+#: inscriptions/models.py:104
+msgid "Date d'ouverture des inscriptionss"
+msgstr "Registration opening date"
+
+#: inscriptions/models.py:105
+#, fuzzy
+#| msgid "Date d'augmentation dss tarifs"
+msgid "Date d'augmentation des tarifs"
+msgstr "Price raise date"
+
+#: inscriptions/models.py:106
+msgid "Date de fermeture des inscriptions"
+msgstr "Registration closing date"
+
+#: inscriptions/models.py:107
+msgid "Limite du nombre de participants"
+msgstr ""
+
+#: inscriptions/models.py:108
+msgid "Adresse paypal"
+msgstr "Paypal address"
+
+#: inscriptions/models.py:109
+msgid "Frais paypal inclus"
+msgstr ""
+
+#: inscriptions/models.py:110
+msgid "Ordre des chèques"
+msgstr ""
+
+#: inscriptions/models.py:111 inscriptions/models.py:372
+#: inscriptions/models.py:503 inscriptions/models.py:504
+msgid "Adresse"
+msgstr "Address"
+
+#: inscriptions/models.py:112
+msgid "Activée"
+msgstr ""
+
+#: inscriptions/models.py:292
 msgid "Code"
 msgstr ""
 
-#: models.py:259
+#: inscriptions/models.py:293
 msgid "Prix normal"
 msgstr ""
 
-#: models.py:260
+#: inscriptions/models.py:294
 msgid "Prix augmenté"
 msgstr ""
 
-#: models.py:261
+#: inscriptions/models.py:295
 msgid "Nombre minimum d'équipiers"
 msgstr "Minimum number of teammate"
 
-#: models.py:262
+#: inscriptions/models.py:296
 msgid "Nombre maximum d'équipiers"
 msgstr "Maximum number of teammate"
 
-#: models.py:263
+#: inscriptions/models.py:297
 msgid "Age minimum"
 msgstr ""
 
-#: models.py:264 models.py:461
+#: inscriptions/models.py:298 inscriptions/models.py:502
 msgid "Sexe"
 msgstr "Sex"
 
-#: models.py:265
+#: inscriptions/models.py:299
 msgid "Validation function (javascript)"
 msgstr ""
 
-#: models.py:266
+#: inscriptions/models.py:300
 msgid "Numero de dossard (début)"
 msgstr ""
 
-#: models.py:267
+#: inscriptions/models.py:301
 msgid "Numero de dossard (fin)"
 msgstr ""
 
-#: models.py:327
+#: inscriptions/models.py:368
 msgid "Nom d'équipe"
 msgstr "Team name"
 
-#: models.py:328
+#: inscriptions/models.py:369
 msgid "Club"
 msgstr "Club"
 
-#: models.py:330 models.py:460
+#: inscriptions/models.py:371 inscriptions/models.py:501
 msgid "Prénom"
 msgstr "First name"
 
-#: models.py:332
+#: inscriptions/models.py:373
 msgid "Adresse 2"
 msgstr "Address 2"
 
-#: models.py:334
+#: inscriptions/models.py:375
 msgid "Code postal"
 msgstr "Postal code"
 
-#: models.py:335 models.py:466
+#: inscriptions/models.py:376 inscriptions/models.py:507
 msgid "Pays"
 msgstr "Country"
 
-#: models.py:336 models.py:467
+#: inscriptions/models.py:377 inscriptions/models.py:508
 msgid "e-mail"
 msgstr "e-mail"
 
-#: models.py:337
+#: inscriptions/models.py:378
 msgid "Mot de passe"
 msgstr "Password"
 
-#: models.py:338
+#: inscriptions/models.py:379
 msgid "Téléphone"
 msgstr "Phone"
 
-#: models.py:341
+#: inscriptions/models.py:382
 msgid "Nombre d'équipiers"
 msgstr "Number of teammate"
 
-#: models.py:342
+#: inscriptions/models.py:383
 msgid "Détails"
 msgstr "Details"
 
-#: models.py:343
+#: inscriptions/models.py:384
 msgid "Prix"
 msgstr "Price"
 
-#: models.py:344
+#: inscriptions/models.py:385
 msgid "Paiement reçu"
 msgstr "Payment received"
 
-#: models.py:345
+#: inscriptions/models.py:386
 msgid "Dossier complet"
 msgstr "File completed"
 
-#: models.py:346
+#: inscriptions/models.py:387
 msgid "Date d'insciption"
 msgstr "Registration date"
 
-#: models.py:347
+#: inscriptions/models.py:388
 msgid "Commentaires"
 msgstr "Comments"
 
-#: models.py:349 models.py:457
+#: inscriptions/models.py:390 inscriptions/models.py:498
 msgid "Numéro"
 msgstr "Number"
 
-#: models.py:350
+#: inscriptions/models.py:391
 msgid "Comment avez vous connu la course ?"
 msgstr "How did you know about the race?"
 
-#: models.py:351
+#: inscriptions/models.py:392
 msgid "Date facture"
 msgstr ""
 
-#: models.py:468
+#: inscriptions/models.py:509
 msgid "Date de naissance"
 msgstr "Birthday"
 
-#: models.py:469
+#: inscriptions/models.py:510
 msgid "Autorisation parentale"
 msgstr "Parental authorization"
 
-#: models.py:470
+#: inscriptions/models.py:511
 msgid "Autorisation parentale valide"
 msgstr "Valid parental authorization"
 
-#: models.py:471
+#: inscriptions/models.py:512
 msgid "Justificatif"
 msgstr "Justificative"
 
-#: models.py:472
+#: inscriptions/models.py:513
 msgid "Numéro de licence"
 msgstr "Licence Number"
 
-#: models.py:473
+#: inscriptions/models.py:514
 msgid "Certificat ou licence"
 msgstr "Certificat or licence"
 
-#: models.py:474
+#: inscriptions/models.py:515
 msgid "Certificat ou licence valide"
 msgstr "Valid certificate or license"
 
-#: models.py:475
-msgid "Lien de parenté"
-msgstr "Family relationship"
-
-#: models.py:476
-msgid "Justificatif entreprise / etudiant"
-msgstr "Enterprise / School justification"
-
-#: models.py:477
-msgid "Justificatif valide"
-msgstr "Valid justificative"
-
-#: models.py:479
-msgid "Code EOSkates"
-msgstr ""
-
-#: models.py:480
+#: inscriptions/models.py:517
 msgid "Transpondeur"
 msgstr "Tag number"
 
-#: models.py:481
+#: inscriptions/models.py:518
 msgid "Taille T-shirt"
 msgstr "Shirt size"
 
-#: models.py:482
+#: inscriptions/models.py:521
 msgid "Verifier"
 msgstr ""
 
-#: models.py:483
+#: inscriptions/models.py:522
 msgid "Licence manquante"
 msgstr ""
 
-#: models.py:484
+#: inscriptions/models.py:523
 msgid "Certificat manquant"
 msgstr "Medical certificate is missing"
 
-#: models.py:485
+#: inscriptions/models.py:524
 msgid "Autorisation manquante"
 msgstr "Parental authorization is missing"
 
-#: models.py:486
+#: inscriptions/models.py:525
 msgid "Valide"
 msgstr "Valide"
 
-#: models.py:537
+#: inscriptions/models.py:574
 msgid "Role"
 msgstr ""
 
-#: models.py:544
+#: inscriptions/models.py:589
 msgid "Destinataire"
 msgstr ""
 
-#: models.py:545
+#: inscriptions/models.py:590
 msgid "Copie cachée à"
 msgstr ""
 
-#: models.py:546
+#: inscriptions/models.py:591
 msgid "Sujet"
 msgstr ""
 
-#: models.py:547
+#: inscriptions/models.py:592
 msgid "Message"
 msgstr ""
 
-#: views.py:105
-msgid "Désolé, il n'y a plus de place dans cette catégorie"
+#: inscriptions/templates/_account_bar.html:11
+msgid "Settings"
 msgstr ""
 
-#: templates/base.html:69
-msgid "Accueil"
-msgstr "Home"
-
-#: templates/base.html:71 templates/index.html:14 templates/index.html.py:28
-msgid "Liste des inscrits"
+#: inscriptions/templates/_account_bar.html:19
+#: inscriptions/templates/orga.html:22
+msgid "Sign up"
 msgstr ""
 
-#: templates/base.html:72 templates/index.html:15 templates/index.html.py:29
+#: inscriptions/templates/account/logout.html:6
+msgid "Vous êtes déconnecté"
+msgstr ""
+
+#: inscriptions/templates/admin/base_site.html:11
+#, fuzzy
+#| msgid "Prochaines courses"
+msgid "Changer de course"
+msgstr "Next races"
+
+#: inscriptions/templates/admin/base_site_common.html:4
+#: inscriptions/templates/admin/base_site_common.html:7
+#: inscriptions/templates/admin/inscriptions/course/change_form.html:4
+msgid "Enduroller"
+msgstr ""
+
+#: inscriptions/templates/admin/course_ask_accreditation.html:4
+msgid "Sélectionnez une course pour demander à faire partie de l'équipe :"
+msgstr ""
+
+#: inscriptions/templates/admin/course_ask_accreditation.html:17
+msgid "Retour"
+msgstr ""
+
+#: inscriptions/templates/admin/course_choose.html:4
+msgid "Sélectionnez votre course :"
+msgstr "Select your race:"
+
+#: inscriptions/templates/admin/course_choose.html:10
+msgid "Créer une nouvelle course"
+msgstr ""
+
+#: inscriptions/templates/admin/course_choose.html:11
+msgid "Demander à rejoindre l'équipe d'une course"
+msgstr ""
+
+#: inscriptions/templates/admin/course_creation_done.html:5
+msgid "Course créée. Vous recevrez un mail quand elle sera validée."
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:25
+msgid "Résumé"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:115
+#, fuzzy
+#| msgid "Dossier complet"
+msgid "Dossiers"
+msgstr "File completed"
+
+#: inscriptions/templates/admin/dashboard.html:121
+msgid "Equipes inscrites"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:125
+msgid "Documents à vérifier"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:129
+#: inscriptions/templates/index.html:29 inscriptions/templates/index.html:56
 msgid "Statistiques"
 msgstr ""
 
-#: templates/base.html:73 templates/change_numero.html:8
-msgid "Modifier une inscription"
-msgstr "Modify your registration"
+#: inscriptions/templates/admin/dashboard.html:138
+msgid "Réglage de la course"
+msgstr ""
 
-#: templates/change.html:11
+#: inscriptions/templates/admin/dashboard.html:144
+msgid "Reglages de la course"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:148
+#, fuzzy
+#| msgid "Catégories"
+msgid "Categories"
+msgstr "Categories"
+
+#: inscriptions/templates/admin/dashboard.html:152
+msgid "Accreditations"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:156
+msgid "Modèles de mail"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:165
+msgid "Exports"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:174
+#, fuzzy
+#| msgid "Numéro"
+msgid "Par numéro"
+msgstr "Number"
+
+#: inscriptions/templates/admin/dashboard.html:178
+#, fuzzy
+#| msgid "Nom d'équipe"
+msgid "Par nom d'équipe"
+msgstr "Team name"
+
+#: inscriptions/templates/admin/dashboard.html:183
+msgid "Par nom du gérant"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:187
+msgid "Retrait dossards"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:198
+#, fuzzy
+#| msgid "Nombre d'équipiers"
+msgid "Equipes et équipiers"
+msgstr "Number of teammate"
+
+#: inscriptions/templates/admin/dashboard.html:202
+#, fuzzy
+#| msgid "Equipier"
+msgid "Equipes"
+msgstr "Teamate "
+
+#: inscriptions/templates/admin/dashboard.html:206
+#, fuzzy
+#| msgid "Equipier"
+msgid "Equipiers"
+msgstr "Teamate "
+
+#: inscriptions/templates/admin/equipe/send_mail.html:23
+msgid "Expéditeur :"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mail.html:25
+msgid "Contact"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mail.html:26
+msgid "Moi"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mail.html:27
+msgid "À :"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mail.html:28
+msgid "Sujet :"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mail.html:30
+msgid "Envoyer"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mails.html:24
+msgid "Prévisualiser"
+msgstr ""
+
+#: inscriptions/templates/admin/equipe/send_mails.html:42
+#, python-format
+msgid "Envoyer à %(num)s équipes"
+msgstr ""
+
+#: inscriptions/templates/admin/inscriptions/course/change_form.html:8
+msgid "Enduroller - Création d'une nouvelle course"
+msgstr ""
+
+#: inscriptions/templates/admin/inscriptions/course/change_form.html:16
+msgid "Ajouter nouvelle course"
+msgstr ""
+
+#: inscriptions/templates/admin/listing_dossards_form.html:40
+msgid "Générer"
+msgstr ""
+
+#: inscriptions/templates/base.html:55
+msgid "Courses d'endurance de roller"
+msgstr ""
+
+#: inscriptions/templates/change.html:11
 msgid "Modifier ou payer une inscription"
 msgstr "Modify or pay your registration"
 
-#: templates/change.html:13
+#: inscriptions/templates/change.html:13
 msgid ""
 "\n"
 "        Un email vient de vous être envoyé. Si vous ne le recevez pas, <a "
@@ -484,7 +2309,7 @@ msgstr ""
 "www.6hdeparis.fr/contact/\">contact us</a> with your team number.\n"
 "    "
 
-#: templates/change.html:17
+#: inscriptions/templates/change.html:17
 msgid ""
 "\n"
 "    Si vous souhaitez modifier ou payer une inscription, utilisez le lien "
@@ -496,7 +2321,7 @@ msgstr ""
 "the confirmation mail.\n"
 "    "
 
-#: templates/change.html:20
+#: inscriptions/templates/change.html:20
 msgid ""
 "\n"
 "    Si vous avez perdu ce mail, vous pouvez le recevoir a nouveau en "
@@ -508,7 +2333,11 @@ msgstr ""
 "the list.\n"
 "    "
 
-#: templates/change_numero.html:9
+#: inscriptions/templates/change_numero.html:8
+msgid "Modifier une inscription"
+msgstr "Modify your registration"
+
+#: inscriptions/templates/change_numero.html:9
 msgid ""
 "\n"
 "        Pour recevoir un email contenant les instructions pour modifier "
@@ -520,7 +2349,7 @@ msgstr ""
 "please answer the following question:\n"
 "    "
 
-#: templates/change_numero.html:12
+#: inscriptions/templates/change_numero.html:12
 msgid ""
 "\n"
 "        Combien font quattre et trois (en chiffre) ?\n"
@@ -530,56 +2359,71 @@ msgstr ""
 "        Multiply four by three (numbers)?\n"
 "    "
 
-#: templates/closed.html:4 templates/not_opened_yet.html:4
+#: inscriptions/templates/closed.html:10
+#: inscriptions/templates/not_opened_yet.html:10
 msgid "Le site d'inscription est fermé."
 msgstr "Registration site is closed."
 
-#: templates/closed.html:5
+#: inscriptions/templates/closed.html:11
+#, fuzzy
+#| msgid ""
+#| "S'il vous manque encore des certificats, ammenez les le jour de la course."
 msgid ""
-"S'il vous manque encore des certificats, ammenez les le jour de la course."
+"S'il vous manque encore des certificats, amenez les le jour de la course."
 msgstr ""
 "If you didn't provide your certificat yet, please bring them on the race day."
 
-#: templates/closed.html:6
+#: inscriptions/templates/closed.html:12
+#, fuzzy
+#| msgid ""
+#| "Si vous n'avez pas encore payé, ammenez votre chèque le jour de la course."
 msgid ""
-"Si vous n'avez pas encore payé, ammenez votre chèque le jour de la course."
+"Si vous n'avez pas encore payé, amenez votre chèque le jour de la course."
 msgstr "If you haven't pay yet, bring a check on race day."
 
-#: templates/done.html:5
+#: inscriptions/templates/done.html:5
 msgid "Votre inscription est enregistrée"
 msgstr "Your registration is booked"
 
-#: templates/done.html:7
+#: inscriptions/templates/done.html:7
 msgid "Equipe : "
 msgstr "Team: "
 
-#: templates/done.html:8
+#: inscriptions/templates/done.html:8
 msgid "Numéro d'inscription :"
 msgstr "Registration number:"
 
-#: templates/done.html:12
+#: inscriptions/templates/done.html:12
 msgid "Un email de confirmation vient de vous être envoyé."
 msgstr "A confirmation mail has just been sent."
 
-#: templates/done.html:17
+#: inscriptions/templates/done.html:18
 msgid "Pour régler votre inscription vous pouvez payer par internet :"
 msgstr "You can pay your registration online:"
 
-#: templates/done.html:37
+#: inscriptions/templates/done.html:38
 msgid "Paypal ou Carte bancaire"
 msgstr "Paypal or credit card"
 
-#: templates/done.html:43
+#: inscriptions/templates/done.html:44
 #, python-format
 msgid "Pour tout paiement par internet, %(frais)s € de frais seront ajoutés."
 msgstr "For online payment, € %(frais)s fee will be added."
 
-#: templates/done.html:46
+#: inscriptions/templates/done.html:47
 #, python-format
 msgid "Ou envoyer un chèque de %(prix)s € à l'ordre de \"%(ordre)s\"."
 msgstr "Or send a € %(prix)s check payable to the \"%(ordre)s\"."
 
-#: templates/done.html:47
+#: inscriptions/templates/done.html:49
+#, fuzzy, python-format
+#| msgid "Ou envoyer un chèque de %(prix)s € à l'ordre de \"%(ordre)s\"."
+msgid ""
+"Pour régler votre inscription vous pouvez envoyer un chèque de %(prix)s € à "
+"l'ordre de \"%(ordre)s\"."
+msgstr "Or send a € %(prix)s check payable to the \"%(ordre)s\"."
+
+#: inscriptions/templates/done.html:51
 #, python-format
 msgid ""
 "Envoyez votre paiement avant le %(date)s. Si nous n'avons pas reçu votre "
@@ -588,16 +2432,16 @@ msgstr ""
 "Send your payment before %(date)s. If you don't, your registrationwill be "
 "canceled."
 
-#: templates/done.html:49
+#: inscriptions/templates/done.html:53
 #, python-format
 msgid "Votre paiement de %(prix)s € à bien été reçu."
 msgstr "Your payment of € %(prix)s was received."
 
-#: templates/done.html:58
+#: inscriptions/templates/done.html:62
 msgid "Il manque les licences de :"
 msgstr "Missing licenses:"
 
-#: templates/done.html:68
+#: inscriptions/templates/done.html:72
 msgid ""
 "Il manque les certificats médicaux de (<a href=\"http://www.6hdeparis.fr/wp-"
 "content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">modèle</"
@@ -607,7 +2451,7 @@ msgstr ""
 "uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">model in french</"
 "a>)."
 
-#: templates/done.html:78
+#: inscriptions/templates/done.html:82
 msgid ""
 "Il manque les autorisations parentales (<a href=\"http://www.6hdeparis.fr/wp-"
 "content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank"
@@ -617,7 +2461,7 @@ msgstr ""
 "content/uploads/2013/03/autorisation_parentale.pdf\" target=\"_blank\">model "
 "in french</a>)."
 
-#: templates/done.html:88
+#: inscriptions/templates/done.html:92
 msgid ""
 "Catégorie Entreprise / Étudiants : Si ce n'est déjà fait, pensez à envoyer "
 "un certificat signé par l'employeur (un seul pour toute l'équipe, <a href="
@@ -630,11 +2474,11 @@ msgstr ""
 "uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank\">model</a>) or "
 "a copy of your school id cards."
 
-#: templates/done.html:96
+#: inscriptions/templates/done.html:100
 msgid "Vous pouvez envoyer le paiement et les justificatifs à"
 msgstr "You can send paiment and justificatives to"
 
-#: templates/done.html:99
+#: inscriptions/templates/done.html:103
 #, python-format
 msgid ""
 "En précisant le nom de votre équipe et le numéro d'inscription <b>"
@@ -643,15 +2487,15 @@ msgstr ""
 "Specifying the name of your team and the registration number <b>%(numero)s</"
 "b>."
 
-#: templates/done.html:105
+#: inscriptions/templates/done.html:109
 msgid "Partager"
 msgstr "Share"
 
-#: templates/done.html:106
+#: inscriptions/templates/done.html:110
 msgid "Partagez votre inscription sur les réseaux sociaux !"
 msgstr "Share it on the social networks!"
 
-#: templates/done.html:126
+#: inscriptions/templates/done.html:130
 msgid ""
 "Les 6h Roller de Paris sont une course d\\'endurance à roller, en relai par "
 "équipe de 5 ou en solitaire. Ouverte à tous, elle aura lieu le 2 août 2015 "
@@ -661,45 +2505,55 @@ msgstr ""
 "to everyone, in the Bois de Boulogne, in Paris on a 2.6km circuit, on august "
 "the 2nd, 2015."
 
-#: templates/done.html:128
+#: inscriptions/templates/done.html:132
 #, python-format
 msgid "\"%(nom)s\" est inscrit aux 6h de Paris."
 msgstr "\"%(nom)s\" is going to the 6h of Paris."
 
-#: templates/done.html:130
+#: inscriptions/templates/done.html:134
 #, python-format
 msgid "Le duo \"%(nom)s\" est inscrit aux 6h de Paris."
 msgstr "The duo \"%(nom)s\" is going to the 6h of Paris."
 
-#: templates/done.html:132
+#: inscriptions/templates/done.html:136
 #, python-format
 msgid "L\\'équipe \"%(nom)s\" est inscrite aux 6h de Paris."
 msgstr "The team \"%(nom)s\" is going to the 6h of Paris."
 
-#: templates/form.html:6 templates/index.html:12
+#: inscriptions/templates/form.html:8 inscriptions/templates/index.html:23
 msgid "Inscription"
 msgstr "Registration"
 
-#: templates/form.html:7
+#: inscriptions/templates/form.html:9
 msgid "Modification de votre inscription"
 msgstr "Modify your registration"
 
-#: templates/form.html:68
+#: inscriptions/templates/form.html:14
+#, fuzzy
+#| msgid "Votre inscription est enregistrée"
+msgid "Votre inscription comporte des erreurs :"
+msgstr "Your registration is booked"
+
+#: inscriptions/templates/form.html:16
+msgid "Veuillez les corriger et valider à nouveau votre inscription."
+msgstr ""
+
+#: inscriptions/templates/form.html:17
 msgid "Informations générales"
 msgstr "General informations"
 
-#: templates/form.html:75
+#: inscriptions/templates/form.html:26
 #, python-format
 msgid "Équipier %(n)s"
 msgstr "Teammate %(n)s"
 
-#: templates/form.html:83
+#: inscriptions/templates/form.html:43
 msgid ""
 "Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez "
 "vous guider."
 msgstr "Register your team, duo or solo in a few steps."
 
-#: templates/form.html:85
+#: inscriptions/templates/form.html:45
 msgid ""
 "Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour "
 "vous communiquer les informations sur la course et pour vous permettre de "
@@ -709,17 +2563,30 @@ msgstr ""
 "infos with you about the race or it'll allow you to modify your registration "
 "if needed."
 
-#: templates/form.html:87
-msgid ""
-"Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous "
-"pouvez payer votre inscription par internet ou par chèque. Une fois votre "
-"inscription terminée, vous recevrez un email de confirmation."
+#: inscriptions/templates/form.html:47
+msgid "Vous pouvez envoyer vos justificatifs par internet ou par courrier."
 msgstr ""
-"You can send your certificates online or by mail. You can pay online or by "
-"check. Once your registration is finished, you'll receive a confirmation "
-"email."
 
-#: templates/form.html:88
+#: inscriptions/templates/form.html:49
+msgid "Vous pouvez payer votre inscription par internet ou par chèque."
+msgstr ""
+
+#: inscriptions/templates/form.html:51
+msgid "Vous pouvez payer votre inscription par chèque."
+msgstr ""
+
+#: inscriptions/templates/form.html:53
+#, fuzzy
+#| msgid "Pour régler votre inscription vous pouvez payer par internet :"
+msgid "Vous pouvez payer votre inscription par internet."
+msgstr "You can pay your registration online:"
+
+#: inscriptions/templates/form.html:56
+msgid ""
+"Une fois votre inscription terminée, vous recevrez un email de confirmation."
+msgstr ""
+
+#: inscriptions/templates/form.html:57
 #, python-format
 msgid ""
 "Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, "
@@ -728,40 +2595,70 @@ msgstr ""
 "You can modify your registration, add or remove teammates, send your "
 "certificates, change category up to %(date)s included."
 
-#: templates/form.html:89
+#: inscriptions/templates/form.html:59
+#, fuzzy, python-format
+#| msgid ""
+#| "Si vous rencontrez des problèmes lors de votre inscription, <a href="
+#| "\"http://www.6hdeparis.fr/contact/\">contactez nous</a>"
 msgid ""
-"Si vous rencontrez des problèmes lors de votre inscription, <a href=\"http://"
-"www.6hdeparis.fr/contact/\">contactez nous</a>"
+"Si vous rencontrez des problèmes lors de votre inscription, <a href="
+"\"%(url_contact)s\">contactez nous</a>"
 msgstr ""
 "If you have troubles to register, <a href=\"http://www.6hdeparis.fr/contact/"
 "\">contact us</a>"
 
-#: templates/form.html:91
+#: inscriptions/templates/form.html:65
 msgid "Information générales"
 msgstr "General informations"
 
-#: templates/form.html:100
+#: inscriptions/templates/form.html:73
+#, fuzzy, python-format
+#| msgid "Équipier %(n)s"
+msgid "Equipier %(count)s"
+msgstr "Teammate %(n)s"
+
+#: inscriptions/templates/form.html:77
+#, fuzzy
+#| msgid ""
+#| "Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
+#| "(formats PDF ou JPEG)."
 msgid ""
 "Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en "
-"pièce jointe (formats PDF ou JPEG, <a href=\"http://www.6hdeparis.fr/wp-"
-"content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">modèle de "
-"certificat</a>)."
-msgstr ""
-"If you can, scan the certificate or the license and add it (formats PDF or "
-"JPEG, <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
-"certificat_medical.pdf\" target=\"_blank\">medial certificat model in "
-"french</a>)."
+"pièce jointe (formats PDF ou JPEG)."
+msgstr "If you can, scan the authorization and add it (formats PDF or JPEG)."
 
-#: templates/form.html:100
-msgid "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier."
-msgstr "You alsa can upload it later or send it by mail."
+#: inscriptions/templates/form.html:78
+#, fuzzy, python-format
+#| msgid ""
+#| "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
+#| "(<a href="
+msgid ""
+"Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (<a "
+"href=\"%(url)s\" target=\"_blank\">modèle de certificat</a>)."
+msgstr "You also can upload it later or send it by mail."
 
-#: templates/form.html:102
+#: inscriptions/templates/form.html:81
+msgid ""
+"Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
+"(formats PDF ou JPEG)."
+msgstr "If you can, scan the authorization and add it (formats PDF or JPEG)."
+
+#: inscriptions/templates/form.html:82
+#, fuzzy, python-format
+#| msgid ""
+#| "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
+#| "(<a href="
+msgid ""
+"Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (<a "
+"href=\"%(url)s\" target=\"_blank\">modèle d'autorisation</a>)"
+msgstr "You also can upload it later or send it by mail."
+
+#: inscriptions/templates/form.html:85
 #, python-format
 msgid "Chaque équipier doit avoir plus de %(min_age)s ans au %(date)s."
 msgstr "Each teammate must be %(min_age)s at %(date)s."
 
-#: templates/form.html:103
+#: inscriptions/templates/form.html:86
 msgid ""
 "Chaque équipier doit avoir un certificat médical de moins d'un an ou une "
 "licence FFRS en cours de validité pour participer."
@@ -769,211 +2666,252 @@ msgstr ""
 "Each teammate must have a medical certificate or a valid FFRS license to "
 "participate."
 
-#: templates/form.html:112 templates/form.html.py:117
-msgid ""
-"La catégorie que vous avez choisi nécéssite des justificatifs suplémentaires."
-msgstr "The category you choose need additional justificatives."
+#: inscriptions/templates/form.html:95
+#, fuzzy
+#| msgid "Catégories"
+msgid "Choix de la catégorie"
+msgstr "Categories"
 
-#: templates/form.html:113
-msgid ""
-"Catégorie Famille : Veuillez le renseigner les liens de parenté pour chaque "
-"équipiers."
-msgstr "Family category: Please inform kinship for each crew."
-
-#: templates/form.html:118
-msgid ""
-"Catégorie Entreprise / Étudiants : Veuillez ajouter un certificat signé par "
-"l'employeur (un seul pour toute l'équipe, <a href=\"http://www.6hdeparis.fr/"
-"wp-content/uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank"
-"\">modèle</a>) ou une copie des fiches de paies ou une copie des cartes "
-"étudiants."
-msgstr ""
-"Enterprise / School category: Please add a certificate signed by the "
-"employer  (one for the team, <a href=\"http://www.6hdeparis.fr/wp-content/"
-"uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank\">model</a>) or "
-"a copy of your school id cards."
-
-#: templates/form.html:122
+#: inscriptions/templates/form.html:105
 #, python-format
 msgid ""
 "J'accepte le <a href=\"%(url)s\" target=\"_blank\">règlement de la course</a>"
 msgstr "I accept <a href=\"%(url)s\" target=\"_blank\">race rules</a>"
 
-#: templates/form.html:128
+#: inscriptions/templates/form.html:116
 msgid "Précédent"
 msgstr "Previous"
 
-#: templates/form.html:129
+#: inscriptions/templates/form.html:117
 msgid "Suivant"
 msgstr "Next"
 
-#: templates/form.html:130
+#: inscriptions/templates/form.html:118
 msgid "Valider"
 msgstr "Submit"
 
-#: templates/index.html:7
+#: inscriptions/templates/homepage.html:13
+msgid "Welcome to<br>pinax-project-account"
+msgstr ""
+
+#: inscriptions/templates/homepage.html:15
+msgid ""
+"\n"
+"                In addition to what is provided by the \"zero\" project, "
+"this project\n"
+"                provides thorough integration with django-user-accounts, "
+"adding\n"
+"                comprehensive account management functionality. It is a "
+"foundation\n"
+"                suitable for most sites that have user accounts.\n"
+"                "
+msgstr ""
+
+#: inscriptions/templates/homepage.html:25
+#, python-format
+msgid ""
+"You can <a href=\"%(login_url)s\" class=\"btn btn-default\">Log In</a> or <a "
+"href=\"%(signup_url)s\" class=\"btn btn-primary\">Sign Up</a> to try out the "
+"site."
+msgstr ""
+
+#: inscriptions/templates/homepage.html:31
+msgid "What is Pinax?"
+msgstr ""
+
+#: inscriptions/templates/homepage.html:33
+msgid ""
+"\n"
+"                <b>Pinax</b> is an open-source platform based on Django and\n"
+"                intended to provide a starting point for websites. It takes\n"
+"                care of the things that many sites have in common, so you "
+"can\n"
+"                focus on what makes your site different.\n"
+"                "
+msgstr ""
+
+#: inscriptions/templates/homepage.html:43
+msgid ""
+"\n"
+"                    <b>Starter projects</b> provide project layout,\n"
+"                    scaffolding, already integrated components and\n"
+"                    ready-to-go code.\n"
+"                    "
+msgstr ""
+
+#: inscriptions/templates/homepage.html:51
+msgid ""
+"\n"
+"                    <b>Reusable apps</b> provide common\n"
+"                    infrastructure, back-end functionality,\n"
+"                    and user-facing components.\n"
+"                    "
+msgstr ""
+
+#: inscriptions/templates/homepage.html:59
+msgid ""
+"\n"
+"                    <b>Themes</b> provide default templates and\n"
+"                    stylesheets for quick prototyping and easy "
+"customization.\n"
+"                    "
+msgstr ""
+
+#: inscriptions/templates/homepage.html:70
+msgid ""
+"\n"
+"                See <a href=\"http://pinaxproject.com/\">pinaxproject.com</"
+"a>\n"
+"                for more information.\n"
+"                "
+msgstr ""
+
+#: inscriptions/templates/index.html:11
 msgid "Prochaines courses"
 msgstr "Next races"
 
-#: templates/index.html:10 templates/index.html.py:27
+#: inscriptions/templates/index.html:19 inscriptions/templates/index.html:53
 #, python-format
 msgid "le %(date)s à %(ville)s"
 msgstr "the %(date)s at %(ville)s"
 
-#: templates/index.html:13
+#: inscriptions/templates/index.html:20
+#, python-format
+msgid "Organisé par %(organisateur)s."
+msgstr ""
+
+#: inscriptions/templates/index.html:27
 #, python-format
 msgid "Fermeture des inscriptions le %(fermeture)s"
 msgstr "Registration 'll close at %(fermeture)s"
 
-#: templates/index.html:17
+#: inscriptions/templates/index.html:28 inscriptions/templates/index.html:55
+msgid "Liste des inscrits"
+msgstr ""
+
+#: inscriptions/templates/index.html:33
 #, python-format
 msgid "Ouverture des inscriptions le %(ouverture)s"
 msgstr "Registration opening on %(ouverture)s"
 
-#: templates/index.html:24
+#: inscriptions/templates/index.html:48
 msgid "Anciennes courses"
 msgstr "Past races"
 
-#: templates/index.html:30
+#: inscriptions/templates/index.html:54
+msgid "Site de la course"
+msgstr ""
+
+#: inscriptions/templates/index.html:57
 msgid "Résultats"
 msgstr "Results"
 
-#: templates/not_opened_yet.html:5
+#: inscriptions/templates/not_opened_yet.html:11
 #, python-format
 msgid "Ouverture des inscriptions le %(ouverture)s."
 msgstr "Registration opening on %(ouverture)s"
 
-#: templates/stats2.html:221
-msgid "Individuel Homme"
-msgstr "Individual Man"
-
-#: templates/stats2.html:222
-msgid "Individuel Femme"
-msgstr "Individual Woman"
-
-#: templates/stats2.html:223
-msgid "Duo Homme ou Mixte"
-msgstr "Duo Men or Mixed"
-
-#: templates/stats2.html:224
-msgid "Duo Femme"
-msgstr "Duo Woman"
-
-#: templates/stats2.html:225
-msgid "Junior"
-msgstr "Junior"
-
-#: templates/stats2.html:226
-msgid "Sénior Homme ou Mixte"
-msgstr "Senior Men or Mixed"
-
-#: templates/stats2.html:227
-msgid "Sénior Femme"
-msgstr "Senior Woman"
-
-#: templates/stats2.html:228
-msgid "Vétéran"
-msgstr "Veteran"
-
-#: templates/stats2.html:229
-msgid "Famille"
-msgstr "Family"
-
-#: templates/stats2.html:230
-msgid "Entreprise / Étudiants"
-msgstr "Enterprise / School"
-
-#: templates/admin/base_site.html:4 templates/admin/base_site.html.py:7
-#, python-format
-msgid "Administration %(nom)s"
+#: inscriptions/templates/not_opened_yet.html:12
+msgid "Accéder au site de la course"
 msgstr ""
 
-#: templates/admin/base_site.html:11
-msgid "Course : "
-msgstr "Race:"
-
-#: templates/admin/course_choose.html:4
-msgid "Sélectionnez votre course :"
-msgstr "Select your race:"
-
-#: templates/admin/dashboard.html:22
-msgid "Résumé"
+#: inscriptions/views.py:83
+msgid "Désolé, il n'y a plus de place dans cette catégorie"
 msgstr ""
 
-#: templates/admin/dashboard.html:112
-msgid "Documents à vérifier"
-msgstr ""
+#~ msgid "Certificat médical établi après le 3/08/2013"
+#~ msgstr "Medical certificate issued after the 08.03.2013"
 
-#: templates/admin/dashboard.html:127
-#, python-format
-msgid "Models in the %(name)s application"
-msgstr ""
+#~ msgid "Lien de parenté"
+#~ msgstr "Family relationship"
 
-#: templates/admin/dashboard.html:128
-#, python-format
-msgid "%(name)s"
-msgstr ""
+#~ msgid "Justificatif entreprise / etudiant"
+#~ msgstr "Enterprise / School justification"
 
-#: templates/admin/dashboard.html:140
-msgid "Add"
-msgstr ""
+#~ msgid "Justificatif valide"
+#~ msgstr "Valid justificative"
 
-#: templates/admin/dashboard.html:146
-msgid "Change"
-msgstr ""
+#~ msgid "Accueil"
+#~ msgstr "Home"
 
-#: templates/admin/dashboard.html:156
-msgid "You don't have permission to edit anything."
-msgstr ""
+#~ msgid ""
+#~ "Vous pouvez envoyer vos justificatifs par internet ou par courrier. Vous "
+#~ "pouvez payer votre inscription par internet ou par chèque. Une fois votre "
+#~ "inscription terminée, vous recevrez un email de confirmation."
+#~ msgstr ""
+#~ "You can send your certificates online or by mail. You can pay online or "
+#~ "by check. Once your registration is finished, you'll receive a "
+#~ "confirmation email."
 
-#: templates/admin/dashboard.html:164
-msgid "Recent Actions"
-msgstr ""
+#~ msgid ""
+#~ "Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en "
+#~ "pièce jointe (formats PDF ou JPEG, <a href=\"http://www.6hdeparis.fr/wp-"
+#~ "content/uploads/2013/03/certificat_medical.pdf\" target=\"_blank\">modèle "
+#~ "de certificat</a>)."
+#~ msgstr ""
+#~ "If you can, scan the certificate or the license and add it (formats PDF "
+#~ "or JPEG, <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+#~ "certificat_medical.pdf\" target=\"_blank\">medial certificat model in "
+#~ "french</a>)."
 
-#: templates/admin/dashboard.html:165
-msgid "My Actions"
-msgstr ""
+#~ msgid ""
+#~ "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier."
+#~ msgstr "You alsa can upload it later or send it by mail."
 
-#: templates/admin/dashboard.html:169
-msgid "None available"
-msgstr ""
+#~ msgid ""
+#~ "La catégorie que vous avez choisi nécéssite des justificatifs "
+#~ "suplémentaires."
+#~ msgstr "The category you choose need additional justificatives."
 
-#: templates/admin/dashboard.html:183
-msgid "Unknown content"
-msgstr ""
+#~ msgid ""
+#~ "Catégorie Famille : Veuillez le renseigner les liens de parenté pour "
+#~ "chaque équipiers."
+#~ msgstr "Family category: Please inform kinship for each crew."
 
-#: templates/admin/equipe/send_mail.html:23
-msgid "Expéditeur :"
-msgstr ""
+#~ msgid ""
+#~ "Catégorie Entreprise / Étudiants : Veuillez ajouter un certificat signé "
+#~ "par l'employeur (un seul pour toute l'équipe, <a href=\"http://"
+#~ "www.6hdeparis.fr/wp-content/uploads/2013/03/attestation_entreprise.pdf\" "
+#~ "target=\"_blank\">modèle</a>) ou une copie des fiches de paies ou une "
+#~ "copie des cartes étudiants."
+#~ msgstr ""
+#~ "Enterprise / School category: Please add a certificate signed by the "
+#~ "employer  (one for the team, <a href=\"http://www.6hdeparis.fr/wp-content/"
+#~ "uploads/2013/03/attestation_entreprise.pdf\" target=\"_blank\">model</a>) "
+#~ "or a copy of your school id cards."
 
-#: templates/admin/equipe/send_mail.html:25
-msgid "Contact"
-msgstr ""
+#~ msgid "Individuel Homme"
+#~ msgstr "Individual Man"
 
-#: templates/admin/equipe/send_mail.html:26
-msgid "Moi"
-msgstr ""
+#~ msgid "Individuel Femme"
+#~ msgstr "Individual Woman"
 
-#: templates/admin/equipe/send_mail.html:27
-msgid "À :"
-msgstr ""
+#~ msgid "Duo Homme ou Mixte"
+#~ msgstr "Duo Men or Mixed"
 
-#: templates/admin/equipe/send_mail.html:28
-msgid "Sujet :"
-msgstr ""
+#~ msgid "Duo Femme"
+#~ msgstr "Duo Woman"
 
-#: templates/admin/equipe/send_mail.html:30
-msgid "Envoyer"
-msgstr ""
+#~ msgid "Junior"
+#~ msgstr "Junior"
 
-#: templates/admin/equipe/send_mails.html:24
-msgid "Prévisualiser"
-msgstr ""
+#~ msgid "Sénior Homme ou Mixte"
+#~ msgstr "Senior Men or Mixed"
 
-#: templates/admin/equipe/send_mails.html:42
-#, python-format
-msgid "Envoyer à %(num)s équipes"
-msgstr ""
+#~ msgid "Sénior Femme"
+#~ msgstr "Senior Woman"
+
+#~ msgid "Vétéran"
+#~ msgstr "Veteran"
+
+#~ msgid "Famille"
+#~ msgstr "Family"
+
+#~ msgid "Entreprise / Étudiants"
+#~ msgstr "Enterprise / School"
+
+#~ msgid "Course : "
+#~ msgstr "Race:"
 
 #~ msgid ""
 #~ "PUC - 6h Roller de Paris\n"
@@ -983,12 +2921,6 @@ msgstr ""
 #~ "PUC - 6h Roller de Paris\n"
 #~ "17 avenue Pierre de Coubertin\n"
 #~ "75013 Paris"
-
-#~ msgid ""
-#~ "Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
-#~ "(formats PDF ou JPEG)."
-#~ msgstr ""
-#~ "If you can, scan the authorization and add it (formats PDF or JPEG)."
 
 #~ msgid ""
 #~ "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
@@ -1067,11 +2999,6 @@ msgstr ""
 #~ "We hace received your paiment of € %(paiement)s € for the team <strong>"
 #~ "%(equipe)s</strong>."
 
-#~ msgid ""
-#~ "Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier "
-#~ "(<a href="
-#~ msgstr "You also can upload it later or send it by mail."
-
 #~ msgid "Il manque les certificats médicaux de :"
 #~ msgstr "Missing medical certificate:"
 
@@ -1086,6 +3013,3 @@ msgstr ""
 
 #~ msgid "Super Vétéran"
 #~ msgstr "Super Veteran"
-
-#~ msgid "Date du certificat médical"
-#~ msgstr "Medical certificate date"

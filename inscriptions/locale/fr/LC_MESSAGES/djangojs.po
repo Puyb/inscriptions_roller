@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-15 01:05+0200\n"
+"POT-Creation-Date: 2015-12-27 12:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,62 +18,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
-#: static/form.js:71
+#: inscriptions/static/form.js:74
 msgid "Ce nom d'équipe est déjà utilisé !"
 msgstr ""
 
-#: static/form.js:100
+#: inscriptions/static/form.js:103
 msgid ""
-"Désolé, il n'y a plus de place dans ces catégories. Changez le nombre de "
+"Désolé, il n'y a plus de place dans cette catégorie. Changez le nombre de "
 "participants."
 msgstr ""
 
-#: static/form.js:131
+#: inscriptions/static/form.js:135
 msgid "Veuillez corriger les champs en rouge."
 msgstr ""
 
-#: static/form.js:151
+#: inscriptions/static/form.js:155
 msgid ""
 "Votre équipe n'est éligible dans aucune des catégories proposées pour cette "
 "compétition. Veuillez vous référer au réglement de la course disponible sur "
 "le site pour voir les critères de chaque catégorie."
 msgstr ""
 
-#: static/form.js:175
+#: inscriptions/static/form.js:182
 msgid ""
 "Vos modifications impliquent un changement de catégorie. Veuillez "
 "sélectionner la nouvelle catégorie."
 msgstr ""
 
-#: static/form.js:217
-msgid ""
-"Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
-"(formats PDF ou JPEG)."
-msgstr ""
-
-#: static/form.js:217
-msgid ""
-"Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (<a "
-"href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
-"autorisation_parentale.pdf\" target=\"_blank\">modèle</a>)."
-msgstr ""
-
-#: static/form.js:230
+#: inscriptions/static/form.js:246
 msgid "Licence"
 msgstr ""
 
-#: static/form.js:235
+#: inscriptions/static/form.js:250
 msgid "Certificat médical"
 msgstr ""
 
-#: static/form.js:259
+#: inscriptions/static/form.js:265
 msgid "E-mail (confirmation) :"
 msgstr ""
 
-#: static/form.js:338
+#: inscriptions/static/form.js:342
 msgid "Vous devez choisir une catégorie"
 msgstr ""
 
-#: static/form.js:342
+#: inscriptions/static/form.js:346
 msgid "Vous devez accépter le règlement de la compétition"
 msgstr ""

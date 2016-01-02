@@ -204,7 +204,7 @@ LANGUAGES = (
     ('en', u'English'),
 )
 
-LOCALE_PATHS = (os.path.join(PROJECT_ROOT , 'inscriptions/static/form.js'), )
+LOCALE_PATHS = (os.path.join(PROJECT_ROOT , 'inscriptions/locale'), )
 
 PAYPAL_URL = 'https://www.paypal.com/cgi-bin/webscr'
 # PAYPAL_URL = 'https://www.sandbox.paypal.com/cgi-bin/webscr'
