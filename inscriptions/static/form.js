@@ -82,7 +82,7 @@ function check_nom(wait) {
 function check_step(data) {
     // check values
     var ok = true;
-    var prefix = '#id_';
+    var prefix = '[name=';
     var test_data = data;
     var tests;
     var message = '';
@@ -120,15 +120,15 @@ function check_step(data) {
             justificatif:       /^(licence|certificat)$/,
             num_licence:        function(k) { return this.justificatif !== 'licence' || /^[0-9]{3,9}$/i.test(this[k]); }
         };
-        prefix = '#id_form-' + (actual_part - 1) + '-';
+        prefix = '[name=form-' + (actual_part - 1) + '-';
         test_data = data.equipiers[actual_part - 1];
     }
     for(var k in tests) {
         if(tests[k].test ? tests[k].test(test_data[k]) : tests[k].call(test_data, k)) {
-            $(prefix + k).parents('.form-group').removeClass('has-error');
+            $(prefix + k + ']').parents('.form-group').removeClass('has-error');
         } else {
             ok = false;
-            $(prefix + k).parents('.form-group').addClass('has-error');
+            $(prefix + k + ']').parents('.form-group').addClass('has-error');
         }
     }
     if(!ok) {
