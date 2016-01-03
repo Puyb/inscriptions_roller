@@ -1,6 +1,6 @@
 "use strict";
 /* globals COURSE, INSTANCE, CATEGORIES, UPDATE, STAFF, CHECK_URL, I18N */
-/* globals Prototype, $, $$, $F, $R, Form, Event, Ajax */
+/* globals $ */
 
 if(![].map)
     Array.prototype.map = function(fn) {
@@ -67,9 +67,10 @@ function check_nom(wait) {
     var v = $('#id_nom').val();
     if (v)
         new $.ajax(CHECK_URL, {
+            method: 'post',
             data: { nom: v, id: INSTANCE.ID || '0' },
             async: !wait,
-            success: function(r, text) {
+            success: function(text) {
                 if(text !== '0')
                     $('#nom_erreur').html(gettext("Ce nom d'équipe est déjà utilisé !"));
                 else
