@@ -83,7 +83,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             if 'skip' in request.POST and request.POST['skip'] != '':
                 skip = request.POST['skip'].split(',')
             equipier = Equipier.objects.get(id=request.POST['id'])
-            print('value:', request.POST['value'])
             if request.POST['value'] == 'yes' or request.POST['value'] == 'no':
                 equipier.piece_jointe_valide = request.POST['value'] == 'yes'
                 equipier.save()
@@ -92,9 +91,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             else:
                 skip.append(str(equipier.id))
         equipier = Equipier.objects.filter(equipe__course=course).exclude(id__in=skip).filter(verifier=True)
-        print(equipier.query)
 
-        print(equipier.count())
         if equipier.count() == 0:
             return redirect('/course/')
 
@@ -407,7 +404,6 @@ class CourseAdmin(admin.ModelAdmin):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
         qs = qs.filter(uid=course_uid, accreditations__user=request.user)
-        print(qs.query)
         return qs
 
     def changelist_view(self, request):

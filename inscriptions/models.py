@@ -122,6 +122,10 @@ class Course(models.Model):
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
+        if not self.id:
+            message = EmailMessage('Nouvelle course %s' % self.nom, """%s.
+""" % self.nom, settings.DEFAULT_FROM_MAIL, [ settings.SERVER_EMAIL ])
+            MailThread([message]).start()
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             message = EmailMessage('Votre course %s est activée' % self.nom, """Votre course %s est activée.
 Les inscriptions pourront commencer à la date que vous avez choisi.
