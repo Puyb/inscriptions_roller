@@ -416,8 +416,9 @@ class CourseAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.save()
-        obj.accreditations.create(user=request.user, role='admin')
-        messages.add_message(request, messages.INFO, u"Course créée. Vous recevrez un message dès qu'elle sera activée.")
+        if not change:
+            obj.accreditations.create(user=request.user, role='admin')
+            messages.add_message(request, messages.INFO, u"Course créée. Vous recevrez un message dès qu'elle sera activée.")
 
     def response_add(self, request, obj, post_url_continue=None):
         response = super().response_add(request, obj, post_url_continue=post_url_continue)
