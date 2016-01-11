@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% if instance.frais_paypal > 0 %}
-{% blocktrans with frais=instance.frais_paypal|floatformat:2 %}Pour tout paiement par internet, {{ frais }} € de frais seront ajoutés.{% endblocktrans %}<br />
+{% blocktrans with frais=instance.frais_paypal|floatformat:2 %}Pour tout paiement par internet, {{ frais }} € de frais seront ajoutés.{% endblocktrans %}{% blocktrans %}Ces frais correspondent aux frais de transaction Paypal.{% endblocktrans %}<br />
 {% endif %}
 <br />
 {% blocktrans with prix=instance.prix ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}<br />
