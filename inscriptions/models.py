@@ -34,7 +34,7 @@ MIXITE_CHOICES = (
     ('HX', _(u'Homme ou Mixte')),
     ('FX', _(u'Femme ou Mixte')),
     ('X', _(u'Mixte')),
-    ('', _(u'Libre')),
+    ('', _(u'Sans critères')),
 )
 
 JUSTIFICATIF_CHOICES = (
