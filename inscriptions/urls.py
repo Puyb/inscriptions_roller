@@ -34,6 +34,7 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/stats/$', 'inscriptions.views.stats', name='inscriptions.stats'),
     url(r'^(?P<course_uid>[^/]+)/stats/(?P<course_uid2>[^/]+)$', 'inscriptions.views.stats_compare', name='inscriptions.stats_compare'),
     url(r'^(?P<course_uid>[^/]+)/contact/$', 'inscriptions.views.contact', name='contact'),
+    url(r'^(?P<course_uid>[^/]+)/contact/thankyou/$', 'inscriptions.views.contact_done', name='contact_done'),
 ]
 urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/equipiers/$', 'inscriptions.admin_views.equipiers', name='inscriptions.equipiers'),

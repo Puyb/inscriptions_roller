@@ -147,7 +147,8 @@ function setup_categories(data) {
                 (c.sexe === 'F' && data.nombre === data.nombre_f) ||
                 (c.sexe === 'HX' && data.nombre_h >= 1) ||
                 (c.sexe === 'FX' && data.nombre_f >= 1) ||
-                (c.sexe === 'X'))
+                (c.sexe === 'X' && data.nombre_h >= 1 && data.nombre_f >= 1) ||
+                (c.sexe === ''))
             && c.valid(data);
     });
     

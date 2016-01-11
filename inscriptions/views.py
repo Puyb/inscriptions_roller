@@ -15,7 +15,7 @@ from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
-from .forms import EquipeForm, EquipierFormset
+from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException
 from .utils import MailThread
 
@@ -269,4 +269,22 @@ def index(request):
     }))
 
 def contact(request, course_uid):
-    raise Http404()
+    course = get_object_or_404(Course, uid=request.path.split('/')[1])
+    name = request.POST.get('name', '')
+    message = request.POST.get('message', '')
+    from_email = request.POST.get('email', '')
+
+    if message and from_email:
+        message = EmailMessage('[%s] Message' % course.uid, """Nom: %s
+Email: %s
+
+%s""" % (name, from_email, message), settings.DEFAULT_FROM_MAIL, [ course.email_contact ], reply_to=[from_email,])
+        MailThread([message]).start()
+        return HttpResponseRedirect('thankyou/')
+    else:
+        return render_to_response('contact.html', RequestContext(request, {'form': ContactForm()}))
+
+    return render_to_response('contact.html', RequestContext(request, {'form': ContactForm()}))
+
+def contact_done(request, course_uid):
+    return render_to_response('contact_done.html')

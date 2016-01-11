@@ -1,0 +1,9 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load bootstrap %}
+{% block body %}
+<h1>{% trans 'Votre message a été envoyé' %}</h1>
+<script>setTimeout(function() { location.href='../../'; }, 2000);</script>
+{% endblock %}
+

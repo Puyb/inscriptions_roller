@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
-from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect
+from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField
+from django.forms.widgets import Textarea
 from django.forms.extras.widgets import SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
@@ -83,3 +84,7 @@ class CourseForm(ModelForm):
                 getattr(instance, key).create(**item)
         return instance
 
+class ContactForm(Form):
+    name = CharField()
+    email = EmailField()
+    message = CharField(widget=Textarea())

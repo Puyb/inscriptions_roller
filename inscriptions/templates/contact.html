@@ -1,0 +1,23 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load bootstrap %}
+{% block body %}
+<h1>{% trans "Contactez nous" %}</h1>
+<form class="form-horizontal" method="post">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="media">
+                <div class="media-left">
+                    <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+                </div>
+                <div class="media-body">
+                    {{ form|bootstrap_horizontal }}
+                    {% csrf_token %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-success" id="button_submit" type="submit">{% trans "Envoyer" %}</button>
+</form>
+{% endblock %}
