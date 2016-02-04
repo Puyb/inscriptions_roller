@@ -6,7 +6,7 @@ PACKAGE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 PROJECT_ROOT = os.path.abspath(os.path.join(PACKAGE_ROOT, os.pardir))
 BASE_DIR = PACKAGE_ROOT
 
-DEBUG = True
+DEBUG = False
 
 DATABASES = {
     "default": {
@@ -181,7 +181,7 @@ EMAIL_HOST = 'smtp.mail.com'
 EMAIL_PORT = 25
 EMAIL_HOST_USER = 'example@mail.com'
 EMAIL_HOST_PASSWORD = 'secret'
-DEFAULT_FROM_MAIL = 'example@mail.com'
+DEFAULT_FROM_EMAIL = 'example@mail.com'
 
 
 ACCOUNT_OPEN_SIGNUP = True

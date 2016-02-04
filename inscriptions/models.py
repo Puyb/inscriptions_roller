@@ -125,12 +125,12 @@ class Course(models.Model):
             self.uid = self.nom.lower().replace(' ', '_')
         if not self.id:
             message = EmailMessage('Nouvelle course %s' % self.nom, """%s.
-""" % self.nom, settings.DEFAULT_FROM_MAIL, [ settings.SERVER_EMAIL ])
+""" % self.nom, settings.DEFAULT_FROM_EMAIL, [ settings.SERVER_EMAIL ])
             MailThread([message]).start()
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             message = EmailMessage('Votre course %s est activée' % self.nom, """Votre course %s est activée.
 Les inscriptions pourront commencer à la date que vous avez choisi.
-""" % self.nom, settings.DEFAULT_FROM_MAIL, [ self.email_contact ])
+""" % self.nom, settings.DEFAULT_FROM_EMAIL, [ self.email_contact ])
             MailThread([message]).start()
         super(Course, self).save(*args, **kwargs)
 
@@ -584,7 +584,7 @@ class Accreditation(models.Model):
         if self.role and self.id  and not Accreditation.objects.get(id=self.id).role:
             message = EmailMessage('[%s] Accès autorisé' % self.course.uid, """Votre demande d'accès à la course %s est acceptée.
 Connectez vous sur enduroller pour y accéder.
-""" % self.course.nom, settings.DEFAULT_FROM_MAIL, [ self.user.email ], reply_to=[self.course.email_contact,])
+""" % self.course.nom, settings.DEFAULT_FROM_EMAIL, [ self.user.email ], reply_to=[self.course.email_contact,])
             MailThread([message]).start()
         super().save(*args, **kwargs)
 
@@ -624,7 +624,7 @@ class TemplateMail(models.Model):
             if self.bcc:
                 bcc = re.split('[,; ]+', self.bcc)
             for dest in dests:
-                message = EmailMessage(subject, message, settings.DEFAULT_FROM_MAIL, [ dest ], bcc, reply_to=[self.course.email_contact,])
+                message = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ dest ], bcc, reply_to=[self.course.email_contact,])
                 message.content_subtype = "html"
                 messages.append(message)
         MailThread(messages).start()

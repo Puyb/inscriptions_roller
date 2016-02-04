@@ -76,7 +76,7 @@ def form(request, course_uid, numero=None, code=None):
                 for f in equipier_formset:
                     text += json.dumps(f.errors) + '\n'
                 text += json.dumps(request.POST)
-                mail = EmailMessage('Error in form submit', text, settings.DEFAULT_FROM_MAIL, [ settings.SERVER_EMAIL ], reply_to=[course.email_contact,])
+                mail = EmailMessage('Error in form submit', text, settings.DEFAULT_FROM_EMAIL, [ settings.SERVER_EMAIL ], reply_to=[course.email_contact,])
                 mail.content_subtype = "text"
                 MailThread([ mail ]).start()
         except NoPlaceLeftException as e:
@@ -278,7 +278,7 @@ def contact(request, course_uid):
         message = EmailMessage('[%s] Message' % course.uid, """Nom: %s
 Email: %s
 
-%s""" % (name, from_email, message), settings.DEFAULT_FROM_MAIL, [ course.email_contact ], reply_to=[from_email,])
+%s""" % (name, from_email, message), settings.DEFAULT_FROM_EMAIL, [ course.email_contact ], reply_to=[from_email,])
         MailThread([message]).start()
         return HttpResponseRedirect('thankyou/')
     else:
