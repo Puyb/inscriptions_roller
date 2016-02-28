@@ -300,7 +300,7 @@ class Categorie(models.Model):
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
-    sexe            = models.CharField(_(u'Sexe'), max_length=2, choices=MIXITE_CHOICES)
+    sexe            = models.CharField(_(u'Sexe'), max_length=2, choices=MIXITE_CHOICES, blank=True)
     validation      = models.TextField(_(u'Validation function (javascript)'))
     numero_debut    = models.IntegerField(_(u'Numero de dossard (début)'), default=0)
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
