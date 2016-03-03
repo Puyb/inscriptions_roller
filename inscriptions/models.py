@@ -362,7 +362,7 @@ def lookup_ville(nom, cp, pays):
         )
         obj.save()
         return obj
-    except json.JSONDecodeError as e:
+    except ValueError as e:
         print(response.text)
         traceback.print_exc()
     except Exception as e:

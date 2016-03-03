@@ -173,6 +173,8 @@ def confirm_ipn_data(data, PP_URL):
 
 @csrf_exempt
 def check_name(request, course_uid):
+    if 'nom' not in request.POST and 'id' not in request.POST:
+        return HttpResponse(status=422)
     return HttpResponse(
             Equipe.objects
                 .filter(course__uid=course_uid, nom__iexact=request.POST['nom'])

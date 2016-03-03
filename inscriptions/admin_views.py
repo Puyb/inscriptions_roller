@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import random
 import csv, io
-from .models import Equipe, Equipier, TemplateMail
+from .models import Equipe, Equipier, TemplateMail, Course
 from .settings import *
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
@@ -23,12 +23,14 @@ def dossards(request, course_uid):
 @login_required
 def listing(request, course_uid, template='listing.html'):
     return render_to_response(template, RequestContext(request, {
+        'course': get_object_or_404(Course, uid=course_uid),
         'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
     }))
 
 def equipiers(request, course_uid):
     return render_to_response('equipiers.html', RequestContext(request, {
+        'course': get_object_or_404(Course, uid=course_uid),
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid)
     }))
 

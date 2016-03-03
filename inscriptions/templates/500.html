@@ -1,4 +1,10 @@
-{% extends "base.html" %}
-{% block content %}
-500 - Internal Error
+{% extends "site_base.html" %}
+{% load i18n %}
+{% block body %}
+<div class="panel panel-danger">
+    <div class="panel-heading">500 - Internal Error</div>
+    <div class="panel-body">
+        {% blocktrans %}Une erreur interne est survenue pendant le traitement de votre demande. L'administrateur du site à été prévenu. N'hésitez pas à contacter l'organisation de votre course pour obtenir de l'assitance.{% endblocktrans %}
+    </div>
+</div>
 {% endblock %}

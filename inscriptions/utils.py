@@ -5,7 +5,7 @@ from threading import Thread
 #from django.core.mail import EmailMessage
 
 def urlEncodeNonAscii(b):
-    return re.sub(b'[\x80-\xFF]', lambda c: b'%%%02x' % ord(c.group(0)), b)
+    return re.sub(b'[\x80-\xFF]', lambda c: ('%%%02x' % ord(c.group(0))).encode('ascii'), b)
 
 def iriToUri(iri):
     parts = urlparse(iri)
