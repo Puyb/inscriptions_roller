@@ -553,11 +553,10 @@ class Equipier(models.Model):
                 original.prenom != self.prenom or
                 original.autorisation != self.autorisation):
                 self.autorisation_valide = None
-        self.verifier = ((self.piece_jointe and self.piece_jointe_valide == None) or
-                         (self.autorisation and self.autorisation_valide == None))
         self.licence_manquante = self.justificatif == 'licence' and not self.piece_jointe_valide and not self.piece_jointe
         self.certificat_manquant = self.justificatif == 'certificat' and not self.piece_jointe_valide and not self.piece_jointe
         self.autorisation_manquante = self.age() < 18 and not self.autorisation_valide and not self.autorisation
+        self.verifier = self.licence_manquante or self.certificat_manquant or self.autorisation_manquante
         self.erreur = self.piece_jointe_valide == False or (self.age() < 18 and self.autorisation_valide == False)
         self.valide = self.piece_jointe_valide == True and (self.age() >= 18 or self.autorisation_valide == True)
         self.homme = self.sexe == 'H'
