@@ -8,15 +8,16 @@ from django.core.urlresolvers import reverse
 from django.db.models import Count, Sum, F
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.template import RequestContext, Template, Context
 from django.template.loader import render_to_string
+from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail
 from .utils import MailThread
 
 @open_closed
@@ -290,3 +291,18 @@ Email: %s
 
 def contact_done(request, course_uid):
     return render_to_response('contact_done.html')
+
+def facture(request, course_uid, numero):
+    equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
+    if not equipe.date_facture:
+        equipe.date_facture = date.today();
+        equipe.save()
+    tpl = TemplateMail.objects.get(nom='facture', course__uid=course_uid);
+    context = Context({
+        "instance": equipe,
+    })
+    content = Template(tpl.message).render(context)
+    return TemplateResponse(request, 'facture.html', {
+        'content': content,
+    })
+
