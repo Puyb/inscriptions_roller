@@ -294,6 +294,9 @@ def contact_done(request, course_uid):
 
 def facture(request, course_uid, numero):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
+    if not equipe.paiement_complet():
+        raise Http404()
+
     if not equipe.date_facture:
         equipe.date_facture = date.today();
         equipe.save()
