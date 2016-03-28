@@ -353,15 +353,13 @@ $(function() {
     });
 });
 
-if(!UPDATE) {
-    if(new Date() >= COURSE.CLOSE_DATE) {
+if(!STAFF) {
+    if (new Date() >= COURSE.CLOSE_DATE) {
         alert("Désolé, les inscriptions sont fermées. Il n'est plus possible de s'incrire à la course");
         location.href = COURSE.URL;
-    } else if(COURSE.EQUIPIERS_COUNT >= COURSE.MAX_EQUIPIERS) {
+    }
+    if(!UPDATE && COURSE.EQUIPIERS_COUNT >= COURSE.MAX_EQUIPIERS) {
         alert("Désolé, la course est complete, il n'y a plus de place disponible.");
         location.href = COURSE.URL;
     }
 }
-
-
-

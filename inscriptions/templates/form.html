@@ -172,7 +172,6 @@
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
     {% if user.is_staff %}
-    UPDATE = false;
     STAFF = true;
     {% endif %}
     var I18N = {};
