@@ -9,6 +9,7 @@ from django.template import Template, Context
 from django.core.mail import EmailMessage
 import os, re, requests, json, sys
 from django.db import models
+from django.db.models.query import prefetch_related_objects
 from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
@@ -470,10 +471,9 @@ class Equipe(models.Model):
             if not self.numero:
                 self.numero = self.getNumero()
 
-        super(Equipe, self).save(*args, **kwargs)
         if not self.gerant_ville2:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
-            super(Equipe, self).save()
+        super(Equipe, self).save(*args, **kwargs)
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
@@ -561,10 +561,9 @@ class Equipier(models.Model):
         self.valide = self.piece_jointe_valide == True and (self.age() >= 18 or self.autorisation_valide == True)
         self.homme = self.sexe == 'H'
 
-        super(Equipier, self).save(*args, **kwargs)
         if not self.ville2:
             self.ville2 = lookup_ville(self.ville, self.code_postal, self.pays)
-            super(Equipier, self).save()
+        super(Equipier, self).save(*args, **kwargs)
 
     def dossard(self):
         return self.equipe.numero * 10 + self.numero
@@ -599,6 +598,10 @@ class TemplateMail(models.Model):
 
     def send(self, instances):
         messages = []
+        if isinstance(instances, list):
+            prefetch_related_objects(instances, ('equipier', ))
+        elif hasattr(instances, 'prefetch_related'):
+            instance.prefetch_related('equipiers')
         for instance in instances:
             dests = set()
             if self.destinataire in ('Organisateur', 'Tous'):
