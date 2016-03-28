@@ -486,8 +486,9 @@ class Equipe(models.Model):
                 LEFT JOIN inscriptions_equipe e2 ON e1.numero=e2.numero-1 AND e1.course_id=e2.course_id
                 WHERE e1.course_id=%s AND e1.numero>=%s AND e1.numero<=%s AND e2.numero IS NULL LIMIT 1""", 
                 [self.course.id, start, end])
+        res = list(res)
 
-        if len(list(res)) == 0 or res[0].numero == None:
+        if len(res) == 0 or res[0].numero == None:
             numero = start
         else:
             numero = res[0].numero + 1
@@ -599,7 +600,7 @@ class TemplateMail(models.Model):
     def send(self, instances):
         messages = []
         if isinstance(instances, list):
-            prefetch_related_objects(instances, ('equipier', ))
+            prefetch_related_objects(instances, ('equipier_set', ))
         elif hasattr(instances, 'prefetch_related'):
             instance.prefetch_related('equipiers')
         for instance in instances:

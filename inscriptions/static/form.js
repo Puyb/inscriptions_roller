@@ -316,6 +316,7 @@ $(function() {
                 $('#button_next').hide();
                 $('#id_form-TOTAL_FORMS').val(actual_part - 1);
                 $('#button_submit').show();
+                $('#button_submit')[0].disabled = false;
             }
         } else {
             $('#part' + actual_part).show();
