@@ -119,7 +119,7 @@ class Course(models.Model):
 
     @property
     def fermee(self):
-        return not self.active or self.date_fermeture < date.today()
+        return not self.active or self.date_fermeture <= date.today()
 
     def save(self, *args, **kwargs):
         if not self.uid:

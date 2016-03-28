@@ -1,77 +1,27 @@
-{% extends "easy_pdf/base.html" %}
+<style>
+    @page  { 
+        size: A4 portrait;
+        margin: 15mm;
+    } 
+    body  { margin: 0px;  } 
+    #adresse {
+        float: left;
+        width: 40%;
+    }
+    #date {
+        float: right;
+        width: 40%;
+        text-align: right;
+    }
 
-{% block layout_style %}
-    <style type="text/css">
-        @page {
-            size: {{ pagesize|default:"A4" }};
-            margin-left: 1.5cm;
-            margin-right: 1.5cm;
-            margin-top: 1.5cm;
-            margin-bottom: 1.5cm;
-            -pdf-frame-border: none;
-        }
-        #content {
-            position: relative;
-            font-size: 12pt;
-        }
-        #adresse {
-            position: absolute;
-            left: 0pt;
-            top: 0pt;
-            width: 40%;
-        }
-        #date {
-            position: absolute;
-            right: 0pt;
-            top: 0pt;
-            width: 40%;
-            text-align: right;
-        }
-        h1 {
-            text-align: center;
-            font-size: 20pt;
-        }
-    </style>
-{% endblock %}
+    #content {
+        clear: both;
+        margin-top: 2cm;
+    }
+    h1 {
+        text-align: center;
+        font-size: 20pt;
+    }
+</style>
 
-{% block content %}
-<div id="content">
-    <div id="adresse">
-        Paris Université Club<br />
-        17 avenue Pierre de Coubertin<br />
-        75013 Paris<br />
-        01 44 16 62 62<br />
-        Email: admi@puc.asso.fr
-    </div>
-    <div id="date">
-        Paris, le {{ equipe.date_facture }}
-    </div>
-
-    <div>
-
-        <h1>FACTURE 6HDP14-{{ equipe.numero }}</h1>
-
-        {{ equipe.gerant_prenom }} {{ equipe.gerant_nom }}<br />
-        {{ equipe.club }}<br />
-        {{ equipe.gerant_adresse1 }}<br />
-        {% if equipe.gerant_adress2 %}{{ equipe.gerant_adress2 }}<br />{% endif %}
-        {{ equipe.gerant_code_postal }} {{ equipe.gerant_ville }}<br />
-        {{ equipe.gerant_pays }}<br />
-        <br />
-        Inscription {{ equipe.course.nom }}, le {{ equipe.course.date }}<br />
-        <br />
-        Equipe : {{ equipe.numero }}<br />
-        {{ equipe.nom }}<br />
-        Catégorie : {{ equipe.categorie.code }} - {{ equipe.categorie.nom }}<br />
-        Prix: {{ equipe.prix }} €<br />
-        Facture acquittée<br />
-        <br />
-        Numéro d'agrément Jeunesse et Sport : 13088 du 10 mars 1954<br />
-        Numéro SIRET 784 259 624 00020<br />
-        Numéro APE 926C<br />
-        <br />
-        TVA non applicable article 293B du CGI<br />
-        Indémnité forfaitaire pour frais de recouvrement due au créancier an cas de retard de paiement (art 121-11 de la loi n° 2012 387 du 22/03/2012) est fixée à 40€ (décret n°2012-1115 du 2 octobre 2012).
-    </div>
-</div>
-{% endblock %}
+{{ content }}
