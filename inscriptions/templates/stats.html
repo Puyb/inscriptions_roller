@@ -61,147 +61,152 @@
             -ms-transform: rotate(270deg) scaleY(-1);
         }
     </style>
-    <div class="clearfix grid_16">
-        <h1>Origine des participants</h1>
-    </div>
-    <div class="clearfix grid_4">
-        <table>
-            <tr><th>Villes des participants</th><th>#</th><th>%</th></tr>
-            {% for ville in stats.villes|slice:":20" %}
-            <tr><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio ville.count stats.course.equipiers 100 %}%</td></tr>
-            {% endfor %}
-            {% with stats.villes|slice:"20:" as villes %}
-            <tr>
-                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ villes|length }} autres villes</a></td>
-                <td><script>
-                    var num = 0{% for ville in villes %} + {{ ville.count }}{% endfor %};
-                    document.write(num);
-                </script></td>
-                <td><script>
-                    document.write(Math.round(num / {{ stats.course.equipiers }} * 100));
-                </script>%</td>
-            </tr>
-            <tr></tr>
-            {% for ville in villes %}
-            <tr style="display:none"><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio villes.count stats.course.equipiers 100 %}%</td></tr>
-            {% endfor %}
-            {% endwith %}
-        </table>
-    </div>
-    <div class="grid_4">
-        <table>
-            <tr><th>Origine des &eacute;quipes</th><th>#</th><th>%</th></tr>
-            {% with stats.pays|pertinent_values:"equipes" as pays %}
-            {% for key in pays %}
-            <tr><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
-            {% endfor %}
-            {% endwith %}
-            {% with stats.pays|other_values:"equipes" as pays %}
-            <tr>
-                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ pays|length }} autres pays / regions</a></td>
-                <td><script>
-                    var num = 0{% for key in pays %} + {{ stats.pays|get:key|get:"equipes" }}{% endfor %};
-                    document.write(num);
-                </script></td>
-                <td><script>
-                    document.write(Math.round(num / {{ stats.course.equipes }} * 100));
-                </script>%</td>
-            </tr>
-            <tr></tr>
-            {% for key in pays %}
-            <tr style="display:none"><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
-            {% endfor %}
-            {% endwith %}
-        </table>
-    </div>
-    <div class="grid_8">
-        <canvas id="canvas_pays"></canvas>
-    </div>
-    <div class="clearfix grid_16">
-        <div id="map"></div>
-    </div>
-    <div class="clearfix grid_16">
-        <canvas id="canvas_distance"></canvas>
-    </div>
-
-    <div class="clearfix grid_16">
-        <hr />
-        <h1>Clubs</h1>
-    </div>
-    <div class="clearfix grid_6">
-        <table>
-            <tr><th>Clubs</th><th>#</th><th>%</th></tr>
-            {% with stats.clubs|pertinent_values:"equipes,2%" as clubs %}
-            {% for club in clubs %}
-            <tr><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
-            {% endfor %}
-            {% endwith %}
-            {% with stats.clubs|other_values:"equipes,2%" as clubs %}
-            <tr>
-                <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ clubs|length }} autres clubs</a></td>
-                <td><script>
-                    var num = 0{% for club in clubs %} + {{ stats.clubs|get:club|get:"equipes" }}{% endfor %};
-                    document.write(num);
-                </script></td>
-                <td><script>
-                    document.write(Math.round(num / {{ stats.course.equipes }} * 100));
-                </script>%</td>
-            </tr>
-            <tr></tr>
-            {% for club in clubs %}
-            <tr style="display:none"><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
-            {% endfor %}
-            {% endwith %}
-        </table>
-    </div>
-    <div class="grid_10">
-        <canvas id="canvas_clubs"></canvas>
+    <div class="panel panel-default">
+        <div class="panel-heading"> Origine des participants </div>
+        <div class="panel-body">
+            <div class="col-md-3">
+                <table>
+                    <tr><th>Villes des participants</th><th>#</th><th>%</th></tr>
+                    {% for ville in stats.villes|slice:":20" %}
+                    <tr><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio ville.count stats.course.equipiers 100 %}%</td></tr>
+                    {% endfor %}
+                    {% with stats.villes|slice:"20:" as villes %}
+                    <tr>
+                        <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ villes|length }} autres villes</a></td>
+                        <td><script>
+                            var num = 0{% for ville in villes %} + {{ ville.count }}{% endfor %};
+                            document.write(num);
+                        </script></td>
+                        <td><script>
+                            document.write(Math.round(num / {{ stats.course.equipiers }} * 100));
+                        </script>%</td>
+                    </tr>
+                    <tr></tr>
+                    {% for ville in villes %}
+                    <tr style="display:none"><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio villes.count stats.course.equipiers 100 %}%</td></tr>
+                    {% endfor %}
+                    {% endwith %}
+                </table>
+            </div>
+            <div class="col-md-3">
+                <table>
+                    <tr><th>Origine des &eacute;quipes</th><th>#</th><th>%</th></tr>
+                    {% with stats.pays|pertinent_values:"equipes" as pays %}
+                    {% for key in pays %}
+                    <tr><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    {% endfor %}
+                    {% endwith %}
+                    {% with stats.pays|other_values:"equipes" as pays %}
+                    <tr>
+                        <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ pays|length }} autres pays / regions</a></td>
+                        <td><script>
+                            var num = 0{% for key in pays %} + {{ stats.pays|get:key|get:"equipes" }}{% endfor %};
+                            document.write(num);
+                        </script></td>
+                        <td><script>
+                            document.write(Math.round(num / {{ stats.course.equipes }} * 100));
+                        </script>%</td>
+                    </tr>
+                    <tr></tr>
+                    {% for key in pays %}
+                    <tr style="display:none"><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    {% endfor %}
+                    {% endwith %}
+                </table>
+            </div>
+            <div class="col-md-6">
+                <canvas id="canvas_pays"></canvas>
+            </div>
+            <div class="col-md-12">
+                <div id="map"></div>
+            </div>
+            <div class="col-md-12">
+                <canvas id="canvas_distance"></canvas>
+            </div>
+        </div>
     </div>
 
-    <div class="clearfix grid_16">
-        <hr />
-        <h1>Catégories</h1>
-    </div>
-    <div class="clearfix grid_6">
-        <table>
-            <tr><th>Code</th><th>Catégorie</th><th>#</th><th>%</th></tr>
-            {% for cat, value in stats.categories.items %}
-            <tr><td>{{ cat }}</td><td>{{ value.name }} </td><td>{{ value.equipes }}</td><td>{% widthratio value.equipes stats.course.equipes 100 %} %</td></tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="grid_10">
-        <canvas id="canvas_categories"></canvas>
-    </div>
-    <div class="clearfix grid_16">
-        <canvas id="canvas_time"></canvas>
-        <canvas id="canvas_time2"></canvas>
+    <div class="panel panel-default">
+        <div class="panel-heading"> Clubs</div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <table>
+                    <tr><th>Clubs</th><th>#</th><th>%</th></tr>
+                    {% with stats.clubs|pertinent_values:"equipes,2%" as clubs %}
+                    {% for club in clubs %}
+                    <tr><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    {% endfor %}
+                    {% endwith %}
+                    {% with stats.clubs|other_values:"equipes,2%" as clubs %}
+                    <tr>
+                        <td><a onclick="var table = this.parentNode.parentNode.parentNode; for(var i=0; i<table.rows.length; i++) table.rows[i].style.display=''; this.parentNode.parentNode.style.display='none';">{{ clubs|length }} autres clubs</a></td>
+                        <td><script>
+                            var num = 0{% for club in clubs %} + {{ stats.clubs|get:club|get:"equipes" }}{% endfor %};
+                            document.write(num);
+                        </script></td>
+                        <td><script>
+                            document.write(Math.round(num / {{ stats.course.equipes }} * 100));
+                        </script>%</td>
+                    </tr>
+                    <tr></tr>
+                    {% for club in clubs %}
+                    <tr style="display:none"><td>{{ club }}</td><td>{{ stats.clubs|get:club|get:"equipes" }}</td><td>{% widthratio stats.clubs|get:club|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    {% endfor %}
+                    {% endwith %}
+                </table>
+            </div>
+            <div class="col-md-8">
+                <canvas id="canvas_clubs"></canvas>
+            </div>
+        </div>
     </div>
 
-    <div class="clearfix grid_16">
-        <hr />
-        <h1>Autre</h1>
+    <div class="panel panel-default">
+        <div class="panel-heading"> Catégories</div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <table>
+                    <tr><th>Code</th><th>Catégorie</th><th>#</th><th>%</th></tr>
+                    {% for cat, value in stats.categories.items %}
+                    <tr><td>{{ cat }}</td><td>{{ value.name }} </td><td>{{ value.equipes }}</td><td>{% widthratio value.equipes stats.course.equipes 100 %} %</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col-md-8">
+                <canvas id="canvas_categories"></canvas>
+            </div>
+            <div class="col-md-12">
+                <canvas id="canvas_time"></canvas>
+                <canvas id="canvas_time2"></canvas>
+            </div>
+        </div>
     </div>
-    <div class="clearfix grid_6">
-        <table>
-            <tr><th>Comment ont-il connu la course</th><th>#</th><th>%</th></tr>
-            {% for connu, count in stats.connu %}
-            <tr><td>{{ connu }}</td><td>{{ count }}</td><td>{% widthratio count stats.course.equipes 100 %} %</td></tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="grid_8">
-        <canvas id="canvas_connu"></canvas>
-    </div>
-    {% if user.is_staff %}
-    <div class="grid_8 clearfix">
-        <canvas id="canvas_paiement"></canvas>
-    </div>
-    <div class="grid_8">
-        <canvas id="canvas_documents"></canvas>
-    </div>
-    <div class="grid_8 clearfix">
-        <canvas id="canvas_licencies"></canvas>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"> Autres</div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                <table>
+                    <tr><th>Comment ont-il connu la course</th><th>#</th><th>%</th></tr>
+                    {% for connu, count in stats.connu %}
+                    <tr><td>{{ connu }}</td><td>{{ count }}</td><td>{% widthratio count stats.course.equipes 100 %} %</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col-md-8">
+                <canvas id="canvas_connu"></canvas>
+            </div>
+            {% if user.is_staff %}
+            <div class="col-md-6">
+                <canvas id="canvas_paiement"></canvas>
+            </div>
+            <div class="col-md-6">
+                <canvas id="canvas_documents"></canvas>
+            </div>
+            <div class="col-md-8">
+                <canvas id="canvas_licencies"></canvas>
+            </div>
+        </div>
     </div>
     {% endif %}
 
