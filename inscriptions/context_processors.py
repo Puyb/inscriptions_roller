@@ -17,18 +17,19 @@ def course(request):
         .annotate(min_age=Min('categories__min_age'), max_equipiers=Max('categories__max_equipiers')))
     if not course.count():
         return {}
+    course = course[0]
     return {
-        'COURSE':          course[0],
-        'YEAR':            course[0].date.year,
-        'MONTH':           course[0].date.month,
-        'DAY':             course[0].date.day,
-        'TITLE':           course[0].nom,
-        'MIN_AGE':         course[0].min_age,
-        'MAX_EQUIPIERS':   course[0].max_equipiers,
-        'CLOSE_YEAR':      course[0].date_fermeture.year,
-        'CLOSE_MONTH':     course[0].date_fermeture.month,
-        'CLOSE_DAY':       course[0].date_fermeture.day,
-        'PAYPAL_BUSINESS': course[0].paypal,
+        'COURSE':          course,
+        'YEAR':            course.date.year,
+        'MONTH':           course.date.month,
+        'DAY':             course.date.day,
+        'TITLE':           course.nom,
+        'MIN_AGE':         course.min_age,
+        'MAX_EQUIPIERS':   course.max_equipiers,
+        'CLOSE_YEAR':      course.date_fermeture.year,
+        'CLOSE_MONTH':     course.date_fermeture.month,
+        'CLOSE_DAY':       course.date_fermeture.day,
+        'PAYPAL_BUSINESS': course.paypal,
         'COURSES':         request.user.is_superuser and Course.objects.all() or [],
     }
 

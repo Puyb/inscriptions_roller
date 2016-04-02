@@ -7,7 +7,7 @@
 {% get_available_languages as LANGUAGES %}
 {% if create %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
 {% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
-<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('button_submit').disabled = true; $('button_submit').style.display='none'; return actual_part > parseInt($F('id_nombre')); ">
+<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); return actual_part > parseInt($('#id_nombre').val()); ">
     {% if errors %}
     <div class="panel panel-danger">
         {% if equipe_form.errors %}
