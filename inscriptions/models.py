@@ -193,6 +193,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 hommes_count=Coalesce(Sum('equipier__homme'), Value(0)),
             ).select_related('categorie', 'gerant_ville2')
             .prefetch_related('equipier_set')
+            .prefetch_related('equipier_set__equipe')
+            .prefetch_related('equipier_set__equipe__course')
         )
         tz = pytz.timezone('Europe/Paris')
         for equipe in equipes:
@@ -273,7 +275,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         result['course']['documents_electroniques'] = 0
         result['course']['documents_attendus'] = 0
         result['course']['licencies'] = 0
-        for equipier in Equipier.objects.filter(equipe__course=self):
+        for equipier in Equipier.objects.filter(equipe__course=self).select_related('equipe', 'equipe__course'):
             if equipier.piece_jointe_valide:
                 result['course']['documents'] += 1
                 if equipier.piece_jointe:
