@@ -604,7 +604,7 @@ class TemplateMail(models.Model):
         if isinstance(instances, list):
             prefetch_related_objects(instances, ('equipier_set', ))
         elif hasattr(instances, 'prefetch_related'):
-            instance.prefetch_related('equipiers')
+            instances.prefetch_related('equipiers')
         for instance in instances:
             dests = set()
             if self.destinataire in ('Organisateur', 'Tous'):
