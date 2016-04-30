@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys, requests, random, traceback, json
+import logging
 from datetime import datetime, date
 from functools import reduce
 from django.conf import settings
@@ -19,6 +20,8 @@ from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail
 from .utils import MailThread
+
+logger = logging.getLogger(__name__)
 
 @open_closed
 def form(request, course_uid, numero=None, code=None):
@@ -138,21 +141,23 @@ def ipn(request, course_uid):
     Adapted from IPN cgi script provided at http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/456361"""
 
     try:
-        if not confirm_ipn_data(request.body, settings.PAYPAL_URL):
+        if not confirm_ipn_data(request.body.decode('ascii'), settings.PAYPAL_URL):
+            logger.warning('Reject ipn %s', json.dumps(request.POST))
             return HttpResponse()
 
         data = request.POST
         if not 'payment_status' in data or not data['payment_status'] == "Completed":
             # We want to respond to anything that isn't a payment - but we won't insert into our database.
-             return HttpResponse()
+            logger.warning('ipn is not a payment %s', json.dumps(request.POST))
+            return HttpResponse()
 
         equipe = get_object_or_404(Equipe, id=data['invoice'][0:-4], course__uid=course_uid)
         equipe.paiement = data['mc_gross']
         equipe.paiement_info = 'Paypal %s %s' % (datetime.now(), data['txn_id'])
         equipe.save()
 
-    except Exception as e:
-        print(e, file=sys.stderr)
+    except:
+        logger.exception('error handling paypal ipn')
 
     return HttpResponse()
 
@@ -165,9 +170,9 @@ def confirm_ipn_data(data, PP_URL):
     response = requests.post(PP_URL, params, headers={ "Content-type": "application/x-www-form-urlencoded" })
 
     if response.text == "VERIFIED":
-        print("PayPal IPN data verification was successful.", file=sys.stderr)
+        logger.debug("PayPal IPN data verification was successful %s.", data)
     else:
-        print("PayPal IPN data verification failed.", file=sys.stderr)
+        logger.debug("PayPal IPN data verification failed %s.", data)
         return False
 
     return True
