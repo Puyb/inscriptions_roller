@@ -21,6 +21,9 @@ from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
+from django import forms
+from django.contrib.postgres import JSONField
+from django.contrib.contenttypes.models import ContentType
 import logging
 import traceback
 import pytz
@@ -145,7 +148,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         return '%s (%s)' % (self.nom, self.date)
 
     def send_mail(self, nom, instances):
-        mail = TemplateMail.objects.get(course=self, nom=nom)
+        mail = TemplateMail.objects.select_related('course').get(course=self, nom=nom)
         mail.send(instances)
 
     @property
@@ -408,6 +411,7 @@ class Equipe(models.Model):
     temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
+    extra              = JSONField()
 
     class Meta:
         unique_together = ( ('course', 'numero'), )
@@ -561,6 +565,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     ville2            = models.ForeignKey(Ville, null=True)
     transpondeur      = models.CharField(_(u'Transpondeur'), max_length=20, blank=True)
     taille_tshirt     = models.CharField(_(u'Taille T-shirt'), max_length=3, choices=TAILLES_CHOICES, blank=True)
+    extra             = JSONField()
 
     # Pre-calculated fields
     verifier               = models.BooleanField(_(u'Verifier'), editable=False)
@@ -612,6 +617,30 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
+
+class ExtraQuestion(models.Model):
+    TYPE_CHOICES = (
+        ('text', _('Texte')),
+        ('list', _('Liste')),
+        ('checkbox', _('Case à cocher')),
+    )
+    course = models.ForeignKey(Course, related_name='extra')
+    attache = models.ForeignKey(ContentType, verbose_name=_('Rattaché à'), limit_choices_to={ 'app_label': 'inscriptions', 'model__in': ['Equipe', 'Equipier'], })
+    type = models.CharField(max_length=200, choices=TYPE_CHOICES)
+    label = models.CharField(max_length=200)
+    required = models.BooleanField()
+    options = JSONField()
+
+    def getField(self):
+        if self.type == 'text':
+            field = forms.CharField(label=self.label, required=self.required)
+        if self.type == 'list':
+            field = forms.ChoiceField(label=self.label, required=self.required, choices=self.options.get('choices'))
+        if self.type == 'checkbox':
+            field = forms.BooleanField(label=self.label, required=self.required)
+        return {
+            ('extra%s' % self.id): field,
+        }
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations')

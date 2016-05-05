@@ -10,22 +10,40 @@ from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
 from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
+
+class ExtraModelForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        opts = self._meta
+        extra_questions = kwargs.pop('extra_questions')
+        instance = kwargs.get('instance')
+        if instance:
+            kwargs['initial'] = kwargs.get('initial', {})
+            kwargs['initial'].update(instance.extra)
+        super().__init__(*args, **kwargs)
+        for extra in extra_questions:
+            self.fields.update(extra.getField())
+    def _post_clean(self):
+        super()._post_clean()
+        self.instance.extra = { k: v for k, v in self.cleaned_data.items() if k.startswith('extra') }
 
 
-class EquipeForm(ModelForm):
+class EquipeForm(ExtraModelForm):
     class Meta:
         model = Equipe
-        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture', 'tours', 'temps', 'position_generale', 'position_categorie',)
+        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture', 'tours', 'temps', 'position_generale', 'position_categorie', 'extra', )
         widgets = {
             'categorie': HiddenInput(),
             'prix': HiddenInput(),
             'nombre': Select(choices=tuple([(i, i) for i in range(1, settings.MAX_EQUIPIERS + 1)])),
         }
 
-class EquipierForm(ModelForm):
+
+
+class EquipierForm(ExtraModelForm):
     class Meta:
         model = Equipier
-        exclude = ('equipe', 'numero', 'piece_jointe_valide', 'autorisation_valide', 'ville2', 'code_eoskates')
+        exclude = ('equipe', 'numero', 'piece_jointe_valide', 'autorisation_valide', 'ville2', 'code_eoskates', 'extra')
         widgets = {
             'sexe':              Select(choices=SEXE_CHOICES),
             'date_de_naissance': SelectDateWidget(years=range(datetime.now().year , datetime.now().year - 100, -1)),

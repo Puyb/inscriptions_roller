@@ -5,11 +5,12 @@ from datetime import datetime, date
 from functools import reduce
 from collections import defaultdict
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField
+from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -22,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, Challenge, ParticipationChallenge, EquipeChallenge
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge
 from .utils import MailThread, jsonDate
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,11 @@ logger = logging.getLogger(__name__)
 @open_closed
 @transaction.atomic
 def form(request, course_uid, numero=None, code=None):
-    course = get_object_or_404(Course.objects.annotate(min_age=Min('categories__min_age')), uid=course_uid)
+    course = get_object_or_404(Course.objects.prefetch_related(
+            Prefetch('extra', queryset=ExtraQuestion.objects.filter(attache=ContentType.objects.get_for_model(Equipe)), to_attr='extra_equipe'),
+            Prefetch('extra', queryset=ExtraQuestion.objects.filter(attache=ContentType.objects.get_for_model(Equipier)), to_attr='extra_equipier'),
+            'categories',
+        ).annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
     old_password = None
     create = True
@@ -45,14 +50,14 @@ def form(request, course_uid, numero=None, code=None):
         create = False
     if request.method == 'POST':
         try:
-            equipe_form = EquipeForm(request.POST, request.FILES, instance=instance)
+            equipe_form = EquipeForm(request.POST, request.FILES, instance=instance, extra_questions=course.extra_equipe)
             if instance:
-                equipier_formset = EquipierFormset(request.POST, request.FILES, queryset=instance.equipier_set.all())
+                equipier_formset = EquipierFormset(request.POST, request.FILES, queryset=instance.equipier_set.all(), form_kwargs={ 'extra_questions': course.extra_equipier })
             else:
-                if date.today() >= course.date_fermeture or equipiers_count >= course.limite_participants:
+                if date.today() >= course.date_fermeture or course.equipiers_count >= course.limite_participants:
                     if not request.user.is_staff:
                         return redirect('/')
-                equipier_formset = EquipierFormset(request.POST, request.FILES)
+                equipier_formset = EquipierFormset(request.POST, request.FILES, form_kwargs={ 'extra_questions': course.extra_equipier })
 
             if equipe_form.is_valid() and equipier_formset.is_valid():
                 new_instance = equipe_form.save(commit=False)
@@ -107,11 +112,11 @@ def form(request, course_uid, numero=None, code=None):
             code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key, None))
             if instance.password != code:
                 raise Http404()
-        equipe_form = EquipeForm(instance=instance)
+        equipe_form = EquipeForm(instance=instance, extra_questions=course.extra_equipe)
         if instance:
-            equipier_formset = EquipierFormset(queryset=instance.equipier_set.all())
+            equipier_formset = EquipierFormset(queryset=instance.equipier_set.all(), form_kwargs={ 'extra_questions': course.extra_equipier })
         else:
-            equipier_formset = EquipierFormset(queryset=Equipier.objects.none())
+            equipier_formset = EquipierFormset(queryset=Equipier.objects.none(), form_kwargs={ 'extra_questions': course.extra_equipier })
         link = '<a href="%s" target="_blank">%s</a>'
         autorisation_link = link % (reverse('inscriptions.model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
         certificat_link   = link % (reverse('inscriptions.model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
@@ -120,11 +125,16 @@ def form(request, course_uid, numero=None, code=None):
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
             equipier_form.fields['piece_jointe'].help_text = _(Equipier.PIECE_JOINTE_HELP) % { 'link': certificat_link }
 
-    nombres_par_tranche = {}
-    for categorie in Categorie.objects.filter(course=course):
-        key = '%d-%d' % (categorie.numero_debut, categorie.numero_fin)
-        if key not in nombres_par_tranche:
-            nombres_par_tranche[key] = Equipe.objects.filter(course=course, numero__gte=categorie.numero_debut, numero__lte=categorie.numero_fin).count()
+    nombres_par_tranche = { e['range']: e['count'] 
+            for e in Equipe.objects
+                .filter(course__uid='6hdp15')
+                .annotate(range=Concat(
+                    'categorie__numero_debut',
+                    Value('-'),
+                    'categorie__numero_fin',
+                    output_field=CharField()
+                )).values('range').annotate(count=Count('numero'))
+        }
     
     return render_to_response("form.html", RequestContext(request, {
         "equipe_form": equipe_form,
@@ -134,7 +144,7 @@ def form(request, course_uid, numero=None, code=None):
         "create": create,
         "update": not create,
         "nombres_par_tranche": nombres_par_tranche,
-        "equipiers_count": equipiers_count,
+        "equipiers_count": course.equipiers_count,
         "course": course,
         "message": message,
     }))
@@ -176,7 +186,8 @@ def find_challenges_categories(request, course_uid):
 def done(request, course_uid, numero):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
     try:
-        instance = Equipe.objects.prefetch_related(
+        instance = Equipe.objects.select_related('course').prefetch_related(
+		'equipier_set',
                 Prefetch('challenges', EquipeChallenge.objects.select_related('participation').prefetch_related(
                     Prefetch('participation__equipes', EquipeChallenge.objects.select_related('equipe__course'))
                 )),
@@ -188,7 +199,7 @@ def done(request, course_uid, numero):
             "instance": instance,
             "url": request.build_absolute_uri(reverse(
                 'inscriptions.edit', kwargs={
-                    'course_uid': course.uid,
+                    'course_uid': instance.course.uid,
                     'numero': instance.numero,
                     'code': instance.password
                 }

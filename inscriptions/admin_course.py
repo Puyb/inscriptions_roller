@@ -695,3 +695,10 @@ class MailAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/mail.js', )
 site.register(Mail, MailAdmin)
+
+class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
+    class Media:
+        js = ('custom_admin/extraquestion.js', )
+    fields = ('attache', 'type', 'label', 'required', 'options', )
+    list_display = ('label', 'attache', 'type', )
+site.register(ExtraQuestion, ExtraQuestionAdmin)

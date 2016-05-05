@@ -168,6 +168,18 @@
     {% endif %}
     var I18N = {};
     {% if message %} alert("{{ message }}"); location.reload(true); {% endif %}
+    TEST_EQUIPE = {};
+    TEST_EQUIPIER = {};
+    {% for extra in course.extra_equipe.all %}
+        {% if extra.required %}
+            TEST_EQUIPE.extra{{ extra.id }} = /./;
+        {% endif %}
+    {% endfor %}
+    {% for extra in course.extra_equipier.all %}
+        {% if extra.required %}
+            TEST_EQUIPIER.extra{{ extra.id }} = /./;
+        {% endif %}
+    {% endfor %}
 </script>
 <script src="{{ STATIC_URL }}form.js"></script>
 {% endblock %}

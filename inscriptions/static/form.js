@@ -124,6 +124,7 @@ function check_step(data) {
             gerant_telephone:   /^\+?[0-9]{10,15}$/i,
             connu:              /^.+$/i
         };
+        $.extend(test, TEST_EQUIPE);
     } else {
         tests = {
             nom:                /^.+$/i,
@@ -136,6 +137,7 @@ function check_step(data) {
             justificatif:       /^(licence|certificat)$/,
             num_licence:        function(k) { return this.justificatif !== 'licence' || /^[0-9]{3,9}$/i.test(this[k]); }
         };
+        $.extend(test, TEST_EQUIPIER);
         prefix = '[name=form-' + (actual_part - 1) + '-';
         test_data = data.equipiers[actual_part - 1];
     }
