@@ -6,7 +6,9 @@ from django.views.generic import ListView
 from .models import Equipe
 
 from inscriptions import admin
-
+from inscriptions import views as inscriptions_views
+from inscriptions import admin_views as inscriptions_admin
+from django.views.i18n import javascript_catalog
 
 urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
@@ -14,12 +16,12 @@ urlpatterns += [
     url(r'^admin/', include(admin.main_site.urls)),
     url(r"^account/", include("account.urls")),
     url(r'^i18n/', include('django.conf.urls.i18n')),
-    url(r'^jsi18n/$', 'django.views.i18n.javascript_catalog', { 'packages': ('inscriptions',), 'domain': 'djangojs' }),
+    url(r'^jsi18n/$', javascript_catalog, { 'packages': ('inscriptions',), 'domain': 'djangojs' }),
     url(r'^(?P<course_uid>[^/]+)/admin/$', admin.course_setter, name='admin_course_setter'),
     url(r'^course/', include(admin.course_site.urls)),
 ]
 urlpatterns += [
-    url(r'^$', 'inscriptions.views.index', name='home'),
+    url(r'^$', inscriptions_views.index, name='home'),
     url(r'^organisteurs/$', TemplateView.as_view(template_name='orga.html'), name='orga'),
     url(r'^challenges/$', 'inscriptions.views.challenges', name='inscriptions.challenges'),
     url(r'^challenges/(?P<challenge_uid>[^/]+)/$', 'inscriptions.views.challenge', name='inscriptions.challenge'),
