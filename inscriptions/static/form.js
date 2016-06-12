@@ -228,7 +228,7 @@ $(function() {
     var equipier_year_max = COURSE.YEAR - COURSE.MIN_AGE;
     $('select[name*=naissance_year]>option').each(function() {
         if (parseFloat(this.value) > equipier_year_max)
-            this.remove();
+            $(this).remove();
     });
 
     $('[data-id]').each(function() {
