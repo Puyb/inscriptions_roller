@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
-from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField
+from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField
 from django.forms.widgets import Textarea
 from django.forms.extras.widgets import SelectDateWidget
 from django.forms.formsets import formset_factory
@@ -88,3 +88,14 @@ class ContactForm(Form):
     name = CharField()
     email = EmailField()
     message = CharField(widget=Textarea())
+
+class ImportResultatForm(Form):
+    csv = FileField()
+    skip_first = BooleanField(required=False)
+    dossard_column = IntegerField()
+    time_column = IntegerField(required=False)
+    time_format = ChoiceField(choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
+    tours_column = IntegerField(required=False)
+    position_generale_column = IntegerField(required=False)
+    position_categorie_column = IntegerField(required=False)
+

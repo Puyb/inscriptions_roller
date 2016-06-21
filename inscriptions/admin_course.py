@@ -14,6 +14,7 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from .forms import CourseForm
+from .admin_views import import_resultats
 from account.views import LogoutView
 import json
 import re
@@ -44,6 +45,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
+            url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
         ] + super().get_urls()
         return urls
 
@@ -126,7 +128,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             return TemplateResponse(request, 'listing_dossards.html', { 'equipes': datas, 'keys': keys })
         return TemplateResponse(request, 'admin/listing_dossards_form.html', { 'course': course })
 
-
     def anomalies(self, request):
         request.current_app = self.name
         uid = request.COOKIES['course_uid']
@@ -153,6 +154,11 @@ class CourseAdminSite(admin.sites.AdminSite):
             doublons=doublons,
             course=course,
         ))
+
+    def resultats(self, request):
+        uid = request.COOKIES['course_uid']
+        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        return import_resultats(course, request)
 
     index_template = 'admin/dashboard.html'
 

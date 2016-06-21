@@ -398,6 +398,10 @@ class Equipe(models.Model):
     numero             = models.IntegerField(_(u'Numéro'))
     connu              = models.CharField(_('Comment avez vous connu la course ?'), max_length=200, choices=CONNU_CHOICES)
     date_facture       = models.DateField(_('Date facture'), blank=True, null=True)
+    tours              = models.IntegerField(_('Nombre de tours'), blank=True, null=True)
+    temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
+    position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
+    position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
 
     class Meta:
         unique_together = ( ('course', 'numero'), )
@@ -473,7 +477,7 @@ class Equipe(models.Model):
             if not self.numero:
                 self.numero = self.getNumero()
 
-        if not self.gerant_ville2:
+        if not self.gerant_ville2_id:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
         super(Equipe, self).save(*args, **kwargs)
 
@@ -501,6 +505,19 @@ class Equipe(models.Model):
     @property
     def date_annulation(self):
         return self.date + timedelta(days=31)
+
+    def temps_humain(self):
+        if not self.temps:
+            return ''
+        s = []
+        t = self.temps
+        while t:
+            f = ('%06' if not s else '%02') if t > 60 else '%'
+            f += 'd' if s else '.3f'
+            s.append(f % (t % 60))
+            t = (t / 60).to_integral()
+        s.reverse()
+        return ':'.join(s)
 
 class Equipier(models.Model):
     numero            = models.IntegerField(_(u'Numéro'))
