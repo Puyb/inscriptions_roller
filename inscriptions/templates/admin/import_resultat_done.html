@@ -1,0 +1,61 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block content %}
+<script src="http://tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+<script>
+</script>
+<style>
+    .r { text-align: right; }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nom</tH>
+            <th>☺</tH>
+            <th>Tours</th>
+            <th>Temps</th>
+            <th>Scratch</th>
+            <th>Catégorie</th>
+            <th>Position</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for e in equipes %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td class="r">{{ e.numero }}</td>
+            <td>{{ e.nom }}</td>
+            <td class="r">{{ e.nombre }}</td>
+            <td class="r">{{ e.tours }}</td>
+            <td class="r">{{ e.temps_humain }}</td>
+            <td class="r">{{ e.position_generale }}</td>
+            <td>{{ e.categorie.code }}</td>
+            <td class="r">{{ e.position_categorie }}</td>
+        </tr>
+{% endfor %}
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nom</tH>
+            <th>☺</tH>
+        </tr>
+    </thead>
+    <tbody>
+{% for e in equipes_manquantes %}
+        <tr class="{% cycle 'odd' 'even' %}">
+            <td class="r">{{ e.numero }}</td>
+            <td>{{ e.nom }}</td>
+        </tr>
+{% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+
