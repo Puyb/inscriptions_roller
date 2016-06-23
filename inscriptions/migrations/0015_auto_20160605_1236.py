@@ -3,8 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import django.db.models.deletion
-import jsonfield.fields
 
 
 class Migration(migrations.Migration):
@@ -15,24 +13,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='ExtraQuestion',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('text', 'Texte'), ('list', 'Liste'), ('checkbox', 'Case à cocher')], max_length=200)),
-                ('label', models.CharField(max_length=200)),
-                ('required', models.BooleanField()),
-                ('options', jsonfield.fields.JSONField()),
-                ('attache', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.ContentType', verbose_name='Rattaché à')),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='extra', to='inscriptions.Course')),
-            ],
-        ),
-        migrations.AddField(
-            model_name='equipe',
-            name='extra',
-            field=jsonfield.fields.JSONField(default={}),
-            preserve_default=False,
-        ),
         migrations.AddField(
             model_name='equipe',
             name='position_categorie',
@@ -52,11 +32,5 @@ class Migration(migrations.Migration):
             model_name='equipe',
             name='tours',
             field=models.IntegerField(blank=True, null=True, verbose_name='Nombre de tours'),
-        ),
-        migrations.AddField(
-            model_name='equipier',
-            name='extra',
-            field=jsonfield.fields.JSONField(default=None),
-            preserve_default=False,
         ),
     ]
