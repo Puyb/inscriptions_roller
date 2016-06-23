@@ -18,6 +18,7 @@ from django.db.models import Count, Sum, Value
 from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread
+from Levenshtein import distance
 import traceback
 import pytz
 
@@ -651,3 +652,56 @@ class TemplateMail(models.Model):
                 message.content_subtype = "html"
                 messages.append(message)
         MailThread(messages).start()
+
+# test:
+# from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
+class Challenge(models.Model):
+    nom = models.CharField(max_length=200)
+    courses = models.ManyToManyField(Course)
+
+    def add_course(self, course):
+        self.courses.add(course)
+        for equipe in course.equipe_set.all():
+            self.inscription_equipe(equipe)
+
+    def inscription_equipe(self, equipe):
+        #for p in self.participations.filter(equipes__equipe__nom__iexact=equipe.nom):
+        for p in self.participations.prefetch_related('equipes__equipe'):
+            if any(distance(equipe.nom, e.equipe.nom) < 3 for e in p.equipes.all()) and p.match(equipe):
+                p.add_equipe(equipe=equipe)
+                return p
+        p = ParticipationChallenge(challenge=self)
+        p.save()
+        p.add_equipe(equipe=equipe)
+        return p
+
+class ParticipationChallenge(models.Model):
+    challenge = models.ForeignKey(Challenge, related_name='participations')
+
+    def add_equipe(self, equipe, point=0):
+        e = EquipeChallenge(
+            participation=self,
+            equipe=equipe,
+            points=0,
+        )
+        e.save()
+        self.equipes.add(e)
+        return e
+        
+    def match(self, equipe):
+        equipiers_challenge = Equipier.objects.filter(equipe__challenge__participation=self)
+        c = 0
+        equipiers = equipe.equipier_set.all()
+        for e in equipiers:
+            for e2 in equipiers_challenge:
+                if e.justificatif == 'licence' and e2.justificatif == 'licence' and e.num_licence == e2.num_licence:
+                    c += 1
+                elif distance(e.nom.lower(), e2.nom.lower()) < 3 and distance(e.prenom.lower(), e2.prenom.lower()) < 3:
+                    c += 1
+        return c >= len(equipiers) / 2
+
+
+class EquipeChallenge(models.Model):
+    equipe = models.ForeignKey(Equipe, related_name='challenge')
+    participation = models.ForeignKey(ParticipationChallenge, related_name='equipes')
+    points = models.IntegerField()
