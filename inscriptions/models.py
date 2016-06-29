@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import defaultdict
 from operator import itemgetter
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
@@ -663,6 +664,22 @@ class Challenge(models.Model):
         self.courses.add(course)
         for equipe in course.equipe_set.all():
             self.inscription_equipe(equipe)
+        self.compute_course(course)
+
+    def compute_course(self, course):
+        points = [None, 15, 12, 10, 8, 6, 5, 4, 3, 2, ]
+        equipes = EquipeChallenge.objects.filter(
+                particpations__challenge=self,
+                equipe__course=course,
+                equipe__position_generale__isnull=False
+            ).order_by('equipe__position_generale').prefetch_related('participations__categorie')
+        positions = defaultdict(lambda: 1)
+        for equipe in equipes:
+            pos = positions[equipe.participations.get().categorie]
+            equipe.position = pos
+            equipe.points = points[pos] if pos < len(points) else 1
+            equipe.save()
+            positions[equipe.participation.categorie] += 1
 
     def inscription_equipe(self, equipe):
         #for p in self.participations.filter(equipes__equipe__nom__iexact=equipe.nom):
@@ -675,8 +692,48 @@ class Challenge(models.Model):
         p.add_equipe(equipe=equipe)
         return p
 
+class ChallengeCategorie(models.Model):
+    challenge       = models.ForeignKey(Challenge, related_name='categories')
+    nom             = models.CharField(_(u'Nom'), max_length=200)
+    code            = models.CharField(_(u'Code'), max_length=10)
+    min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
+    max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
+    min_age         = models.IntegerField(_(u'Age minimum'), default=12)
+    sexe            = models.CharField(_(u'Sexe'), max_length=2, choices=MIXITE_CHOICES, blank=True)
+    validation      = models.TextField(_(u'Validation function (javascript)'))
+    categories      = models.ManyToManyField(Categorie, related_name='+')
+
+    def __str__(self):
+        return self.code
+
+    def valide(self, equipe):
+        if equipe.categorie not in self.categories.all():
+            return False
+
+        equipiers = list(equipe.equipiers_set.all())
+        if len(equipiers) < self.min_equipiers and len(equipiers) > self.max_equipiers:
+            return False
+        for e in equipiers:
+            if e.age() < self.min_age:
+                return False
+        sexes = [e.sexe for e in equipiers]
+        if self.sexe == 'H' and 'F' not in sexes:
+            return False
+        if self.sexe == 'F' and 'H' not in sexes:
+            return False
+        if self.sexe == 'HX' and 'H' in sexes:
+            return False
+        if self.sexe == 'FX' and 'F' in sexes:
+            return False
+        if self.sexe == 'X' and 'H' in sexes and 'F' in sexes:
+            return False
+        #TODO self.validation
+        return True
+
+
 class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations')
+    categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, blank=True)
 
     def add_equipe(self, equipe, point=0):
         e = EquipeChallenge(
@@ -686,9 +743,16 @@ class ParticipationChallenge(models.Model):
         )
         e.save()
         self.equipes.add(e)
+        if not self.categorie:
+            for c in self.challenge.categories.all():
+                if c.valide(equipe):
+                    self.categorie = c
+                    self.save()
         return e
         
     def match(self, equipe):
+        if self.categorie and not self.categorie.valide(equipe):
+            return False
         equipiers_challenge = Equipier.objects.filter(equipe__challenge__participation=self)
         c = 0
         equipiers = equipe.equipier_set.all()
