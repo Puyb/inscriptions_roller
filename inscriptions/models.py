@@ -658,6 +658,7 @@ class TemplateMail(models.Model):
 # from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
 class Challenge(models.Model):
     nom = models.CharField(max_length=200)
+    logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
     courses = models.ManyToManyField(Course)
 
     def add_course(self, course):
