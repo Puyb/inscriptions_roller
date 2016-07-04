@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% block body %}
+    {% include "_list_filter.html" %}
     <script>
         var nbcomplet = 0;
     </script>
@@ -9,6 +10,10 @@
         <div class="panel-heading">Inscrits</div>
         <div class="panel-body">
             <table class="list_inscrits">
+            {% for equipe in equipes %}
+            {% if split_categories %}
+                {% ifchanged equipe.categorie %}
+                <tr><th colspan="6">{{ equipe.categorie.code }} - {{ equipe.categorie.nom }}</th></tr>
                 <tr>
                     <th>#</th>
                     <th>Nom</th>
@@ -23,8 +28,26 @@
                     <th><img alt="None" src="/static/admin/img/icon-yes.gif"></th>
                     {% endif %}
                 </tr>
-                {% for equipe in equipes %}
-                <tr class="{% cycle 'odd' 'even' %}" id="{{ forloop.counter }}">
+                {% endifchanged %}
+            {% else %}
+                {% if forloop.first %}
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Club</th>
+                    <th>Cat.</th>
+                    <th>Ville</th>
+                    <th>Pays</th>
+                    {% if user.is_staff %}
+                    <th>☺</th>
+                    <th>Date</th>
+                    <th>€</th>
+                    <th><img alt="None" src="/static/admin/img/icon-yes.gif"></th>
+                    {% endif %}
+                </tr>
+                {% endif %}
+            {% endif %}
+                <tr class="{% cycle 'odd' 'even' %}">
                     <td>{{ equipe.numero }}</td>
                     <td>{{ equipe.nom }}</td>
                     <td>{{ equipe.club }}</td>
