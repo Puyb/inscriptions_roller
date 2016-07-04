@@ -7,7 +7,7 @@ $(function() {
         }
     });
     var $place = $('<div>');
-    $('fieldset')
+    $('fieldset:first-child')
         .append($('<div class="form-row">')
             .append($('<label class="required">').html('Catégories&nbsp;:'))
             .append($place)
@@ -22,7 +22,7 @@ $(function() {
                 .append($('<th>').html('Code'))
                 .append($('<td>').html('Nom'))
             );
-        $place.html($table);
+        $place.empty().append($table);
         if(model.categories)
             model.categories.forEach(function(c) {
                 $('<tr>')
