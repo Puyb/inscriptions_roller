@@ -119,6 +119,6 @@ class ChallengeForm(ModelForm):
 
         fields = ChallengeCategorie._meta.get_all_field_names()
         for cat in COURSE_MODELS[model]['categories']:
-            instance.categories.create(**{ k: v for k, v in cat if k in fields })
+            instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
         return instance
 

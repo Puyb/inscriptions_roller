@@ -660,25 +660,36 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course)
+    courses = models.ManyToManyField(Course, null=True, blank=True)
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course):
-        self.courses.add(course)
+        course_categories = { c.code: c for c in course.categories.all() }
+        for c in self.categories.all():
+            if c.code in course_categories:
+                c.categories.add(course_categories[c.code])
         for equipe in course.equipe_set.all():
             self.inscription_equipe(equipe)
         self.compute_course(course)
 
+    def del_course(self, course):
+        course_categories = course.categories.all();
+        for c in self.categories.all():
+            c.categories.remove(course_categories)
+        EquipeChallenge.objects.filter(equipe__course=course, participation__challenge=self).delete()
+        self.participations.annotate(c=Count('equipes')).filter(c=0).delete()
+
+
     def compute_course(self, course):
         points = [None, 15, 12, 10, 8, 6, 5, 4, 3, 2, ]
         equipes = EquipeChallenge.objects.filter(
-                particpations__challenge=self,
+                participation__challenge=self,
                 equipe__course=course,
                 equipe__position_generale__isnull=False
-            ).order_by('equipe__position_generale').prefetch_related('participations__categorie')
+            ).order_by('equipe__position_generale').prefetch_related('participation__categorie')
         positions = defaultdict(lambda: 1)
         for equipe in equipes:
-            pos = positions[equipe.participations.get().categorie]
+            pos = positions[equipe.participation.categorie]
             equipe.position = pos
             equipe.points = points[pos] if pos < len(points) else 1
             equipe.save()
@@ -713,7 +724,7 @@ class ChallengeCategorie(models.Model):
         if equipe.categorie not in self.categories.all():
             return False
 
-        equipiers = list(equipe.equipiers_set.all())
+        equipiers = list(equipe.equipier_set.all())
         if len(equipiers) < self.min_equipiers and len(equipiers) > self.max_equipiers:
             return False
         for e in equipiers:

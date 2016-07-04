@@ -513,6 +513,21 @@ class ChallengeCategorieInline(admin.StackedInline):
     model = ChallengeCategorie
     extra = 0
 
+    def get_formset(self, request, obj=None, **kwargs):
+        # Hack! Hook parent obj just in time to use in formfield_for_manytomany
+        self.parent_obj = obj
+        return super().get_formset(request, obj, **kwargs)
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == 'categories':
+            if self.parent_obj:
+                kwargs['queryset'] = Categorie.objects.filter(
+                    course__in=self.parent_obj.courses.all(),
+                )
+            else:
+                kwargs['queryset'] = Categorie.objects.empty()
+        super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 class ChallengeAdmin(admin.ModelAdmin):
     list_display = ('nom', )
