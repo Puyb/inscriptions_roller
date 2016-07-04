@@ -1,0 +1,69 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load stats %}
+
+{% block body %}
+    {% include "_list_filter.html" %}
+    <div class="panel panel-default">
+        <div class="panel-heading">Resultats</div>
+        <div class="panel-body">
+            <table class="table table-striped" style="width: 100%">
+            {% for participation in participations %}
+            {% if split_categories %}
+                {% ifchanged equipe.categorie %}
+                    <tr><th colspan="7">{{ equipe.categorie.code }} - {{ equipe.categorie.nom }}</th></tr>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Cat.</th>
+                        {% for c in challenge.courses.all %}
+                        <th>{{ c.uid }}</th>
+                        {% endfor %}
+                        <th>Points</th>
+                    </tr>
+                {% endifchanged %}
+            {% else %}
+                {% if forloop.first %}
+                    <tr>
+                        <th>Nom</th>
+                        <th>Cat.</th>
+                        {% for c in challenge.courses.all %}
+                        <th>{{ c.uid }}</th>
+                        {% endfor %}
+                        <th>Points</th>
+                    </tr>
+                {% endif %}
+            {% endif %}
+                <tr data-toggle="popover" data-trigger="click" title="Détails" data-placement="bottom" data-content="
+                    <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
+                        <tr>
+                            <th>{% trans "Course" %}</th>
+                            <th>{% trans "Générale" %}</th>
+                            <th>{% trans "Cat." %}</th>
+                            <th>{% trans "Points" %}</th>
+                            <th>{% trans "Position" %}</th>
+                            <th>{% trans "Tours" %}</th>
+                            <th>{% trans "Temps" %}</th>
+                        </tr>{% for c in challenge.courses.all %}
+                        <tr>
+                            <th>{{ c.nom }}</th>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"position_generale"|default_if_none:"" }}</td>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"categorie"|default_if_none:"" }}</td>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"points"|default_if_none:"" }}</td>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"position_categorie"|default_if_none:"" }}</td>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"tours"|default_if_none:"" }}</td>
+                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"temps"|default_if_none:"" }}</td>
+                        </tr>
+                    {% endfor %}</table>
+                    ">
+                    <td>{{ participation.nom }}</td>
+                    <td>{{ participation.categorie.code }}</td>
+                    {% for c in challenge.courses.all %}
+                    <td>{{ participation.equipes_dict|get:c.uid|get:"points"|default_if_none:"" }}</td>
+                    {% endfor %}
+                    <td>{{ participation.points }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

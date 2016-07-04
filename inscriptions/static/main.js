@@ -8,4 +8,5 @@
         $('#navbar')[0].submit();
         event.preventDefault();
     });
+    $("[data-toggle=popover]").popover({placement: 'bottom', trigger: 'hover', html: true, container: 'body' });
 })(jQuery);

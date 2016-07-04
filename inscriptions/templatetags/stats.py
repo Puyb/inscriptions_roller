@@ -6,7 +6,13 @@ register = template.Library()
 
 @register.filter
 def get(dictionary, key):
-    return dictionary.get(key)
+    if not dictionary:
+        return None
+    if hasattr(dictionary, 'get'):
+        return dictionary.get(key)
+    if hasattr(dictionary, key):
+        return getattr(dictionary, key)
+    return None
 
 @register.filter
 def pertinent_values(dictionary, key):

@@ -658,8 +658,10 @@ class TemplateMail(models.Model):
 # from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
 class Challenge(models.Model):
     nom = models.CharField(max_length=200)
+    uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
     courses = models.ManyToManyField(Course)
+    active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course):
         self.courses.add(course)
@@ -735,6 +737,9 @@ class ChallengeCategorie(models.Model):
 class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations')
     categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True)
+
+    def equipes_dict(self):
+        return { e.equipe.course.uid: e for e in self.equipes.all() }
 
     def add_equipe(self, equipe, point=0):
         e = EquipeChallenge(
