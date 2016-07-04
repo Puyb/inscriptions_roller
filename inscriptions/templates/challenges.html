@@ -1,0 +1,53 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+
+{% for challenge in prochains_challenges %}
+{% if forloop.first %}
+    <section class="container">
+      <h1>{% trans "Prochains challenges" %}</h1>
+      <div class="row equal">{% endif %}
+        <div class="col-md-4">
+            <div class="thumbnail">
+                <a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid }}" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
+                <div class="caption">
+                    <h3><a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></h3>
+                    <ol>{% for course in challenge.courses.all %}
+                        <li>
+                            <h4>{{ course.nom }}</h4>
+                            <p>{% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}</p>
+                        </li>
+                    {% endfor %}</ol>
+                </div>
+            </div>
+        </div>
+    {% if forloop.last %}
+      </div>
+    </section>
+    {% endif %}
+{% endfor %}
+
+{% for challenge in anciens_challenges %}
+{% if forloop.first %}
+    <section class="container">
+      <h1>{% trans "Anciens challenges" %}</h1>
+      <div class="row">{% endif %}
+        <div class="col-md-4">
+            <h2><a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></hr23>
+            <ol>{% for course in challenge.courses.all %}
+                <li>
+                    <h4>{{ course.nom }}</h4>
+                    <p>{% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}</p>
+                </li>
+            {% endfor %}</ol>
+        </div>
+{% if forloop.last %}
+        </div>
+    </section>
+{% endif %}
+{% endfor %}
+            
+{% endblock %}

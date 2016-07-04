@@ -6,7 +6,8 @@ from functools import reduce
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, F, Q
+from django.db.models import Count, Sum, Min, F, Q, Prefetch
+from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Template, Context
@@ -18,7 +19,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, Challenge, ParticipationChallenge, EquipeChallenge
 from .utils import MailThread
 
 logger = logging.getLogger(__name__)
@@ -337,7 +338,40 @@ def facture(request, course_uid, numero):
     })
 
 def challenges(request):
-    pass
+    challenges = Challenge.objects.filter(active=True).prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+
+    return render_to_response('challenges.html', RequestContext(request, {
+        'prochains_challenges': challenges.filter (courses__date__gt=date.today()).order_by('nom'),
+        'anciens_challenges':   challenges.exclude(courses__date__gt=date.today()).order_by('nom'),
+    }))
 
 def challenge(request, challenge_uid):
-    pass
+    sorts = ['points', 'nom', 'categorie__code']
+    challenge = get_object_or_404(Challenge, uid=challenge_uid)
+    prefetch_related_objects([ challenge, ], (
+        Prefetch('courses', Course.objects.order_by('date')),
+        'categories',
+    ))
+
+    participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe')
+    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'))
+    if request.GET.get('search'):
+        participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
+    s = []
+    if request.GET.get('by_categories') == '1':
+        s.append('categorie__code')
+    if request.GET.get('sort') in sorts + [ '-' + i for i in sorts ]:
+        s.append('-points')
+    else:
+        s.append(sorts[0])
+    participations = participations.order_by(*s)
+    if request.GET.get('categorie'):
+        participations = participations.filter(categorie__code=request.GET['categorie'])
+
+    return render_to_response('resultats_challenge.html', RequestContext(request, {
+        'challenge': challenge,
+        'participations': participations,
+        'sorts': sorts,
+        'split_categories':  request.GET.get('by_categories') == '1',
+    }))
+

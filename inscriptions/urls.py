@@ -21,8 +21,8 @@ urlpatterns += [
 urlpatterns += [
     url(r'^$', 'inscriptions.views.index', name='home'),
     url(r'^organisteurs/$', TemplateView.as_view(template_name='orga.html'), name='orga'),
-    url(r'^challenges/$', 'inscriptions.views.challenges', name='challenges'),
-    url(r'^challenges/(?P<challenge_uid>[^/]+)/$', 'inscriptions.views.challenge', name='challenges'),
+    url(r'^challenges/$', 'inscriptions.views.challenges', name='inscriptions.challenges'),
+    url(r'^challenges/(?P<challenge_uid>[^/]+)/$', 'inscriptions.views.challenge', name='inscriptions.challenge'),
     url(r'^(?P<course_uid>[^/]+)/vars.js$', TemplateView.as_view(template_name='vars.js')),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/done/$', 'inscriptions.views.done', name='inscriptions.done'),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/facture/$', 'inscriptions.views.facture', name='inscriptions.facture'),
