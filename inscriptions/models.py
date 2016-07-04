@@ -734,7 +734,7 @@ class ChallengeCategorie(models.Model):
 
 class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations')
-    categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, blank=True)
+    categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True)
 
     def add_equipe(self, equipe, point=0):
         e = EquipeChallenge(
