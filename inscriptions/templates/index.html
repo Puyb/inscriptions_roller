@@ -54,7 +54,7 @@
             <a href="{{ course.url }}">{% trans "Site de la course" %}</a>
             <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
             <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
-            {% trans "Résultats" %}
+            <a href="{% url "inscriptions.resultats" course_uid=course.uid %}">{% trans "Résultats" %}</a>
           </p>
         </div>
 {% if forloop.last %}

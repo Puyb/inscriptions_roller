@@ -1,0 +1,50 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+
+{% block body %}
+    {% include "_list_filter.html" %}
+    <div class="panel panel-default">
+        <div class="panel-heading">Resultats</div>
+        <div class="panel-body">
+            <table class="list_inscrits">
+            {% for equipe in equipes %}
+            {% if split_categories %}
+                {% ifchanged equipe.categorie %}
+                    <tr><th colspan="7">{{ equipe.categorie.code }} - {{ equipe.categorie.nom }}</th></tr>
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Générale</th>
+                        <th>Cat.</th>
+                        <th>Position</th>
+                        <th>Tours</th>
+                        <th>Temps</th>
+                    </tr>
+                {% endifchanged %}
+            {% else %}
+                {% if forloop.first %}
+                    <tr>
+                        <th>#</th>
+                        <th>Nom</th>
+                        <th>Générale</th>
+                        <th>Cat.</th>
+                        <th>Position</th>
+                        <th>Tours</th>
+                        <th>Temps</th>
+                    </tr>
+                {% endif %}
+            {% endif %}
+                <tr class="{% cycle 'odd' 'even' %}">
+                    <td>{{ equipe.numero }}</td>
+                    <td>{{ equipe.nom }}</td>
+                    <td>{{ equipe.position_generale }}</td>
+                    <td>{{ equipe.categorie }}</td>
+                    <td>{{ equipe.position_categorie }}</td>
+                    <td>{{ equipe.tours }}</td>
+                    <td>{{ equipe.temps_humain }}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

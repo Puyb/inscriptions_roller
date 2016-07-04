@@ -21,6 +21,8 @@ urlpatterns += [
 urlpatterns += [
     url(r'^$', 'inscriptions.views.index', name='home'),
     url(r'^organisteurs/$', TemplateView.as_view(template_name='orga.html'), name='orga'),
+    url(r'^challenges/$', 'inscriptions.views.challenges', name='challenges'),
+    url(r'^challenges/(?P<challenge_uid>[^/]+)/$', 'inscriptions.views.challenge', name='challenges'),
     url(r'^(?P<course_uid>[^/]+)/vars.js$', TemplateView.as_view(template_name='vars.js')),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/done/$', 'inscriptions.views.done', name='inscriptions.done'),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/facture/$', 'inscriptions.views.facture', name='inscriptions.facture'),
@@ -29,6 +31,7 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/ipn/$', 'inscriptions.views.ipn', name='inscriptions.ipn'),
     url(r'^(?P<course_uid>[^/]+)/check_name/$', 'inscriptions.views.check_name', name='inscriptions.check_name'),
     url(r'^(?P<course_uid>[^/]+)/list/$', 'inscriptions.views.list', name='inscriptions.list'),
+    url(r'^(?P<course_uid>[^/]+)/resultats/$', 'inscriptions.views.resultats', name='inscriptions.resultats'),
     url(r'^(?P<course_uid>[^/]+)/change/(?P<numero>\d+)/$', 'inscriptions.views.change', name='inscriptions.change'),
     url(r'^(?P<course_uid>[^/]+)/change/sent/$', 'inscriptions.views.change', { 'sent': True }, 'inscriptions.change_sent'),
     url(r'^(?P<course_uid>[^/]+)/change/$', 'inscriptions.views.change', name='inscriptions.change'),

@@ -6,7 +6,7 @@ from functools import reduce
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, F
+from django.db.models import Count, Sum, F, Q
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext, Template, Context
@@ -189,7 +189,28 @@ def check_name(request, course_uid):
             content_type="text/plain")
 
 def list(request, course_uid):
-    stats = Equipe.objects.filter(course__uid=course_uid).aggregate(
+    equipes = Equipe.objects.filter(course__uid=course_uid)
+    return _list(equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
+
+def resultats(request, course_uid):
+    equipes = Equipe.objects.filter(course__uid=course_uid, position_generale__isnull=False)
+    return _list(equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'])
+
+def _list(equipes, request, template, sorts):
+    if request.GET.get('search'):
+        equipes = equipes.filter(Q(nom__icontains=request.GET['search']) | Q(club__icontains=request.GET['search']))
+    s = []
+    if request.GET.get('by_categories') == '1':
+        s.append('categorie__code')
+    if request.GET.get('sort') in sorts + [ '-' + i for i in sorts ]:
+        s.append(request.GET['sort'])
+    else:
+        s.append(sorts[0])
+    equipes = equipes.order_by(*s)
+    if request.GET.get('categorie'):
+        equipes = equipes.filter(categorie__code=request.GET['categorie'])
+
+    stats = equipes.aggregate(
         count     = Count('id'),
         prix      = Sum('prix'), 
         nbpaye    = Count('paiement'), 
@@ -198,13 +219,14 @@ def list(request, course_uid):
         villes    = Count('gerant_ville2__nom', distinct=True),
         pays      = Count('gerant_ville2__pays', distinct=True),
     )
-    stats['equipiers'] = Equipe.objects.filter(course__uid=course_uid).aggregate(
+    stats['equipiers'] = equipes.aggregate(
         equipiers = Count('equipier'),
     )['equipiers']
-    equipes = Equipe.objects.filter(course__uid=course_uid).order_by('date')
-    return render_to_response('list.html', RequestContext(request, {
+    return render_to_response(template, RequestContext(request, {
         'stats': stats,
-        'equipes': equipes
+        'equipes': equipes,
+        'sorts': sorts,
+        'split_categories':  request.GET.get('by_categories') == '1',
     }))
 
 def change(request, course_uid, numero=None, sent=None):
@@ -314,3 +336,8 @@ def facture(request, course_uid, numero):
         'content': content,
     })
 
+def challenges(request):
+    pass
+
+def challenge(request, challenge_uid):
+    pass
