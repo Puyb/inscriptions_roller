@@ -8,7 +8,7 @@ from django.forms.extras.widgets import SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
-from .models import Equipe, Equipier, Course, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
+from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
 
 
@@ -98,4 +98,27 @@ class ImportResultatForm(Form):
     tours_column = IntegerField(required=False)
     position_generale_column = IntegerField(required=False)
     position_categorie_column = IntegerField(required=False)
+
+class ChallengeForm(ModelForm):
+    class Meta:
+        model = Challenge
+        exclude = ('active', )
+    class Media:
+        js = ('jquery-2.1.4.min.js', 'admin_create_challenge.js', )
+    course_model = CharField(
+        label=_("Model de course"),
+        widget=AdminRadioSelect(
+            choices=[(k, v['_name']) for k, v in COURSE_MODELS.items()]
+        )
+    )
+
+    def save(self, commit=True):
+        model = self.cleaned_data['course_model']
+        instance = super().save(commit=False)
+        instance.save()
+
+        fields = ChallengeCategorie._meta.get_all_field_names()
+        for cat in COURSE_MODELS[model]['categories']:
+            instance.categories.create(**{ k: v for k, v in cat if k in fields })
+        return instance
 

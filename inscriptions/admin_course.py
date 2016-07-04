@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from .forms import CourseForm
+from .forms import CourseForm, ChallengeForm
 from .admin_views import import_resultats
 from account.views import LogoutView
 import json
@@ -507,3 +507,22 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
     def has_add_permission(self, request):
         return False
 site.register(Accreditation, AccreditationAdmin)
+
+
+class ChallengeCategorieInline(admin.StackedInline):
+    model = ChallengeCategorie
+    extra = 0
+
+
+class ChallengeAdmin(admin.ModelAdmin):
+    list_display = ('nom', )
+    inlines = [ ChallengeCategorieInline,  ]
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj == None:
+            return ChallengeForm
+        return super().get_form(request, obj, **kwargs)
+
+
+site.register(Challenge, ChallengeAdmin)
+    
