@@ -29,6 +29,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participationchallenge',
             name='categorie',
-            field=models.ForeignKey(related_name='participations', default=None, blank=True, to='inscriptions.ChallengeCategorie'),
+            field=models.ForeignKey(related_name='participations', default=None, null=True, blank=True, to='inscriptions.ChallengeCategorie'),
         ),
     ]
