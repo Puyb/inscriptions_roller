@@ -19,9 +19,9 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Categories" %} <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a data-name="by_categories" data-value="{% if request.GET.by_categories == "1" %}">{% trans "Regrouper les catégories" %}{% else %}1">{% trans "Séparer les catégories" %}{% endif %}"</a></li>
+            <li><a data-name="by_categories" data-value="{% if request.GET.by_categories == "1" %}">{% trans "Regrouper les catégories" %}{% else %}1">{% trans "Séparer les catégories" %}{% endif %}</a></li>
             <li><a data-name="categorie" data-value="">{% if request.GET.categorie == "" %}<strong>{% endif %}{% trans "Toutes" %}{% if request.GET.categorie == "" %}</strong>{% endif %}</a></li>
-            {% for c in COURSE.categories.all %}
+            {% for c in categories %}
             <li><a data-name="categorie" data-value="{{ c.code }}">{% if request.GET.categorie == c.code %}<strong>{% endif %}{{ c.nom }}{% if request.GET.categorie == c.code %}</strong>{% endif %}</a></li>
             {% endfor %}
           </ul>

@@ -3,18 +3,21 @@
 {% load stats %}
 
 {% block body %}
+    {% with categories=challenge.categories.all %}
     {% include "_list_filter.html" %}
+    {% endwith %}
     <div class="panel panel-default">
         <div class="panel-heading">Resultats</div>
         <div class="panel-body">
             <table class="table table-striped" style="width: 100%">
             {% for participation in participations %}
             {% if split_categories %}
-                {% ifchanged equipe.categorie %}
-                    <tr><th colspan="7">{{ equipe.categorie.code }} - {{ equipe.categorie.nom }}</th></tr>
+                {% ifchanged participation.categorie %}
+                    <tr><th colspan="7">{{ participation.categorie.code }} - {{ participation.categorie.nom }}</th></tr>
                     <tr>
                         <th>Nom</th>
                         <th>Cat.</th>
+                        <th>Pos.</th>
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
@@ -26,6 +29,7 @@
                     <tr>
                         <th>Nom</th>
                         <th>Cat.</th>
+                        <th>Pos.</th>
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
@@ -37,26 +41,29 @@
                     <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
                         <tr>
                             <th>{% trans "Course" %}</th>
+                            <th>{% trans "#" %}</th>
                             <th>{% trans "Générale" %}</th>
                             <th>{% trans "Cat." %}</th>
                             <th>{% trans "Points" %}</th>
                             <th>{% trans "Position" %}</th>
                             <th>{% trans "Tours" %}</th>
                             <th>{% trans "Temps" %}</th>
-                        </tr>{% for c in challenge.courses.all %}
+                        </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
                         <tr>
                             <th>{{ c.nom }}</th>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"position_generale"|default_if_none:"" }}</td>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"categorie"|default_if_none:"" }}</td>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"points"|default_if_none:"" }}</td>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"position_categorie"|default_if_none:"" }}</td>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"tours"|default_if_none:"" }}</td>
-                            <td>{{ participation.equipes_dict|get:c.uid|get:"equipe"|get:"temps"|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.numero|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.position_generale|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.categorie|default_if_none:"" }}</td>
+                            <td>{{ e.points|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.tours|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.temps|default_if_none:"" }}</td>
                         </tr>
-                    {% endfor %}</table>
+                        {% endwith %}{% endfor %}</table>
                     ">
                     <td>{{ participation.nom }}</td>
                     <td>{{ participation.categorie.code }}</td>
+                    <td>{{ participation.position|default_if_none:"" }}</td>
                     {% for c in challenge.courses.all %}
                     <td>{{ participation.equipes_dict|get:c.uid|get:"points"|default_if_none:"" }}</td>
                     {% endfor %}
