@@ -346,7 +346,7 @@ def challenges(request):
     }))
 
 def challenge(request, challenge_uid):
-    sorts = ['points', 'nom', 'categorie__code']
+    sorts = ['position', 'nom', 'categorie__code']
     challenge = get_object_or_404(Challenge, uid=challenge_uid)
     prefetch_related_objects([ challenge, ], (
         Prefetch('courses', Course.objects.order_by('date')),

@@ -525,8 +525,11 @@ class ChallengeCategorieInline(admin.StackedInline):
                     course__in=self.parent_obj.courses.all(),
                 )
             else:
-                kwargs['queryset'] = Categorie.objects.empty()
-        super().formfield_for_manytomany(db_field, request, **kwargs)
+                kwargs['queryset'] = Categorie.objects.none()
+            f = super().formfield_for_manytomany(db_field, request, **kwargs)
+            f.label_from_instance = lambda x: '%s (%s) - %s (%s)' % (x.course.nom, x.course.uid, x.nom, x.code)
+            return f
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
 class ChallengeAdmin(admin.ModelAdmin):

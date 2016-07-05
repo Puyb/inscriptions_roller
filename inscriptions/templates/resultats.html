@@ -2,7 +2,9 @@
 {% load i18n %}
 
 {% block body %}
+    {% with categories=COURSE.categories.all %}
     {% include "_list_filter.html" %}
+    {% endwith %}
     <div class="panel panel-default">
         <div class="panel-heading">Resultats</div>
         <div class="panel-body">
@@ -38,7 +40,7 @@
                     <td>{{ equipe.numero }}</td>
                     <td>{{ equipe.nom }}</td>
                     <td>{{ equipe.position_generale }}</td>
-                    <td>{{ equipe.categorie }}</td>
+                    <td>{{ equipe.categorie.code }}</td>
                     <td>{{ equipe.position_categorie }}</td>
                     <td>{{ equipe.tours }}</td>
                     <td>{{ equipe.temps_humain }}</td>

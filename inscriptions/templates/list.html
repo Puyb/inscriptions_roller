@@ -2,7 +2,9 @@
 {% load i18n %}
 
 {% block body %}
+    {% with categories=COURSE.categories.all %}
     {% include "_list_filter.html" %}
+    {% endwith %}
     <script>
         var nbcomplet = 0;
     </script>
@@ -51,7 +53,7 @@
                     <td>{{ equipe.numero }}</td>
                     <td>{{ equipe.nom }}</td>
                     <td>{{ equipe.club }}</td>
-                    <td>{{ equipe.categorie }}</td>
+                    <td>{{ equipe.categorie.code }}</td>
                     <td>{{ equipe.gerant_ville2.nom }}</td>
                     <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays.name }}" /></td>
                     {% if user.is_staff %}

@@ -9,13 +9,13 @@ from django.core.validators import RegexValidator
 from django.template import Template, Context
 from django.core.mail import EmailMessage
 import os, re, requests, json, sys
-from django.db import models
+from django.db import models, transaction
 from django.db.models.query import prefetch_related_objects
 from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
-from django.db.models import Count, Sum, Value
+from django.db.models import Count, Sum, Value, F
 from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread
@@ -114,6 +114,7 @@ class Course(models.Model):
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
+    distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
 
     @property
     def ouverte(self):
@@ -664,18 +665,26 @@ class Challenge(models.Model):
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course):
-        course_categories = { c.code: c for c in course.categories.all() }
-        for c in self.categories.all():
-            if c.code in course_categories:
-                c.categories.add(course_categories[c.code])
-        for equipe in course.equipe_set.all():
-            self.inscription_equipe(equipe)
-        self.compute_course(course)
+        with transaction.atomic():
+            if course in self.courses.all():
+                orig_cats = { c.code: list(c.categories.filter(course=course)) for c in self.categories.all() }
+                self.del_course(course)
+                for c in self.categories.all():
+                    if c.code in orig_cats:
+                        c.categories.add(*orig_cats[c.code])
+            else:
+                course_categories = { c.code: c for c in course.categories.all() }
+                for c in self.categories.all():
+                    if c.code in course_categories:
+                        c.categories.add(course_categories[c.code])
+            for equipe in course.equipe_set.all():
+                self.inscription_equipe(equipe)
+            self.compute_course(course)
 
     def del_course(self, course):
         course_categories = course.categories.all();
         for c in self.categories.all():
-            c.categories.remove(course_categories)
+            c.categories.remove(*course_categories)
         EquipeChallenge.objects.filter(equipe__course=course, participation__challenge=self).delete()
         self.participations.annotate(c=Count('equipes')).filter(c=0).delete()
 
@@ -695,10 +704,18 @@ class Challenge(models.Model):
             equipe.save()
             positions[equipe.participation.categorie] += 1
 
+    def compute_challenge(self):
+        cats = defaultdict(lambda: 1)
+        for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
+            p.position = cats[p.categorie.code]
+            p.save()
+            cats[p.categorie.code] += 1
+
     def inscription_equipe(self, equipe):
-        #for p in self.participations.filter(equipes__equipe__nom__iexact=equipe.nom):
+        ParticipationChallenge.objects.filter(challenge=self, equipes__equipe=equipe).delete()
+
         for p in self.participations.prefetch_related('equipes__equipe'):
-            if any(distance(equipe.nom, e.equipe.nom) < 3 for e in p.equipes.all()) and p.match(equipe):
+            if any(distance(equipe.nom.lower(), e.equipe.nom.lower()) < 3 for e in p.equipes.all()) and p.match(equipe):
                 p.add_equipe(equipe=equipe)
                 return p
         p = ParticipationChallenge(challenge=self)
@@ -725,21 +742,21 @@ class ChallengeCategorie(models.Model):
             return False
 
         equipiers = list(equipe.equipier_set.all())
-        if len(equipiers) < self.min_equipiers and len(equipiers) > self.max_equipiers:
+        if len(equipiers) < self.min_equipiers or len(equipiers) > self.max_equipiers:
             return False
         for e in equipiers:
             if e.age() < self.min_age:
                 return False
         sexes = [e.sexe for e in equipiers]
-        if self.sexe == 'H' and 'F' not in sexes:
+        if self.sexe == 'H' and 'F' in sexes:
             return False
-        if self.sexe == 'F' and 'H' not in sexes:
+        if self.sexe == 'F' and 'H' in sexes:
             return False
-        if self.sexe == 'HX' and 'H' in sexes:
+        if self.sexe == 'HX' and 'H' not in sexes:
             return False
-        if self.sexe == 'FX' and 'F' in sexes:
+        if self.sexe == 'FX' and 'F' not in sexes:
             return False
-        if self.sexe == 'X' and 'H' in sexes and 'F' in sexes:
+        if self.sexe == 'X' and ('H' not in sexes or 'F' not in sexes):
             return False
         #TODO self.validation
         return True
@@ -748,11 +765,13 @@ class ChallengeCategorie(models.Model):
 class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations')
     categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True)
+    position = models.IntegerField(null=True, blank=True)
 
     def equipes_dict(self):
         return { e.equipe.course.uid: e for e in self.equipes.all() }
 
     def add_equipe(self, equipe, point=0):
+        EquipeChallenge.objects.filter(participation__challenge=self.challenge, equipe=equipe).delete()
         e = EquipeChallenge(
             participation=self,
             equipe=equipe,
@@ -786,3 +805,6 @@ class EquipeChallenge(models.Model):
     equipe = models.ForeignKey(Equipe, related_name='challenge')
     participation = models.ForeignKey(ParticipationChallenge, related_name='equipes')
     points = models.IntegerField()
+
+    class Meta:
+        unique_together = (('equipe', 'participation'), )
