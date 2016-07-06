@@ -20,8 +20,11 @@ from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread
 from Levenshtein import distance
+import logging
 import traceback
 import pytz
+
+logger = logging.getLogger(__name__)
 
 class NoPlaceLeftException(Exception):
     pass
@@ -483,6 +486,12 @@ class Equipe(models.Model):
         if not self.gerant_ville2_id:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
         super(Equipe, self).save(*args, **kwargs)
+
+        try:
+            for challenge in self.course.challenges.all():
+                challenge.inscription_equipe()
+        except:
+            logger.exception()
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])

@@ -2,7 +2,6 @@
 {% load i18n admin_static %}
 
 {% block content %}
-<script src="http://tinymce.cachefly.net/4.0/tinymce.min.js"></script>
 <script>
 </script>
 <style>
@@ -15,5 +14,46 @@
     <button type="submit">{% trans "Envoyer" %}</button>
     {% csrf_token %}
 </form>
+<script>
+var f = $('[type=file]');
+var p = $('<p>').append($('<label>').text('Aperçu:')).append($('<div>')).insertAfter(f.parent());
+var selects = [];
+$('[type=number]').each(function() {
+    var s = $('<select>').attr('name', this.name);
+    selects.push(s);
+    $(this).replaceWith(s)
+});
+function parse() {
+    f.parse({
+        config: {
+            preview: 4,
+            delimiter: $('[name=delimiter]').val(),
+            complete: function(results) {
+                $('[name=delimiter]').val(results.meta.delimiter);
+                p.find('div').html('<table>' + results.data.map(function(r) {
+                    return '<tr><td>' + r.join('</td><td>') + '</td></tr>';
+                }).join('') + '</table>');
+
+                selects.forEach(function(s) {
+                    s.empty();
+                    s.append($('<option>'));
+                    results.data[0].forEach(function(c, i) {
+                        s.append($('<option>').val(i + 1).text('Colonne ' + (i + 1) + ' - ' + c));
+                    });
+                });
+            }
+        }
+    });
+};
+f.change(parse);
+parse();
+
+function temps_change() {
+    var p = $('[name=time_column]').val() ? 'show' : 'hide';
+    $('[name=time_format]').parent()[p]();
+}
+$('[name=time_column]').change(temps_change);
+temps_change();
+</script>
 {% endblock %}
 

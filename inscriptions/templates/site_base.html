@@ -18,6 +18,14 @@
 <a class="navbar-brand" href="{% url "home" %}">Enduroller</a>
 {% endblock %}
 
+{% block nav %}
+    <ul class="nav navbar-nav">
+        <li{% if request.resolver_match.url_name == "home" %} class="active"{% endif %}><a href="{% url "home" %}">{% trans "Courses" %}</a></li>
+        <li{% if request.resolver_match.url_name == "inscriptions.challenges" %} class="active"{% endif %}><a href="{% url "inscriptions.challenges" %}">{% trans "Challenges" %}</a></li>
+        <li{% if request.resolver_match.url_name == "orga" %} class="active"{% endif %}><a href="{% url "orga" %}">{% trans "Organisateurs" %}</a></li>
+    </ul>
+{% endblock %}
+
 {% block account_bar %}
 {% endblock %}
 
