@@ -1,8 +1,7 @@
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, post_save, m2m_changed
+from django.db.models.signals import pre_save, post_save
 
 from django.contrib.auth.models import User, Permission
-from .models import Challenge
 
 
 @receiver(pre_save, sender=User)
@@ -27,13 +26,3 @@ def handle_user_postsave(sender, instance, **kwargs):
         Permission.objects.get(codename='delete_accreditation'),
     )
 
-@receiver(m2m_changed, sender=Challenge)
-def add_course(sender, instance, action, model, pk_set, **kwargs):
-    if model != Course:
-        return
-    if action == 'post_add':
-        for course in pk_set:
-            instance.add_course(course)
-    if action == 'post_remove':
-        for course in pk_set:
-            instance.del_course(course)

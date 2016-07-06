@@ -1,6 +1,7 @@
 import re
 from urllib.parse import urlparse, urlunparse
 from threading import Thread
+from django.contrib import messages
 #from django.template.loader import render_to_string
 #from django.core.mail import EmailMessage
 
@@ -22,3 +23,15 @@ class MailThread(Thread):
     def run(self):  
         for message in self.messages:
             message.send()
+
+class ChallengeUpdateThread(Thread):
+    def __init__(self, qs):
+        Thread.__init__(self)
+        self.qs = qs
+
+    def run(self):
+        for challenge in self.qs:
+            challenge.compute_course()
+            challenge.compute_challenge()
+            messages.add_message(request, messages.INFO, u'Classement du challenge "%s" calculé' % (challenge.nom, ))
+
