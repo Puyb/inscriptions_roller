@@ -210,6 +210,11 @@ def _list(equipes, request, template, sorts):
     equipes = equipes.order_by(*s)
     if request.GET.get('categorie'):
         equipes = equipes.filter(categorie__code=request.GET['categorie'])
+    if request.GET.get('top'):
+        if request.GET.get('by_categories') == '1':
+            equipes = equipes.filter(position_categorie__lte=request.GET.get('top'))
+        else:
+            equipes = equipes.filter(position_generale__lte=request.GET.get('top'))
 
     stats = equipes.aggregate(
         count     = Count('id'),
@@ -346,7 +351,7 @@ def challenges(request):
     }))
 
 def challenge(request, challenge_uid):
-    sorts = ['position', 'nom', 'categorie__code']
+    sorts = ['position', 'count', 'nom', 'categorie__code']
     challenge = get_object_or_404(Challenge, uid=challenge_uid)
     prefetch_related_objects([ challenge, ], (
         Prefetch('courses', Course.objects.order_by('date')),
@@ -354,7 +359,7 @@ def challenge(request, challenge_uid):
     ))
 
     participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe')
-    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'))
+    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'))
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
     s = []
@@ -367,6 +372,8 @@ def challenge(request, challenge_uid):
     participations = participations.order_by(*s)
     if request.GET.get('categorie'):
         participations = participations.filter(categorie__code=request.GET['categorie'])
+    if request.GET.get('top'):
+        participations = participations.filter(position__lte=request.GET.get('top'))
 
     return render_to_response('resultats_challenge.html', RequestContext(request, {
         'challenge': challenge,
