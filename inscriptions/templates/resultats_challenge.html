@@ -18,6 +18,7 @@
                         <th>Nom</th>
                         <th>Cat.</th>
                         <th>Pos.</th>
+                        <th>Courses</th>
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
@@ -30,6 +31,7 @@
                         <th>Nom</th>
                         <th>Cat.</th>
                         <th>Pos.</th>
+                        <th>Courses</th>
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
@@ -54,7 +56,7 @@
                             <td>{{ e.equipe.numero|default_if_none:"" }}</td>
                             <td>{{ e.equipe.position_generale|default_if_none:"" }}</td>
                             <td>{{ e.equipe.categorie|default_if_none:"" }}</td>
-                            <td>{{ e.points|default_if_none:"" }}</td>
+                            <td>{{ e.points|default:"" }}</td>
                             <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                             <td>{{ e.equipe.temps|default_if_none:"" }}</td>
@@ -64,8 +66,9 @@
                     <td>{{ participation.nom }}</td>
                     <td>{{ participation.categorie.code }}</td>
                     <td>{{ participation.position|default_if_none:"" }}</td>
+                    <td>{{ participation.count }}</td>
                     {% for c in challenge.courses.all %}
-                    <td>{{ participation.equipes_dict|get:c.uid|get:"points"|default_if_none:"" }}</td>
+                    <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{{ participation.equipes_dict|get:c.uid|get:"points"|default:"" }}</td>
                     {% endfor %}
                     <td>{{ participation.points }}</td>
                 </tr>
