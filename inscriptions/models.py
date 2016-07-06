@@ -664,22 +664,20 @@ class Challenge(models.Model):
     courses = models.ManyToManyField(Course, null=True, blank=True)
     active = models.BooleanField(_(u'Activée'), default=False)
 
-    def add_course(self, course):
+    def add_course(self, course, course_categories=None):
         with transaction.atomic():
             if course in self.courses.all():
-                orig_cats = { c.code: list(c.categories.filter(course=course)) for c in self.categories.all() }
+                course_categories = course_categories or { c: c.categories.filter(course=course) for c in self.categories.all() }
                 self.del_course(course)
-                for c in self.categories.all():
-                    if c.code in orig_cats:
-                        c.categories.add(*orig_cats[c.code])
             else:
-                course_categories = { c.code: c for c in course.categories.all() }
-                for c in self.categories.all():
-                    if c.code in course_categories:
-                        c.categories.add(course_categories[c.code])
-            for equipe in course.equipe_set.all():
-                self.inscription_equipe(equipe)
+                course_categories = course_categories or { c: [c] for c in course.categories.all() }
+            for c in self.categories.all():
+                if c in course_categories:
+                    c.categories.add(*course_categories[c])
+            print(self.categories.all()[0].categories.filter(course=course))
+            equipes_skiped = [ equipe for equipe in course.equipe_set.all() if not self.inscription_equipe(equipe) ]
             self.compute_course(course)
+            return equipes_skiped
 
     def del_course(self, course):
         course_categories = course.categories.all();
@@ -713,6 +711,8 @@ class Challenge(models.Model):
 
     def inscription_equipe(self, equipe):
         ParticipationChallenge.objects.filter(challenge=self, equipes__equipe=equipe).delete()
+        if not any(c for c in self.categories.all() if c.valide(equipe)):
+            return None
 
         for p in self.participations.prefetch_related('equipes__equipe'):
             if any(distance(equipe.nom.lower(), e.equipe.nom.lower()) < 3 for e in p.equipes.all()) and p.match(equipe):

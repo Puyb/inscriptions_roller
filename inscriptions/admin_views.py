@@ -4,6 +4,7 @@ import csv, io
 from .forms import ImportResultatForm
 from .models import Equipe, Equipier, TemplateMail, Course
 from .settings import *
+from .utils import ChallengeUpdateThread
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -208,7 +209,6 @@ def import_resultats(course, request):
                                     n *= Decimal(60)
                             else:
                                 time = Decimal(g(row, 'time_column'))
-                            print(g(row, 'time_column'), time)
                             equipe.temps = time
                         equipe.position_generale  = g(row, 'position_generale_column', int)
                         equipe.position_categorie = g(row, 'position_categorie_column', int)
@@ -245,11 +245,13 @@ def import_resultats(course, request):
                 for equipe in equipes:
                     super(Equipe, equipe).save()
 
-                return render_to_response('admin/import_resultat_done.html', RequestContext(request, {
-                    'course': course,
-                    'equipes': course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
-                    'equipes_manquantes': course.equipe_set.filter(numero__in=numeros),
-                }))
+            ChallengeUpdateThread(courses.challenges.all()).start()
+
+            return render_to_response('admin/import_resultat_done.html', RequestContext(request, {
+                'course': course,
+                'equipes': course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
+                'equipes_manquantes': course.equipe_set.filter(numero__in=numeros),
+            }))
     return render_to_response('admin/import_resultat_form.html', RequestContext(request, {
         'course': course,
         'form': form,
