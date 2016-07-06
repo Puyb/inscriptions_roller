@@ -50,6 +50,7 @@ site.register(Accreditation, AccreditationAdmin)
 class ChallengeCategorieInline(admin.StackedInline):
     model = ChallengeCategorie
     extra = 0
+    readonly_fields = ('categories', )
 
     def get_formset(self, request, obj=None, **kwargs):
         # Hack! Hook parent obj just in time to use in formfield_for_manytomany

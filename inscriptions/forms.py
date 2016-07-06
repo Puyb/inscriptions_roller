@@ -90,14 +90,15 @@ class ContactForm(Form):
     message = CharField(widget=Textarea())
 
 class ImportResultatForm(Form):
-    csv = FileField()
-    skip_first = BooleanField(required=False)
-    dossard_column = IntegerField()
-    time_column = IntegerField(required=False)
-    time_format = ChoiceField(choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
-    tours_column = IntegerField(required=False)
-    position_generale_column = IntegerField(required=False)
-    position_categorie_column = IntegerField(required=False)
+    csv = FileField(label=_('Fichier CSV'))
+    delimiter = CharField(label=_('Délimiteur'), max_length=1)
+    skip_first = BooleanField(label=_('Sauter la première ligne'), required=False)
+    dossard_column = IntegerField(label=_('Dossard'))
+    time_column = IntegerField(label=_('Temps'), required=False)
+    time_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
+    tours_column = IntegerField(label=_('Tours'), required=False)
+    position_generale_column = IntegerField(label=_('Position générale'), required=False)
+    position_categorie_column = IntegerField(label=_('Position catégorie'), required=False)
 
 class ChallengeForm(ModelForm):
     class Meta:

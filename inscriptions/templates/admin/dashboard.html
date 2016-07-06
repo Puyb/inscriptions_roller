@@ -213,6 +213,21 @@ location.href = "choose/";
             </tr>
         </table>
     </div>
+    <div class="module icons">
+        <table>
+            <caption>
+                {% blocktrans %}Imports{% endblocktrans %}
+            </caption>
+            <tr>
+                <td>
+                    <a href="{% url "admin:course_resultats" %}">
+                        <i class="fa fa-upload"></i><br />
+                        <label>{% blocktrans %}Résultats{% endblocktrans %}</label>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
 </div>
 {% endblock %}
 

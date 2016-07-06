@@ -13,8 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from .forms import CourseForm, ChallengeForm
-from .admin_views import import_resultats
+from .forms import CourseForm, ChallengeForm, ImportResultatForm
 from account.views import LogoutView
 import json
 import re
@@ -23,16 +22,22 @@ from Levenshtein import distance
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
+        print('plop4')
         if not request.user.is_authenticated():
             return False
+        print('plop3')
         if request.path.endswith('/logout/'):
             return True
+        print('plop3a', request.user.is_superuser)
         if request.user.is_superuser:
             return True
+        print('plop3z')
         if request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
+        print('plop2')
         if 'course_uid' not in request.COOKIES:
             return False
+        print('plop')
         course_uid = request.COOKIES['course_uid']
         return request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0
 
@@ -108,6 +113,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         ))
 
     def listing_dossards(self, request):
+        request.current_app = self.name
         uid = request.COOKIES['course_uid']
         course = Course.objects.get(uid=uid, accreditations__user=request.user)
 
@@ -125,8 +131,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                 datas[key] = equipes.filter(numero__gte=splits[i],  numero__lt=splits[i + 1])
                 keys.append(key)
 
-            return TemplateResponse(request, 'listing_dossards.html', { 'equipes': datas, 'keys': keys })
-        return TemplateResponse(request, 'admin/listing_dossards_form.html', { 'course': course })
+            return TemplateResponse(request, 'listing_dossards.html', dict(self.each_context(request),
+                equipes=datas,
+                keys=keys,
+            ))
+        return TemplateResponse(request, 'admin/listing_dossards_form.html', dict(self.each_context(request), course=course))
 
     def anomalies(self, request):
         request.current_app = self.name
@@ -156,9 +165,123 @@ class CourseAdminSite(admin.sites.AdminSite):
         ))
 
     def resultats(self, request):
+        request.current_app = self.name
         uid = request.COOKIES['course_uid']
         course = Course.objects.get(uid=uid, accreditations__user=request.user)
-        return import_resultats(course, request)
+        form = ImportResultatForm()
+
+        if request.method == 'POST':
+            form = ImportResultatForm(request.POST, request.FILES)
+            if form.is_valid():
+                csv_file = request.FILES['csv']
+                data = form.cleaned_data
+
+                with transaction.atomic():
+                    course.equipe_set.all().update(
+                        tours              = None,
+                        temps              = None,
+                        position_generale  = None,
+                        position_categorie = None,
+                    )
+
+                    with io.StringIO(csv_file.read().decode('utf-8')) as io_file:
+                        csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                        if data.get('skip_first'):
+                            next(csv_reader)
+
+                        def g(row, n, f=lambda x: x):
+                            if not data.get(n):
+                                return None
+                            return f(row[data[n] - 1])
+                        equipes = list(course.equipe_set.select_related('categorie'))
+                        numeros = [ e.numero for e in equipes]
+                        equipes_by_numero = { e.numero: e for e in equipes }
+
+
+                        for row in csv_reader:
+                            numero = int(g(row, 'dossard_column'))
+                            equipe = equipes_by_numero.get(numero)
+                            if not equipe:
+                                categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
+                                equipe = Equipe(
+                                    numero=numero,
+                                    course=course,
+                                    categorie=categorie,
+                                    nom='Equipe non inscrite %s' % numero,
+                                    gerant_nom='?',
+                                    gerant_prenom='?',
+                                    gerant_ville='?',
+                                    gerant_code_postal='?',
+                                    gerant_email=course.email_contact,
+                                    nombre=categorie.max_equipiers,
+                                    prix=Decimal(0),
+                                )
+                                equipes.append(equipe)
+                                equipes_by_numero[numero] = equipe
+                            else:
+                                numeros.remove(numero)
+
+                            equipe.tours = g(row, 'tours_column', int)
+                            if data.get('time_column'):
+                                if data['time_format'] == 'HMS':
+                                    s = g(row, 'time_column').split(':')
+                                    time = Decimal(0)
+                                    n = Decimal(1)
+                                    while len(s):
+                                        time += n * Decimal(s.pop())
+                                        n *= Decimal(60)
+                                else:
+                                    time = Decimal(g(row, 'time_column'))
+                                equipe.temps = time
+                            equipe.position_generale  = g(row, 'position_generale_column', int)
+                            equipe.position_categorie = g(row, 'position_categorie_column', int)
+
+
+                            #super(Equipe, equipe).save()
+
+                    # compute positions
+                    equipes_to_compute = None
+                    if data.get('time_column') and data.get('tours_column'):
+                        #equipes = course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('tours', 'temps')
+                        equipes_to_compute = [ e for e in equipes if e.numero not in numeros ]
+                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps)
+                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours, reverse=True)
+
+                    elif not data.get('position_categorie_column') and data.get('position_generale_column'):
+                        #equipes = course.equipe_set.exclude(numero__in=numeros).filter(position_generale__isnull=False).select_related('categorie').order_by('position_generale')
+                        equipes_to_compute = [ e for e in equipes if e.numero not in numeros and e.position_generale is not None ]
+                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.position_generale)
+
+                    if equipes_to_compute:
+                        position = 1
+                        position_categories = {}
+                        for categorie in course.categories.all():
+                            position_categories[categorie.code] = 1
+
+                        for equipe in equipes_to_compute:
+                            if not data.get('position_generale_column'):
+                                equipe.position_generale = position
+                                position += 1
+                            code = equipe.categorie.code
+                            equipe.position_categorie = position_categories[code]
+                            position_categories[code] += 1
+                    for equipe in equipes:
+                        super(Equipe, equipe).save()
+
+                ChallengeUpdateThread(courses.challenges.all()).start()
+
+                return TemplateResponse(request, 'admin/import_resultat_done.html', dict(self.each_context(request),
+                    course=course,
+                    equipes=course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
+                    equipes_manquantes=course.equipe_set.filter(numero__in=numeros),
+                ))
+        return TemplateResponse(request, 'admin/import_resultat_form.html', dict(self.each_context(request),
+            course=course,
+            form=form,
+        ))
+
+
+
 
     index_template = 'admin/dashboard.html'
 
