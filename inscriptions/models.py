@@ -491,7 +491,7 @@ class Equipe(models.Model):
             for challenge in self.course.challenges.all():
                 challenge.inscription_equipe()
         except:
-            logger.exception()
+            logger.exception('error updating challenge')
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
@@ -670,7 +670,7 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course, null=True, blank=True)
+    courses = models.ManyToManyField(Course, null=True, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course, course_categories=None):
