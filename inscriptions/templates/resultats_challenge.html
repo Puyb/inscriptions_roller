@@ -59,7 +59,7 @@
                             <td>{{ e.points|default:"" }}</td>
                             <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
-                            <td>{{ e.equipe.temps|default_if_none:"" }}</td>
+                            <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
                         </tr>
                         {% endwith %}{% endfor %}</table>
                     ">
