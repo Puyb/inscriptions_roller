@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript" src="/static/admin/js/jquery.js"></script>
+<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="{% url "admin:challenge_courses" %}">
+    <input type="hidden" name="challenge_id" value="{{ challenge.id }}" />
+    <label for="id_courses">Courses:</label>
+    <select id="id_courses" name="courses" multiple>
+        {% for c in courses %}<option value="{{ c.id }}" {% if c in challenge.courses.all %}selected{% endif %}>{{ c.nom }} ({{ c.uid }})</option>{% endfor %}
+    </select>
+
+    {% for c in courses %}
+    <div id="course_{{ c.id }}" style="{% if c not in challenge.courses.all %}display: none;{% endif %}">
+        <h2>{{ c.nom }} ({{ c.uid }})</h2>
+        <p>{% blocktrans with date=c.date ville=c.ville %}le {{date }} à {{ ville }}{% endblocktrans %}</p>
+        <table>
+            <tr>
+                <th></th>
+                <th colspan="{{ challenge.categories.count }}">Challenge</th>
+            </tr>
+            <tr>
+                <th>Course</th>
+                {% for cat2 in challenge.categories.all %}<th>{{ cat2.code }}</th>{% endfor %}
+            </tr>
+            {% for cat in c.categories.all %}
+            <tr>
+                <td>{{ cat.nom }} ({{ cat.code }}):</td>
+                {% for cat2 in challenge.categories.all %}<td><input type="checkbox" value="1" name="course_{{ c.id }}_{{ cat.id }}_{{ cat2.id }}" {% if c not in challenge.courses.all and cat.code == cat2.code %}checked{% endif %}{% if cat in cat2.categories.all %}checked{% endif %}></td>{% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+    <button type="submit">Valider</button>
+    {% csrf_token %}
+</form>
+<script>
+(function($) {
+    function upd() {
+        $('#id_courses option').each(function() {
+            $('#course_' + this.value)[this.selected ? 'show' : 'hide']()
+        });
+    }
+    $('#id_courses').change(upd)
+    upd();
+})(django.jQuery);
+</script>
+{% endblock %}
