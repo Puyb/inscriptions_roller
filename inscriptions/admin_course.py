@@ -13,11 +13,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from .forms import CourseForm, ChallengeForm, ImportResultatForm
+from .forms import CourseForm, ImportResultatForm
+from .utils import ChallengeUpdateThread
 from account.views import LogoutView
 import json
 import re
 from Levenshtein import distance
+import csv, io
 
 
 class CourseAdminSite(admin.sites.AdminSite):
@@ -268,7 +270,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                     for equipe in equipes:
                         super(Equipe, equipe).save()
 
-                ChallengeUpdateThread(courses.challenges.all()).start()
+                ChallengeUpdateThread(course.challenges.all()).start()
 
                 return TemplateResponse(request, 'admin/import_resultat_done.html', dict(self.each_context(request),
                     course=course,

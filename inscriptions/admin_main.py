@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.template.response import TemplateResponse
+from .forms import ChallengeForm
 
 
 site = admin.site
@@ -74,6 +75,7 @@ class ChallengeCategorieInline(admin.StackedInline):
 class ChallengeAdmin(admin.ModelAdmin):
     list_display = ('nom', )
     inlines = [ ChallengeCategorieInline,  ]
+    readonly_fields = ('courses', )
     actions = ['compute_challenge', 'manage_courses']
 
     def get_form(self, request, obj=None, **kwargs):

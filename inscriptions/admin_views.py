@@ -3,7 +3,6 @@ import random
 import csv, io
 from .models import Equipe, Equipier, TemplateMail, Course
 from .settings import *
-from .utils import ChallengeUpdateThread
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
