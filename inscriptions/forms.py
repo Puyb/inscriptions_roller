@@ -15,7 +15,7 @@ from django.conf import settings
 class EquipeForm(ModelForm):
     class Meta:
         model = Equipe
-        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture')
+        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture', 'tours', 'temps', 'position_generale', 'position_categorie',)
         widgets = {
             'categorie': HiddenInput(),
             'prix': HiddenInput(),

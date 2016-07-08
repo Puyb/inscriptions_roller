@@ -18,7 +18,7 @@ from django.contrib.auth.models import User
 from django.db.models import Count, Sum, Value, F
 from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
-from .utils import iriToUri, MailThread
+from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
 from Levenshtein import distance
 import logging
 import traceback
@@ -102,7 +102,6 @@ class Course(models.Model):
     uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
-#    challenge           = models.ForeignKey(Challenge, blank=True, null=True)
     date                = models.DateField(_(u'Date'))
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
@@ -487,11 +486,8 @@ class Equipe(models.Model):
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
         super(Equipe, self).save(*args, **kwargs)
 
-        try:
-            for challenge in self.course.challenges.all():
-                challenge.inscription_equipe()
-        except:
-            logger.exception('error updating challenge')
+        ChallengeInscriptionEquipe(self).start()
+
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
@@ -798,7 +794,7 @@ class ParticipationChallenge(models.Model):
     def match(self, equipe):
         if self.categorie and not self.categorie.valide(equipe):
             return False
-        equipiers_challenge = Equipier.objects.filter(equipe__challenge__participation=self)
+        equipiers_challenge = Equipier.objects.filter(equipe__challenges__participation=self)
         c = 0
         equipiers = equipe.equipier_set.all()
         for e in equipiers:
@@ -811,7 +807,7 @@ class ParticipationChallenge(models.Model):
 
 
 class EquipeChallenge(models.Model):
-    equipe = models.ForeignKey(Equipe, related_name='challenge')
+    equipe = models.ForeignKey(Equipe, related_name='challenges')
     participation = models.ForeignKey(ParticipationChallenge, related_name='equipes')
     points = models.IntegerField()
 

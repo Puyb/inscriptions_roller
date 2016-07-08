@@ -303,6 +303,7 @@ $(function() {
         // change page
         $('#button_prev').show();
         $('.parts').hide();
+        $('body').scrollTop(0);
         actual_part++;
         if(actual_part > parseFloat($('#id_nombre').val())) {
             // last page
