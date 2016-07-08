@@ -9,6 +9,7 @@ from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.db.models import Sum, Value, F, Q, Max
 from django.db.models.functions import Coalesce
+from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
@@ -24,22 +25,17 @@ import csv, io
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
-        print('plop4')
         if not request.user.is_authenticated():
             return False
-        print('plop3')
+        prefetch_related_objects([request.user], ('accreditations__course', ))
         if request.path.endswith('/logout/'):
             return True
-        print('plop3a', request.user.is_superuser)
         if request.user.is_superuser:
             return True
-        print('plop3z')
         if request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
-        print('plop2')
         if 'course_uid' not in request.COOKIES:
             return False
-        print('plop')
         course_uid = request.COOKIES['course_uid']
         return request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0
 
@@ -403,6 +399,7 @@ class CategorieFilter(SimpleListFilter):
 class EquipeAdmin(CourseFilteredObjectAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
+        qs = qs.prefetch_related('equipier_set')
         qs = qs.annotate(
             verifier_count = Coalesce(Sum('equipier__verifier'), Value(0)),
             valide_count   = Coalesce(Sum('equipier__valide'), Value(0)),
