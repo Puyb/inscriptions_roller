@@ -15,7 +15,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
-from django.db.models import Count, Sum, Value, F
+from django.db.models import Count, Sum, Value, F, When, Case
 from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
@@ -709,7 +709,10 @@ class Challenge(models.Model):
 
     def compute_challenge(self):
         cats = defaultdict(lambda: 1)
-        for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
+        courses_points = [ ('points_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__points'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('-date') ]
+        #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
+        print(self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]).query.sql_with_params())
+        for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]):
             p.position = cats[p.categorie.code]
             p.save()
             cats[p.categorie.code] += 1
