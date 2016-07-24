@@ -17,6 +17,7 @@ from .forms import CourseForm
 from account.views import LogoutView
 import json
 import re
+from Levenshtein import distance
 
 
 class CourseAdminSite(admin.sites.AdminSite):
@@ -42,6 +43,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
             url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
+            url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
         ] + super().get_urls()
         return urls
 
@@ -123,6 +125,34 @@ class CourseAdminSite(admin.sites.AdminSite):
 
             return TemplateResponse(request, 'listing_dossards.html', { 'equipes': datas, 'keys': keys })
         return TemplateResponse(request, 'admin/listing_dossards_form.html', { 'course': course })
+
+
+    def anomalies(self, request):
+        request.current_app = self.name
+        uid = request.COOKIES['course_uid']
+        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        equipiers = list(Equipier.objects.filter(equipe__course=course).select_related('equipe__categorie'))
+
+        doublons = []
+        for i, e in enumerate(equipiers):
+            if e.numero > e.equipe.nombre:
+                continue
+            dbl = []
+            for j in range(i + 1, len(equipiers)):
+                e2 = equipiers[j]
+                if e2.numero > e2.equipe.nombre:
+                    continue
+                if distance((e.nom + ' ' + e.prenom).lower(), (e2.nom + ' ' + e2.prenom).lower()) < 3:
+                    dbl.append(e2)
+            if dbl:
+                dbl.insert(0, e)
+                doublons.append(dbl)
+        print(doublons)
+
+        return TemplateResponse(request, 'admin/anomalies.html', dict(self.each_context(request),
+            doublons=doublons,
+            course=course,
+        ))
 
     index_template = 'admin/dashboard.html'
 

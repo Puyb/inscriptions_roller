@@ -151,5 +151,3 @@ def dossardsEquipiersCSV(request, course_uid):
 #        equipiers = Equipier.objects.filter(equipe__course__uid=self.kwargs['course_uid']).order_by('equipe__numero', 'numero')
 #        context['equipiers'] = equipiers
 #        return context
-
-
