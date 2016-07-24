@@ -560,7 +560,7 @@ class Equipier(models.Model):
         self.certificat_manquant = self.justificatif == 'certificat' and not self.piece_jointe_valide and not self.piece_jointe
         self.autorisation_manquante = self.age() < 18 and not self.autorisation_valide and not self.autorisation
         self.verifier = ((bool(self.piece_jointe) and self.piece_jointe_valide == None) or
-                         (bool(self.autorisation) and self.autorisation_valide == None))
+                         (self.age() < 18 and bool(self.autorisation) and self.autorisation_valide == None))
         self.erreur = self.piece_jointe_valide == False or (self.age() < 18 and self.autorisation_valide == False)
         self.valide = self.piece_jointe_valide == True and (self.age() >= 18 or self.autorisation_valide == True)
         self.homme = self.sexe == 'H'
