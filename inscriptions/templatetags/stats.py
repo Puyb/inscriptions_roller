@@ -63,3 +63,6 @@ def get_max(l):
 def get_min(l):
     return min(l)
 
+@register.filter
+def percent(n, d, s=100):
+    return n / d * s

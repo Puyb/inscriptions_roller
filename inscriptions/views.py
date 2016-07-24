@@ -18,6 +18,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
+from .functions import DayOfWeek, Hour
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail
 from .utils import MailThread
 
@@ -226,9 +227,22 @@ def stats(request, course_uid):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
     stats = course.stats()
 
+    jours = [[0] * 24 for i in range(7)]
+    max_jours = 0
+    nb_jours = [(course.date_fermeture - course.date_ouverture).days / 7] * 7
+    for i in range(7):
+        n = (course.date_ouverture.weekday() + i) % 7
+        if n < min(date.today(), course.date_fermeture).weekday():
+            nb_jours[n] += 1
+    for e in course.equipe_set.annotate(jour=DayOfWeek('date'), heure=Hour('date')).values('jour', 'heure').annotate(count=Count('id')):
+        jours[e['jour']][e['heure']] = e['count'] / nb_jours[e['jour']]
+        max_jours = max(max_jours, e['count'] / nb_jours[e['jour']])
+
     return render_to_response('stats.html', RequestContext(request, {
         'stats': stats,
         'course': course,
+        'jours': jours,
+        'max_jours': max_jours,
         'json': json.dumps(stats),
     }))
 

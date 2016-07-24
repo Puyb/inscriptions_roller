@@ -206,9 +206,32 @@
             <div class="col-md-8">
                 <canvas id="canvas_licencies"></canvas>
             </div>
+            <div class="col-md-12">
+<style>
+.punchcard { table-layout: fixed;  }
+.punchcard td { width: 30px; height: 30px;}
+</style>
+                <table class="punchcard">
+                    <tr>
+                        <th></th>
+                    {% for h in jours|first %} 
+                        <td>{{ forloop.counter0 }}</td>
+                    {% endfor %}
+                    </tr>
+                    {% for j in jours %} 
+                    <tr>
+                        <th>{{ forloop.counter0 }}</th>
+                        {% localize off %}
+                        {% for h in j %} 
+                        <td style="background: hsl(0, {{ h|percent:max_jours }}%, 50%)"></div></td>
+                        {% endfor %}
+                        {% endlocalize %}
+                    </tr>
+                    {% endfor %}
+            </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 
 
     <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
