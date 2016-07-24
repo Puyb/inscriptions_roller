@@ -1,0 +1,34 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% block content %}
+<style>
+.separator td { border-bottom: 1px solid black }
+</style>
+<h1>{{ doublons|length }} anomalies possibles</h1>
+<table>
+    <tr>
+        <th>Dossard</th>
+        <th>Nom</th>
+        <th>Date de naissance</th>
+        <th>Equipe</th>
+        <th>Catégorie</th>
+    </tr>
+{% for dbl in doublons %}
+    {% for equipier in dbl %}
+    <tr{% if forloop.last %} class="separator"{% endif %}>
+        <td>{{ equipier.equipe.numero }}{{ equipier.numero }}</td>
+        <td>{{ equipier.nom }} {{ equipier.prenom }}</td>
+        <td>{{ equipier.date_de_naissance }}</td>
+        <td>{{ equipier.equipe.nom }}</td>
+        <td>{{ equipier.equipe.categorie.code }}</td>
+    </tr>
+    {% endfor %}
+{% endfor %}
+{% endblock %}
