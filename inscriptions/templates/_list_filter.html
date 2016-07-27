@@ -48,7 +48,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Trie" %} <span class="caret"></span></a>
           <ul class="dropdown-menu">
               {% for i in sorts %}
-              <li><a href="#" data-name="sort" data-value="{% if request.GET.sort == i %}-{% endif %}{{ i }}">{% if request.GET.sort|cut:"-" == i %}<strong>{% endif %}{% blocktrans with i=i %}{{ i }}{% endblocktrans %}{% if request.GET.sort|cut:"-" == i %}</strong>{% endif %}</a></li>
+              <li><a href="#" data-name="sort" data-value="{% if request.GET.sort == i %}-{% endif %}{{ i }}">{% if request.GET.sort|cut:"-" == i %}<strong>{% endif %}{% trans i %}{% if request.GET.sort|cut:"-" == i %}</strong>{% endif %}</a></li>
               {% endfor %}
           </ul>
         </li>
