@@ -24,7 +24,7 @@
                     {% endif %}
                 </tr>
                 {% for equipe in equipes %}
-                <tr class="{% cycle 'odd' 'even' %}">
+                <tr class="{% cycle 'odd' 'even' %}" id="{{ forloop.counter }}">
                     <td>{{ equipe.numero }}</td>
                     <td>{{ equipe.nom }}</td>
                     <td>{{ equipe.club }}</td>
