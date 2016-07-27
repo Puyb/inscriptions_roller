@@ -356,8 +356,12 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         sujet = ''
         message = ''
         try:
-            sujet = Template(mail.sujet).render(Context({ "course": instance.course, "instance": instance, }))
-            message = Template(mail.message).render(Context({ "course": instance.course, "instance": instance, }))
+            context = Context({
+                "instance": instance,
+                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+            })
+            sujet   = Template(mail.sujet).render(context)
+            message = Template(mail.message).render(context)
         except Exception as e:
             message = '<p style="color: red">Error in template: %s</p>' % str(e)
 
@@ -375,8 +379,12 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         sujet = ''
         message = ''
         try:
-            sujet = Template(mail.sujet).render(Context({ "course": instance.course, "instance": instance, }))
-            message = Template(mail.message).render(Context({ "course": instance.course, "instance": instance, }))
+            context = Context({
+                "instance": instance,
+                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+            })
+            sujet   = Template(mail.sujet).render(context)
+            message = Template(mail.message).render(context)
         except Exception as e:
             message = '<p style="color: red">Error in template: %s</p>' % str(e)
 
