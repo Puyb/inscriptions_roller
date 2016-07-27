@@ -750,6 +750,9 @@ class ChallengeCategorie(models.Model):
             return False
 
         equipiers = list(equipe.equipier_set.all())
+        if not equipiers:
+            return True
+
         if len(equipiers) < self.min_equipiers or len(equipiers) > self.max_equipiers:
             return False
         for e in equipiers:
