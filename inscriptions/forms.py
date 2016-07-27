@@ -99,6 +99,8 @@ class ImportResultatForm(Form):
     tours_column = IntegerField(label=_('Tours'), required=False)
     position_generale_column = IntegerField(label=_('Position générale'), required=False)
     position_categorie_column = IntegerField(label=_('Position catégorie'), required=False)
+    nom_column = IntegerField(label=_('Nom de l\'équipe'), required=False)
+    categorie_column = IntegerField(label=_('Code catégorie'), required=False)
 
 class ChallengeForm(ModelForm):
     class Meta:

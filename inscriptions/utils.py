@@ -29,15 +29,15 @@ class MailThread(Thread):
             message.send()
 
 class ChallengeUpdateThread(Thread):
-    def __init__(self, qs):
+    def __init__(self, course):
         Thread.__init__(self)
-        self.qs = qs
+        self.course = course
 
     def run(self):
-        for challenge in self.qs:
-            challenge.compute_course()
+        for challenge in self.course.challenges.all():
+            challenge.compute_course(self.course)
             challenge.compute_challenge()
-            messages.add_message(request, messages.INFO, u'Classement du challenge "%s" calculé' % (challenge.nom, ))
+            #messages.add_message(request, messages.INFO, u'Classement du challenge "%s" calculé' % (challenge.nom, ))
 
 class ChallengeInscriptionEquipe(Thread):
     def __init__(self, equipe):

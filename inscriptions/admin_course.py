@@ -165,7 +165,7 @@ class CourseAdminSite(admin.sites.AdminSite):
     def resultats(self, request):
         request.current_app = self.name
         uid = request.COOKIES['course_uid']
-        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        course = Course.objects.prefetch_related('categories', 'challenges').get(uid=uid, accreditations__user=request.user)
         form = ImportResultatForm()
 
         if request.method == 'POST':
@@ -200,12 +200,15 @@ class CourseAdminSite(admin.sites.AdminSite):
                             numero = int(g(row, 'dossard_column'))
                             equipe = equipes_by_numero.get(numero)
                             if not equipe:
-                                categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
+                                if data.get('categorie_column'):
+                                    categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                else:
+                                    categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
                                 equipe = Equipe(
                                     numero=numero,
                                     course=course,
                                     categorie=categorie,
-                                    nom='Equipe non inscrite %s' % numero,
+                                    nom=g(row, 'nom_column') or ('Equipe non inscrite %s' % numero),
                                     gerant_nom='?',
                                     gerant_prenom='?',
                                     gerant_ville='?',
@@ -264,9 +267,13 @@ class CourseAdminSite(admin.sites.AdminSite):
                             equipe.position_categorie = position_categories[code]
                             position_categories[code] += 1
                     for equipe in equipes:
+                        _id = equipe.id
                         super(Equipe, equipe).save()
+                        if not _id:
+                            for challenge in course.challenges.all():
+                                challenge.inscription_equipe(equipe)
 
-                ChallengeUpdateThread(course.challenges.all()).start()
+                ChallengeUpdateThread(course).start()
 
                 return TemplateResponse(request, 'admin/import_resultat_done.html', dict(self.each_context(request),
                     course=course,
