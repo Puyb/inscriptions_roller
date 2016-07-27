@@ -6,7 +6,7 @@ from functools import reduce
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, Min, F, Q, Prefetch
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Case, When, Value, IntegerField
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -191,10 +191,12 @@ def check_name(request, course_uid):
 
 def list(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid)
+    (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
     return _list(equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
 
 def resultats(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid, position_generale__isnull=False)
+    (_('position_generale'), _('position_categorie'), _('numero'), _('nom'), _('categorie__code'))
     return _list(equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'])
 
 def _list(equipes, request, template, sorts):
@@ -351,7 +353,8 @@ def challenges(request):
     }))
 
 def challenge(request, challenge_uid):
-    sorts = ['position', 'count', 'nom', 'categorie__code']
+    sorts = ['position2', 'count', 'nom', 'categorie__code']
+    (_('position2'), _('count'), _('nom'), _('categorie__code'))
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
         Prefetch('courses', Course.objects.order_by('date')),
         'categories',
@@ -360,12 +363,12 @@ def challenge(request, challenge_uid):
     participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe__categorie', 'equipes__equipe__course').select_related('categorie')
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
-    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'))
+    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'), position2=Case(When(position__isnull=True, then=Value(100000)), default='position', output_field=IntegerField())).filter(count__gt=0)
     s = []
     if request.GET.get('by_categories') == '1':
         s.append('categorie__code')
-    if request.GET.get('sort') in sorts + [ '-' + i for i in sorts ]:
-        s.append('-points')
+    if request.GET.get('sort') in (sorts + [ '-' + i for i in sorts ]):
+        s.append(request.GET['sort'])
     else:
         s.append(sorts[0])
     participations = participations.order_by(*s)

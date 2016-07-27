@@ -3,1676 +3,94 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-27 12:27+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"POT-Creation-Date: 2016-07-28 01:11+0200\n"
+"PO-Revision-Date: 2016-07-28 01:13+0200\n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:4
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:8
-msgid "Page not found"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/404.html:10
-msgid "We're sorry, but the requested page could not be found."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:6
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/app_index.html:10
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:19
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:142
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:22
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:43
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:9
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:9
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:7
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:7
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:12
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:7
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:7
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:7
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:7
-#: inscriptions/templates/admin/inscriptions/course/change_form.html:15
-msgid "Home"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:7
-msgid "Server error"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:11
-msgid "Server error (500)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:14
-msgid "Server Error <em>(500)</em>"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/500.html:15
-msgid ""
-"There's been an error. It's been reported to the site administrators via "
-"email and should be fixed shortly. Thanks for your patience."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:7
-msgid "Run the selected action"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:7
-msgid "Go"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:20
-msgid "Click here to select the objects across all pages"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:20
-#, python-format
-msgid "Select all %(total_count)s %(module_name)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/actions.html:22
-msgid "Clear selection"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/add_form.html:7
-msgid ""
-"First, enter a username and password. Then, you'll be able to edit more user "
-"options."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/add_form.html:10
-msgid "Enter a username and password."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:31
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:75
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:122
-msgid "Change password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:44
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:65
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:69
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:35
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:31
-#, fuzzy
-msgid "Please correct the error below."
-msgstr ""
-"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-"#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:44
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:65
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:31
-msgid "Please correct the errors below."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:50
-#, python-format
-msgid "Enter a new password for the user <strong>%(username)s</strong>."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:60
-msgid "Password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:68
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:57
-msgid "Password (again)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/auth/user/change_password.html:69
-msgid "Enter the same password as above, for verification."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:70
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:95
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:98
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:23
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:27
-msgid "Django administration"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:117
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:131
-msgid "Documentation"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:126
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:133
-#: inscriptions/templates/_account_bar.html:14
-msgid "Log out"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base.html:152
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:68
-msgid "Close"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/base_site.html:3
-#: inscriptions/templates/admin/base_site.html:4
-#: inscriptions/templates/admin/base_site.html:7
-#, python-format
-msgid "Enduroller - %(nom)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:39
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:65
-msgid "Add"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:114
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:116
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:18
-msgid "History"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:121
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_form.html:123
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:20
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:35
-msgid "View on site"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:58
-msgid "Filter"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:92
-#, python-format
-msgid "Add %(name)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list.html:154
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:5
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:7
-#: inscriptions/templates/admin/submit_line.html:3
-msgid "Save"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:13
-msgid "Remove from sorting"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:16
-#, python-format
-msgid "Sorting priority: %(priority_number)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/change_list_results.html:17
-msgid "Toggle sorting"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:20
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:34
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:36
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:372
-#: inscriptions/templates/admin/submit_line.html:6
-msgid "Delete"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:29
-#, python-format
-msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would result in deleting "
-"related objects, but your account doesn't have permission to delete the "
-"following types of objects:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:43
-#, python-format
-msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
-"following protected related objects:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:57
-#, python-format
-msgid ""
-"Are you sure you want to delete the %(object_name)s \"%(escaped_object)s\"? "
-"All of the following related items will be deleted:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:65
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_confirmation.html:67
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:68
-msgid "Yes, I'm sure"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:17
-msgid "Delete multiple objects"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:26
-#, python-format
-msgid ""
-"Deleting the selected %(objects_name)s would result in deleting related "
-"objects, but your account doesn't have permission to delete the following "
-"types of objects:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:40
-#, python-format
-msgid ""
-"Deleting the selected %(objects_name)s would require deleting the following "
-"protected related objects:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/delete_selected_confirmation.html:54
-#, python-format
-msgid ""
-"Are you sure you want to delete the selected %(objects_name)s? All of the "
-"following objects and their related items will be deleted:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:41
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:82
-msgid "Remove"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/stacked.html:42
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:81
-#, python-format
-msgid "Add another %(verbose_name)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/edit_inline/tabular.html:20
-msgid "Delete?"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/filter.html:2
-#, python-format
-msgid " By %(filter_title)s "
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:18
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:31
-msgid "Apps"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:21
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:22
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:80
-msgid "Recent Actions"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:37
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:67
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:11
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:13
-msgid "Search"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:42
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:31
-msgid "Action"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:52
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:58
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:6
-#, python-format
-msgid "Models in the %(name)s application"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:66
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:346
-msgid "Change"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:80
-msgid "My Actions"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:85
-msgid "None available"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:111
-msgid "Unknown content"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/index.html:139
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:12
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/bootstrap_admin/sidebar_menu.html:18
-msgid "You don't have permission to edit anything."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/invalid_setup.html:5
-msgid ""
-"Something's wrong with your database installation. Make sure the appropriate "
-"database tables have been created, and make sure the database is readable by "
-"the appropriate user."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:76
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:23
-#: inscriptions/templates/_account_bar.html:17
-#: inscriptions/templates/orga.html:33
-msgid "Log in"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/login.html:87
-msgid "Forgotten your password or username?"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:29
-msgid "Date/time"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:30
-msgid "User"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/object_history.html:45
-msgid ""
-"This object doesn't have a change history. It probably wasn't added via this "
-"admin site."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/pagination.html:19
-msgid "Show all"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:8
-#, python-format
-msgid "Change selected %(model)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:15
-#, python-format
-msgid "Add another %(model)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/related_widget_wrapper.html:22
-#, python-format
-msgid "Delete selected %(model)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:4
-#, python-format
-msgid "%(counter)s result"
-msgid_plural "%(counter)s results"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/search_form.html:4
-#, python-format
-msgid "%(full_result_count)s total"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:12
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:14
-msgid "Save as new"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:19
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:21
-msgid "Save and add another"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:26
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/admin/submit_line.html:28
-msgid "Save and continue editing"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/logged_out.html:18
-msgid "Thanks for spending some quality time with the Web site today."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/logged_out.html:20
-msgid "Log in again"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:10
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:15
-msgid "Password change"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_done.html:20
-msgid "Your password was changed."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:37
-msgid ""
-"Please enter your old password, for security's sake, and then enter your new "
-"password twice so we can verify you typed it in correctly."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:43
-msgid "Old password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:50
-msgid "New password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_change_form.html:66
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:46
-msgid "Change my password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:10
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:10
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:10
-msgid "Password reset"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_complete.html:20
-msgid "Your password has been set.  You may go ahead and log in now."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:10
-msgid "Password reset confirmation"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:24
-msgid ""
-"Please enter your new password twice so we can verify you typed it in "
-"correctly."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:30
-msgid "New password:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:37
-msgid "Confirm password:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_confirm.html:55
-msgid ""
-"The password reset link was invalid, possibly because it has already been "
-"used.  Please request a new password reset."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:19
-msgid ""
-"We've emailed you instructions for setting your password. You should be "
-"receiving them shortly."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_done.html:21
-msgid ""
-"If you don't receive an email, please make sure you've entered the address "
-"you registered with, and check your spam folder."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:2
-#, python-format
-msgid ""
-"You're receiving this email because you requested a password reset for your "
-"user account at %(site_name)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:4
-msgid "Please go to the following page and choose a new password:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:8
-msgid "Your username, in case you've forgotten:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:10
-msgid "Thanks for using our site!"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_email.html:12
-#, python-format
-msgid "The %(site_name)s team"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:23
-msgid ""
-"Forgotten your password? Enter your email address below, and we'll email "
-"instructions for setting a new one."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:29
-msgid "Email address:"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/bootstrap_admin/templates/registration/password_reset_form.html:38
-msgid "Reset my password"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/contrib/messages/apps.py:7
-msgid "Messages"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/contrib/sitemaps/apps.py:7
-msgid "Site Maps"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/contrib/staticfiles/apps.py:7
-msgid "Static Files"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/contrib/syndication/apps.py:7
-msgid "Syndication"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/contrib/webdesign/apps.py:7
-msgid "Web Design"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:20
-msgid "Enter a valid value."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:87
-#: env/lib/python3.5/site-packages/django/forms/fields.py:712
-msgid "Enter a valid URL."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:130
-msgid "Enter a valid integer."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:141
-msgid "Enter a valid email address."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:215
-msgid ""
-"Enter a valid 'slug' consisting of letters, numbers, underscores or hyphens."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:220
-#: env/lib/python3.5/site-packages/django/core/validators.py:239
-msgid "Enter a valid IPv4 address."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:225
-#: env/lib/python3.5/site-packages/django/core/validators.py:240
-msgid "Enter a valid IPv6 address."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:235
-#: env/lib/python3.5/site-packages/django/core/validators.py:238
-msgid "Enter a valid IPv4 or IPv6 address."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:263
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1144
-msgid "Enter only digits separated by commas."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:272
-#, python-format
-msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:298
-#, python-format
-msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:305
-#, python-format
-msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:314
-#, python-format
-msgid ""
-"Ensure this value has at least %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at least %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/core/validators.py:325
-#, python-format
-msgid ""
-"Ensure this value has at most %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at most %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/db/models/base.py:1130
-#: env/lib/python3.5/site-packages/django/forms/models.py:718
-msgid "and"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/base.py:1132
-#, python-format
-msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:107
-#, python-format
-msgid "Value %(value)r is not a valid choice."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:108
-msgid "This field cannot be null."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:109
-msgid "This field cannot be blank."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:110
-#, python-format
-msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr ""
-
-#. Translators: The 'lookup_type' is one of 'date', 'year' or 'month'.
-#. Eg: "Title must be unique for pub_date year"
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:114
-#, python-format
-msgid ""
-"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:132
-#, python-format
-msgid "Field of type: %(field_type)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:922
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1832
-msgid "Integer"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:926
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1830
-#, python-format
-msgid "'%(value)s' value must be an integer."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1001
-#, python-format
-msgid "'%(value)s' value must be either True or False."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1003
-msgid "Boolean (Either True or False)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1078
-#, python-format
-msgid "String (up to %(max_length)s)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1139
-msgid "Comma-separated integers"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1188
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid date format. It must be in YYYY-MM-DD "
-"format."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1190
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1340
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (YYYY-MM-DD) but it is an invalid "
-"date."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1193
-msgid "Date (without time)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1338
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1342
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
-"[TZ]) but it is an invalid date/time."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1346
-msgid "Date (with time)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1498
-#, python-format
-msgid "'%(value)s' value must be a decimal number."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1500
-msgid "Decimal number"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1651
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in [DD] [HH:[MM:]]ss[."
-"uuuuuu] format."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1654
-msgid "Duration"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1705
-msgid "Email address"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1729
-msgid "File path"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1796
-#, python-format
-msgid "'%(value)s' value must be a float."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1798
-msgid "Floating point number"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1899
-msgid "Big (8 byte) integer"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1914
-msgid "IPv4 address"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:1950
-msgid "IP address"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2029
-#, python-format
-msgid "'%(value)s' value must be either None, True or False."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2031
-msgid "Boolean (Either True, False or None)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2091
-msgid "Positive integer"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2103
-msgid "Positive small integer"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2116
-#, python-format
-msgid "Slug (up to %(max_length)s)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2145
-msgid "Small integer"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2152
-msgid "Text"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2175
-#, python-format
-msgid ""
-"'%(value)s' value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
-"format."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2177
-#, python-format
-msgid ""
-"'%(value)s' value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
-"invalid time."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2180
-msgid "Time"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2308
-#: inscriptions/models.py:100
-msgid "URL"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2331
-msgid "Raw binary data"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/__init__.py:2375
-#, python-format
-msgid "'%(value)s' is not a valid UUID."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/files.py:239
-msgid "File"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/files.py:389
-msgid "Image"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:1796
-#, python-format
-msgid "%(model)s instance with %(field)s %(value)r does not exist."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:1798
-msgid "Foreign Key (type determined by related field)"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:2028
-msgid "One-to-one relationship"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/db/models/fields/related.py:2118
-msgid "Many-to-many relationship"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:64
-msgid "This field is required."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:237
-msgid "Enter a whole number."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:280
-#: env/lib/python3.5/site-packages/django/forms/fields.py:317
-msgid "Enter a number."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:319
-#, python-format
-msgid "Ensure that there are no more than %(max)s digit in total."
-msgid_plural "Ensure that there are no more than %(max)s digits in total."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:323
-#, python-format
-msgid "Ensure that there are no more than %(max)s decimal place."
-msgid_plural "Ensure that there are no more than %(max)s decimal places."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:327
-#, python-format
-msgid ""
-"Ensure that there are no more than %(max)s digit before the decimal point."
-msgid_plural ""
-"Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:438
-#: env/lib/python3.5/site-packages/django/forms/fields.py:1193
-msgid "Enter a valid date."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:462
-#: env/lib/python3.5/site-packages/django/forms/fields.py:1194
-msgid "Enter a valid time."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:484
-msgid "Enter a valid date/time."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:525
-msgid "Enter a valid duration."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:591
-msgid "No file was submitted. Check the encoding type on the form."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:592
-msgid "No file was submitted."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:593
-msgid "The submitted file is empty."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:595
-#, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
-msgid_plural ""
-"Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:598
-msgid "Please either submit a file or check the clear checkbox, not both."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:660
-msgid ""
-"Upload a valid image. The file you uploaded was either not an image or a "
-"corrupted image."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:827
-#: env/lib/python3.5/site-packages/django/forms/fields.py:921
-#: env/lib/python3.5/site-packages/django/forms/models.py:1234
-#, python-format
-msgid "Select a valid choice. %(value)s is not one of the available choices."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:922
-#: env/lib/python3.5/site-packages/django/forms/fields.py:1037
-#: env/lib/python3.5/site-packages/django/forms/models.py:1233
-msgid "Enter a list of values."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:1038
-msgid "Enter a complete value."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/fields.py:1264
-msgid "Enter a valid UUID."
-msgstr ""
-
-#. Translators: This is the default suffix added to form field labels
-#: env/lib/python3.5/site-packages/django/forms/forms.py:129
-msgid ":"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/forms.py:214
-#, python-format
-msgid "(Hidden field %(name)s) %(error)s"
-msgstr ""
-
-#. Translators: If found as last label character, these punctuation
-#. characters will prevent the default label_suffix to be appended to the label
-#: env/lib/python3.5/site-packages/django/forms/forms.py:659
-msgid ":?.!"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:96
-msgid "ManagementForm data is missing or has been tampered with"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:333
-#, python-format
-msgid "Please submit %d or fewer forms."
-msgid_plural "Please submit %d or fewer forms."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:340
-#, python-format
-msgid "Please submit %d or more forms."
-msgid_plural "Please submit %d or more forms."
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:368
-#: env/lib/python3.5/site-packages/django/forms/formsets.py:370
-msgid "Order"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:712
-#, python-format
-msgid "Please correct the duplicate data for %(field)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:716
-#, python-format
-msgid "Please correct the duplicate data for %(field)s, which must be unique."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:722
-#, python-format
-msgid ""
-"Please correct the duplicate data for %(field_name)s which must be unique "
-"for the %(lookup)s in %(date_field)s."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:730
-msgid "Please correct the duplicate values below."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:1053
-msgid "The inline foreign key did not match the parent instance primary key."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:1119
-msgid "Select a valid choice. That choice is not one of the available choices."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/models.py:1236
-#, python-format
-msgid "\"%(pk)s\" is not a valid value for a primary key."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/utils.py:165
-#, python-format
-msgid ""
-"%(datetime)s couldn't be interpreted in time zone %(current_timezone)s; it "
-"may be ambiguous or it may not exist."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:345
-msgid "Currently"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:347
-msgid "Clear"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:555
-msgid "Unknown"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:556
-msgid "Yes"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/forms/widgets.py:557
-msgid "No"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:865
-msgid "yes,no,maybe"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:894
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:906
-#, python-format
-msgid "%(size)d byte"
-msgid_plural "%(size)d bytes"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:908
-#, python-format
-msgid "%s KB"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:910
-#, python-format
-msgid "%s MB"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:912
-#, python-format
-msgid "%s GB"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:914
-#, python-format
-msgid "%s TB"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/template/defaultfilters.py:916
-#, python-format
-msgid "%s PB"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:61
-msgid "p.m."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:62
-msgid "a.m."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:67
-msgid "PM"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:68
-msgid "AM"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:151
-msgid "midnight"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dateformat.py:153
-msgid "noon"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:6
-msgid "Monday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:6
-msgid "Tuesday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:6
-msgid "Wednesday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:6
-msgid "Thursday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:6
-msgid "Friday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:7
-msgid "Saturday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:7
-msgid "Sunday"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:10
-msgid "Mon"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:10
-msgid "Tue"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:10
-msgid "Wed"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:10
-msgid "Thu"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:10
-msgid "Fri"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:11
-msgid "Sat"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:11
-msgid "Sun"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "January"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "February"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "March"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "April"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "May"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:18
-msgid "June"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:19
-msgid "July"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:19
-msgid "August"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:19
-msgid "September"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:19
-msgid "October"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:19
-msgid "November"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:20
-msgid "December"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "jan"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "feb"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "mar"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "apr"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "may"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:23
-msgid "jun"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "jul"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "aug"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "sep"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "oct"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "nov"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:24
-msgid "dec"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:31
-msgctxt "abbrev. month"
-msgid "Jan."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:32
-msgctxt "abbrev. month"
-msgid "Feb."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:33
-msgctxt "abbrev. month"
-msgid "March"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:34
-msgctxt "abbrev. month"
-msgid "April"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:35
-msgctxt "abbrev. month"
-msgid "May"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:36
-msgctxt "abbrev. month"
-msgid "June"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:37
-msgctxt "abbrev. month"
-msgid "July"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:38
-msgctxt "abbrev. month"
-msgid "Aug."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:39
-msgctxt "abbrev. month"
-msgid "Sept."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:40
-msgctxt "abbrev. month"
-msgid "Oct."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:41
-msgctxt "abbrev. month"
-msgid "Nov."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:42
-msgctxt "abbrev. month"
-msgid "Dec."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:45
-msgctxt "alt. month"
-msgid "January"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:46
-msgctxt "alt. month"
-msgid "February"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:47
-msgctxt "alt. month"
-msgid "March"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:48
-msgctxt "alt. month"
-msgid "April"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:49
-msgctxt "alt. month"
-msgid "May"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:50
-msgctxt "alt. month"
-msgid "June"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:51
-msgctxt "alt. month"
-msgid "July"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:52
-msgctxt "alt. month"
-msgid "August"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:53
-msgctxt "alt. month"
-msgid "September"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:54
-msgctxt "alt. month"
-msgid "October"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:55
-msgctxt "alt. month"
-msgid "November"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/dates.py:56
-msgctxt "alt. month"
-msgid "December"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/ipv6.py:10
-msgid "This is not a valid IPv6 address."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/text.py:79
-#, python-format
-msgctxt "String to return when truncating text"
-msgid "%(truncated_text)s..."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/text.py:248
-msgid "or"
-msgstr ""
-
-#. Translators: This string is used as a separator between list elements
-#: env/lib/python3.5/site-packages/django/utils/text.py:267
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:58
-msgid ", "
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:10
-#, python-format
-msgid "%d year"
-msgid_plural "%d years"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:11
-#, python-format
-msgid "%d month"
-msgid_plural "%d months"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:12
-#, python-format
-msgid "%d week"
-msgid_plural "%d weeks"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:13
-#, python-format
-msgid "%d day"
-msgid_plural "%d days"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:14
-#, python-format
-msgid "%d hour"
-msgid_plural "%d hours"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:15
-#, python-format
-msgid "%d minute"
-msgid_plural "%d minutes"
-msgstr[0] ""
-msgstr[1] ""
-
-#: env/lib/python3.5/site-packages/django/utils/timesince.py:47
-msgid "0 minutes"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:107
-msgid "Forbidden"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:108
-msgid "CSRF verification failed. Request aborted."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:112
-msgid ""
-"You are seeing this message because this HTTPS site requires a 'Referer "
-"header' to be sent by your Web browser, but none was sent. This header is "
-"required for security reasons, to ensure that your browser is not being "
-"hijacked by third parties."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:117
-msgid ""
-"If you have configured your browser to disable 'Referer' headers, please re-"
-"enable them, at least for this site, or for HTTPS connections, or for 'same-"
-"origin' requests."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:122
-msgid ""
-"You are seeing this message because this site requires a CSRF cookie when "
-"submitting forms. This cookie is required for security reasons, to ensure "
-"that your browser is not being hijacked by third parties."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:127
-msgid ""
-"If you have configured your browser to disable cookies, please re-enable "
-"them, at least for this site, or for 'same-origin' requests."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/csrf.py:132
-msgid "More information is available with DEBUG=True."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/debug.py:583
-msgid "Welcome to Django"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/debug.py:584
-msgid "It worked!"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/debug.py:585
-msgid "Congratulations on your first Django-powered page."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/debug.py:586
-msgid ""
-"Of course, you haven't actually done any work yet. Next, start your first "
-"app by running <code>python manage.py startapp [app_label]</code>."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/debug.py:588
-msgid ""
-"You're seeing this message because you have <code>DEBUG = True</code> in "
-"your Django settings file and you haven't configured any URLs. Get to work!"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:48
-msgid "No year specified"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:104
-msgid "No month specified"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:163
-msgid "No day specified"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:219
-msgid "No week specified"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:378
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:406
-#, python-format
-msgid "No %(verbose_name_plural)s available"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:660
-#, python-format
-msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/dates.py:694
-#, python-format
-msgid "Invalid date string '%(datestr)s' given format '%(format)s'"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/detail.py:55
-#, python-format
-msgid "No %(verbose_name)s found matching the query"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/list.py:76
-msgid "Page is not 'last', nor can it be converted to an int."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/list.py:81
-#, python-format
-msgid "Invalid page (%(page_number)s): %(message)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/generic/list.py:172
-#, python-format
-msgid "Empty list and '%(class_name)s.allow_empty' is False."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/static.py:58
-msgid "Directory indexes are not allowed here."
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/static.py:60
-#, python-format
-msgid "\"%(path)s\" does not exist"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/django/views/static.py:100
-#, python-format
-msgid "Index of %(directory)s"
-msgstr ""
-
-#: env/lib/python3.5/site-packages/jsonfield/fields.py:30
-#, python-format
-msgid "'%s' is not a valid JSON string."
-msgstr ""
-
-#: inscriptions/admin_course.py:192
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#: inscriptions/admin_course.py:325
 msgid "Statut"
 msgstr ""
 
-#: inscriptions/admin_course.py:196
+#: inscriptions/admin_course.py:329
 msgid "À vérifier"
 msgstr ""
 
-#: inscriptions/admin_course.py:197
+#: inscriptions/admin_course.py:330
 msgid "Complet"
 msgstr ""
 
-#: inscriptions/admin_course.py:198
+#: inscriptions/admin_course.py:331
 msgid "Incomplet"
 msgstr ""
 
-#: inscriptions/admin_course.py:199 inscriptions/models.py:526
+#: inscriptions/admin_course.py:332 inscriptions/models.py:559
 msgid "Erreur"
 msgstr ""
 
-#: inscriptions/admin_course.py:217
+#: inscriptions/admin_course.py:350
 msgid "Paiement complet"
 msgstr ""
 
-#: inscriptions/admin_course.py:221
+#: inscriptions/admin_course.py:354
 msgid "Payé"
 msgstr ""
 
-#: inscriptions/admin_course.py:222
+#: inscriptions/admin_course.py:355
 msgid "Impayé"
 msgstr ""
 
-#: inscriptions/admin_course.py:232
+#: inscriptions/admin_course.py:365 inscriptions/templates/stats.html:165
 msgid "Catégories"
 msgstr ""
 
-#: inscriptions/admin_course.py:380
+#: inscriptions/admin_course.py:514
 msgid "Envoyer un mail groupé"
 msgstr ""
 
-#: inscriptions/forms.py:51
+#: inscriptions/admin_main.py:97
+#, python-format
+msgid "Classement du challenge \"%s\" calculé"
+msgstr ""
+
+#: inscriptions/admin_main.py:99
+msgid "Calculer le classement"
+msgstr ""
+
+#: inscriptions/admin_main.py:129
+#, python-format
+msgid "Course \"%s (%s)\" supprimée."
+msgstr ""
+
+#: inscriptions/admin_main.py:136 inscriptions/admin_main.py:145
+#, python-format
+msgid "Catégories de la course \"%s (%s)\" modifiées."
+msgstr ""
+
+#: inscriptions/admin_main.py:136 inscriptions/admin_main.py:145
+#, python-format
+msgid " %d équipes ne correspondent à aucune catégorie"
+msgstr ""
+
+#: inscriptions/admin_main.py:151
+msgid "Sélectionnez une seul course"
+msgstr ""
+
+#: inscriptions/admin_main.py:158
+msgid "Gérer les courses"
+msgstr ""
+
+#: inscriptions/forms.py:52
 msgid ""
 "Code utilisé pour identifier la course. Ce code sera affiché dans l'adresse "
 "internet de la page d'inscription. Par exemple, pour les 6h de Paris 2015, "
@@ -1680,413 +98,503 @@ msgid ""
 "chiffres."
 msgstr ""
 
-#: inscriptions/forms.py:52
+#: inscriptions/forms.py:53
 msgid "Nom du club ou association organisateur"
 msgstr ""
 
-#: inscriptions/forms.py:53
+#: inscriptions/forms.py:54
 msgid "Adresse internet pointant vers le site présentant la course"
 msgstr ""
 
-#: inscriptions/forms.py:54
+#: inscriptions/forms.py:55
 msgid "Adresse internet pointant vers le réglement de la course"
 msgstr ""
 
-#: inscriptions/forms.py:55
+#: inscriptions/forms.py:56
 msgid "Email utilisée pour envoyer les emails"
 msgstr ""
 
-#: inscriptions/forms.py:60
+#: inscriptions/forms.py:61 inscriptions/forms.py:112
 msgid "Model de course"
 msgstr ""
 
-#: inscriptions/models.py:27 inscriptions/models.py:32
-#: inscriptions/models.py:527
+#: inscriptions/forms.py:93
+msgid "Fichier CSV"
+msgstr ""
+
+#: inscriptions/forms.py:94
+msgid "Délimiteur"
+msgstr ""
+
+#: inscriptions/forms.py:95
+msgid "Sauter la première ligne"
+msgstr ""
+
+#: inscriptions/forms.py:96
+msgid "Dossard"
+msgstr ""
+
+#: inscriptions/forms.py:97 inscriptions/templates/resultats_challenge.html:52
+msgid "Temps"
+msgstr ""
+
+#: inscriptions/forms.py:98
+msgid "Format du temps"
+msgstr ""
+
+#: inscriptions/forms.py:98
+msgid "Nombre de secondes"
+msgstr ""
+
+#: inscriptions/forms.py:98
+msgid "HH:MM:SS.xxx"
+msgstr ""
+
+#: inscriptions/forms.py:99 inscriptions/templates/resultats_challenge.html:51
+msgid "Tours"
+msgstr ""
+
+#: inscriptions/forms.py:100 inscriptions/models.py:408
+msgid "Position générale"
+msgstr ""
+
+#: inscriptions/forms.py:101 inscriptions/models.py:409
+msgid "Position catégorie"
+msgstr ""
+
+#: inscriptions/forms.py:102
+msgid "Nom de l'équipe"
+msgstr ""
+
+#: inscriptions/forms.py:103
+msgid "Code catégorie"
+msgstr ""
+
+#: inscriptions/models.py:33 inscriptions/models.py:38
+#: inscriptions/models.py:560
 msgid "Homme"
 msgstr ""
 
-#: inscriptions/models.py:28 inscriptions/models.py:33
+#: inscriptions/models.py:34 inscriptions/models.py:39
 msgid "Femme"
 msgstr ""
 
-#: inscriptions/models.py:34
+#: inscriptions/models.py:40
 msgid "Homme ou Mixte"
 msgstr ""
 
-#: inscriptions/models.py:35
+#: inscriptions/models.py:41
 msgid "Femme ou Mixte"
 msgstr ""
 
-#: inscriptions/models.py:36
+#: inscriptions/models.py:42
 msgid "Mixte"
 msgstr ""
 
-#: inscriptions/models.py:40
+#: inscriptions/models.py:43
+msgid "Sans critères"
+msgstr ""
+
+#: inscriptions/models.py:47
 msgid "Licence FFRS"
 msgstr ""
 
-#: inscriptions/models.py:41
+#: inscriptions/models.py:48
 msgid "Certificat médical"
 msgstr ""
 
-#: inscriptions/models.py:45
+#: inscriptions/models.py:52
 msgid "Accès interdit"
 msgstr ""
 
-#: inscriptions/models.py:46
+#: inscriptions/models.py:53
 msgid "Administrateur"
 msgstr ""
 
-#: inscriptions/models.py:47 inscriptions/models.py:76
-#: inscriptions/models.py:96
+#: inscriptions/models.py:54 inscriptions/models.py:83
+#: inscriptions/models.py:103
 msgid "Organisateur"
 msgstr ""
 
-#: inscriptions/models.py:48
+#: inscriptions/models.py:55
 msgid "Validateur"
 msgstr ""
 
-#: inscriptions/models.py:52
+#: inscriptions/models.py:59
 msgid "Site Roller en Ligne.com"
 msgstr ""
 
-#: inscriptions/models.py:53
+#: inscriptions/models.py:60
 msgid "Facebook"
 msgstr ""
 
-#: inscriptions/models.py:54
+#: inscriptions/models.py:61
 msgid "Presse"
 msgstr ""
 
-#: inscriptions/models.py:55
+#: inscriptions/models.py:62
 msgid "Bouche à oreille"
 msgstr ""
 
-#: inscriptions/models.py:56
+#: inscriptions/models.py:63
 msgid "Flyer pendant une course"
 msgstr ""
 
-#: inscriptions/models.py:57
+#: inscriptions/models.py:64
 msgid "Flyer pendant une randonnée"
 msgstr ""
 
-#: inscriptions/models.py:58
+#: inscriptions/models.py:65
 msgid "Affiche"
 msgstr ""
 
-#: inscriptions/models.py:59
+#: inscriptions/models.py:66
 msgid "Information de la Mairie"
 msgstr ""
 
-#: inscriptions/models.py:60
+#: inscriptions/models.py:67
 msgid "Par mon club"
 msgstr ""
 
-#: inscriptions/models.py:61
+#: inscriptions/models.py:68
 msgid "Autre"
 msgstr ""
 
-#: inscriptions/models.py:65
+#: inscriptions/models.py:72
 msgid "XS"
 msgstr ""
 
-#: inscriptions/models.py:66
+#: inscriptions/models.py:73
 msgid "S"
 msgstr ""
 
-#: inscriptions/models.py:67
+#: inscriptions/models.py:74
 msgid "M"
 msgstr ""
 
-#: inscriptions/models.py:68
+#: inscriptions/models.py:75
 msgid "L"
 msgstr ""
 
-#: inscriptions/models.py:69
+#: inscriptions/models.py:76
 msgid "XL"
 msgstr ""
 
-#: inscriptions/models.py:70
+#: inscriptions/models.py:77
 msgid "XXL"
 msgstr ""
 
-#: inscriptions/models.py:74
+#: inscriptions/models.py:81
 msgid "Gerant d'équipe"
 msgstr ""
 
-#: inscriptions/models.py:75
+#: inscriptions/models.py:82
 msgid "Equipier"
 msgstr ""
 
-#: inscriptions/models.py:77
+#: inscriptions/models.py:84 inscriptions/templates/_list_filter.html:32
 msgid "Tous"
 msgstr ""
 
-#: inscriptions/models.py:94 inscriptions/models.py:291
-#: inscriptions/models.py:370 inscriptions/models.py:500
-#: inscriptions/models.py:588
+#: inscriptions/models.py:101 inscriptions/models.py:304
+#: inscriptions/models.py:383 inscriptions/models.py:533
+#: inscriptions/models.py:620 inscriptions/models.py:736
 msgid "Nom"
 msgstr ""
 
-#: inscriptions/models.py:95
+#: inscriptions/models.py:102 inscriptions/models.py:667
 msgid "uid"
 msgstr ""
 
-#: inscriptions/models.py:95
+#: inscriptions/models.py:102 inscriptions/models.py:667
 msgid "Ne doit contenir que des lettres ou des chiffres"
 msgstr ""
 
-#: inscriptions/models.py:97 inscriptions/models.py:374
+#: inscriptions/models.py:104 inscriptions/models.py:387
 msgid "Ville"
 msgstr ""
 
-#: inscriptions/models.py:99
+#: inscriptions/models.py:105
 msgid "Date"
 msgstr ""
 
-#: inscriptions/models.py:101
-msgid "URL Réglement"
-msgstr ""
-
-#: inscriptions/models.py:102
-msgid "Email contact"
-msgstr ""
-
-#: inscriptions/models.py:103
-msgid "Logo"
-msgstr ""
-
-#: inscriptions/models.py:104
-msgid "Date d'ouverture des inscriptionss"
-msgstr ""
-
-#: inscriptions/models.py:105
-msgid "Date d'augmentation des tarifs"
-msgstr ""
-
 #: inscriptions/models.py:106
-msgid "Date de fermeture des inscriptions"
+msgid "URL"
 msgstr ""
 
 #: inscriptions/models.py:107
-msgid "Limite du nombre de participants"
+msgid "URL Réglement"
 msgstr ""
 
 #: inscriptions/models.py:108
-msgid "Adresse paypal"
+msgid "Email contact"
 msgstr ""
 
-#: inscriptions/models.py:109
-msgid "Frais paypal inclus"
+#: inscriptions/models.py:109 inscriptions/models.py:668
+msgid "Logo"
 msgstr ""
 
 #: inscriptions/models.py:110
-msgid "Ordre des chèques"
+msgid "Date d'ouverture des inscriptionss"
 msgstr ""
 
-#: inscriptions/models.py:111 inscriptions/models.py:372
-#: inscriptions/models.py:503 inscriptions/models.py:504
-msgid "Adresse"
+#: inscriptions/models.py:111
+msgid "Date d'augmentation des tarifs"
 msgstr ""
 
 #: inscriptions/models.py:112
+msgid "Date de fermeture des inscriptions"
+msgstr ""
+
+#: inscriptions/models.py:113
+msgid "Limite du nombre de participants"
+msgstr ""
+
+#: inscriptions/models.py:114
+msgid "Adresse paypal"
+msgstr ""
+
+#: inscriptions/models.py:115
+msgid "Frais paypal inclus"
+msgstr ""
+
+#: inscriptions/models.py:116
+msgid "Ordre des chèques"
+msgstr ""
+
+#: inscriptions/models.py:117 inscriptions/models.py:385
+#: inscriptions/models.py:536 inscriptions/models.py:537
+msgid "Adresse"
+msgstr ""
+
+#: inscriptions/models.py:118 inscriptions/models.py:670
 msgid "Activée"
 msgstr ""
 
-#: inscriptions/models.py:292
+#: inscriptions/models.py:119
+msgid "Distance d'un tour (en km)"
+msgstr ""
+
+#: inscriptions/models.py:305 inscriptions/models.py:737
+#: inscriptions/templates/stats.html:169
 msgid "Code"
 msgstr ""
 
-#: inscriptions/models.py:293
+#: inscriptions/models.py:306
 msgid "Prix normal"
 msgstr ""
 
-#: inscriptions/models.py:294
+#: inscriptions/models.py:307
 msgid "Prix augmenté"
 msgstr ""
 
-#: inscriptions/models.py:295
+#: inscriptions/models.py:308 inscriptions/models.py:738
 msgid "Nombre minimum d'équipiers"
 msgstr ""
 
-#: inscriptions/models.py:296
+#: inscriptions/models.py:309 inscriptions/models.py:739
 msgid "Nombre maximum d'équipiers"
 msgstr ""
 
-#: inscriptions/models.py:297
+#: inscriptions/models.py:310 inscriptions/models.py:740
 msgid "Age minimum"
 msgstr ""
 
-#: inscriptions/models.py:298 inscriptions/models.py:502
+#: inscriptions/models.py:311 inscriptions/models.py:535
+#: inscriptions/models.py:741
 msgid "Sexe"
 msgstr ""
 
-#: inscriptions/models.py:299
+#: inscriptions/models.py:312 inscriptions/models.py:742
 msgid "Validation function (javascript)"
 msgstr ""
 
-#: inscriptions/models.py:300
+#: inscriptions/models.py:313
 msgid "Numero de dossard (début)"
 msgstr ""
 
-#: inscriptions/models.py:301
+#: inscriptions/models.py:314
 msgid "Numero de dossard (fin)"
 msgstr ""
 
-#: inscriptions/models.py:368
+#: inscriptions/models.py:381
 msgid "Nom d'équipe"
 msgstr ""
 
-#: inscriptions/models.py:369
+#: inscriptions/models.py:382
 msgid "Club"
 msgstr ""
 
-#: inscriptions/models.py:371 inscriptions/models.py:501
+#: inscriptions/models.py:384 inscriptions/models.py:534
 msgid "Prénom"
 msgstr ""
 
-#: inscriptions/models.py:373
+#: inscriptions/models.py:386
 msgid "Adresse 2"
 msgstr ""
 
-#: inscriptions/models.py:375
+#: inscriptions/models.py:388
 msgid "Code postal"
 msgstr ""
 
-#: inscriptions/models.py:376 inscriptions/models.py:507
+#: inscriptions/models.py:389 inscriptions/models.py:540
 msgid "Pays"
 msgstr ""
 
-#: inscriptions/models.py:377 inscriptions/models.py:508
+#: inscriptions/models.py:390 inscriptions/models.py:541
 msgid "e-mail"
 msgstr ""
 
-#: inscriptions/models.py:378
+#: inscriptions/models.py:391
 msgid "Mot de passe"
 msgstr ""
 
-#: inscriptions/models.py:379
+#: inscriptions/models.py:392
 msgid "Téléphone"
 msgstr ""
 
-#: inscriptions/models.py:382
+#: inscriptions/models.py:395
 msgid "Nombre d'équipiers"
 msgstr ""
 
-#: inscriptions/models.py:383
+#: inscriptions/models.py:396
 msgid "Détails"
 msgstr ""
 
-#: inscriptions/models.py:384
+#: inscriptions/models.py:397
 msgid "Prix"
 msgstr ""
 
-#: inscriptions/models.py:385
+#: inscriptions/models.py:398
 msgid "Paiement reçu"
 msgstr ""
 
-#: inscriptions/models.py:386
+#: inscriptions/models.py:399
 msgid "Dossier complet"
 msgstr ""
 
-#: inscriptions/models.py:387
+#: inscriptions/models.py:400
 msgid "Date d'insciption"
 msgstr ""
 
-#: inscriptions/models.py:388
+#: inscriptions/models.py:401
 msgid "Commentaires"
 msgstr ""
 
-#: inscriptions/models.py:390 inscriptions/models.py:498
+#: inscriptions/models.py:403 inscriptions/models.py:531
 msgid "Numéro"
 msgstr ""
 
-#: inscriptions/models.py:391
+#: inscriptions/models.py:404
 msgid "Comment avez vous connu la course ?"
 msgstr ""
 
-#: inscriptions/models.py:392
+#: inscriptions/models.py:405
 msgid "Date facture"
 msgstr ""
 
-#: inscriptions/models.py:509
+#: inscriptions/models.py:406
+msgid "Nombre de tours"
+msgstr ""
+
+#: inscriptions/models.py:407
+msgid "Temps (en secondes)"
+msgstr ""
+
+#: inscriptions/models.py:542
 msgid "Date de naissance"
 msgstr ""
 
-#: inscriptions/models.py:510
+#: inscriptions/models.py:543
 msgid "Autorisation parentale"
 msgstr ""
 
-#: inscriptions/models.py:511
+#: inscriptions/models.py:544
 msgid "Autorisation parentale valide"
 msgstr ""
 
-#: inscriptions/models.py:512
+#: inscriptions/models.py:545
 msgid "Justificatif"
 msgstr ""
 
-#: inscriptions/models.py:513
+#: inscriptions/models.py:546
 msgid "Numéro de licence"
 msgstr ""
 
-#: inscriptions/models.py:514
+#: inscriptions/models.py:547
 msgid "Certificat ou licence"
 msgstr ""
 
-#: inscriptions/models.py:515
+#: inscriptions/models.py:548
 msgid "Certificat ou licence valide"
 msgstr ""
 
-#: inscriptions/models.py:517
+#: inscriptions/models.py:550
 msgid "Transpondeur"
 msgstr ""
 
-#: inscriptions/models.py:518
+#: inscriptions/models.py:551
 msgid "Taille T-shirt"
 msgstr ""
 
-#: inscriptions/models.py:521
+#: inscriptions/models.py:554
 msgid "Verifier"
 msgstr ""
 
-#: inscriptions/models.py:522
+#: inscriptions/models.py:555
 msgid "Licence manquante"
 msgstr ""
 
-#: inscriptions/models.py:523
+#: inscriptions/models.py:556
 msgid "Certificat manquant"
 msgstr ""
 
-#: inscriptions/models.py:524
+#: inscriptions/models.py:557
 msgid "Autorisation manquante"
 msgstr ""
 
-#: inscriptions/models.py:525
+#: inscriptions/models.py:558
 msgid "Valide"
 msgstr ""
 
-#: inscriptions/models.py:574
+#: inscriptions/models.py:606
 msgid "Role"
 msgstr ""
 
-#: inscriptions/models.py:589
+#: inscriptions/models.py:621
 msgid "Destinataire"
 msgstr ""
 
-#: inscriptions/models.py:590
+#: inscriptions/models.py:622
 msgid "Copie cachée à"
 msgstr ""
 
-#: inscriptions/models.py:591
+#: inscriptions/models.py:623
 msgid "Sujet"
 msgstr ""
 
-#: inscriptions/models.py:592
+#: inscriptions/models.py:624
 msgid "Message"
+msgstr ""
+
+#: inscriptions/templates/500.html:7
+msgid ""
+"Une erreur interne est survenue pendant le traitement de votre demande. "
+"L'administrateur du site à été prévenu. N'hésitez pas à contacter "
+"l'organisation de votre course pour obtenir de l'assitance."
 msgstr ""
 
 #: inscriptions/templates/_account_bar.html:11
 msgid "Settings"
+msgstr ""
+
+#: inscriptions/templates/_account_bar.html:14
+msgid "Log out"
+msgstr ""
+
+#: inscriptions/templates/_account_bar.html:17
+#: inscriptions/templates/orga.html:33
+msgid "Log in"
 msgstr ""
 
 #: inscriptions/templates/_account_bar.html:19
@@ -2094,8 +602,65 @@ msgstr ""
 msgid "Sign up"
 msgstr ""
 
+#: inscriptions/templates/_list_filter.html:13
+#: inscriptions/templates/admin/dashboard.html:202
+msgid "Equipes"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:20
+#: inscriptions/templates/admin/dashboard.html:148
+msgid "Categories"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:22
+msgid "Regrouper les catégories"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:22
+msgid "Séparer les catégories"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:23
+msgid "Toutes"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:30
+msgid "Top"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:33
+msgid "Top 1"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:34
+msgid "Top 3"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:35
+msgid "Top 5"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:36
+msgid "Top 10"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:48
+msgid "Trie"
+msgstr ""
+
+#: inscriptions/templates/_list_filter.html:51
+#, python-format
+msgid "%(i)s"
+msgstr ""
+
 #: inscriptions/templates/account/logout.html:6
 msgid "Vous êtes déconnecté"
+msgstr ""
+
+#: inscriptions/templates/admin/base_site.html:4
+#: inscriptions/templates/admin/base_site.html:7
+#, python-format
+msgid "Enduroller - %(nom)s"
 msgstr ""
 
 #: inscriptions/templates/admin/base_site.html:11
@@ -2106,6 +671,14 @@ msgstr ""
 #: inscriptions/templates/admin/base_site_common.html:7
 #: inscriptions/templates/admin/inscriptions/course/change_form.html:4
 msgid "Enduroller"
+msgstr ""
+
+#: inscriptions/templates/admin/challenge/courses.html:21
+#: inscriptions/templates/challenges.html:21
+#: inscriptions/templates/challenges.html:43
+#: inscriptions/templates/index.html:19 inscriptions/templates/index.html:53
+#, python-format
+msgid "le %(date)s à %(ville)s"
 msgstr ""
 
 #: inscriptions/templates/admin/course_ask_accreditation.html:4
@@ -2161,10 +734,6 @@ msgstr ""
 msgid "Reglages de la course"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:148
-msgid "Categories"
-msgstr ""
-
 #: inscriptions/templates/admin/dashboard.html:152
 msgid "Accreditations"
 msgstr ""
@@ -2197,12 +766,17 @@ msgstr ""
 msgid "Equipes et équipiers"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:202
-msgid "Equipes"
-msgstr ""
-
 #: inscriptions/templates/admin/dashboard.html:206
 msgid "Equipiers"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:215
+msgid "Imports"
+msgstr ""
+
+#: inscriptions/templates/admin/dashboard.html:221
+#: inscriptions/templates/index.html:57
+msgid "Résultats"
 msgstr ""
 
 #: inscriptions/templates/admin/equipe/send_mail.html:23
@@ -2226,6 +800,8 @@ msgid "Sujet :"
 msgstr ""
 
 #: inscriptions/templates/admin/equipe/send_mail.html:30
+#: inscriptions/templates/admin/import_resultat_form.html:14
+#: inscriptions/templates/contact.html:21
 msgid "Envoyer"
 msgstr ""
 
@@ -2242,6 +818,10 @@ msgstr ""
 msgid "Enduroller - Création d'une nouvelle course"
 msgstr ""
 
+#: inscriptions/templates/admin/inscriptions/course/change_form.html:15
+msgid "Home"
+msgstr ""
+
 #: inscriptions/templates/admin/inscriptions/course/change_form.html:16
 msgid "Ajouter nouvelle course"
 msgstr ""
@@ -2250,8 +830,24 @@ msgstr ""
 msgid "Générer"
 msgstr ""
 
+#: inscriptions/templates/admin/submit_line.html:3
+msgid "Save"
+msgstr ""
+
+#: inscriptions/templates/admin/submit_line.html:6
+msgid "Delete"
+msgstr ""
+
 #: inscriptions/templates/base.html:55
 msgid "Courses d'endurance de roller"
+msgstr ""
+
+#: inscriptions/templates/challenges.html:11
+msgid "Prochains challenges"
+msgstr ""
+
+#: inscriptions/templates/challenges.html:36
+msgid "Anciens challenges"
 msgstr ""
 
 #: inscriptions/templates/change.html:11
@@ -2317,6 +913,14 @@ msgid ""
 "Si vous n'avez pas encore payé, amenez votre chèque le jour de la course."
 msgstr ""
 
+#: inscriptions/templates/contact.html:6
+msgid "Contactez nous"
+msgstr ""
+
+#: inscriptions/templates/contact_done.html:6
+msgid "Votre message a été envoyé"
+msgstr ""
+
 #: inscriptions/templates/done.html:5
 msgid "Votre inscription est enregistrée"
 msgstr ""
@@ -2344,6 +948,10 @@ msgstr ""
 #: inscriptions/templates/done.html:44
 #, python-format
 msgid "Pour tout paiement par internet, %(frais)s € de frais seront ajoutés."
+msgstr ""
+
+#: inscriptions/templates/done.html:44
+msgid "Ces frais correspondent aux frais de transaction Paypal."
 msgstr ""
 
 #: inscriptions/templates/done.html:47
@@ -2659,11 +1267,6 @@ msgstr ""
 msgid "Prochaines courses"
 msgstr ""
 
-#: inscriptions/templates/index.html:19 inscriptions/templates/index.html:53
-#, python-format
-msgid "le %(date)s à %(ville)s"
-msgstr ""
-
 #: inscriptions/templates/index.html:20
 #, python-format
 msgid "Organisé par %(organisateur)s."
@@ -2691,10 +1294,6 @@ msgstr ""
 msgid "Site de la course"
 msgstr ""
 
-#: inscriptions/templates/index.html:57
-msgid "Résultats"
-msgstr ""
-
 #: inscriptions/templates/not_opened_yet.html:11
 #, python-format
 msgid "Ouverture des inscriptions le %(ouverture)s."
@@ -2704,6 +1303,132 @@ msgstr ""
 msgid "Accéder au site de la course"
 msgstr ""
 
-#: inscriptions/views.py:83
+#: inscriptions/templates/resultats_challenge.html:45
+msgid "Course"
+msgstr ""
+
+#: inscriptions/templates/resultats_challenge.html:46
+msgid "#"
+msgstr ""
+
+#: inscriptions/templates/resultats_challenge.html:47
+msgid "Générale"
+msgstr ""
+
+#: inscriptions/templates/resultats_challenge.html:48
+msgid "Cat."
+msgstr ""
+
+#: inscriptions/templates/resultats_challenge.html:49
+msgid "Points"
+msgstr ""
+
+#: inscriptions/templates/resultats_challenge.html:50
+msgid "Position"
+msgstr ""
+
+#: inscriptions/templates/site_base.html:23
+msgid "Courses"
+msgstr ""
+
+#: inscriptions/templates/site_base.html:24
+msgid "Challenges"
+msgstr ""
+
+#: inscriptions/templates/site_base.html:25
+msgid "Organisateurs"
+msgstr ""
+
+#: inscriptions/templates/stats.html:65
+msgid "Origine des participants"
+msgstr ""
+
+#: inscriptions/templates/stats.html:69
+msgid "Villes des participants"
+msgstr ""
+
+#: inscriptions/templates/stats.html:75
+#, python-format
+msgid "%(villes)s autres villes"
+msgstr ""
+
+#: inscriptions/templates/stats.html:93
+msgid "Origine des équipes"
+msgstr ""
+
+#: inscriptions/templates/stats.html:101
+#, python-format
+msgid "%(pays)s autres pays / regions"
+msgstr ""
+
+#: inscriptions/templates/stats.html:130 inscriptions/templates/stats.html:134
+msgid "Clubs"
+msgstr ""
+
+#: inscriptions/templates/stats.html:142
+#, python-format
+msgid "%(clubs)s autres clubs"
+msgstr ""
+
+#: inscriptions/templates/stats.html:169
+msgid "Catégorie"
+msgstr ""
+
+#: inscriptions/templates/stats.html:186
+msgid "Autres"
+msgstr ""
+
+#: inscriptions/templates/stats.html:190
+msgid "Comment ont-il connu la course"
+msgstr ""
+
+#: inscriptions/views.py:88
 msgid "Désolé, il n'y a plus de place dans cette catégorie"
 msgstr ""
+
+#: inscriptions/views.py:194
+msgid "date"
+msgstr "Date d'inscription"
+
+#: inscriptions/views.py:194 inscriptions/views.py:199
+msgid "numero"
+msgstr "Numéro de dossard"
+
+#: inscriptions/views.py:194 inscriptions/views.py:199
+#: inscriptions/views.py:357
+msgid "nom"
+msgstr "Nom"
+
+#: inscriptions/views.py:194
+msgid "club"
+msgstr "Club"
+
+#: inscriptions/views.py:194 inscriptions/views.py:199
+#: inscriptions/views.py:357
+msgid "categorie__code"
+msgstr "Catégorie"
+
+#: inscriptions/views.py:199
+msgid "position_generale"
+msgstr "Position générale"
+
+#: inscriptions/views.py:199
+msgid "position_categorie"
+msgstr "Position par catégories"
+
+#: inscriptions/views.py:357
+msgid "position2"
+msgstr "Position"
+
+#: inscriptions/views.py:357
+msgid "count"
+msgstr "Nombre de participation"
+
+#, fuzzy
+#~ msgid "Please correct the error below."
+#~ msgstr ""
+#~ "#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+#~ "#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+#~ "#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+#~ "#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+#~ "#-#-#-#-#  django.pot (PACKAGE VERSION)  #-#-#-#-#\n"
