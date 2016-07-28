@@ -1523,10 +1523,9 @@ msgstr "Bib number"
 
 #: inscriptions/views.py:194 inscriptions/views.py:199
 #: inscriptions/views.py:357
-#, fuzzy
 #| msgid "Nom"
 msgid "nom"
-msgstr "Last name"
+msgstr "Name"
 
 #: inscriptions/views.py:194
 msgid "club"
@@ -1534,7 +1533,6 @@ msgstr "Club"
 
 #: inscriptions/views.py:194 inscriptions/views.py:199
 #: inscriptions/views.py:357
-#, fuzzy
 #| msgid "Catégories"
 msgid "categorie__code"
 msgstr "Categories"
@@ -1548,10 +1546,9 @@ msgid "position_categorie"
 msgstr "Position by categories"
 
 #: inscriptions/views.py:357
-#, fuzzy
 #| msgid "Inscription"
 msgid "position2"
-msgstr "Registration"
+msgstr "Position"
 
 #: inscriptions/views.py:357
 msgid "count"
