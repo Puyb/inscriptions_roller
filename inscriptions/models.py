@@ -722,7 +722,7 @@ class Challenge(models.Model):
         if not any(c for c in self.categories.all() if c.valide(equipe)):
             return None
 
-        for p in self.participations.prefetch_related('equipes__equipe'):
+        for p in self.participations.exclude(equipes__equipe__course=equipe.course).prefetch_related('equipes__equipe'):
             if any(distance(equipe.nom.lower(), e.equipe.nom.lower()) < 3 for e in p.equipes.all()) and p.match(equipe):
                 p.add_equipe(equipe=equipe)
                 return p
