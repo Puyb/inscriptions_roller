@@ -486,7 +486,7 @@ class Equipe(models.Model):
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
         super(Equipe, self).save(*args, **kwargs)
 
-        ChallengeInscriptionEquipe(self).start()
+        #ChallengeInscriptionEquipe(self).start()
 
 
     def send_mail(self, nom):
