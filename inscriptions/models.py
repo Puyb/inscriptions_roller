@@ -15,7 +15,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
-from django.db.models import Count, Sum, Value, F, When, Case
+from django.db.models import Count, Sum, Value, F, When, Case, Prefetch
 from django.db.models.functions import Coalesce
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
@@ -415,18 +415,18 @@ class Equipe(models.Model):
         return u'%s - %s - %s - %s' % (self.numero, self.course.uid, self.categorie, self.nom)
 
     def licence_manquantes(self):
-        return [equipier for equipier in self.equipier_set.all() if equipier.licence_manquante]
+        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.licence_manquante]
 
     def certificat_manquantes(self):
-        return [equipier for equipier in self.equipier_set.all() if equipier.certificat_manquant]
+        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.certificat_manquant]
 
     def autorisation_manquantes(self):
-        return [equipier for equipier in self.equipier_set.all() if equipier.autorisation_manquante]
+        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.autorisation_manquante]
 
     def verifier(self):
         if hasattr(self, 'verifier_count'):
             return self.verifier_count > 0
-        return len([equipier for equipier in self.equipier_set.all() if equipier.verifier]) > 0
+        return len([equipier for equipier in self.equipier_set.all().filter(numero__lte=self.nombre) if equipier.verifier]) > 0
 
     def paiement_complet(self):
         return (self.paiement or Decimal(0)) >= self.prix
@@ -435,12 +435,12 @@ class Equipe(models.Model):
         if hasattr(self, 'erreur_count'):
             if self.erreur_count > 0:
                 return False
-        elif len([equipier for equipier in self.equipier_set.all() if equipier.erreur]) > 0:
+        elif len([equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.erreur]) > 0:
             return False
         if hasattr(self, 'valide_count'):
             if self.valide_count < self.nombre:
                 return None
-        elif len([equipier for equipier in self.equipier_set.all() if not equipier.valide]) > 0:
+        elif len([equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if not equipier.valide]) > 0:
             return None
         return True
 
@@ -641,7 +641,7 @@ class TemplateMail(models.Model):
                 if isinstance(instance, Equipier):
                     dests.add(instance.email)
                 if isinstance(instance, Equipe):
-                    for equipier in instance.equipier_set.all():
+                    for equipier in instance.equipier_set.filter(numero__lte=F('equipe__nombre')):
                         dests.add(equipier.email)
             
             context = Context({
@@ -670,19 +670,18 @@ class Challenge(models.Model):
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course, course_categories=None):
-        with transaction.atomic():
-            if course in self.courses.all():
-                course_categories = course_categories or { c: c.categories.filter(course=course) for c in self.categories.all() }
-                self.del_course(course)
-            else:
-                course_categories = course_categories or { c: [c] for c in course.categories.all() }
-            for c in self.categories.all():
-                if c in course_categories:
-                    c.categories.add(*course_categories[c])
-            print(self.categories.all()[0].categories.filter(course=course))
-            equipes_skiped = [ equipe for equipe in course.equipe_set.all() if not self.inscription_equipe(equipe) ]
-            self.compute_course(course)
-            return equipes_skiped
+        if course in self.courses.all():
+            course_categories = course_categories or { c: c.categories.filter(course=course) for c in self.categories.all() }
+            self.del_course(course)
+        else:
+            course_categories = course_categories or { c: [c] for c in course.categories.all() }
+        for c in self.categories.all():
+            if c in course_categories:
+                c.categories.add(*course_categories[c])
+        print(self.categories.all()[0].categories.filter(course=course))
+        equipes_skiped = [ equipe for equipe in course.equipe_set.select_related('categorie').prefetch_related(Prefetch('equipier_set', Equipier.objects.filter(numero__lte=F('equipe__nombre')))) if not self.inscription_equipe(equipe) ]
+        self.compute_course(course)
+        return equipes_skiped
 
     def del_course(self, course):
         course_categories = course.categories.all();
@@ -712,7 +711,7 @@ class Challenge(models.Model):
         courses_points = [ ('points_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__points'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('-date') ]
         #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
         print(self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]).query.sql_with_params())
-        for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]):
+        for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]):
             p.position = cats[p.categorie.code]
             p.save()
             cats[p.categorie.code] += 1
@@ -783,18 +782,17 @@ class ParticipationChallenge(models.Model):
 
     def add_equipe(self, equipe, point=0):
         EquipeChallenge.objects.filter(participation__challenge=self.challenge, equipe=equipe).delete()
-        e = EquipeChallenge(
+        e = self.equipes.create(
             participation=self,
             equipe=equipe,
             points=0,
         )
-        e.save()
-        self.equipes.add(e)
         if not self.categorie:
             for c in self.challenge.categories.all():
                 if c.valide(equipe):
                     self.categorie = c
                     self.save()
+                    break
         return e
         
     def match(self, equipe):

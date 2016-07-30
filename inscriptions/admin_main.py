@@ -100,7 +100,7 @@ class ChallengeAdmin(admin.ModelAdmin):
 
     def manage_courses(self, request, queryset=None):
         if 'courses' in request.POST and 'challenge_id' in request.POST:
-            challenge = Challenge.objects.filter(id=int(request.POST['challenge_id'])).prefetch_related('categories').get()
+            challenge = Challenge.objects.filter(id=int(request.POST['challenge_id'])).prefetch_related('categories__categories__course').get()
             challenge_categories = { c.id: c for c in challenge.categories.all() }
 
             courses = Course.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories')
@@ -119,33 +119,35 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 
 
-            for c in challenge.courses.all():
-                if c not in courses:
-                    challenge.courses.remove(c)
-                    challenge.del_course(c)
-                    messages.add_message(
-                        request,
-                        messages.INFO,
-                        _(u'Course "%s (%s)" supprimée.') % (c.nom, c.uid),
-                    )
-                elif any(cat for cat in challenge.categories.all() if set(cat.categories.filter(course=c)) != categories[c][cat]):
-                    equipes_skiped = challenge.add_course(c, categories[c])
-                    messages.add_message(
-                        request,
-                        messages.WARNING if len(equipes_skiped) else messages.INFO,
-                        _(u'Catégories de la course "%s (%s)" modifiées.') % (c.nom, c.uid) + (_(u' %d équipes ne correspondent à aucune catégorie') % len(equipes_skiped) if len(equipes_skiped) else ''),
-                    )
-            for c in courses:
-                if c not in challenge.courses.all():
-                    challenge.courses.add(c)
-                    equipes_skiped = challenge.add_course(c, categories[c])
-                    messages.add_message(
-                        request,
-                        messages.WARNING if len(equipes_skiped) else messages.INFO,
-                        _(u'Catégories de la course "%s (%s)" modifiées.') % (c.nom, c.uid) + (_(u' %d équipes ne correspondent à aucune catégorie') % len(equipes_skiped) if len(equipes_skiped) else ''),
-                    )
-            challenge.compute_challenge()
-            return redirect('/admin/inscriptions/challenge/')
+
+            with transaction.atomic():
+                for c in challenge.courses.all():
+                    if c not in courses:
+                        challenge.courses.remove(c)
+                        challenge.del_course(c)
+                        messages.add_message(
+                            request,
+                            messages.INFO,
+                            _(u'Course "%s (%s)" supprimée.') % (c.nom, c.uid),
+                        )
+                    elif any(cat for cat in challenge.categories.all() if set(c for c in cat.categories.all() if c.course == c) != categories[c][cat]):
+                        equipes_skiped = challenge.add_course(c, categories[c])
+                        messages.add_message(
+                            request,
+                            messages.WARNING if len(equipes_skiped) else messages.INFO,
+                            _(u'Catégories de la course "%s (%s)" modifiées.') % (c.nom, c.uid) + (_(u' %d équipes ne correspondent à aucune catégorie') % len(equipes_skiped) if len(equipes_skiped) else ''),
+                        )
+                for c in courses:
+                    if c not in challenge.courses.all():
+                        challenge.courses.add(c)
+                        equipes_skiped = challenge.add_course(c, categories[c])
+                        messages.add_message(
+                            request,
+                            messages.WARNING if len(equipes_skiped) else messages.INFO,
+                            _(u'Catégories de la course "%s (%s)" modifiées.') % (c.nom, c.uid) + (_(u' %d équipes ne correspondent à aucune catégorie') % len(equipes_skiped) if len(equipes_skiped) else ''),
+                        )
+                challenge.compute_challenge()
+                return redirect('/admin/inscriptions/challenge/')
 
         if len(queryset) != 1:
             messages.add_message(request, messages.ERROR, _(u'Sélectionnez une seul course'))
