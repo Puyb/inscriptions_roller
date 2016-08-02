@@ -527,6 +527,11 @@ class Equipe(models.Model):
         s.reverse()
         return ':'.join(s)
 
+class EquipierManager(models.Manager):
+    use_for_related_fields = True
+    def get_queryset(self):
+        return super().get_queryset().filter(numero__lte=F('equipe__nombre'))
+
 class Equipier(models.Model):
     numero            = models.IntegerField(_(u'Numéro'))
     equipe            = models.ForeignKey(Equipe)
@@ -559,6 +564,8 @@ class Equipier(models.Model):
     erreur                 = models.BooleanField(_(u'Erreur'), editable=False)
     homme                  = models.BooleanField(_(u'Homme'), editable=False)
     
+    objects = EquipierManager()
+
     def age(self):
         today = self.equipe.course.date
         try: 
