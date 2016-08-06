@@ -225,11 +225,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                             equipe.tours = g(row, 'tours_column', int)
                             if data.get('time_column'):
                                 if data['time_format'] == 'HMS':
-                                    s = g(row, 'time_column').split(':')
+                                    s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
                                     time = Decimal(0)
                                     n = Decimal(1)
                                     while len(s):
-                                        time += n * Decimal(s.pop())
+                                        time += n * Decimal(s.pop().replace(',', '.'))
                                         n *= Decimal(60)
                                 else:
                                     time = Decimal(g(row, 'time_column'))

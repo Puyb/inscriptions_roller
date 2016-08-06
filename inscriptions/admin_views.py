@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import random
 import csv, io
-from .models import Equipe, Equipier, TemplateMail, Course
+from .models import Equipe, Equipier, TemplateMail, Course, TAILLES_CHOICES
 from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Count
+from django.db.models import Count, Sum, Case, When, Value, IntegerField
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -17,6 +17,28 @@ from django.utils.translation import ugettext as _
 def dossards(request, course_uid):
     return render_to_response('dossards.html', RequestContext(request, {
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid).order_by(*request.GET.get('order','equipe__numero,numero').split(','))
+    }))
+
+@login_required
+def tshirts(request, course_uid):
+    annotates = {}
+    annotates['hommme'] = Sum(Case(When(equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField))
+    annotates['femmme'] = Sum(Case(When(equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField))
+    rh = annotates['hommme']
+    rf = annotates['femmme']
+
+    for t, n in TAILLES_CHOICES:
+        annotates['tailles_hommme_' + t] = Sum(Case(When(equipier__taille_shirt=t, equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField))
+        annotates['tailles_femmme_' + t] = Sum(Case(When(equipier__taille_shirt=t, equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField))
+        rh -= annotates['tailles_hommme_' + t]
+        rh -= annotates['tailles_femmme_' + t]
+    annotates['tailles_homme_reste'] = rh
+    annotates['tailles_femme_reste'] = rf
+
+    return render_to_response('t-shirts.html', RequestContext(request, {
+        'course': get_object_or_404(Course, uid=course_uid),
+        'equipes': Equipe.objects.filter(course__uid=course_uid).annotate(**annotates).order_by(*request.GET.get('order','numero').split(',')),
+        'order': request.GET.get('order','numero')
     }))
 
 @login_required
