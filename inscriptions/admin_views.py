@@ -22,22 +22,28 @@ def dossards(request, course_uid):
 @login_required
 def tshirts(request, course_uid):
     annotates = {}
-    annotates['hommme'] = Sum(Case(When(equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField))
-    annotates['femmme'] = Sum(Case(When(equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField))
-    rh = annotates['hommme']
-    rf = annotates['femmme']
+    annotates['homme'] = Sum(Case(When(equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField()))
+    annotates['femme'] = Sum(Case(When(equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField()))
+    rh = annotates['homme']
+    rf = annotates['femme']
 
     for t, n in TAILLES_CHOICES:
-        annotates['tailles_hommme_' + t] = Sum(Case(When(equipier__taille_shirt=t, equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField))
-        annotates['tailles_femmme_' + t] = Sum(Case(When(equipier__taille_shirt=t, equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField))
-        rh -= annotates['tailles_hommme_' + t]
-        rh -= annotates['tailles_femmme_' + t]
+        tl = t.lower()
+        print(t)
+        annotates['tailles_homme_' + tl] = Sum(Case(When(equipier__taille_tshirt=t, equipier__sexe='H', then=Value(1)), default=Value(0), output_field=IntegerField()))
+        annotates['tailles_femme_' + tl] = Sum(Case(When(equipier__taille_tshirt=t, equipier__sexe='F', then=Value(1)), default=Value(0), output_field=IntegerField()))
+        rh -= annotates['tailles_homme_' + tl]
+        rf -= annotates['tailles_femme_' + tl]
     annotates['tailles_homme_reste'] = rh
     annotates['tailles_femme_reste'] = rf
 
+    
+    qs = Equipe.objects.filter(course__uid=course_uid).values('numero', 'nom').annotate(**annotates).order_by(*request.GET.get('order','numero').split(','))
+    print(qs.query.sql_with_params())
+    print(qs)
     return render_to_response('t-shirts.html', RequestContext(request, {
         'course': get_object_or_404(Course, uid=course_uid),
-        'equipes': Equipe.objects.filter(course__uid=course_uid).annotate(**annotates).order_by(*request.GET.get('order','numero').split(',')),
+        'equipes': qs,
         'order': request.GET.get('order','numero')
     }))
 

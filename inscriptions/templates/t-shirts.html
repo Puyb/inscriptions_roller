@@ -20,11 +20,8 @@
 </style>
 
 {% for e in equipes %}
-{% if forloop.counter0|divisibleby:"30" %}
+{% if forloop.counter0|divisibleby:"20" %}
 {% if not forloop.first %}<div style="page-break-before: always"></div>{% endif %}
-<div style="float: right; height: 3cm; width: 3cm; background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain;"></div>
-<h1>Liste des inscrits</h1>
-<h2>Trié par {{ order }}</h2>
 <table>
     <thead>
         <tr>
@@ -57,24 +54,24 @@
         <tr class="{% cycle 'odd' 'even' %} nopb">
             <td class="r">{{ e.numero }}</td>
             <td>{{ e.nom }}</td>
-            <td>{{ homme| default:"" }}</td>
-            <td>{{ tailles_homme_XS| default:"" }}</td>
-            <td>{{ tailles_homme_S| default:"" }}</td>
-            <td>{{ tailles_homme_M| default:"" }}</td>
-            <td>{{ tailles_homme_L| default:"" }}</td>
-            <td>{{ tailles_homme_XL| default:"" }}</td>
-            <td>{{ tailles_homme_XXL| default:"" }}</td>
-            <td>{{ tailles_homme_reste| default:"" }}</td>
-            <td>{{ femme| default:"" }}</td>
-            <td>{{ tailles_femme_XS| default:"" }}</td>
-            <td>{{ tailles_femme_S| default:"" }}</td>
-            <td>{{ tailles_femme_M| default:"" }}</td>
-            <td>{{ tailles_femme_L| default:"" }}</td>
-            <td>{{ tailles_femme_XL| default:"" }}</td>
-            <td>{{ tailles_femme_XXL| default:"" }}</td>
-            <td>{{ tailles_femme_reste| default:"" }}</td>
+            <td>{{ e.homme| default:"" }}</td>
+            <td>{{ e.tailles_homme_xs|default:"" }}</td>
+            <td>{{ e.tailles_homme_s|default:"" }}</td>
+            <td>{{ e.tailles_homme_m|default:"" }}</td>
+            <td>{{ e.tailles_homme_l|default:"" }}</td>
+            <td>{{ e.tailles_homme_xl|default:"" }}</td>
+            <td>{{ e.tailles_homme_xxl|default:"" }}</td>
+            <td>{{ e.tailles_homme_reste|default:"" }}</td>
+            <td>{{ e.femme|default:"" }}</td>
+            <td>{{ e.tailles_femme_xs|default:"" }}</td>
+            <td>{{ e.tailles_femme_s|default:"" }}</td>
+            <td>{{ e.tailles_femme_m|default:"" }}</td>
+            <td>{{ e.tailles_femme_l|default:"" }}</td>
+            <td>{{ e.tailles_femme_xl|default:"" }}</td>
+            <td>{{ e.tailles_femme_xxl|default:"" }}</td>
+            <td>{{ e.tailles_femme_reste|default:"" }}</td>
         </tr>
-{% if forloop.counter|divisibleby:"30" or forloop.last %}
+{% if forloop.counter|divisibleby:"20" or forloop.last %}
     </tbody>
 </table>
 {% endif %}
