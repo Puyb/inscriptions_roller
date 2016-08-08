@@ -6,7 +6,8 @@ from functools import reduce
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Case, When, Value, IntegerField
+from django.db.models import Count, Sum, Min, F, Q, Prefetch
+from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
@@ -363,7 +364,7 @@ def challenge(request, challenge_uid):
     participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe__categorie', 'equipes__equipe__course').select_related('categorie')
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
-    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'), position2=Case(When(position__isnull=True, then=Value(100000)), default='position', output_field=IntegerField())).filter(count__gt=0)
+    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'), position2=Coalesce('position', 10000)).filter(count__gt=0)
     s = []
     if request.GET.get('by_categories') == '1':
         s.append('categorie__code')
