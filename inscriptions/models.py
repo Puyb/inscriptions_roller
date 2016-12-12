@@ -559,8 +559,9 @@ class Equipier(models.Model):
     erreur                 = models.BooleanField(_(u'Erreur'), editable=False)
     homme                  = models.BooleanField(_(u'Homme'), editable=False)
     
-    def age(self):
-        today = self.equipe.course.date
+    def age(self, today=None):
+        if not today:
+            today = self.equipe.course.date
         try: 
             birthday = self.date_de_naissance.replace(year=today.year)
         except ValueError: # raised when birth date is February 29 and the current year is not a leap year
@@ -730,6 +731,17 @@ class Challenge(models.Model):
         p.add_equipe(equipe=equipe)
         return p
 
+    def find_categories(self, equipiers, categories, course):
+        result = {}
+        for cc in self.categories.all():
+            for ec in categories:
+                if not cc.valide_categorie(ec):
+                    continue
+                if cc.valide_equipiers(equipiers, course):
+                    result[ec] = cc
+                    break
+        return result
+
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories')
     nom             = models.CharField(_(u'Nom'), max_length=200)
@@ -745,17 +757,22 @@ class ChallengeCategorie(models.Model):
         return self.code
 
     def valide(self, equipe):
-        if equipe.categorie not in self.categories.all():
+        if not self.valide_categorie(equipe.categorie):
             return False
 
-        equipiers = list(equipe.equipier_set.all())
+        return self.valide_equipiers(list(equipe.equipier_set.all()))
+
+    def valide_categorie(self, categorie):
+        return categorie in self.categories.all()
+
+    def valide_equipiers(self, equipiers, course=None):
         if not equipiers:
             return True
 
         if len(equipiers) < self.min_equipiers or len(equipiers) > self.max_equipiers:
             return False
         for e in equipiers:
-            if e.age() < self.min_age:
+            if e.age(course and course.date) < self.min_age:
                 return False
         sexes = [e.sexe for e in equipiers]
         if self.sexe == 'H' and 'F' in sexes:
@@ -770,7 +787,6 @@ class ChallengeCategorie(models.Model):
             return False
         #TODO self.validation
         return True
-
 
 class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations')
@@ -796,11 +812,16 @@ class ParticipationChallenge(models.Model):
         return e
         
     def match(self, equipe):
-        if self.categorie and not self.categorie.valide(equipe):
+        if not self.match_categorie(equipe.categorie):
             return False
-        equipiers_challenge = Equipier.objects.filter(equipe__challenges__participation=self)
+        return self.match_equipiers(list(equipe.equipier_set.all()))
+
+    def match_categorie(self, categorie):
+        return not self.categorie or self.categorie.valide_categorie(categorie)
+
+    def match_equipiers(self, equipiers):
+        equipiers_challenge = list(Equipier.objects.filter(equipe__challenges__participation=self))
         c = 0
-        equipiers = equipe.equipier_set.all()
         for e in equipiers:
             for e2 in equipiers_challenge:
                 if e.justificatif == 'licence' and e2.justificatif == 'licence' and e.num_licence == e2.num_licence:
@@ -808,6 +829,7 @@ class ParticipationChallenge(models.Model):
                 elif distance(e.nom.lower(), e2.nom.lower()) < 3 and distance(e.prenom.lower(), e2.prenom.lower()) < 3:
                     c += 1
         return c >= len(equipiers) / 2
+
 
 
 class EquipeChallenge(models.Model):

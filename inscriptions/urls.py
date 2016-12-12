@@ -30,7 +30,7 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/$', 'inscriptions.views.form', name='inscriptions.create'),
     url(r'^(?P<course_uid>[^/]+)/ipn/$', 'inscriptions.views.ipn', name='inscriptions.ipn'),
     url(r'^(?P<course_uid>[^/]+)/check_name/$', 'inscriptions.views.check_name', name='inscriptions.check_name'),
-    url(r'^(?P<course_uid>[^/]+)/list/$', 'inscriptions.views.list', name='inscriptions.list'),
+    url(r'^(?P<course_uid>[^/]+)/list/$', 'inscriptions.views.equipe_list', name='inscriptions.list'),
     url(r'^(?P<course_uid>[^/]+)/resultats/$', 'inscriptions.views.resultats', name='inscriptions.resultats'),
     url(r'^(?P<course_uid>[^/]+)/change/(?P<numero>\d+)/$', 'inscriptions.views.change', name='inscriptions.change'),
     url(r'^(?P<course_uid>[^/]+)/change/sent/$', 'inscriptions.views.change', { 'sent': True }, 'inscriptions.change_sent'),
@@ -39,6 +39,7 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/stats/(?P<course_uid2>[^/]+)$', 'inscriptions.views.stats_compare', name='inscriptions.stats_compare'),
     url(r'^(?P<course_uid>[^/]+)/contact/$', 'inscriptions.views.contact', name='contact'),
     url(r'^(?P<course_uid>[^/]+)/contact/thankyou/$', 'inscriptions.views.contact_done', name='contact_done'),
+    url(r'^(?P<course_uid>[^/]+)/challenges/categories/$', 'inscriptions.views.find_challenges_categories', name='inscriptions.find_challenges_categories'),
 ]
 urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/equipiers/$', 'inscriptions.admin_views.equipiers', name='inscriptions.equipiers'),

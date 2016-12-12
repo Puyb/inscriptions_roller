@@ -20,6 +20,7 @@ $.fn.serializeObject = function() {
 };
 
 var actual_part = 0;
+var challenge_categories = null;
 
 function age(a) {
     return function(eq) {
@@ -173,8 +174,27 @@ function setup_categories(data) {
         $('input[name=categorie]').each(function() {
             if (!this.checked) return;
             var categorie = this.value;
-            var d = CATEGORIES.filter(function(c) { return c.code === categorie; })[0];
+            var d = CATEGORIES.filter(function(c) { return c.id === categorie; })[0];
             $('#id_prix').val(d.prix);
+
+
+            $('#partlast .challenge-participation').remove();
+            (challenge_categories[d.code] || []).forEach(function(chall) {
+                var div = 
+       '<div class="panel panel-default challenge-participation">' +
+       '    <div class="panel-heading">' + chall.challenge.nom + '</div>' +
+       '    <div>' +
+       '        ' + gettext("En vous inscrivant à la course, vous participerez au challenge grand nord dans la categorie suivante : ")  + chall.categorie.nom + '<br />' +
+       '        ' + gettext("Le challenge comprend les courses suivantes : ") +
+       '        <ul>' + chall.challenge.courses.map(function(course) {
+                    return '<li>' + course.nom + ' - ' + new Date(course.date) + '</li>';
+                }).join('\n') +
+       '        </ul>' +
+       '    </div>' +
+       '</div>'; 
+                $('#partlast').append(div);
+
+            });
         });
     });
 
@@ -188,6 +208,25 @@ function setup_categories(data) {
         $('input[name=categorie]')[0].checked = true;
         $('#id_prix').val(actual_categories[0].prix);
     }
+
+    var data = $('form').serializeObject();
+    Object.keys(data).forEach(function(k) {
+        if (parseFloat(k.split('-')[0].slice('form'.length)) >= actual_part) {
+            delete data[k];
+        }
+    });
+    data['form-TOTAL_FORMS'] = actual_part - 1;
+
+    var data = $.param(data) + actual_categories.map(function(c) {
+        return '&categories=' + c.code;
+    }).join('');
+    $.ajax({
+        url: CHALLENGES_CATEGORIES_URL,
+        method: 'post',
+        data: data
+    }).then(function(response) {
+        challenge_categories = response;
+    })
 
     return true;
 }

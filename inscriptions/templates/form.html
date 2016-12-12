@@ -110,6 +110,7 @@
         </div>
     </div>
 
+
     {{ equipier_formset.management_form }}
     <div class="btn-toolbar pull-right" role="toolbar">
         <div class="btn-group" role="group">
@@ -169,6 +170,7 @@
         CATEGORIE_CODE: '{{ instance.categorie.code }}'
     }{% endif %};
     var CHECK_URL = '{% url "inscriptions.check_name" course_uid=COURSE.uid %}';
+    var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions.find_challenges_categories" course_uid=COURSE.uid %}';
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
     {% if user.is_staff %}

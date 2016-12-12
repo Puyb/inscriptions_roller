@@ -3,6 +3,7 @@ import sys, requests, random, traceback, json
 import logging
 from datetime import datetime, date
 from functools import reduce
+from collections import defaultdict
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
@@ -21,7 +22,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, Challenge, ParticipationChallenge, EquipeChallenge
-from .utils import MailThread
+from .utils import MailThread, jsonDate
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,39 @@ def form(request, course_uid, numero=None, code=None):
     }))
 
 @open_closed
+def find_challenges_categories(request, course_uid, numero=None, code=None):
+    course = get_object_or_404(Course, uid=course_uid)
+    if request.method != 'POST':
+        return HttpResponse(status=405)
+    equipier_formset = EquipierFormset(request.POST)
+
+    if not equipier_formset.is_valid():
+        return HttpResponse(json.dumps(equipier_formset.errors), status=400, content_type='application/json')
+    equipiers = [ equipier_formset.forms[i].save(commit=False)
+            for i in range(0, int(request.POST['nombre']))]
+
+    print(request.POST.getlist('categories'))
+    course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
+    
+    all_result = defaultdict(list)
+    for challenge in course.challenges.all():
+        result = challenge.find_categories(equipiers, course_categories, course)
+        for ec, cc in result.items():
+            all_result[ec.code].append({
+                'challenge': {
+                    'uid': challenge.uid,
+                    'nom': challenge.nom,
+                    'logo': challenge.logo.url,
+                    'courses': list(challenge.courses.exclude(uid=course.uid).values('nom', 'uid', 'date')),
+                },
+                'categorie': {
+                    'nom': cc.nom,
+                    'code': cc.code,
+                },
+            })
+    return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
+
+@open_closed
 def done(request, course_uid, numero):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
     instance = get_object_or_404(Equipe, course=course, numero=numero)
@@ -190,7 +224,7 @@ def check_name(request, course_uid):
                 .count(),
             content_type="text/plain")
 
-def list(request, course_uid):
+def equipe_list(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid)
     (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
     return _list(equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])

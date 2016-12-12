@@ -107,32 +107,6 @@
                 "max_equipiers": 5,
                 "code": "VEX",
                 "prix2": "90.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Entreprise / Étudiants / Famille",
-                "prix1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "",
-                "validation": "function(data) { return true; }",
-                "min_age": 12,
-                "max_equipiers": 5,
-                "code": "EFX",
-                "prix2": "90.00"
-            },
-            {
-                "numero_debut": 500,
-                "nom": "Handisport",
-                "prix1": "0.00",
-                "min_equipiers": 0,
-                "numero_fin": 600,
-                "sexe": "",
-                "validation": "function() { return false; }",
-                "min_age": 12,
-                "max_equipiers": 0,
-                "code": "HND",
-                "prix2": "0.00"
             }
         ],
         "templatemail_set": [
@@ -186,6 +160,6 @@
                 "bcc": ""
             }
         ],
-        "_name": "Challenge Grand Nord 2016"
+        "_name": "Challenge Grand Nord"
     }
 }
