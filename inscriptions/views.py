@@ -55,6 +55,7 @@ def form(request, course_uid, numero=None, code=None):
                 new_instance.password = old_password
                 if not instance:
                     new_instance.password = '%06x' % random.randrange(0x100000, 0xffffff)
+                # FIXME: price is set client side... This is really bad... I'm lazy ! Shame on me !
                 #if instance and instance.categorie == new_instance.categorie and instance.prix:
                 #    new_instance.prix = instance.prix
                 #else:
@@ -74,6 +75,8 @@ def form(request, course_uid, numero=None, code=None):
                         course.send_mail('inscription_admin', [ new_instance ])
                     except Exception as e:
                         traceback.print_exc()
+                for challenge in course.challenges.all():
+                    challenge.inscription_equipe(new_instance)
                 return redirect('inscriptions.done', course_uid=course.uid, numero=new_instance.numero)
             else:
                 text = 'Error in form submit\n'
@@ -136,17 +139,43 @@ def find_challenges_categories(request, course_uid, numero=None, code=None):
     for challenge in course.challenges.all():
         result = challenge.find_categories(equipiers, course_categories, course)
         for ec, cc in result.items():
-            all_result[ec.code].append({
+            participations = list(challenge.find_participation_for_equipe_raw(
+                    course, request.POST['nom'], equipiers, ec
+                ).exclude(equipes__equipe__course=course).prefetch_related('equipes__equipe__course'))
+            participation = None
+            participation_courses = {}
+            if len(participations):
+                participation = {
+                    'position': participations[0].position,
+                    'points': None,
+                }
+                participation_courses = {
+                    e.equipe.course.uid: { 'points': e.points } for e in participations[0].equipes.all()
+                }
+                for e in participations[0].equipes.all():
+                    participation['points'] = (participation['points'] or 0) + e.points
+
+            all_result[ec.code].append(
+                    {
                 'challenge': {
                     'uid': challenge.uid,
                     'nom': challenge.nom,
                     'logo': challenge.logo.url,
-                    'courses': list(challenge.courses.exclude(uid=course.uid).values('nom', 'uid', 'date')),
+                    'courses': [
+                        {
+                            'nom': c.nom,
+                            'uid': c.uid,
+                            'date': c.date,
+                            'participation': c.uid in participation_courses,
+                            'points': participation_courses[c.uid]['points'] if c.uid in participation_courses else None
+                        } for c in challenge.courses.exclude(uid=course.uid)
+                    ],
                 },
                 'categorie': {
                     'nom': cc.nom,
                     'code': cc.code,
                 },
+                'participation': participation,
             })
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
 

@@ -15,8 +15,9 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
-from django.db.models import Count, Sum, Value, F, When, Case, Prefetch
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func, Min
+from django.db.models.expressions import RawSQL
+from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
 from Levenshtein import distance
@@ -189,13 +190,13 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         equipes = (Equipe.objects.filter(course=self)
             .annotate(
                 equipiers_count=Count('equipier'),
-                verifier_count=Coalesce(Sum('equipier__verifier'), Value(0)),
-                licence_manquantes_count=Coalesce(Sum('equipier__licence_manquante'), Value(0)),
-                certificat_manquants_count=Coalesce(Sum('equipier__certificat_manquant'), Value(0)),
-                autorisation_manquantes_count=Coalesce(Sum('equipier__autorisation_manquante'), Value(0)),
-                valide_count=Coalesce(Sum('equipier__valide'), Value(0)),
-                erreur_count=Coalesce(Sum('equipier__erreur'), Value(0)),
-                hommes_count=Coalesce(Sum('equipier__homme'), Value(0)),
+                verifier_count=Coalesce(Sum(Case(When(equipier__verifier=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                licence_manquantes_count=Coalesce(Sum(Case(When(equipier__licence_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                certificat_manquants_count=Coalesce(Sum(Case(When(equipier__certificat_manquant=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                autorisation_manquantes_count=Coalesce(Sum(Case(When(equipier__autorisation_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                valide_count=Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                erreur_count=Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                hommes_count=Coalesce(Sum(Case(When(equipier__homme=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             ).select_related('categorie', 'gerant_ville2')
             .prefetch_related('equipier_set')
             .prefetch_related('equipier_set__equipe')
@@ -722,10 +723,11 @@ class Challenge(models.Model):
         if not any(c for c in self.categories.all() if c.valide(equipe)):
             return None
 
-        for p in self.participations.exclude(equipes__equipe__course=equipe.course).prefetch_related('equipes__equipe'):
-            if any(distance(equipe.nom.lower(), e.equipe.nom.lower()) < 3 for e in p.equipes.all()) and p.match(equipe):
-                p.add_equipe(equipe=equipe)
-                return p
+        participations = list(self.find_participations_for_equipe(equipe)[:2])
+        if particpations:
+            if len(participations) > 1:
+                logger.warning('found multiple participation to challenge', equipe, self)
+            return participations[0]
         p = ParticipationChallenge(challenge=self)
         p.save()
         p.add_equipe(equipe=equipe)
@@ -742,6 +744,72 @@ class Challenge(models.Model):
                     break
         return result
 
+    def find_participation_for_equipe(self, equipe):
+        return self.participations.filter(
+            Q(categorie__isnull=True) | Q(categorie__in=equipe.categorie.challenge_categories.filter(challenge=self)),
+            equipes__equipe__in=self.get_match_equipe_query(equipe)
+        )
+
+    def find_participation_for_equipe_raw(self, course, equipe_nom, equipiers_data, categorie):
+        return self.participations.filter(
+            Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
+            equipes__equipe__in=self.get_match_equipe_query_raw(course, equipe_nom, equipiers_data)
+        )
+
+    def get_match_equipe_query(self, equipe):
+        equipiers = list(equipe.equipier_set.all())
+        return get_match_equipe_query_raw(equipe.course, equipe.nom, equipiers)
+            
+
+    def get_match_equipe_query_raw(self, course, nom, equipiers):
+        subquery = Equipe.objects.filter(
+                course__in=self.courses.exclude(id=course.id)
+            ).prefetch_related(
+                Prefetch('equipier_set', self.get_match_equipiers_query(equipiers))
+            ).annotate(
+                d=Levenshtein(Unaccent(Lower('nom')), Unaccent(Lower(Value(nom)))),
+                e=Count('equipier__id')
+            ).filter(d__lt=3, e__gte=len(equipiers) / 2).values('id', 'd')
+
+        sql, params = subquery.query.sql_with_params()
+
+        return Equipe.objects.raw("""
+            SELECT id FROM
+                (SELECT id, d, first_value(d) OVER(ORDER BY d) AS min_d FROM (%s) AS a) AS b
+                WHERE d = min_d
+        """ % sql, params=params)
+
+
+
+    def get_match_equipiers_query(self, equipiers):
+        def _or(*conds):
+            conds = list(conds)
+            r = conds.pop(0)
+            while conds:
+                r = r | conds.pop(0)
+            return r
+
+        annotate = { 'licence': Value(1, output_field=models.IntegerField()) }
+        equipiers_licence = [
+            Q(equipe__equipier__num_licence=e.num_licence)
+                for e in equipiers if e.justificatif == 'licence']
+        if equipiers_licence:
+            annotate['licence'] = Case(When(_or(*equipiers_licence), then=Value(1)), default=Value(0), output_field=models.IntegerField())
+        annotate.update({
+            'nom%s' % e.numero: Levenshtein(Unaccent(Lower('nom')), Unaccent(Lower(Value(e.nom))))
+                for e in equipiers if e.justificatif != 'licence'
+        })
+        annotate.update({
+            'prenom%s' % e.numero: Levenshtein(Unaccent(Lower('prenom')), Unaccent(Lower(Value(e.prenom))))
+                for e in equipiers if e.justificatif != 'licence'
+        })
+        filters = [
+            Q(**{'nom%s__lt' % e.numero: 3, 'prenom%s__lt' % e.numero: 3})
+                for e in equipiers if e.justificatif != 'licence'
+        ]
+
+        return Equipier.objects.annotate(**annotate).filter(_or(Q(licence=1), *filters))
+
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories')
     nom             = models.CharField(_(u'Nom'), max_length=200)
@@ -751,7 +819,7 @@ class ChallengeCategorie(models.Model):
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
     sexe            = models.CharField(_(u'Sexe'), max_length=2, choices=MIXITE_CHOICES, blank=True)
     validation      = models.TextField(_(u'Validation function (javascript)'))
-    categories      = models.ManyToManyField(Categorie, related_name='+')
+    categories      = models.ManyToManyField(Categorie, related_name='challenge_categories')
 
     def __str__(self):
         return self.code
@@ -811,26 +879,6 @@ class ParticipationChallenge(models.Model):
                     break
         return e
         
-    def match(self, equipe):
-        if not self.match_categorie(equipe.categorie):
-            return False
-        return self.match_equipiers(list(equipe.equipier_set.all()))
-
-    def match_categorie(self, categorie):
-        return not self.categorie or self.categorie.valide_categorie(categorie)
-
-    def match_equipiers(self, equipiers):
-        equipiers_challenge = list(Equipier.objects.filter(equipe__challenges__participation=self))
-        c = 0
-        for e in equipiers:
-            for e2 in equipiers_challenge:
-                if e.justificatif == 'licence' and e2.justificatif == 'licence' and e.num_licence == e2.num_licence:
-                    c += 1
-                elif distance(e.nom.lower(), e2.nom.lower()) < 3 and distance(e.prenom.lower(), e2.prenom.lower()) < 3:
-                    c += 1
-        return c >= len(equipiers) / 2
-
-
 
 class EquipeChallenge(models.Model):
     equipe = models.ForeignKey(Equipe, related_name='challenges')
@@ -839,3 +887,22 @@ class EquipeChallenge(models.Model):
 
     class Meta:
         unique_together = (('equipe', 'participation'), )
+
+class Levenshtein(Func):
+    function = 'levenshtein'
+class Unaccent(Func):
+    function = 'unaccent'
+
+def test_participation():
+    count=0
+    ko=0
+    for c in Challenge.objects.all():
+        for course in c.courses.all():
+            for e in course.equipe_set.all():
+                count+=1
+                p = c.find_participation_for_equipe(e)[0]
+                if p not in [cp.participation for cp in e.challenges.select_related('participation')]:
+                    ko+=1
+                    print(c, course, e.id, e, p.id, e.challenges.values('participation'))
+
+    print (count, ko)

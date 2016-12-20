@@ -187,7 +187,11 @@ function setup_categories(data) {
        '        ' + gettext("En vous inscrivant à la course, vous participerez au challenge grand nord dans la categorie suivante : ")  + chall.categorie.nom + '<br />' +
        '        ' + gettext("Le challenge comprend les courses suivantes : ") +
        '        <ul>' + chall.challenge.courses.map(function(course) {
-                    return '<li>' + course.nom + ' - ' + new Date(course.date) + '</li>';
+                    return '<li>' + 
+                        course.nom + ' - ' + 
+                        new Date(course.date) + 
+                        (course.participation ? '<br />' + (course.points ? 'Vous y avez déjà gagné ' + course.points + ' points' : 'Vous êtes déjà inscrit') : '') + 
+                        '</li>';
                 }).join('\n') +
        '        </ul>' +
        '    </div>' +
@@ -226,6 +230,7 @@ function setup_categories(data) {
         data: data
     }).then(function(response) {
         challenge_categories = response;
+        $('input[name=categorie]:checked').change();
     })
 
     return true;

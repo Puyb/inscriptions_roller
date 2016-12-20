@@ -408,9 +408,9 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         qs = super().get_queryset(request)
         qs = qs.prefetch_related('equipier_set')
         qs = qs.annotate(
-            verifier_count = Coalesce(Sum('equipier__verifier'), Value(0)),
-            valide_count   = Coalesce(Sum('equipier__valide'), Value(0)),
-            erreur_count   = Coalesce(Sum('equipier__erreur'), Value(0)),
+            verifier_count = Coalesce(Sum(Case(When(equipier__verifier=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+            valide_count   = Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+            erreur_count   = Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
         )
         return qs
 
