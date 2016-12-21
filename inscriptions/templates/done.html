@@ -3,17 +3,37 @@
 {% load l10n %}
 {% block body %}
 <div class="jumbotron">
-    <h1>{% trans 'Votre inscription est enregistrée' %}</h1>
-    <p>
-        <table>
-            <tr><th>{% trans 'Equipe : ' %}</th><td>{{ instance.nom }}</td></tr>
-            <tr><th>{% trans "Numéro d'inscription :" %}</th><td>{{ instance.numero }}</td></tr>
-        </table>
-    </p>
-    {% if create %}
-    <p>{% trans 'Un email de confirmation vient de vous être envoyé.' %}</p>>
-    {% endif %}
+    <div class="media">
+        <div class="media-left">
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+        </div>
+        <div class="media-body">
+            <h2>{% trans 'Votre inscription est enregistrée' %}</h2>
+            <p>
+                <table>
+                    <tr><th>{% trans "Equipe :" %}</th><td>{{ instance.nom }}</td></tr>
+                    <tr><th>{% trans "Dossard :" %}</th><td>{{ instance.numero }}</td></tr>
+                </table>
+            </p>
+            {% if create %}
+            <p>{% trans 'Un email de confirmation vient de vous être envoyé.' %}</p>>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+{% if not instance.paiement or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{% trans "Instructions :" %}</h3>
+    </div>
+    <div class="panel-body">
+        <p>{% trans 'Vous pouvez envoyer le paiement et les justificatifs à' %} </p>
+        <pre>{{ COURSE.adresse }}</pre>
+        <p>{% blocktrans with numero=instance.numero %}En précisant le nom de votre équipe et le numéro d'inscription <b>{{ numero }}</b>.{% endblocktrans %}</p>
+    </div>
+</div>
+{% endif %}
 
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -43,7 +63,7 @@
                 <input type="hidden" name="tax_cart"      value="0.00" />
                 <input type="hidden" name="notify_url"    value="{{ paypal_ipn_url }}" />
 
-                <input type="submit" value="{% trans 'Paypal ou Carte bancaire' %}"><br />
+                <input type="submit" value="{% trans 'Paypal ou Carte bancaire' %}" class="btn btn-primary"><br />
             </form>
             <script> document.getElementById('paypal_return_url').value = location.href; </script>
         </p>
@@ -103,19 +123,6 @@
         {% endif %}
     </div>
 </div>
-
-{% if not instance.paiement or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">{% trans "Instructions :" %}</h3>
-    </div>
-    <div class="panel-body">
-        <p>{% trans 'Vous pouvez envoyer le paiement et les justificatifs à' %} </p>
-        <pre>{{ COURSE.adresse }}</pre>
-        <p>{% blocktrans with numero=instance.numero %}En précisant le nom de votre équipe et le numéro d'inscription <b>{{ numero }}</b>.{% endblocktrans %}</p>
-    </div>
-</div>
-{% endif %}
 
 {% for ec in instance.challenges.all %}
     {% with ec.participation as participation %}

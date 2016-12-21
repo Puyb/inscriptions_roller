@@ -7,6 +7,7 @@ from collections import defaultdict
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.db.models import Count, Sum, Min, F, Q, Prefetch
 from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
@@ -27,6 +28,7 @@ from .utils import MailThread, jsonDate
 logger = logging.getLogger(__name__)
 
 @open_closed
+@transaction.atomic
 def form(request, course_uid, numero=None, code=None):
     course = get_object_or_404(Course, uid=course_uid)
     instance = None
@@ -142,62 +144,42 @@ def find_challenges_categories(request, course_uid, numero=None, code=None):
             participations = list(challenge.find_participation_for_equipe_raw(
                     course, request.POST['nom'], equipiers, ec
                 ).exclude(equipes__equipe__course=course).prefetch_related('equipes__equipe__course'))
-            participation = None
-            participation_courses = {}
-            if len(participations):
-                participation = {
-                    'position': participations[0].position,
-                    'points': None,
-                }
-                participation_courses = {
-                    e.equipe.course.uid: { 'points': e.points } for e in participations[0].equipes.all()
-                }
-                for e in participations[0].equipes.all():
-                    participation['points'] = (participation['points'] or 0) + e.points
 
-            all_result[ec.code].append(
-                    {
-                'challenge': {
-                    'uid': challenge.uid,
-                    'nom': challenge.nom,
-                    'logo': challenge.logo.url,
-                    'courses': [
-                        {
-                            'nom': c.nom,
-                            'uid': c.uid,
-                            'date': c.date,
-                            'participation': c.uid in participation_courses,
-                            'points': participation_courses[c.uid]['points'] if c.uid in participation_courses else None
-                        } for c in challenge.courses.exclude(uid=course.uid)
-                    ],
-                },
-                'categorie': {
-                    'nom': cc.nom,
-                    'code': cc.code,
-                },
-                'participation': participation,
+            ctx = RequestContext(request, {
+                'challenge': challenge,
+                'participation': participations[0],
             })
+            all_result[ec.code].append(render_to_string("_participation.html", ctx))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
 
 @open_closed
 def done(request, course_uid, numero):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
-    instance = get_object_or_404(Equipe, course=course, numero=numero)
-    if instance.course != course:
+    try:
+        instance = Equipe.objects.prefetch_related(
+                Prefetch('challenges', EquipeChallenge.objects.select_related('participation').prefetch_related(
+                    Prefetch('participation__equipes', EquipeChallenge.objects.select_related('equipe__course'))
+                )),
+            ).get(course=course, numero=numero)
+        #prefetch_related_objects([instance], [Prefetch('equipier_set', Equipier.objects.filter(numero__lte=instance.nombre))])
+        if instance.course != course:
+            raise Http404()
+        ctx = RequestContext(request, {
+            "instance": instance,
+            "url": request.build_absolute_uri(reverse(
+                'inscriptions.edit', kwargs={
+                    'course_uid': course.uid,
+                    'numero': instance.numero,
+                    'code': instance.password
+                }
+            )),
+            "paypal_ipn_url": request.build_absolute_uri(reverse('inscriptions.ipn', kwargs={'course_uid': course.uid })),
+            "hour": datetime.now().strftime('%H%M'),
+        })
+        return render_to_response('done.html', ctx)
+    except Equipe.DoesNotExist as e:
         raise Http404()
-    ctx = RequestContext(request, {
-        "instance": instance,
-        "url": request.build_absolute_uri(reverse(
-            'inscriptions.edit', kwargs={
-                'course_uid': course.uid,
-                'numero': instance.numero,
-                'code': instance.password
-            }
-        )),
-        "paypal_ipn_url": request.build_absolute_uri(reverse('inscriptions.ipn', kwargs={'course_uid': course.uid })),
-        "hour": datetime.now().strftime('%H%M'),
-    })
-    return render_to_response('done.html', ctx)
+
 
 @csrf_exempt
 def ipn(request, course_uid):

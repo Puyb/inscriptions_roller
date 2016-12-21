@@ -480,14 +480,15 @@ class Equipe(models.Model):
                 except Exception as e:
                     traceback.print_exc()
         else:
+            print('plop', args, kwargs)
             if not self.numero:
                 self.numero = self.getNumero()
 
+        print('plop2', args, kwargs)
         if not self.gerant_ville2_id:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
-        super(Equipe, self).save(*args, **kwargs)
-
-        #ChallengeInscriptionEquipe(self).start()
+        print('plop3', args, kwargs)
+        return super(Equipe, self).save(*args, **kwargs)
 
 
     def send_mail(self, nom):
@@ -723,10 +724,11 @@ class Challenge(models.Model):
         if not any(c for c in self.categories.all() if c.valide(equipe)):
             return None
 
-        participations = list(self.find_participations_for_equipe(equipe)[:2])
-        if particpations:
+        participations = list(self.find_participation_for_equipe(equipe)[:2])
+        if participations:
             if len(participations) > 1:
                 logger.warning('found multiple participation to challenge', equipe, self)
+            participations[0].add_equipe(equipe=equipe)
             return participations[0]
         p = ParticipationChallenge(challenge=self)
         p.save()
@@ -758,7 +760,7 @@ class Challenge(models.Model):
 
     def get_match_equipe_query(self, equipe):
         equipiers = list(equipe.equipier_set.all())
-        return get_match_equipe_query_raw(equipe.course, equipe.nom, equipiers)
+        return self.get_match_equipe_query_raw(equipe.course, equipe.nom, equipiers)
             
 
     def get_match_equipe_query_raw(self, course, nom, equipiers):

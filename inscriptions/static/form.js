@@ -178,26 +178,9 @@ function setup_categories(data) {
             $('#id_prix').val(d.prix);
 
 
-            $('#partlast .challenge-participation').remove();
+            $('#challenge-participation').empty();
             (challenge_categories[d.code] || []).forEach(function(chall) {
-                var div = 
-       '<div class="panel panel-default challenge-participation">' +
-       '    <div class="panel-heading">' + chall.challenge.nom + '</div>' +
-       '    <div>' +
-       '        ' + gettext("En vous inscrivant à la course, vous participerez au challenge grand nord dans la categorie suivante : ")  + chall.categorie.nom + '<br />' +
-       '        ' + gettext("Le challenge comprend les courses suivantes : ") +
-       '        <ul>' + chall.challenge.courses.map(function(course) {
-                    return '<li>' + 
-                        course.nom + ' - ' + 
-                        new Date(course.date) + 
-                        (course.participation ? '<br />' + (course.points ? 'Vous y avez déjà gagné ' + course.points + ' points' : 'Vous êtes déjà inscrit') : '') + 
-                        '</li>';
-                }).join('\n') +
-       '        </ul>' +
-       '    </div>' +
-       '</div>'; 
-                $('#partlast').append(div);
-
+                $('#challenge-participation').append(chall);
             });
         });
     });
