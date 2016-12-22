@@ -134,7 +134,6 @@ def find_challenges_categories(request, course_uid, numero=None, code=None):
     equipiers = [ equipier_formset.forms[i].save(commit=False)
             for i in range(0, int(request.POST['nombre']))]
 
-    print(request.POST.getlist('categories'))
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
     all_result = defaultdict(list)
@@ -236,7 +235,7 @@ def check_name(request, course_uid):
             content_type="text/plain")
 
 def equipe_list(request, course_uid):
-    equipes = Equipe.objects.filter(course__uid=course_uid)
+    equipes = Equipe.objects.filter(course__uid=course_uid).select_related('categorie', 'gerant_ville2')
     (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
     return _list(equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
 
