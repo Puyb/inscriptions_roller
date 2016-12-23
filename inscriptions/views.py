@@ -33,6 +33,7 @@ def form(request, course_uid, numero=None, code=None):
     course = get_object_or_404(Course, uid=course_uid)
     instance = None
     old_password = None
+    create = True
     equipiers_count = Equipier.objects.filter(equipe__course=course).count()
     message = ''
     if numero:
@@ -40,6 +41,7 @@ def form(request, course_uid, numero=None, code=None):
         old_password = instance.password
         if instance.password != code:
             raise Http404()
+        create = False
     if request.method == 'POST':
         try:
             equipe_form = EquipeForm(request.POST, request.FILES, instance=instance)
@@ -96,6 +98,10 @@ def form(request, course_uid, numero=None, code=None):
         except Exception as e:
             raise e
     else:
+        if not instance and 'course' in request.GET and 'numero' in request.GET:
+            instance = get_object_or_404(Equipe, course__uid=request.GET['course'], numero=request.GET['numero'])
+            if instance.password != request.GET.get('code', ''):
+                raise Http404()
         equipe_form = EquipeForm(instance=instance)
         if instance:
             equipier_formset = EquipierFormset(queryset=instance.equipier_set.all())
@@ -114,8 +120,8 @@ def form(request, course_uid, numero=None, code=None):
         "equipier_formset": equipier_formset,
         "errors": equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
         "instance": instance,
-        "create": not instance,
-        "update": not not instance,
+        "create": create,
+        "update": not create,
         "nombres_par_tranche": nombres_par_tranche,
         "equipiers_count": equipiers_count,
         "course": course,

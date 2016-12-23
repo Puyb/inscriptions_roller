@@ -37,7 +37,9 @@
                                         </p>
                                         {% else  %}
                                             {% if course.ouverte %}
-                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
+                                            {% if not create and not update %}
+                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}&code={{ instance.password }}">{% trans "Inscription" %}</a><br />
+                                            {% endif %}
                                             <p>
                                                 {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
                                             </p>
