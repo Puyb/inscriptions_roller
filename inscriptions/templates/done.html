@@ -5,7 +5,8 @@
 <div class="jumbotron">
     <div class="media">
         <div class="media-left">
-            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
         </div>
         <div class="media-body">
             <h2>{% trans 'Votre inscription est enregistrée' %}</h2>

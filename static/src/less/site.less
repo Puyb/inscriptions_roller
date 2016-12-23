@@ -18,10 +18,20 @@
 // Site overrides
 @import "custom.less";
 
+.equal {
+    @media (min-width: @screen-xs-max) {
+        flex-wrap: wrap;
+    }
+}
 .equal, .equal > div[class*='col-'] {  
-    display: -webkit-flex;
-    display: flex;
-    flex: 0 0 auto;
+    @media (min-width: @screen-xs-max) {
+        display: -webkit-flex;
+        display: flex;
+        flex: 0 0 auto;
+    }
+}
+.equal, .equal > div[class*='col-'] > div {
+    width: 100%;
 }
 
 .list_inscrits {

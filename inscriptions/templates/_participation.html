@@ -8,7 +8,8 @@
     <div class="panel-body">
         <div class="media">
             <div class="media-left">
-                <img src="{{ MEDIA_URL }}{{ challenge.logo }}" align="left" width="200" />
+                <img src="{{ MEDIA_URL }}{{ challenge.logo }}" align="left" width="100" class="visible-xs" />
+                <img src="{{ MEDIA_URL }}{{ challenge.logo }}" align="left" width="200" class="hidden-xs" />
             </div>
             <div class="media-body">
                 <p>{% trans "Vous participez au challenge." %}</p>
@@ -16,9 +17,9 @@
                 <div class="row equal">
                     {% for course in challenge.courses.all %}
                     {% if course != COURSE %}
-                    <div class="col-md-4">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                         <div class="thumbnail">
-                            <a href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
+                            <a class="hidden-xs" href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
                             <div class="caption">
                                 <h3><a href="{{ course.url }}">{{ course.nom }}</a></h3>
                                 <p>

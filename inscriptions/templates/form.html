@@ -37,7 +37,8 @@
             <div class="panel-body">
                 <div class="media">
                     <div class="media-left">
-                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
+                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
+                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
                     </div>
                     <div class="media-body">
                         {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
