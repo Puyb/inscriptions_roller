@@ -27,6 +27,7 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/done/$', 'inscriptions.views.done', name='inscriptions.done'),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/facture/$', 'inscriptions.views.facture', name='inscriptions.facture'),
     url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/(?P<code>\w+)/$', 'inscriptions.views.form', name='inscriptions.edit'),
+    url(r'^(?P<course_uid>[^/]+)/(?P<numero>\d+)/$', 'inscriptions.views.form', name='inscriptions.edit'),
     url(r'^(?P<course_uid>[^/]+)/$', 'inscriptions.views.form', name='inscriptions.create'),
     url(r'^(?P<course_uid>[^/]+)/ipn/$', 'inscriptions.views.ipn', name='inscriptions.ipn'),
     url(r'^(?P<course_uid>[^/]+)/check_name/$', 'inscriptions.views.check_name', name='inscriptions.check_name'),

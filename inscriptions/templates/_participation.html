@@ -28,9 +28,11 @@
                                 </p>
                                 {% with participation.equipes_dict|get:course.uid as ec2 %}
                                     {% if ec2 %}
-                                        <br />
-                                        {% if ec2.points %}{% blocktrans with points=ec2.points %}Vous y avez déjà gagné {{ points }} points{% endblocktrans %}
-                                        {% else %}{% trans "Vous êtes déjà inscrit" %}{% endif %}
+                                        <p>
+                                        {% if ec2.points %}{% blocktrans with points=ec2.points %}Vous y avez déjà gagné {{ points }} points.{% endblocktrans %}
+                                        {% else %}{% trans "Vous êtes déjà inscrit." %}{% endif %}
+                                        </p>
+                                        <p>Dossard {{ ec2.equipe.numero }} - {{ ec2.equipe.nom }}</p>
                                     {% else %}
                                         {% if course.fermee %}
                                         <p>
@@ -38,8 +40,8 @@
                                         </p>
                                         {% else  %}
                                             {% if course.ouverte %}
-                                            {% if not create and not update %}
-                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}&code={{ instance.password }}">{% trans "Inscription" %}</a><br />
+                                            {% if not create and not update and request.COOKIES|get:instance.cookie_key %}
+                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
                                             {% endif %}
                                             <p>
                                                 {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />

@@ -38,6 +38,7 @@ def form(request, course_uid, numero=None, code=None):
     message = ''
     if numero:
         instance = get_object_or_404(Equipe, course=course, numero=numero)
+        code = code or request.COOKIES.get(instance.cookie_key(), None)
         old_password = instance.password
         if instance.password != code:
             raise Http404()
@@ -81,7 +82,9 @@ def form(request, course_uid, numero=None, code=None):
                         traceback.print_exc()
                 for challenge in course.challenges.all():
                     challenge.inscription_equipe(new_instance)
-                return redirect('inscriptions.done', course_uid=course.uid, numero=new_instance.numero)
+                response = redirect('inscriptions.done', course_uid=course.uid, numero=new_instance.numero)
+                response.set_cookie(new_instance.cookie_key(), new_instance.password)
+                return response
             else:
                 text = 'Error in form submit\n'
                 text += request.META['REMOTE_ADDR'] + '\n'
@@ -99,8 +102,10 @@ def form(request, course_uid, numero=None, code=None):
             raise e
     else:
         if not instance and 'course' in request.GET and 'numero' in request.GET:
-            instance = get_object_or_404(Equipe, course__uid=request.GET['course'], numero=request.GET['numero'])
-            if instance.password != request.GET.get('code', ''):
+            course2 = get_object_or_404(Course, uid=request.GET['course'])
+            instance = get_object_or_404(Equipe, course=course2, numero=request.GET['numero'])
+            code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key, None))
+            if instance.password != code:
                 raise Http404()
         equipe_form = EquipeForm(instance=instance)
         if instance:
@@ -129,7 +134,7 @@ def form(request, course_uid, numero=None, code=None):
     }))
 
 @open_closed
-def find_challenges_categories(request, course_uid, numero=None, code=None):
+def find_challenges_categories(request, course_uid):
     course = get_object_or_404(Course, uid=course_uid)
     if request.method != 'POST':
         return HttpResponse(status=405)
@@ -137,8 +142,12 @@ def find_challenges_categories(request, course_uid, numero=None, code=None):
 
     if not equipier_formset.is_valid():
         return HttpResponse(json.dumps(equipier_formset.errors), status=400, content_type='application/json')
-    equipiers = [ equipier_formset.forms[i].save(commit=False)
-            for i in range(0, int(request.POST['nombre']))]
+    equipiers = []
+    for i in range(0, int(request.POST['nombre'])):
+        equipier = equipier_formset.forms[i].save(commit=False)
+        equipier.numero = i + 1
+        equipiers.append(equipier)
+    print(len(equipiers))
 
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
@@ -152,7 +161,7 @@ def find_challenges_categories(request, course_uid, numero=None, code=None):
 
             ctx = RequestContext(request, {
                 'challenge': challenge,
-                'participation': participations[0],
+                'participation': len(participations) and participations[0],
             })
             all_result[ec.code].append(render_to_string("_participation.html", ctx))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')

@@ -20,7 +20,6 @@ from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
-from Levenshtein import distance
 import logging
 import traceback
 import pytz
@@ -529,6 +528,9 @@ class Equipe(models.Model):
         s.reverse()
         return ':'.join(s)
 
+    def cookie_key(self):
+        return 'code_%s' % self.id
+
 class Equipier(models.Model):
     numero            = models.IntegerField(_(u'Numéro'))
     equipe            = models.ForeignKey(Equipe)
@@ -713,7 +715,6 @@ class Challenge(models.Model):
         cats = defaultdict(lambda: 1)
         courses_points = [ ('points_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__points'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('-date') ]
         #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
-        print(self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]).query.sql_with_params())
         for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]):
             p.position = cats[p.categorie.code]
             p.save()
@@ -750,7 +751,7 @@ class Challenge(models.Model):
         return self.participations.filter(
             Q(categorie__isnull=True) | Q(categorie__in=equipe.categorie.challenge_categories.filter(challenge=self)),
             equipes__equipe__in=self.get_match_equipe_query(equipe)
-        )
+        ).distinct('id')
 
     def find_participation_for_equipe_raw(self, course, equipe_nom, equipiers_data, categorie):
         return self.participations.filter(
@@ -764,14 +765,32 @@ class Challenge(models.Model):
             
 
     def get_match_equipe_query_raw(self, course, nom, equipiers):
+        annotate = { 'equipier__licence': Value(0, output_field=models.IntegerField()) }
+        equipiers_licence = [ e.num_licence for e in equipiers if e.justificatif == 'licence']
+        if equipiers_licence:
+            annotate['equipier__licence'] = CompareLicences(equipiers_licence)
+        annotate.update({
+            'equipier__nom%s' % e.numero: CompareNames('equipier__nom', Value(e.nom)) for e in equipiers if e.justificatif != 'licence'
+        })
+        annotate.update({
+            'equipier__prenom%s' % e.numero: CompareNames('equipier__prenom', Value(e.prenom)) for e in equipiers if e.justificatif != 'licence'
+        })
+        filters = [
+            Q(**{'equipier__nom%s__lt' % e.numero: 3, 'equipier__prenom%s__lt' % e.numero: 3})
+                for e in equipiers if e.justificatif != 'licence'
+        ]
+
         subquery = Equipe.objects.filter(
                 course__in=self.courses.exclude(id=course.id)
-            ).prefetch_related(
-                Prefetch('equipier_set', self.get_match_equipiers_query(equipiers))
             ).annotate(
-                d=Levenshtein(Unaccent(Lower('nom')), Unaccent(Lower(Value(nom)))),
-                e=Count('equipier__id')
-            ).filter(d__lt=3, e__gte=len(equipiers) / 2).values('id', 'd')
+                **annotate,
+                d=CompareNames('nom', Value(nom)),
+                e=Count('equipier')
+            ).filter(
+                _or(Q(equipier__licence=1), *filters),
+                d__lt=3,
+                e__gte=len(equipiers) / 2
+            ).values('id', 'd')
 
         sql, params = subquery.query.sql_with_params()
 
@@ -781,36 +800,26 @@ class Challenge(models.Model):
                 WHERE d = min_d
         """ % sql, params=params)
 
+    def test_participation(self):
+        count=0
+        ko=0
+        dup=0
+        for course in self.courses.all():
+            for e in course.equipe_set.all():
+                count+=1
+                ps = list(self.find_participation_for_equipe(e))
+                if len(ps) > 1:
+                    dup+=1
+                good_p=None
+                for p in ps:
+                    if p in [cp.participation for cp in e.challenges.select_related('participation')]:
+                        good_p=p
+                if e.challenges.get().participation.equipes.count() > 1:
+                    if not good_p or len(ps) > 1:
+                        ko+=1
+                        print(course, len(ps), e.id, e, e.challenges.values('participation'), ps)
 
-
-    def get_match_equipiers_query(self, equipiers):
-        def _or(*conds):
-            conds = list(conds)
-            r = conds.pop(0)
-            while conds:
-                r = r | conds.pop(0)
-            return r
-
-        annotate = { 'licence': Value(1, output_field=models.IntegerField()) }
-        equipiers_licence = [
-            Q(equipe__equipier__num_licence=e.num_licence)
-                for e in equipiers if e.justificatif == 'licence']
-        if equipiers_licence:
-            annotate['licence'] = Case(When(_or(*equipiers_licence), then=Value(1)), default=Value(0), output_field=models.IntegerField())
-        annotate.update({
-            'nom%s' % e.numero: Levenshtein(Unaccent(Lower('nom')), Unaccent(Lower(Value(e.nom))))
-                for e in equipiers if e.justificatif != 'licence'
-        })
-        annotate.update({
-            'prenom%s' % e.numero: Levenshtein(Unaccent(Lower('prenom')), Unaccent(Lower(Value(e.prenom))))
-                for e in equipiers if e.justificatif != 'licence'
-        })
-        filters = [
-            Q(**{'nom%s__lt' % e.numero: 3, 'prenom%s__lt' % e.numero: 3})
-                for e in equipiers if e.justificatif != 'licence'
-        ]
-
-        return Equipier.objects.annotate(**annotate).filter(_or(Q(licence=1), *filters))
+        print (count, ko, dup)
 
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories')
@@ -890,21 +899,42 @@ class EquipeChallenge(models.Model):
     class Meta:
         unique_together = (('equipe', 'participation'), )
 
+def _or(*conds):
+    conds = list(conds)
+    r = conds.pop(0)
+    while conds:
+        r = r | conds.pop(0)
+    return r
+
 class Levenshtein(Func):
     function = 'levenshtein'
 class Unaccent(Func):
     function = 'unaccent'
+class RegexpReplace(Func):
+    function = 'regexp_replace'
+class CompareNames(Func):
+    function = 'levenshtein'
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+        super().__init__(
+            Unaccent(Lower(RegexpReplace(a, Value('[ -]\\+'), Value(' ')))),
+            Unaccent(Lower(RegexpReplace(b, Value('[ -]\\+'), Value(' '))))
+        )
+    def get_group_by_cols(self):
+        cols = []
+        for source in self._parse_expressions([self.a, self.b]):
+            cols.extend(source.get_group_by_cols())
+        return cols
 
-def test_participation():
-    count=0
-    ko=0
-    for c in Challenge.objects.all():
-        for course in c.courses.all():
-            for e in course.equipe_set.all():
-                count+=1
-                p = c.find_participation_for_equipe(e)[0]
-                if p not in [cp.participation for cp in e.challenges.select_related('participation')]:
-                    ko+=1
-                    print(c, course, e.id, e, p.id, e.challenges.values('participation'))
+class CompareLicences(Case):
+    def __init__(self, licences):
+        equipiers_licence = [ Q(equipier__num_licence=l) for l in licences ]
+        super().__init__(When(_or(*equipiers_licence), then=Value(1)), default=Value(0), output_field=models.IntegerField())
+    def get_group_by_cols(self):
+        cols = []
+        for source in self._parse_expressions(['equipiers_licence']):
+            cols.extend(source.get_group_by_cols())
+        return cols
 
-    print (count, ko)
+
