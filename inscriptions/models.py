@@ -783,9 +783,9 @@ class Challenge(models.Model):
         subquery = Equipe.objects.filter(
                 course__in=self.courses.exclude(id=course.id)
             ).annotate(
-                **annotate,
                 d=CompareNames('nom', Value(nom)),
-                e=Count('equipier')
+                e=Count('equipier'),
+                **annotate
             ).filter(
                 _or(Q(equipier__licence=1), *filters),
                 d__lt=3,
