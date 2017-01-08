@@ -532,6 +532,13 @@ class Equipe(models.Model):
         return 'code_%s' % self.id
 
 class Equipier(models.Model):
+    PIECE_JOINTE_HELP = _("""Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en pièce jointe (formats PDF ou JPEG).
+Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s).""")
+    AUTORISATION_HELP = _("""Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).
+Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link)s)""")
+    DATE_DE_NAISSANCE_HELP = _("""Chaque équipier doit avoir plus de %(min_age)s ans au %(date)s.""")
+    JUSTIFICATIF_HELP = _("""Chaque équipier doit avoir un certificat médical de moins d'un an ou une licence FFRS en cours de validité pour participer.""")
+
     numero            = models.IntegerField(_(u'Numéro'))
     equipe            = models.ForeignKey(Equipe)
     nom               = models.CharField(_(u'Nom'), max_length=200)
@@ -543,12 +550,12 @@ class Equipier(models.Model):
     code_postal       = models.CharField(max_length=200)
     pays              = CountryField(_(u'Pays'), default='FR')
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
-    date_de_naissance = models.DateField(_(u'Date de naissance'))
-    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True)
+    date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
+    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True, help_text=AUTORISATION_HELP)
     autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
-    justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES)
+    justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
-    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True)
+    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True, help_text=PIECE_JOINTE_HELP)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
     ville2            = models.ForeignKey(Ville, null=True)
     transpondeur      = models.CharField(_(u'Transpondeur'), max_length=20, blank=True)

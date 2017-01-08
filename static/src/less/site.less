@@ -40,3 +40,17 @@
 .list_inscrits tr:nth-child(odd) {
     background: #f5f5f5;
 }
+select[name*=date_de_naissance] {
+    max-width: 12rem;
+    float: left;
+}
+select[name*=date_de_naissance_day] {
+    max-width: 5rem;
+}
+select[name*=date_de_naissance_year] {
+    max-width: 8rem;
+}
+select[name*=date_de_naissance] + p {
+    clear: both;
+}
+

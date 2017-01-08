@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 @open_closed
 @transaction.atomic
 def form(request, course_uid, numero=None, code=None):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(Course.objects.annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
     old_password = None
     create = True
@@ -112,7 +112,13 @@ def form(request, course_uid, numero=None, code=None):
             equipier_formset = EquipierFormset(queryset=instance.equipier_set.all())
         else:
             equipier_formset = EquipierFormset(queryset=Equipier.objects.none())
-    date_prix2 = timezone.make_aware(datetime(2013, 6, 17), timezone.get_default_timezone())
+        link = '<a href="%s" target="_blank">%s</a>'
+        autorisation_link = link % (reverse('inscriptions.model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
+        certificat_link   = link % (reverse('inscriptions.model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
+        for equipier_form in equipier_formset:
+            equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
+            equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
+            equipier_form.fields['piece_jointe'].help_text = _(Equipier.PIECE_JOINTE_HELP) % { 'link': certificat_link }
 
     nombres_par_tranche = {}
     for categorie in Categorie.objects.filter(course=course):
@@ -444,3 +450,5 @@ def challenge(request, challenge_uid):
         'split_categories':  request.GET.get('by_categories') == '1',
     }))
 
+def model_certificat(request, course_uid):
+    return redirect(settings.STATIC_URL + '/certificat_medical.pdf')

@@ -74,18 +74,6 @@
             <div class="panel-heading">{% blocktrans with count=forloop.counter %}Equipier {{ count }}{% endblocktrans %}</div>
             <div class="panel-body equipier_table">
                 {{ equipier_form|bootstrap_horizontal }}
-                <span data-id="id_form-{{ forloop.counter0 }}-piece_jointe" class="help-block">
-                    {% blocktrans %}Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en pièce jointe (formats PDF ou JPEG).{% endblocktrans %}<br />
-                    {% blocktrans with url="" %}Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (<a href="{{ url }}" target="_blank">modèle de certificat</a>).{% endblocktrans %}
-                </span>
-                <span data-id="id_form-{{ forloop.counter0 }}-autorisation" class="help-block">
-                    {% blocktrans %}Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).{% endblocktrans %}<br />
-                    {% blocktrans with url="" %}Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (<a href="{{ url }}" target="_blank">modèle d'autorisation</a>){% endblocktrans %}
-                </span>
-                <span data-id="id_form-{{ forloop.counter0 }}-date_de_naissance_year" class="help-block">
-                    {% blocktrans with min_age=COURSE.min_age date=COURSE.date %}Chaque équipier doit avoir plus de {{ min_age }} ans au {{ date }}.{% endblocktrans %}<br />
-                    {% trans "Chaque équipier doit avoir un certificat médical de moins d'un an ou une licence FFRS en cours de validité pour participer." %}<br />
-                </span>
             </div>
         </div>
     </div>

@@ -41,6 +41,8 @@ urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/contact/$', 'inscriptions.views.contact', name='contact'),
     url(r'^(?P<course_uid>[^/]+)/contact/thankyou/$', 'inscriptions.views.contact_done', name='contact_done'),
     url(r'^(?P<course_uid>[^/]+)/challenges/categories/$', 'inscriptions.views.find_challenges_categories', name='inscriptions.find_challenges_categories'),
+    url(r'^(?P<course_uid>[^/]+)/model/certificat/$', 'inscriptions.views.model_certificat', name='inscriptions.model_certificat'),
+    url(r'^(?P<course_uid>[^/]+)/model/autorisation/$', TemplateView.as_view(template_name='autorisation.html'), name='inscriptions.model_autorisation'),
 ]
 urlpatterns += [
     url(r'^(?P<course_uid>[^/]+)/equipiers/$', 'inscriptions.admin_views.equipiers', name='inscriptions.equipiers'),

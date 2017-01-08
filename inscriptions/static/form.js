@@ -258,11 +258,6 @@ $(function() {
             $(this).remove();
     });
 
-    $('[data-id]').each(function() {
-        var $this = $(this);
-        $('#' + $this.attr('data-id')).parents('.col-md-9').append($this);
-    });
-
     $('input[name*=licence]').each(function() {
         var $this = $(this);
         var $formGroup = $this.parents('.form-group');
