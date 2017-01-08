@@ -681,4 +681,6 @@ class MailAdmin(CourseFilteredObjectAdmin):
     fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
     readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
     list_filter = [EquipeFilter, TemplateMailFilter, 'date']
+    class Media:
+        js = ('custom_admin/mail.js', )
 site.register(Mail, MailAdmin)
