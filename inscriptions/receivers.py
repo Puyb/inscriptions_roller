@@ -24,5 +24,6 @@ def handle_user_postsave(sender, instance, **kwargs):
         Permission.objects.get(codename='delete_equipe'),
         Permission.objects.get(codename='change_accreditation'),
         Permission.objects.get(codename='delete_accreditation'),
+        Permission.objects.get(codename='change_mail'),
     )
 
