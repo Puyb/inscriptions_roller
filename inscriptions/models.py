@@ -15,6 +15,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func, Min
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
@@ -637,8 +638,11 @@ class TemplateMail(models.Model):
     class Meta:
         unique_together= ( ('course', 'nom'), )
 
+    def __str__(self):
+        return self.nom
+
     def send(self, instances):
-        messages = []
+        mails = []
         if isinstance(instances, list):
             prefetch_related_objects(instances, ('equipier_set', ))
         elif hasattr(instances, 'prefetch_related'):
@@ -666,11 +670,36 @@ class TemplateMail(models.Model):
             bcc = []
             if self.bcc:
                 bcc = re.split('[,; ]+', self.bcc)
-            for dest in dests:
-                message = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ dest ], bcc, reply_to=[self.course.email_contact,])
-                message.content_subtype = "html"
-                messages.append(message)
-        MailThread(messages).start()
+            mails.append(Mail(
+                course=self.course,
+                template=self,
+                equipe=instance if isinstance(instance, Equipe) else None,
+                emeteur=self.course.email_contact,
+                destinataires=list(dests),
+                bcc=bcc,
+                sujet=subject,
+                message=message,
+            ))
+        MailThread(mails).start()
+
+class Mail(models.Model):
+    course = models.ForeignKey(Course)
+    template = models.ForeignKey(TemplateMail, null=True)
+    equipe = models.ForeignKey(Equipe, null=True)
+    emeteur = models.EmailField()
+    destinataires = ArrayField(models.EmailField())
+    bcc = ArrayField(models.EmailField(), blank=True)
+    sujet = models.CharField(max_length=200)
+    message = models.TextField()
+    date = models.DateTimeField(auto_now=True)
+
+    def send(self):
+        self.save()
+        for dest in self.destinataires:
+            message = EmailMessage(self.sujet, self.message, settings.DEFAULT_FROM_EMAIL, [ dest ], self.bcc, reply_to=[self.emeteur,])
+            message.content_subtype = "html"
+            message.send()
+
 
 # test:
 # from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]

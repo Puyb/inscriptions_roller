@@ -1,5 +1,6 @@
 <a href="/{{ instance.course.uid }}/{{ instance.numero }}/done/">Lien de paiement</a><br />
 <a href="/{{ instance.course.uid }}/{{ instance.numero }}/{{ instance.password }}/">Lien de modification</a><br />
+<a href="../../mail/?equipe={{ instance.id }}">Historique des mails envoyés</a><br />
 {% for template in templates %}
 <a href="send/{{ template.id }}">Envoyer un mail "{{ template.nom }}"</a><br />
 {% endfor %}

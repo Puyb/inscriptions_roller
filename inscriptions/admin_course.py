@@ -480,14 +480,22 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         instance = get_object_or_404(Equipe, id=id)
 
         if request.method == 'POST':
-            msg = EmailMessage(request.POST['subject'], request.POST['message'], settings.DEFAULT_FROM_EMAIL, [ request.POST['mail'] ], reply_to=[request.POST['sender'],])
-            msg.content_subtype = "html"
-            msg.send()
+            mail = Mail(
+                course=instance.course,
+                template=None,
+                equipe=instance,
+                emeteur=request.POST['sender'],
+                destinataires=[ request.POST['mail'], ],
+                bcc=[],
+                sujet=request.POST['subject'],
+                message=request.POST['message'],
+            )
+            mail.send()
             messages.add_message(request, messages.INFO, u'Message envoyé à %s' % (request.POST['mail'], ))
             return redirect('/course/inscriptions/equipe/%s/' % (instance.id, ))
 
 
-        mail = get_object_or_404(TemplateMail, id=template)
+        template = get_object_or_404(TemplateMail, id=template)
         sujet = ''
         message = ''
         try:
@@ -495,8 +503,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 "instance": instance,
                 'ROOT_URL': 'http://%s' % Site.objects.get_current(),
             })
-            sujet   = Template(mail.sujet).render(context)
-            message = Template(mail.message).render(context)
+            sujet   = Template(template.sujet).render(context)
+            message = Template(template.message).render(context)
         except Exception as e:
             message = '<p style="color: red">Error in template: %s</p>' % str(e)
 
@@ -637,3 +645,40 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
         return False
 site.register(Accreditation, AccreditationAdmin)
 
+class EquipeFilter(SimpleListFilter):
+    title = _(u'Equipes')
+    parameter_name = 'equipe'
+    def lookups(self, request, model_admin):
+        return [
+            (e.id, u'%s - %s - %s' % (e.numero, e.nom, e.categorie.code))
+            for e in Equipe.objects.select_related('categorie').filter(course__uid=request.COOKIES['course_uid']).order_by('numero')
+        ]
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(equipe__id=self.value())
+        return queryset
+
+class TemplateMailFilter(SimpleListFilter):
+    title = _(u'Modèle')
+    parameter_name = 'template'
+    def lookups(self, request, model_admin):
+        return [('', _('Aucun'))] + [
+            (t.id, t.nom)
+            for t in TemplateMail.objects.filter(course__uid=request.COOKIES['course_uid']).order_by('nom')
+        ]
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(template__id=self.value())
+        return queryset
+
+class MailAdmin(CourseFilteredObjectAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.select_related('equipe__categorie', 'equipe__course', 'template')
+        return qs
+
+    list_display = ('date', 'equipe', 'sujet', 'template')
+    fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
+    readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
+    list_filter = [EquipeFilter, TemplateMailFilter, 'date']
+site.register(Mail, MailAdmin)

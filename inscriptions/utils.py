@@ -20,13 +20,13 @@ def iriToUri(iri):
     ])
 
 class MailThread(Thread):
-    def __init__ (self, messages):
+    def __init__ (self, mails):
         Thread.__init__(self)
-        self.messages = messages
+        self.mails = mails
 
     def run(self):  
-        for message in self.messages:
-            message.send()
+        for mail in self.mails:
+            mail.send()
 
 class ChallengeUpdateThread(Thread):
     def __init__(self, course):
