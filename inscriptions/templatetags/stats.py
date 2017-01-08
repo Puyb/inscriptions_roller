@@ -29,9 +29,9 @@ def pertinent_values(dictionary, key):
         limit = int(limit)
 
     keys.sort(key=lambda a: dictionary[a][key], reverse=True)
-
+    
     index = len(keys) - 1
-    while dictionary[keys[index]][key] < limit and index > 10:
+    while index > 10 and dictionary[keys[index]][key] < limit:
         index -= 1
     return keys[:index + 1]
 
