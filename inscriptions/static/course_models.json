@@ -77,7 +77,7 @@
                 "numero_fin": 300,
                 "sexe": "HX",
                 "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
-                "min_age": 12,
+                "min_age": 14,
                 "max_equipiers": 5,
                 "code": "SNX",
                 "prix2": "90.00"
@@ -90,7 +90,7 @@
                 "numero_fin": 300,
                 "sexe": "F",
                 "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
-                "min_age": 12,
+                "min_age": 14,
                 "max_equipiers": 5,
                 "code": "SNF",
                 "prix2": "90.00"
