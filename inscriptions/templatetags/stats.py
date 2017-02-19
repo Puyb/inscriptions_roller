@@ -52,7 +52,7 @@ def other_values(dictionary, key):
     keys.sort(key=lambda a: dictionary[a][key], reverse=True)
 
     index = len(keys) - 1
-    while dictionary[keys[index]][key] < limit and index > 10:
+    while index > 10 and dictionary[keys[index]][key] < limit:
         index -= 1
     return keys[index + 1:]
 
@@ -63,9 +63,13 @@ def get_range(last):
 
 @register.filter
 def get_max(l):
-    return max(l)
+    if len(l):
+        return max(l)
+    return 0
 
 @register.filter
 def get_min(l):
-    return min(l)
+    if len(l):
+        return min(l)
+    return 0
 

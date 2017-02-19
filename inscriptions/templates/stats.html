@@ -4,6 +4,7 @@
 {% load stats %}
 
 {% block body %}
+{% if stats.course.equipiers %}
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
     <!--[if lte IE 8]>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
@@ -464,4 +465,7 @@
         g.draw();
     </script>
     {% endif %}
+{% else %}
+{% trans "Il n'y a aucune inscription pour l'instant." %}
+{% endif %}
 {% endblock %}
