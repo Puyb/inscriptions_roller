@@ -14,7 +14,7 @@ def add_perm(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('inscriptions', '0024_auto_20170108_2304'),
+        ('inscriptions', '0025_add_mail_perm'),
     ]
 
     operations = [
