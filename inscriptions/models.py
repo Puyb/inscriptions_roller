@@ -670,7 +670,7 @@ class TemplateMail(models.Model):
             bcc = []
             if self.bcc:
                 bcc = re.split('[,; ]+', self.bcc)
-            mails.append(Mail(
+            m = Mail(
                 course=self.course,
                 template=self,
                 equipe=instance if isinstance(instance, Equipe) else None,
@@ -679,7 +679,9 @@ class TemplateMail(models.Model):
                 bcc=bcc,
                 sujet=subject,
                 message=message,
-            ))
+            )
+            mails.append(m)
+            m.save()
         MailThread(mails).start()
 
 class Mail(models.Model):
@@ -694,7 +696,8 @@ class Mail(models.Model):
     date = models.DateTimeField(auto_now=True)
 
     def send(self):
-        self.save()
+        if not self.id:
+            self.save()
         for dest in self.destinataires:
             message = EmailMessage(self.sujet, self.message, settings.DEFAULT_FROM_EMAIL, [ dest ], self.bcc, reply_to=[self.emeteur,])
             message.content_subtype = "html"
