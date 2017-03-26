@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import sys, requests, random, traceback, json
+import sys, requests, random, json
 import logging
 from datetime import datetime, date
 from functools import reduce
@@ -75,15 +75,15 @@ def form(request, course_uid, numero=None, code=None):
                     try:
                         course.send_mail('inscription', [ new_instance ])
                     except Exception as e:
-                        traceback.print_exc()
+                        logging.exception('Fail to send "inscription" mail')
                     try:
                         course.send_mail('inscription_admin', [ new_instance ])
                     except Exception as e:
-                        traceback.print_exc()
+                        logging.exception('Fail to send "inscription_admin" mail')
                 for challenge in course.challenges.all():
                     challenge.inscription_equipe(new_instance)
                 response = redirect('inscriptions.done', course_uid=course.uid, numero=new_instance.numero)
-                response.set_cookie(new_instance.cookie_key(), new_instance.password)
+                response.set_cookie(new_instance.cookie_key(), new_instance.password, max_age=365*86400, httponly=True)
                 return response
             else:
                 text = 'Error in form submit\n'
