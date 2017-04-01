@@ -976,4 +976,17 @@ class CompareLicences(Case):
             cols.extend(source.get_group_by_cols())
         return cols
 
+class LiveSnapshot(models.Model):
+    course = models.ForeignKey(Course)
+    date = models.DateTimeField()
+    received = models.DateTimeField(auto_now=True)
+
+class LiveResult(models.Model):
+    snapshot = models.ForeignKey(LiveSnapshot)
+    equipe = models.ForeignKey(Equipe)
+    position = models.IntegerField()
+    tours = models.IntegerField()
+    temps = models.DecimalField(max_digits=8, decimal_places=3)
+    meilleur_tour = models.DecimalField(max_digits=8, decimal_places=3)
+    penalité = models.IntegerField()
 
