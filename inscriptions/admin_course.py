@@ -182,63 +182,68 @@ class CourseAdminSite(admin.sites.AdminSite):
                         position_categorie = None,
                     )
 
-                    with io.StringIO(csv_file.read().decode('utf-8')) as io_file:
-                        csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
-                        if data.get('skip_first'):
-                            next(csv_reader)
+                    for enc in ('utf-8', 'latin15'):
+                        try:
+                            with io.StringIO(csv_file.read().decode(enc)) as io_file:
+                                csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                                if data.get('skip_first'):
+                                    next(csv_reader)
 
-                        def g(row, n, f=lambda x: x):
-                            if not data.get(n):
-                                return None
-                            return f(row[data[n] - 1])
-                        equipes = list(course.equipe_set.select_related('categorie'))
-                        numeros = [ e.numero for e in equipes]
-                        equipes_by_numero = { e.numero: e for e in equipes }
-
-
-                        for row in csv_reader:
-                            numero = int(g(row, 'dossard_column'))
-                            equipe = equipes_by_numero.get(numero)
-                            if not equipe:
-                                if data.get('categorie_column'):
-                                    categorie = course.categories.get(code=g(row, 'categorie_column'))
-                                else:
-                                    categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
-                                equipe = Equipe(
-                                    numero=numero,
-                                    course=course,
-                                    categorie=categorie,
-                                    nom=g(row, 'nom_column') or ('Equipe non inscrite %s' % numero),
-                                    gerant_nom='?',
-                                    gerant_prenom='?',
-                                    gerant_ville='?',
-                                    gerant_code_postal='?',
-                                    gerant_email=course.email_contact,
-                                    nombre=categorie.max_equipiers,
-                                    prix=Decimal(0),
-                                )
-                                equipes.append(equipe)
-                                equipes_by_numero[numero] = equipe
-                            else:
-                                numeros.remove(numero)
-
-                            equipe.tours = g(row, 'tours_column', int)
-                            if data.get('time_column'):
-                                if data['time_format'] == 'HMS':
-                                    s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
-                                    time = Decimal(0)
-                                    n = Decimal(1)
-                                    while len(s):
-                                        time += n * Decimal(s.pop().replace(',', '.'))
-                                        n *= Decimal(60)
-                                else:
-                                    time = Decimal(g(row, 'time_column'))
-                                equipe.temps = time
-                            equipe.position_generale  = g(row, 'position_generale_column', int)
-                            equipe.position_categorie = g(row, 'position_categorie_column', int)
+                                def g(row, n, f=lambda x: x):
+                                    if not data.get(n):
+                                        return None
+                                    return f(row[data[n] - 1])
+                                equipes = list(course.equipe_set.select_related('categorie'))
+                                numeros = [ e.numero for e in equipes]
+                                equipes_by_numero = { e.numero: e for e in equipes }
 
 
-                            #super(Equipe, equipe).save()
+                                for row in csv_reader:
+                                    numero = int(g(row, 'dossard_column'))
+                                    equipe = equipes_by_numero.get(numero)
+                                    if not equipe:
+                                        if data.get('categorie_column'):
+                                            categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                        else:
+                                            categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
+                                        equipe = Equipe(
+                                            numero=numero,
+                                            course=course,
+                                            categorie=categorie,
+                                            nom=g(row, 'nom_column') or ('Equipe non inscrite %s' % numero),
+                                            gerant_nom='?',
+                                            gerant_prenom='?',
+                                            gerant_ville='?',
+                                            gerant_code_postal='?',
+                                            gerant_email=course.email_contact,
+                                            nombre=categorie.max_equipiers,
+                                            prix=Decimal(0),
+                                        )
+                                        equipes.append(equipe)
+                                        equipes_by_numero[numero] = equipe
+                                    else:
+                                        numeros.remove(numero)
+
+                                    equipe.tours = g(row, 'tours_column', int)
+                                    if data.get('time_column'):
+                                        if data['time_format'] == 'HMS':
+                                            s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
+                                            time = Decimal(0)
+                                            n = Decimal(1)
+                                            while len(s):
+                                                time += n * Decimal(s.pop().replace(',', '.'))
+                                                n *= Decimal(60)
+                                        else:
+                                            time = Decimal(g(row, 'time_column'))
+                                        equipe.temps = time
+                                    equipe.position_generale  = g(row, 'position_generale_column', int)
+                                    equipe.position_categorie = g(row, 'position_categorie_column', int)
+
+
+                                    #super(Equipe, equipe).save()
+                        except UnicodeDecodeError as exc:
+                            if enc == 'latin15':
+                                raise exc
 
                     # compute positions
                     equipes_to_compute = None
