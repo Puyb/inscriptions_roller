@@ -755,6 +755,8 @@ class Challenge(models.Model):
         courses_points = [ ('points_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__points'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('-date') ]
         #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
         for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', 'c', *['-' + k for k, v in courses_points]):
+            if p.c == 0:
+                continue
             p.position = cats[p.categorie.code]
             p.save()
             cats[p.categorie.code] += 1
