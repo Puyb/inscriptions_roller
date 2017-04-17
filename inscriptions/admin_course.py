@@ -182,8 +182,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                         position_categorie = None,
                     )
 
-                    for enc in ('utf-8', 'latin15'):
+                    for enc in ('utf-8', 'iso8859-1'):
                         try:
+                            csv_file.seek(0)
                             with io.StringIO(csv_file.read().decode(enc)) as io_file:
                                 csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
                                 if data.get('skip_first'):
@@ -197,6 +198,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                                 numeros = [ e.numero for e in equipes]
                                 equipes_by_numero = { e.numero: e for e in equipes }
 
+                                def intOrNone(x):
+                                    try:
+                                        return int(x)
+                                    except:
+                                        return None
 
                                 for row in csv_reader:
                                     numero = int(g(row, 'dossard_column'))
@@ -224,7 +230,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                     else:
                                         numeros.remove(numero)
 
-                                    equipe.tours = g(row, 'tours_column', int)
+                                    equipe.tours = g(row, 'tours_column', intOrNone)
                                     if data.get('time_column'):
                                         if data['time_format'] == 'HMS':
                                             s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
@@ -236,13 +242,14 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         else:
                                             time = Decimal(g(row, 'time_column'))
                                         equipe.temps = time
-                                    equipe.position_generale  = g(row, 'position_generale_column', int)
-                                    equipe.position_categorie = g(row, 'position_categorie_column', int)
+                                    equipe.position_generale  = g(row, 'position_generale_column', intOrNone)
+                                    equipe.position_categorie = g(row, 'position_categorie_column', intOrNone)
 
 
                                     #super(Equipe, equipe).save()
+                            break
                         except UnicodeDecodeError as exc:
-                            if enc == 'latin15':
+                            if enc == 'iso8859-1':
                                 raise exc
 
                     # compute positions
