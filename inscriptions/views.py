@@ -454,30 +454,31 @@ def model_certificat(request, course_uid):
     return redirect(settings.STATIC_URL + '/certificat_medical.pdf')
 
 def live_push(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
-    date = dateTime.strptime(request.GET['date'], '%d/%m/%Y %H:%M:%S')
-    snapshort = LiveSnapshort(
-        course=course,
-        date=date
-    )
-    snapshot.save()
-    csv_file = request.FILES['csv']
-    with io.StringIO(csv_file.read().decode('utf-8')) as io_file:
-        csv_reader = csv.reader(io_file)
-        for row in csv_reader:
-            try:
-                # format : c.writerow([num, tours, temps, pos, meilleur_tour, penalite])
-                result = LiveResult(
-                    snapshot=snapshot,
-                    equipe=Equipe.objects.get(course=course, numero=row[0]),
-                    tours=int(row[1]),
-                    temps=Decimal(row[2]),
-                    position=int(row[3]),
-                    meilleur_tour=Decimal(row[4])
-                )
-                result.save()
-            except Exception as e:
-                logger.exception('Error importing row %s' % row)
-    return HttpResponse()
+    if request.method == 'POST':
+        course = get_object_or_404(Course, uid=course_uid)
+        date = dateTime.strptime(request.GET['date'], '%d/%m/%Y %H:%M:%S')
+        snapshort = LiveSnapshort(
+            course=course,
+            date=date
+        )
+        snapshot.save()
+        csv_file = request.FILES['csv']
+        with io.StringIO(csv_file.read().decode('utf-8')) as io_file:
+            csv_reader = csv.reader(io_file)
+            for row in csv_reader:
+                try:
+                    # format : c.writerow([num, tours, temps, pos, meilleur_tour, penalite])
+                    result = LiveResult(
+                        snapshot=snapshot,
+                        equipe=Equipe.objects.get(course=course, numero=row[0]),
+                        tours=int(row[1]),
+                        temps=Decimal(row[2]),
+                        position=int(row[3]),
+                        meilleur_tour=Decimal(row[4])
+                    )
+                    result.save()
+                except Exception as e:
+                    logger.exception('Error importing row %s' % row)
+        return HttpResponse()
 
 
