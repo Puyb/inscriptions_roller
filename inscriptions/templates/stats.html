@@ -11,8 +11,10 @@
     <![endif]-->
     <style>
         table, td, th { border: 1px solid grey; }
+        td, th { padding: 0 2px; }
         table { margin: 10px; }
         tr:nth-child(odd) { background: #F2E5FF; }
+        td:nth-child(2), th:nth-child(2), td:nth-child(3), th:nth-child(3) { text-align: right; white-space: nowrap; }
         #map {width: 100%; height: 600px; }
         #map img { border: none; padding: 0; margin: 0; }
         hr { clear: both; margin: 30px auto; width: 40%; }
@@ -167,9 +169,9 @@
         <div class="panel-body">
             <div class="col-md-4">
                 <table>
-                    <tr><th>{% trans "Code" %}</th><th>{% trans "Catégorie" %}</th><th>#</th><th>%</th></tr>
+                    <tr><th>{% trans "Code" %}</th><th>#</th><th>%</th></tr>
                     {% for cat, value in stats.categories.items %}
-                    <tr><td>{{ cat }}</td><td>{{ value.name }} </td><td>{{ value.equipes }}</td><td>{% widthratio value.equipes stats.course.equipes 100 %} %</td></tr>
+                    <tr><td>{{ cat }}</td><td>{{ value.equipes }}</td><td>{% widthratio value.equipes stats.course.equipes 100 %} %</td></tr>
                     {% endfor %}
                 </table>
             </div>
