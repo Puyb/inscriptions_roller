@@ -155,7 +155,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             if dbl:
                 dbl.insert(0, e)
                 doublons.append(dbl)
-        print(doublons)
 
         return TemplateResponse(request, 'admin/anomalies.html', dict(self.each_context(request),
             doublons=doublons,
