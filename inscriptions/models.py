@@ -303,7 +303,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
 class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories')
     nom             = models.CharField(_(u'Nom'), max_length=200)
-    code            = models.CharField(_(u'Code'), max_length=10)
+    code            = models.CharField(_(u'Code'), max_length=200)
     prix1           = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
     prix2           = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2)
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
@@ -865,7 +865,7 @@ class Challenge(models.Model):
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories')
     nom             = models.CharField(_(u'Nom'), max_length=200)
-    code            = models.CharField(_(u'Code'), max_length=10)
+    code            = models.CharField(_(u'Code'), max_length=200)
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)

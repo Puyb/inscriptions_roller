@@ -68,10 +68,11 @@ class CourseForm(ModelForm):
     def save(self, commit=True):
         model = self.cleaned_data['course_model']
         prix = json.loads(self.cleaned_data['course_prix'])
-        for c in COURSE_MODELS[model]['categories']:
-            if c['code'] in prix:
-                c['prix1'] = prix[c['code']]['prix1']
-                c['prix2'] = prix[c['code']]['prix2']
+        if 'categories' in COURSE_MODELS[model]:
+            for c in COURSE_MODELS[model]['categories']:
+                if c['code'] in prix:
+                    c['prix1'] = prix[c['code']]['prix1']
+                    c['prix2'] = prix[c['code']]['prix2']
 
         instance = super().save(commit=False)
         instance.is_active = False
