@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='accreditation',
             name='course',
-            field=models.ForeignKey(default=None, related_name='accreditations', to='inscriptions.Course'),
+            field=models.ForeignKey(default=None, related_name='accreditations', to='inscriptions.Course', on_delete=models.CASCADE),
             preserve_default=False,
         ),
     ]

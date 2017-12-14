@@ -25,9 +25,9 @@ import csv, io
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return False
-        prefetch_related_objects([request.user], ('accreditations__course', ))
+        prefetch_related_objects([request.user], 'accreditations__course')
         if request.path.endswith('/logout/'):
             return True
         if request.user.is_superuser:

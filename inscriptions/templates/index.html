@@ -20,13 +20,13 @@
                         {% blocktrans with organisateur=course.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}
                     </p>
                     {% if course.ouverte %}
-                    <a class="btn btn-lg btn-block {% if course.fermee %}btn-default disabled{% else %}btn-primary{% endif %}" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
+                    <a class="btn btn-lg btn-block {% if course.fermee %}btn-default disabled{% else %}btn-primary{% endif %}" role="button" href="{% url "inscriptions_create" course_uid=course.uid %}">{% trans "Inscription" %}</a><br />
                     {% endif %}
                     {% if course.ouverte %}
                     <p>
                         {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
-                        <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
-                        <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
+                        <a href="{% url "inscriptions_list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
+                        <a href="{% url "inscriptions_stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
                     </p>
                     {% else %}
                     <p>
@@ -52,9 +52,9 @@
           <p>
             {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
             <a href="{{ course.url }}">{% trans "Site de la course" %}</a>
-            <a href="{% url "inscriptions.list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
-            <a href="{% url "inscriptions.stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
-            <a href="{% url "inscriptions.resultats" course_uid=course.uid %}">{% trans "Résultats" %}</a>
+            <a href="{% url "inscriptions_list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
+            <a href="{% url "inscriptions_stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
+            <a href="{% url "inscriptions_resultats" course_uid=course.uid %}">{% trans "Résultats" %}</a>
           </p>
         </div>
 {% if forloop.last %}

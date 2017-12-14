@@ -22,9 +22,9 @@ class Migration(migrations.Migration):
                 ('sujet', models.CharField(max_length=200)),
                 ('message', models.TextField()),
                 ('date', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(to='inscriptions.Course')),
-                ('equipe', models.ForeignKey(to='inscriptions.Equipe', null=True)),
-                ('template', models.ForeignKey(to='inscriptions.TemplateMail', null=True)),
+                ('course', models.ForeignKey(to='inscriptions.Course', on_delete=models.CASCADE)),
+                ('equipe', models.ForeignKey(to='inscriptions.Equipe', null=True, on_delete=models.SET_NULL)),
+                ('template', models.ForeignKey(to='inscriptions.TemplateMail', null=True, on_delete=models.SET_NULL)),
             ],
         ),
         migrations.AlterField(

@@ -23,12 +23,12 @@ class Migration(migrations.Migration):
                 ('sexe', models.CharField(choices=[('H', 'Homme'), ('F', 'Femme'), ('HX', 'Homme ou Mixte'), ('FX', 'Femme ou Mixte'), ('X', 'Mixte'), ('', 'Sans critères')], max_length=2, verbose_name='Sexe', blank=True)),
                 ('validation', models.TextField(verbose_name='Validation function (javascript)')),
                 ('categories', models.ManyToManyField(related_name='_categories_+', to='inscriptions.Categorie')),
-                ('challenge', models.ForeignKey(related_name='categories', to='inscriptions.Challenge')),
+                ('challenge', models.ForeignKey(related_name='categories', to='inscriptions.Challenge', on_delete=models.CASCADE)),
             ],
         ),
         migrations.AddField(
             model_name='participationchallenge',
             name='categorie',
-            field=models.ForeignKey(related_name='participations', default=None, null=True, blank=True, to='inscriptions.ChallengeCategorie'),
+            field=models.ForeignKey(related_name='participations', default=None, null=True, blank=True, to='inscriptions.ChallengeCategorie', on_delete=models.SET_NULL),
         ),
     ]

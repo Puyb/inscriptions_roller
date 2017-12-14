@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('temps', models.DecimalField(max_digits=8, decimal_places=3)),
                 ('meilleur_tour', models.DecimalField(max_digits=8, decimal_places=3)),
                 ('penalité', models.IntegerField()),
-                ('equipe', models.ForeignKey(to='inscriptions.Equipe')),
+                ('equipe', models.ForeignKey(to='inscriptions.Equipe', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -29,12 +29,12 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
                 ('date', models.DateTimeField()),
                 ('received', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(to='inscriptions.Course')),
+                ('course', models.ForeignKey(to='inscriptions.Course', on_delete=models.CASCADE)),
             ],
         ),
         migrations.AddField(
             model_name='liveresult',
             name='snapshot',
-            field=models.ForeignKey(to='inscriptions.LiveSnapshot'),
+            field=models.ForeignKey(to='inscriptions.LiveSnapshot', on_delete=models.CASCADE),
         ),
     ]

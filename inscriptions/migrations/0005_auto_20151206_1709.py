@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='accreditation',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='accreditations'),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, related_name='accreditations', on_delete=models.CASCADE),
         ),
     ]

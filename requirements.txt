@@ -1,11 +1,16 @@
-Django==1.8.5
+## The following requirements were added by pip freeze:
+Django==2.0
 django-appconf==1.0.2
 django-bootstrap-form==3.3
-django-countries==3.3
-django-debug-toolbar==1.5
-django-extensions==1.6.7
-django-user-accounts==2.0.0
+django-countries==5.0
+django-debug-toolbar==1.9.1
+django-extensions==1.9.8
+django-jsonfield==0.9.15
+django-user-accounts==2.0.3
 pinax-theme-bootstrap==7.1.1
+pydot==1.2.3
+pygraphviz==1.3.1
 python-Levenshtein==0.12.0
-pytz==2015.6
+pytz==2017.3
 sqlparse==0.2.4
+typing==3.6.2
