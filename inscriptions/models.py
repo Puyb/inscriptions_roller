@@ -751,15 +751,26 @@ class Challenge(models.Model):
             positions[equipe.participation.categorie] += 1
 
     def compute_challenge(self):
-        cats = defaultdict(lambda: 1)
-        courses_points = [ ('points_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__points'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('-date') ]
+        cats = defaultdict(lambda: 0)
+        courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
         #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
-        for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *['-' + k for k, v in courses_points]):
+        previous_position = defaultdict(lambda: None)
+        for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
             if p.c == 0:
                 continue
+            pp = previous_position[p.categorie.code]
+            print(p.categorie.code, p.equipes.all()[0].equipe.nom, p.position)
+            if not pp or pp.p != p.p or pp.c != p.c:
+                cats[p.categorie.code] += 1
+            else: # equality
+                if [k for k, v in courses_points if getattr(p, k) and getattr(pp, k)]:
+                    print ('course commune');
+                    cats[p.categorie.code] += 1
+
+            previous_position[p.categorie.code] = p
             p.position = cats[p.categorie.code]
             p.save()
-            cats[p.categorie.code] += 1
+
 
     def inscription_equipe(self, equipe):
         ParticipationChallenge.objects.filter(challenge=self, equipes__equipe=equipe).delete()
