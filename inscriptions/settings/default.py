@@ -138,8 +138,6 @@ INSTALLED_APPS = [
 
     # external
     "account",
-    "metron",
-    "pinax.eventlog",
 
     # project
     "inscriptions",

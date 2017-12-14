@@ -31,6 +31,14 @@ function age(a) {
         return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY;
     };
 }
+function age2(eq) {
+    var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));
+    var course = new Date(COURSE_YEAR, COURSE_MONTH -1, COURSE_DAY);
+    var age = birthday.getFullYear() - course.getFullYear();
+    birth.setFullYear(COURSE_YEAR);
+    if (birthday > course) return age - 1;
+    return age;
+}
 
 function check_date(data, k) {
     var d = new Date(parseFloat(data[k + '_year']), parseFloat(data[k + '_month']) - 1, parseFloat(data[k + '_day']));
@@ -49,6 +57,12 @@ function serialize() {
     for(var k in data)
         if(/^form-\d-/.test(k) && parseFloat(k.substr(5)) < data.nombre)
             data.equipiers[parseFloat(k.substr(5))][k.substr(7)] = data[k];
+    data.age_moyen = 0;
+    data.equipiers.forEach(function(eq) {
+        data.age_moyen += eq.age
+        eq.age = age2(eq);
+    });
+    data.age_moyen /= data.equipiers.length;
     data.nombre_h = data.equipiers.filter(function(i) { return i.sexe === 'H'; }).length;
     data.nombre_f = data.equipiers.filter(function(i) { return i.sexe === 'F'; }).length;
     return data;
@@ -179,6 +193,7 @@ function setup_categories(data) {
 
 
             $('#challenge-participation').empty();
+    
             (challenge_categories[d.code] || []).forEach(function(chall) {
                 $('#challenge-participation').append(chall);
             });
