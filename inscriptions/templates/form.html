@@ -5,7 +5,7 @@
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
-{% if create %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
+{% if not update %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
 {% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); return actual_part > parseInt($('#id_nombre').val()); ">
     {% if errors %}

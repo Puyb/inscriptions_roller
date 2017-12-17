@@ -13,7 +13,7 @@ from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext, Template, Context
+from django.template import Template, Context
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -33,7 +33,7 @@ def form(request, course_uid, numero=None, code=None):
     course = get_object_or_404(Course.objects.annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
     old_password = None
-    create = True
+    update = False
     equipiers_count = Equipier.objects.filter(equipe__course=course).count()
     message = ''
     if numero:
@@ -42,7 +42,7 @@ def form(request, course_uid, numero=None, code=None):
         old_password = instance.password
         if instance.password != code:
             raise Http404()
-        create = False
+        update = True
     if request.method == 'POST':
         try:
             equipe_form = EquipeForm(request.POST, request.FILES, instance=instance)
@@ -131,8 +131,7 @@ def form(request, course_uid, numero=None, code=None):
         "equipier_formset": equipier_formset,
         "errors": equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
         "instance": instance,
-        "create": create,
-        "update": not create,
+        "update": update,
         "nombres_par_tranche": nombres_par_tranche,
         "equipiers_count": equipiers_count,
         "course": course,

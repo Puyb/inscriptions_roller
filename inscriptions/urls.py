@@ -16,7 +16,7 @@ urlpatterns += [
     path(r'admin/', admin.main_site.urls),
     url(r"account/", include("account.urls")),
     url(r'i18n/', include('django.conf.urls.i18n')),
-    path(r'jsi18n/', JavaScriptCatalog.as_view(), { 'packages': ('inscriptions',), 'domain': 'djangojs' }, name='javascript_catalog'),
+    path(r'jsi18n/', JavaScriptCatalog.as_view(), { 'packages': 'inscriptions', 'domain': 'djangojs' }, name='javascript_catalog'),
     path(r'<str:course_uid>/admin/', admin.course_setter, name='admin_course_setter'),
     path(r'course/', admin.course_site.urls),
 ]

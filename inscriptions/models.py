@@ -480,14 +480,11 @@ class Equipe(models.Model):
                 except Exception as e:
                     traceback.print_exc()
         else:
-            print('plop', args, kwargs)
             if not self.numero:
                 self.numero = self.getNumero()
 
-        print('plop2', args, kwargs)
         if not self.gerant_ville2_id:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
-        print('plop3', args, kwargs)
         return super(Equipe, self).save(*args, **kwargs)
 
 
@@ -581,7 +578,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
         return today.year - self.date_de_naissance.year - (birthday > today)
 
     def __str__(self):
-        return u'%d' % self.numero
+        return u'%d%d %s %s' % (self.equipe.numero, self.numero, self.nom, self.prenom)
 
     def save(self, *args, **kwargs):
         if self.id:
@@ -710,7 +707,7 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course, null=True, blank=True, related_name='challenges')
+    courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course, course_categories=None):
