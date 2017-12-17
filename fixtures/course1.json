@@ -1,0 +1,335 @@
+[
+{
+    "model": "inscriptions.course",
+    "pk": 1,
+    "fields": {
+        "nom": "Course 1",
+        "uid": "course1",
+        "organisateur": "PUC Roller",
+        "ville": "Paris",
+        "date": "2013-08-04",
+        "url": "http://6hdeparis.fr/",
+        "url_reglement": "http://6hdeparis.fr/reglement2013/",
+        "email_contact": "organisation@6hdeparis.fr",
+        "logo": "",
+        "date_ouverture": "2013-03-15",
+        "date_augmentation": "2013-06-15",
+        "date_fermeture": "2013-07-21",
+        "limite_participants": "700",
+        "paypal": "magalie@puc.asso.fr",
+        "frais_paypal_inclus": false,
+        "ordre": "Paris Universit\u00e9 Club",
+        "adresse": "Paris Universit\u00e9 Club\n6h de Paris\n17 avenue Pierre de Coubertin\n75013 PARIS",
+        "active": true,
+        "distance": null
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 1,
+    "fields": {
+        "course": 1,
+        "nom": "Individuel Homme",
+        "code": "IDH",
+        "prix1": "40.00",
+        "prix2": "50.00",
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "min_age": 18,
+        "sexe": "H",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 200,
+        "numero_fin": 249
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 2,
+    "fields": {
+        "course": 1,
+        "nom": "Individuel Femme",
+        "code": "IDF",
+        "prix1": "40.00",
+        "prix2": "50.00",
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "min_age": 18,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 200,
+        "numero_fin": 249
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 3,
+    "fields": {
+        "course": 1,
+        "nom": "Duo Homme ou Mixte",
+        "code": "DUX",
+        "prix1": "50.00",
+        "prix2": "60.00",
+        "min_equipiers": 2,
+        "max_equipiers": 2,
+        "min_age": 18,
+        "sexe": "MX",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 300,
+        "numero_fin": 369
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 4,
+    "fields": {
+        "course": 1,
+        "nom": "Duo Femme",
+        "code": "DUF",
+        "prix1": "50.00",
+        "prix2": "60.00",
+        "min_equipiers": 2,
+        "max_equipiers": 2,
+        "min_age": 18,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 300,
+        "numero_fin": 369
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 5,
+    "fields": {
+        "course": 1,
+        "nom": "Junior",
+        "code": "JNX",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "min_age": 12,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 6,
+    "fields": {
+        "course": 1,
+        "nom": "S\u00e9nior Homme ou Mixte",
+        "code": "SNX",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "min_age": 12,
+        "sexe": "MX",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 7,
+    "fields": {
+        "course": 1,
+        "nom": "S\u00e9nior Femme",
+        "code": "SNF",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "min_age": 12,
+        "sexe": "F",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 8,
+    "fields": {
+        "course": 1,
+        "nom": "V\u00e9t\u00e9ran",
+        "code": "VEX",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "min_age": 35,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 9,
+    "fields": {
+        "course": 1,
+        "nom": "Famille",
+        "code": "FMX",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "min_age": 12,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.categorie",
+    "pk": 10,
+    "fields": {
+        "course": 1,
+        "nom": "Entreprise / \u00c9tudiants",
+        "code": "EPX",
+        "prix1": "75.00",
+        "prix2": "90.00",
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "min_age": 12,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "numero_debut": 0,
+        "numero_fin": 199
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 3,
+    "fields": {
+        "course": 1,
+        "nom": "paiement",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "{% load i18n %}\n\n<p>{% blocktrans with nom=instance.gerant_nom prenom=instance.gerant_prenom equipe=instance.nom paiement=instance.paiement %}Bonjour,{{ gerant_prenom }} {{ gerant_nom }}<br />\nNous avons bien re\u00e7u votre paiement de {{ paiement }} \u20ac pour l'\u00e9quipe <strong>{{ equipe }}</strong>.{% endblocktrans %}</p>\n\n<p>--<br />\nPUC Roller</p>\n"
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 6,
+    "fields": {
+        "course": 1,
+        "nom": "inscription",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "Template {{ instance.id }}"
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 7,
+    "fields": {
+        "course": 1,
+        "nom": "paiement_admin",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "Paiement de {{ instance.paiement }} \u20ac re\u00e7u pour l'\u00e9quipe {{ instance.id }} - {{ instance.nom }}\n\n{{ instance.info_paiement }}\n\n<p>--<br />\nPUC Roller</p>\n"
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 8,
+    "fields": {
+        "course": 1,
+        "nom": "inscription_admin",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "<h1>Nouvelle \u00e9quipe {{ instance.id }}</h1>\n<a href=\"{{ url_admin }}\">Voir la fiche dans l'administration</a><br />\n<table>\n{% for field in equipe_form %}\n    <tr><td>{{ field.label }}:</td><td>{{ field.data }}</td></tr>\n{% endfor %}\n</table>\n{% for equipier_form in equipier_formset %}\n<h2>Equipier {{ forloop.counter }}</h2>\n<table>\n{% for field in equipier_form %}\n    <tr><td>{{ field.label }}:</td><td>{{ field.data }}</td></tr>\n{% endfor %}\n</table>\n{% endfor %}\n\n"
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 9,
+    "fields": {
+        "course": 1,
+        "nom": "changement_numero_admin",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "Paiement de {{ instance.paiement }} \u20ac re\u00e7u pour l'\u00e9quipe {{ instance.id }} - {{ instance.nom }}\n\n{{ instance.info_paiement }}\n\n<p>--<br />\nPUC Roller</p>\n"
+    }
+},
+{
+    "model": "inscriptions.templatemail",
+    "pk": 10,
+    "fields": {
+        "course": 1,
+        "nom": "changement_numero",
+        "destinataire": "Equipe",
+        "bcc": "puyb@puyb.net",
+        "sujet": "[6hdp] Votre inscription {{ instance.numero }}",
+        "message": "<h1>Nouvelle \u00e9quipe {{ instance.id }}</h1>\n<a href=\"{{ url_admin }}\">Voir la fiche dans l'administration</a><br />\n<table>\n{% for field in equipe_form %}\n    <tr><td>{{ field.label }}:</td><td>{{ field.data }}</td></tr>\n{% endfor %}\n</table>\n{% for equipier_form in equipier_formset %}\n<h2>Equipier {{ forloop.counter }}</h2>\n<table>\n{% for field in equipier_form %}\n    <tr><td>{{ field.label }}:</td><td>{{ field.data }}</td></tr>\n{% endfor %}\n</table>\n{% endfor %}\n\n"
+    }
+},
+{
+    "model": "inscriptions.equipe",
+    "pk": 1,
+    "fields": {
+        "course": 1,
+        "date": "2017-12-12",
+        "prix": "60",
+        "nom": "Equipe 1",
+        "club": "Club 1",
+        "gerant_nom": "Dylan",
+        "gerant_prenom": "Bob",
+        "gerant_adresse1": "123 rue",
+        "gerant_adress2": "",
+        "gerant_ville": "Somewhere",
+        "gerant_code_postal": "12345",
+        "gerant_pays": "FR",
+        "gerant_email": "bob.dylan@example.fr",
+        "gerant_telephone": "0123456789",
+        "nombre": "1",
+        "connu": "Bouche à oreille",
+        "numero": 201,
+        "categorie_id": 1,
+        "password": "123456"
+    }
+},
+{
+    "model": "inscriptions.equipier",
+    "pk": 1,
+    "fields": {
+        "equipe": 1,
+        "numero": 1,
+        "nom": "Dylan",
+        "prenom": "Bob",
+        "sexe": "H",
+        "adresse1": "123 rue",
+        "adresse2": "",
+        "ville": "Somewhere",
+        "code_postal": "12345",
+        "pays": "FR",
+        "email": "bob.dylan@example.fr",
+        "date_de_naissance": "1989-01-01",
+        "autorisation": "",
+        "justificatif": "certificat",
+        "num_licence": "",
+        "piece_jointe": "",
+        "transpondeur": "123",
+        "taille_tshirt": "L",
+        "verifier": false,
+        "licence_manquante": true,
+        "certificat_manquant": true,
+        "autorisation_manquante": true,
+        "valide": false,
+        "erreur": false,
+        "homme": true
+    }
+}
+]
