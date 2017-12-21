@@ -258,14 +258,14 @@ def check_name(request, course_uid):
 def equipe_list(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid).select_related('categorie', 'gerant_ville2')
     (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
-    return _list(equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
+    return _list(course_uid, equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
 
 def resultats(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid, position_generale__isnull=False)
     (_('position_generale'), _('position_categorie'), _('numero'), _('nom'), _('categorie__code'))
-    return _list(equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'])
+    return _list(course_uid, equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'])
 
-def _list(equipes, request, template, sorts):
+def _list(course_uid, equipes, request, template, sorts):
     if request.GET.get('search'):
         equipes = equipes.filter(Q(nom__icontains=request.GET['search']) | Q(club__icontains=request.GET['search']))
     s = []
@@ -296,7 +296,10 @@ def _list(equipes, request, template, sorts):
     stats['equipiers'] = equipes.aggregate(
         equipiers = Count('equipier'),
     )['equipiers']
+    user_is_staff = (request.user and request.user.is_staff and 
+        request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
     return render_to_response(template, RequestContext(request, {
+        'user_is_staff': user_is_staff,
         'stats': stats,
         'equipes': equipes,
         'sorts': sorts,

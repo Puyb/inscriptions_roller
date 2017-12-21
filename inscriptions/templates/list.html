@@ -23,7 +23,7 @@
                     <th>Cat.</th>
                     <th>Ville</th>
                     <th>Pays</th>
-                    {% if user.is_staff %}
+                    {% if user_is_staff %}
                     <th>☺</th>
                     <th>Date</th>
                     <th>€</th>
@@ -40,7 +40,7 @@
                     <th>Cat.</th>
                     <th>Ville</th>
                     <th>Pays</th>
-                    {% if user.is_staff %}
+                    {% if user_is_staff %}
                     <th>☺</th>
                     <th>Date</th>
                     <th>€</th>
@@ -56,7 +56,7 @@
                     <td>{{ equipe.categorie.code }}</td>
                     <td>{{ equipe.gerant_ville2.nom }}</td>
                     <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays.name }}" /></td>
-                    {% if user.is_staff %}
+                    {% if user_is_staff %}
                     <td>{{ equipe.nombre }}</td>
                     <td>{{ equipe.date }}</td>
                     <td>{{ equipe.prix }}€ {% if equipe.paiement_complet %}<img alt="None" src="/static/admin/img/icon-yes.gif">{% endif %}</td>
@@ -75,7 +75,7 @@
                     <td></td>
                     <td>{{ stats.villes }} villes</td>
                     <td>{{ stats.pays }} pays</td>
-                    {% if user.is_staff %}
+                    {% if user_is_staff %}
                     <td>{{ stats.equipiers }}</td>
                     <td colspan="2" style="text-align: right;">{{ stats.paiement }}€ / {{ stats.prix }}€ ({{ stats.nbpaye }}<img alt="None" src="/static/admin/img/icon-yes.gif">)</td>
                     <td><script>document.write(nbcomplet);</script><img alt="None" src="/static/admin/img/icon-yes.gif"></td>
