@@ -1,4 +1,5 @@
-(function() {
+django.jQuery(function() {
+    var $ = django.jQuery;
     function resetCookie() {
         var date = new Date();
         date.setTime(date.getTime() - (24 * 60 * 60 * 1000));
@@ -19,4 +20,4 @@
             location.href = '/admin/';
         }
     });
-})()
+});
