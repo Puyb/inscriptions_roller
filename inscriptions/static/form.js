@@ -35,7 +35,7 @@ function age2(eq) {
     var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));
     var course = new Date(COURSE.YEAR, COURSE.MONTH -1, COURSE.DAY);
     var age = birthday.getFullYear() - course.getFullYear();
-    birth.setFullYear(COURSE.YEAR);
+    birthday.setFullYear(COURSE.YEAR);
     if (birthday > course) return age - 1;
     return age;
 }
