@@ -40,7 +40,14 @@ site.register(LogEntry, LogAdmin)
 
 
 class CourseAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('uid', 'nom', 'date', 'active2', )
+    list_filter = ('active', )
+
+    def active2(self, obj):
+        return obj.active and u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""" or u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+    active2.allow_tags = True
+    active2.short_description = 'Active'
+
 site.register(Course, CourseAdmin)
 
 class AccreditationAdmin(admin.ModelAdmin):
