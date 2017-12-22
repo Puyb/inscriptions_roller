@@ -12,7 +12,7 @@ from django.db.models import Count, Sum, Min, F, Q, Prefetch
 from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
