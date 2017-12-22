@@ -12,9 +12,9 @@
       <div class="row equal">{% endif %}
         <div class="col-md-4">
             <div class="thumbnail">
-                <a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid }}" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
+                <a href="{% url "inscriptions_challenge" challenge_uid=challenge.uid }}" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
                 <div class="caption">
-                    <h3><a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></h3>
+                    <h3><a href="{% url "inscriptions_challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></h3>
                     <ol>{% for course in challenge.courses.all %}
                         <li>
                             <h4>{{ course.nom }}</h4>
@@ -36,7 +36,7 @@
       <h1>{% trans "Anciens challenges" %}</h1>
       <div class="row">{% endif %}
         <div class="col-md-4">
-            <h2><a href="{% url "inscriptions.challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></hr23>
+            <h2><a href="{% url "inscriptions_challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></hr23>
             <ol>{% for course in challenge.courses.all %}
                 <li>
                     <h4>{{ course.nom }}</h4>

@@ -304,7 +304,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         return result
 
 class Categorie(models.Model):
-    course          = models.ForeignKey(Course, related_name='categories')
+    course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
     prix1           = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
@@ -394,8 +394,8 @@ class Equipe(models.Model):
     gerant_email       = models.EmailField(_(u'e-mail'), max_length=200)
     password           = models.CharField(_(u'Mot de passe'), max_length=200, blank=True)
     gerant_telephone   = models.CharField(_(u'Téléphone'), max_length=200, blank=True)
-    categorie          = models.ForeignKey(Categorie)
-    course             = models.ForeignKey(Course)
+    categorie          = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+    course             = models.ForeignKey(Course, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
     paiement_info      = models.CharField(_(u'Détails'), max_length=200, blank=True)
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
@@ -403,7 +403,7 @@ class Equipe(models.Model):
     dossier_complet    = models.NullBooleanField(_(u'Dossier complet'))
     date               = models.DateTimeField(_(u"Date d'insciption"), auto_now_add=True)
     commentaires       = models.TextField(_(u'Commentaires'), blank=True)
-    gerant_ville2      = models.ForeignKey(Ville, null=True)
+    gerant_ville2      = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     numero             = models.IntegerField(_(u'Numéro'))
     connu              = models.CharField(_('Comment avez vous connu la course ?'), max_length=200, choices=CONNU_CHOICES)
     date_facture       = models.DateField(_('Date facture'), blank=True, null=True)
@@ -484,14 +484,11 @@ class Equipe(models.Model):
                 except Exception as e:
                     traceback.print_exc()
         else:
-            print('plop', args, kwargs)
             if not self.numero:
                 self.numero = self.getNumero()
 
-        print('plop2', args, kwargs)
         if not self.gerant_ville2_id:
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
-        print('plop3', args, kwargs)
         return super(Equipe, self).save(*args, **kwargs)
 
 
@@ -545,7 +542,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     JUSTIFICATIF_HELP = _("""Chaque équipier doit avoir un certificat médical de moins d'un an ou une licence FFRS en cours de validité pour participer.""")
 
     numero            = models.IntegerField(_(u'Numéro'))
-    equipe            = models.ForeignKey(Equipe)
+    equipe            = models.ForeignKey(Equipe, on_delete=models.CASCADE)
     nom               = models.CharField(_(u'Nom'), max_length=200)
     prenom            = models.CharField(_(u'Prénom'), max_length=200, blank=True)
     sexe              = models.CharField(_(u'Sexe'), max_length=1, choices=SEXE_CHOICES)
@@ -562,7 +559,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True, help_text=PIECE_JOINTE_HELP)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    ville2            = models.ForeignKey(Ville, null=True)
+    ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     transpondeur      = models.CharField(_(u'Transpondeur'), max_length=20, blank=True)
     taille_tshirt     = models.CharField(_(u'Taille T-shirt'), max_length=3, choices=TAILLES_CHOICES, blank=True)
     extra             = JSONField()
@@ -586,7 +583,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
         return today.year - self.date_de_naissance.year - (birthday > today)
 
     def __str__(self):
-        return u'%d' % self.numero
+        return u'%d%d %s %s' % (self.equipe.numero, self.numero, self.nom, self.prenom)
 
     def save(self, *args, **kwargs):
         if self.id:
@@ -643,8 +640,8 @@ class ExtraQuestion(models.Model):
         }
 
 class Accreditation(models.Model):
-    user = models.ForeignKey(User, related_name='accreditations')
-    course = models.ForeignKey(Course, related_name='accreditations')
+    user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='accreditations', on_delete=models.CASCADE)
     role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='', blank=True)
     class Meta:
         unique_together = (('user', 'course'), )
@@ -658,7 +655,7 @@ Connectez vous sur enduroller pour y accéder.
         super().save(*args, **kwargs)
 
 class TemplateMail(models.Model):
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     nom = models.CharField(_('Nom'), max_length=200)
     destinataire = models.CharField(_('Destinataire'), max_length=20, choices=DESTINATAIRE_CHOICES)
     bcc = models.CharField(_(u'Copie cachée à'), max_length=1000, blank=True)
@@ -673,7 +670,7 @@ class TemplateMail(models.Model):
     def send(self, instances):
         mails = []
         if isinstance(instances, list):
-            prefetch_related_objects(instances, ('equipier_set', ))
+            prefetch_related_objects(instances, 'equipier_set')
         elif hasattr(instances, 'prefetch_related'):
             instances.prefetch_related('equipiers')
         for instance in instances:
@@ -714,9 +711,9 @@ class TemplateMail(models.Model):
         MailThread(mails).start()
 
 class Mail(models.Model):
-    course = models.ForeignKey(Course)
-    template = models.ForeignKey(TemplateMail, null=True)
-    equipe = models.ForeignKey(Equipe, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    template = models.ForeignKey(TemplateMail, null=True, on_delete=models.SET_NULL)
+    equipe = models.ForeignKey(Equipe, null=True, on_delete=models.SET_NULL)
     emeteur = models.EmailField()
     destinataires = ArrayField(models.EmailField())
     bcc = ArrayField(models.EmailField(), blank=True)
@@ -739,7 +736,7 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course, null=True, blank=True, related_name='challenges')
+    courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
 
     def add_course(self, course, course_categories=None):
@@ -903,7 +900,7 @@ class Challenge(models.Model):
         print (count, ko, dup)
 
 class ChallengeCategorie(models.Model):
-    challenge       = models.ForeignKey(Challenge, related_name='categories')
+    challenge       = models.ForeignKey(Challenge, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
@@ -949,8 +946,8 @@ class ChallengeCategorie(models.Model):
         return True
 
 class ParticipationChallenge(models.Model):
-    challenge = models.ForeignKey(Challenge, related_name='participations')
-    categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True)
+    challenge = models.ForeignKey(Challenge, related_name='participations', on_delete=models.CASCADE)
+    categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True, on_delete=models.SET_NULL)
     position = models.IntegerField(null=True, blank=True)
 
     def equipes_dict(self):
@@ -973,8 +970,8 @@ class ParticipationChallenge(models.Model):
         
 
 class EquipeChallenge(models.Model):
-    equipe = models.ForeignKey(Equipe, related_name='challenges')
-    participation = models.ForeignKey(ParticipationChallenge, related_name='equipes')
+    equipe = models.ForeignKey(Equipe, related_name='challenges', on_delete=models.CASCADE)
+    participation = models.ForeignKey(ParticipationChallenge, related_name='equipes', on_delete=models.CASCADE)
     points = models.IntegerField()
 
     class Meta:
@@ -1019,13 +1016,13 @@ class CompareLicences(Case):
         return cols
 
 class LiveSnapshot(models.Model):
-    course = models.ForeignKey(Course)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     date = models.DateTimeField()
     received = models.DateTimeField(auto_now=True)
 
 class LiveResult(models.Model):
-    snapshot = models.ForeignKey(LiveSnapshot)
-    equipe = models.ForeignKey(Equipe)
+    snapshot = models.ForeignKey(LiveSnapshot, on_delete=models.CASCADE)
+    equipe = models.ForeignKey(Equipe, on_delete=models.CASCADE)
     position = models.IntegerField()
     tours = models.IntegerField()
     temps = models.DecimalField(max_digits=8, decimal_places=3)

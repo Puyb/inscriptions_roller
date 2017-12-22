@@ -9,15 +9,15 @@ from django.db import transaction
 from django.db.models import Count, Sum, Case, When, Value, IntegerField
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.template.response import TemplateResponse
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
 
 @login_required
 def dossards(request, course_uid):
-    return render_to_response('dossards.html', RequestContext(request, {
+    return TemplateResponse(request, 'dossards.html', {
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid).order_by(*request.GET.get('order','equipe__numero,numero').split(','))
-    }))
+    })
 
 @login_required
 def tshirts(request, course_uid):
@@ -41,25 +41,25 @@ def tshirts(request, course_uid):
     qs = Equipe.objects.filter(course__uid=course_uid).values('numero', 'nom').annotate(**annotates).order_by(*request.GET.get('order','numero').split(','))
     print(qs.query.sql_with_params())
     print(qs)
-    return render_to_response('t-shirts.html', RequestContext(request, {
+    return TemplateResponse(request, 't-shirts.html', {
         'course': get_object_or_404(Course, uid=course_uid),
         'equipes': qs,
         'order': request.GET.get('order','numero')
-    }))
+    })
 
 @login_required
 def listing(request, course_uid, template='listing.html'):
-    return render_to_response(template, RequestContext(request, {
+    return TemplateResponse(request, template, {
         'course': get_object_or_404(Course, uid=course_uid),
         'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
-    }))
+    })
 
 def equipiers(request, course_uid):
-    return render_to_response('equipiers.html', RequestContext(request, {
+    return TemplateResponse(request, 'equipiers.html', {
         'course': get_object_or_404(Course, uid=course_uid),
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid)
-    }))
+    })
 
 #@login_required
 def dossardsCSV(request, course_uid):

@@ -77,8 +77,8 @@ class Migration(migrations.Migration):
                 ('numero', models.IntegerField(verbose_name='Numéro')),
                 ('connu', models.CharField(verbose_name='Comment avez vous connu la course ?', max_length=200, choices=[('Site Roller en LIgne.com', 'Site Roller en Ligne.com'), ('Facebook', 'Facebook'), ('Presse', 'Presse'), ('Bouche à oreille', 'Bouche à oreille'), ('Flyer pendant une course', 'Flyer pendant une course'), ('Flyer pendant une randonnée', 'Flyer pendant une randonnée'), ('Affiche', 'Affiche'), ('Informations de la Mairie de Paris', 'Information de la Maire de Paris'), ('Autre', 'Autre')])),
                 ('date_facture', models.DateField(verbose_name='Date facture', blank=True, null=True)),
-                ('categorie', models.ForeignKey(to='inscriptions.Categorie')),
-                ('course', models.ForeignKey(to='inscriptions.Course')),
+                ('categorie', models.ForeignKey(to='inscriptions.Categorie', on_delete=models.CASCADE)),
+                ('course', models.ForeignKey(to='inscriptions.Course', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
                 ('valide', models.BooleanField(verbose_name='Valide', editable=False)),
                 ('erreur', models.BooleanField(verbose_name='Erreur', editable=False)),
                 ('homme', models.BooleanField(verbose_name='Homme', editable=False)),
-                ('equipe', models.ForeignKey(to='inscriptions.Equipe')),
+                ('equipe', models.ForeignKey(to='inscriptions.Equipe', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -127,7 +127,7 @@ class Migration(migrations.Migration):
                 ('bcc', models.CharField(verbose_name='Copie cachée à', max_length=1000, blank=True)),
                 ('sujet', models.CharField(verbose_name='Sujet', max_length=200)),
                 ('message', models.TextField(verbose_name='Message')),
-                ('course', models.ForeignKey(to='inscriptions.Course')),
+                ('course', models.ForeignKey(to='inscriptions.Course', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True, serialize=False)),
                 ('role', models.CharField(verbose_name='Role', max_length=20, choices=[('admin', 'Administrateur'), ('organisateur', 'Organisateur'), ('validateur', 'Validateur')])),
                 ('course', models.ManyToManyField(to='inscriptions.Course', related_name='+')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, unique=True)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, unique=True, on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
@@ -153,17 +153,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='equipier',
             name='ville2',
-            field=models.ForeignKey(to='inscriptions.Ville', null=True),
+            field=models.ForeignKey(to='inscriptions.Ville', null=True, on_delete=models.SET_NULL),
         ),
         migrations.AddField(
             model_name='equipe',
             name='gerant_ville2',
-            field=models.ForeignKey(to='inscriptions.Ville', null=True),
+            field=models.ForeignKey(to='inscriptions.Ville', null=True, on_delete=models.SET_NULL),
         ),
         migrations.AddField(
             model_name='categorie',
             name='course',
-            field=models.ForeignKey(related_name='categories', to='inscriptions.Course'),
+            field=models.ForeignKey(related_name='categories', to='inscriptions.Course', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='templatemail',

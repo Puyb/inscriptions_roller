@@ -41,7 +41,7 @@
                                         {% else  %}
                                             {% if course.ouverte %}
                                             {% if not create and not update and request.COOKIES|get:instance.cookie_key %}
-                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions.create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
+                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions_create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
                                             {% endif %}
                                             <p>
                                                 {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />

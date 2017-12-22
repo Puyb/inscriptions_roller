@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='participationchallenge',
             name='challenge',
-            field=models.ForeignKey(to='inscriptions.Challenge', related_name='participations'),
+            field=models.ForeignKey(to='inscriptions.Challenge', related_name='participations', on_delete=models.CASCADE),
         ),
     ]

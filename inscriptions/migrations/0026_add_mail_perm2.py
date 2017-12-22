@@ -7,9 +7,11 @@ from django.db import migrations, models
 def add_perm(apps, schema_editor):
     User = apps.get_model('auth', 'user')
     Permission = apps.get_model('auth', 'permission')
-    perm = Permission.objects.get(codename='delete_mail')
-    for user in User.objects.exclude(user_permissions=perm):
-        user.user_permissions.add(perm)
+    perms = Permission.objects.filter(codename='delete_mail')
+    if perms.count() == 1:
+        perm = perms[0]
+        for user in User.objects.exclude(user_permissions=perm):
+            user.user_permissions.add(perm)
 
 class Migration(migrations.Migration):
 

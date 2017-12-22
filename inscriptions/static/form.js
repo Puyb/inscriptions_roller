@@ -391,6 +391,8 @@ $(function() {
         $('input, select').each(function() {
             this.disabled = false;
         });
+        console.log(JSON.stringify($('form').serializeObject(), null, 4))
+            event.stopPropagation();
     });
 });
 

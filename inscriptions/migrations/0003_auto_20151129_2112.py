@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, primary_key=True, auto_created=True)),
                 ('role', models.CharField(verbose_name='Role', choices=[('admin', 'Administrateur'), ('organisateur', 'Organisateur'), ('validateur', 'Validateur')], max_length=20)),
                 ('course', models.ManyToManyField(related_name='accreditations', to='inscriptions.Course')),
-                ('user', models.ForeignKey(related_name='accredidations', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(related_name='accredidations', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
         ),
         migrations.RemoveField(

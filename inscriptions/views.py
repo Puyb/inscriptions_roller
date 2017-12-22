@@ -7,14 +7,14 @@ from collections import defaultdict
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMessage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext, Template, Context
+from django.shortcuts import get_object_or_404, redirect
+from django.template import Template, Context
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import timezone
@@ -38,7 +38,7 @@ def form(request, course_uid, numero=None, code=None):
         ).annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
     old_password = None
-    create = True
+    update = False
     equipiers_count = Equipier.objects.filter(equipe__course=course).count()
     message = ''
     if numero:
@@ -47,7 +47,7 @@ def form(request, course_uid, numero=None, code=None):
         old_password = instance.password
         if instance.password != code:
             raise Http404()
-        create = False
+        update = True
     if request.method == 'POST':
         try:
             equipe_form = EquipeForm(request.POST, request.FILES, instance=instance, extra_questions=course.extra_equipe)
@@ -87,7 +87,7 @@ def form(request, course_uid, numero=None, code=None):
                         logging.exception('Fail to send "inscription_admin" mail')
                 for challenge in course.challenges.all():
                     challenge.inscription_equipe(new_instance)
-                response = redirect('inscriptions.done', course_uid=course.uid, numero=new_instance.numero)
+                response = redirect('inscriptions_done', course_uid=course.uid, numero=new_instance.numero)
                 response.set_cookie(new_instance.cookie_key(), new_instance.password, max_age=365*86400, httponly=True)
                 return response
             else:
@@ -118,8 +118,8 @@ def form(request, course_uid, numero=None, code=None):
         else:
             equipier_formset = EquipierFormset(queryset=Equipier.objects.none(), form_kwargs={ 'extra_questions': course.extra_equipier })
         link = '<a href="%s" target="_blank">%s</a>'
-        autorisation_link = link % (reverse('inscriptions.model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
-        certificat_link   = link % (reverse('inscriptions.model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
+        autorisation_link = link % (reverse('inscriptions_model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
+        certificat_link   = link % (reverse('inscriptions_model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
         for equipier_form in equipier_formset:
             equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
@@ -136,18 +136,17 @@ def form(request, course_uid, numero=None, code=None):
                 )).values('range').annotate(count=Count('numero'))
         }
     
-    return render_to_response("form.html", RequestContext(request, {
+    return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
         "errors": equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
         "instance": instance,
-        "create": create,
-        "update": not create,
+        "update": update,
         "nombres_par_tranche": nombres_par_tranche,
         "equipiers_count": course.equipiers_count,
         "course": course,
         "message": message,
-    }))
+    })
 
 @open_closed
 def find_challenges_categories(request, course_uid):
@@ -175,10 +174,10 @@ def find_challenges_categories(request, course_uid):
                     course, request.POST['nom'], equipiers, ec
                 ).exclude(equipes__equipe__course=course).prefetch_related('equipes__equipe__course'))
 
-            ctx = RequestContext(request, {
+            ctx = {
                 'challenge': challenge,
                 'participation': len(participations) and participations[0],
-            })
+            }
             all_result[ec.code].append(render_to_string("_participation.html", ctx))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
 
@@ -195,19 +194,19 @@ def done(request, course_uid, numero):
         #prefetch_related_objects([instance], [Prefetch('equipier_set', Equipier.objects.filter(numero__lte=instance.nombre))])
         if instance.course != course:
             raise Http404()
-        ctx = RequestContext(request, {
+        ctx = {
             "instance": instance,
             "url": request.build_absolute_uri(reverse(
-                'inscriptions.edit', kwargs={
+                'inscriptions_edit', kwargs={
                     'course_uid': instance.course.uid,
                     'numero': instance.numero,
                     'code': instance.password
                 }
             )),
-            "paypal_ipn_url": request.build_absolute_uri(reverse('inscriptions.ipn', kwargs={'course_uid': course.uid })),
+            "paypal_ipn_url": request.build_absolute_uri(reverse('inscriptions_ipn', kwargs={'course_uid': course.uid })),
             "hour": datetime.now().strftime('%H%M'),
-        })
-        return render_to_response('done.html', ctx)
+        }
+        return TemplateResponse(request, 'done.html', ctx)
     except Equipe.DoesNotExist as e:
         raise Http404()
 
@@ -309,38 +308,38 @@ def _list(course_uid, equipes, request, template, sorts):
     )['equipiers']
     user_is_staff = (request.user and request.user.is_staff and 
         request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
-    return render_to_response(template, RequestContext(request, {
+    return TemplateResponse(request, template, {
         'user_is_staff': user_is_staff,
         'stats': stats,
         'equipes': equipes,
         'sorts': sorts,
         'split_categories':  request.GET.get('by_categories') == '1',
-    }))
+    })
 
 def change(request, course_uid, numero=None, sent=None):
     if numero:
         equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
         if 'question' in request.POST and request.POST['question'] == '7':
             equipe.send_mail('change_request')
-            return redirect('inscriptions.change_sent', course_uid=course_uid)
-        return render_to_response('change_numero.html', RequestContext(request, {
+            return redirect('inscriptions_change_sent', course_uid=course_uid)
+        return TemplateResponse(request, 'change_numero.html', {
             'equipe': equipe
-        }))
+        })
     equipes = Equipe.objects.filter(course__uid=course_uid).order_by('date')
-    return render_to_response('change.html', RequestContext(request, {
+    return TemplateResponse(request, 'change.html', {
         'sent': sent,
         'equipes': equipes
-    }))
+    })
 
 def stats(request, course_uid):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
     stats = course.stats()
 
-    return render_to_response('stats.html', RequestContext(request, {
+    return TemplateResponse(request, 'stats.html', {
         'stats': stats,
         'course': course,
         'json': json.dumps(stats),
-    }))
+    })
 
 def stats_compare(request, course_uid, course_uid2):
     uids = [ course_uid ]
@@ -375,16 +374,16 @@ def stats_compare(request, course_uid, course_uid2):
         });
         i += 1;
 
-    return render_to_response('stats_compare.html', RequestContext(request, {
+    return TemplateResponse(request, 'stats_compare.html', {
         'data': res,
         'align': request.GET.get('align', '')
-    }));
+    });
 
 def index(request):
-    return render_to_response('index.html', RequestContext(request, {
+    return TemplateResponse(request, 'index.html', {
         'prochaines_courses': Course.objects.filter(active=True, date__gt=date.today()).order_by('date'),
         'anciennes_courses': Course.objects.filter(active=True, date__lte=date.today()).order_by('date'),
-    }))
+    })
 
 def contact(request, course_uid):
     course = get_object_or_404(Course, uid=request.path.split('/')[1])
@@ -400,12 +399,12 @@ Email: %s
         MailThread([message]).start()
         return HttpResponseRedirect('thankyou/')
     else:
-        return render_to_response('contact.html', RequestContext(request, {'form': ContactForm()}))
+        return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
-    return render_to_response('contact.html', RequestContext(request, {'form': ContactForm()}))
+    return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
 def contact_done(request, course_uid):
-    return render_to_response('contact_done.html')
+    return TemplateResponse(request, 'contact_done.html')
 
 def facture(request, course_uid, numero):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
@@ -427,10 +426,10 @@ def facture(request, course_uid, numero):
 def challenges(request):
     challenges = Challenge.objects.filter(active=True).prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
 
-    return render_to_response('challenges.html', RequestContext(request, {
+    return TemplateResponse(request, 'challenges.html', {
         'prochains_challenges': challenges.filter (courses__date__gt=date.today()).order_by('nom'),
         'anciens_challenges':   challenges.exclude(courses__date__gt=date.today()).order_by('nom'),
-    }))
+    })
 
 def challenge(request, challenge_uid):
     sorts = ['position2', 'count', 'nom', 'categorie__code']
@@ -457,12 +456,12 @@ def challenge(request, challenge_uid):
     if request.GET.get('top'):
         participations = participations.filter(position__lte=request.GET.get('top'))
 
-    return render_to_response('resultats_challenge.html', RequestContext(request, {
+    return TemplateResponse(request, 'resultats_challenge.html', {
         'challenge': challenge,
         'participations': participations,
         'sorts': sorts,
         'split_categories':  request.GET.get('by_categories') == '1',
-    }))
+    })
 
 def model_certificat(request, course_uid):
     return redirect(settings.STATIC_URL + '/certificat_medical.pdf')

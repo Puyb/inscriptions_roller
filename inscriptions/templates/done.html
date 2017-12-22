@@ -156,8 +156,8 @@
         <script> 
             var obj = {
                 method: 'feed',
-                redirect_uri: '{{ ROOT_URL }}{% url "inscriptions.done" course_uid=instance.course.uid numero=instance.numero %}',
-                link: '{{ ROOT_URL }}{% url "inscriptions.create" course_uid=instance.course.uid %}', 
+                redirect_uri: '{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}',
+                link: '{{ ROOT_URL }}{% url "inscriptions_create" course_uid=instance.course.uid %}', 
                 picture: 'http://www.6hdeparis.fr/wp-content/uploads/2013/03/logo-6h-paris-small.png',
                 description: '{% blocktrans %}Les 6h Roller de Paris sont une course d\'endurance à roller, en relai par équipe de 5 ou en solitaire. Ouverte à tous, elle aura lieu le 2 août 2015 dans le Bois de Boulogne, sur un circuit de 2,6 km fermé à la circulation.{% endblocktrans %}',
                 name: {% if instance.nombre == 1 %}

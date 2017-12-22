@@ -24,19 +24,19 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
                 ('points', models.IntegerField()),
-                ('equipe', models.ForeignKey(to='inscriptions.Equipe', related_name='challenge')),
+                ('equipe', models.ForeignKey(to='inscriptions.Equipe', related_name='challenge', on_delete=models.CASCADE)),
             ],
         ),
         migrations.CreateModel(
             name='ParticipationChallenge',
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', serialize=False, auto_created=True)),
-                ('challenge', models.ForeignKey(to='inscriptions.Challenge', related_name='particpations')),
+                ('challenge', models.ForeignKey(to='inscriptions.Challenge', related_name='particpations', on_delete=models.CASCADE)),
             ],
         ),
         migrations.AddField(
             model_name='equipechallenge',
             name='particpation',
-            field=models.ForeignKey(to='inscriptions.ParticipationChallenge', related_name='equipes'),
+            field=models.ForeignKey(to='inscriptions.ParticipationChallenge', related_name='equipes', on_delete=models.CASCADE),
         ),
     ]

@@ -5,7 +5,7 @@
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
-{% if create %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
+{% if not update %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
 {% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); return actual_part > parseInt($('#id_nombre').val()); ">
     {% if errors %}
@@ -56,7 +56,7 @@
                         {% endif %}{% endif %}{% endif %}
                         {% blocktrans %}Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
                         {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
-                        {% url "inscriptions.views.contact" course_uid=COURSE.uid as url_contact %}
+                        {% url "inscriptions_views.contact" course_uid=COURSE.uid as url_contact %}
                         {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />
                     </div>
                 </div>
@@ -116,7 +116,7 @@
 {% endblock %}
 
 {% block extra_body %}
-<script type="text/javascript" src="{% url "django.views.i18n.javascript_catalog" %}"></script>
+<script type="text/javascript" src="{% url "javascript_catalog" %}"></script>
 <script>
     var AUGMENTATION_PASSED = new Date("{{ COURSE.date_augmentation|date:'c' }}") <= new Date({% if instance %}"{{ instance.date|date:'c' }}"{% endif %}) 
     var CATEGORIES = [
@@ -159,8 +159,8 @@
         CATEGORIE: {{ instance.categorie_id }},
         CATEGORIE_CODE: '{{ instance.categorie.code }}'
     }{% endif %};
-    var CHECK_URL = '{% url "inscriptions.check_name" course_uid=COURSE.uid %}';
-    var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions.find_challenges_categories" course_uid=COURSE.uid %}';
+    var CHECK_URL = '{% url "inscriptions_check_name" course_uid=COURSE.uid %}';
+    var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions_find_challenges_categories" course_uid=COURSE.uid %}';
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
     {% if user.is_staff %}
