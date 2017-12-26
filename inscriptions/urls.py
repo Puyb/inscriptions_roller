@@ -8,9 +8,8 @@ from django.views.i18n import JavaScriptCatalog
 from .models import Equipe
 
 from inscriptions import admin
-from inscriptions import views as inscriptions_views
-from inscriptions import admin_views as inscriptions_admin
-from django.views.i18n import javascript_catalog
+from inscriptions import views
+from inscriptions import admin_views
 
 urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
@@ -55,6 +54,5 @@ urlpatterns += [
     path(r'<str:course_uid>/dossards_equipes.csv', admin_views.dossardsEquipesCSV, name='inscriptions_dossardsEquipesCSV'),
     path(r'<str:course_uid>/dossards_equipiers.csv', admin_views.dossardsEquipiersCSV, name='inscriptions_dossardsEquipiersCSV'),
     path(r'<str:course_uid>/listing/', admin_views.listing, name='inscriptions_listing'),
-    path(r'<str:course_uid>/t-shirts/', admin_views.tshirts, name='inscriptions_tshirts'),
 ]
 

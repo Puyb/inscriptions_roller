@@ -23,19 +23,6 @@
     </div>
 </div>
 
-{% if not instance.paiement or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title">{% trans "Instructions :" %}</h3>
-    </div>
-    <div class="panel-body">
-        <p>{% trans 'Vous pouvez envoyer le paiement et les justificatifs à' %} </p>
-        <pre>{{ COURSE.adresse }}</pre>
-        <p>{% blocktrans with numero=instance.numero %}En précisant le nom de votre équipe et le numéro d'inscription <b>{{ numero }}</b>.{% endblocktrans %}</p>
-    </div>
-</div>
-{% endif %}
-
 <div class="panel panel-default">
     <div class="panel-heading">
         <h3 class="panel-title">{% trans "Paiement :" %}</h3>
@@ -124,6 +111,19 @@
         {% endif %}
     </div>
 </div>
+
+{% if not instance.paiement or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">{% trans "Instructions :" %}</h3>
+    </div>
+    <div class="panel-body">
+        <p>{% trans 'Vous pouvez envoyer le paiement et les justificatifs à' %} </p>
+        <pre>{{ COURSE.adresse }}</pre>
+        <p>{% blocktrans with numero=instance.numero %}En précisant le nom de votre équipe et le numéro d'inscription <b>{{ numero }}</b>.{% endblocktrans %}</p>
+    </div>
+</div>
+{% endif %}
 
 {% for ec in instance.challenges.all %}
     {% with ec.participation as participation %}

@@ -17,8 +17,9 @@ django.jQuery(function() {
         }
     
     });
+    $('.dynamic-equipier_set .help').remove();
 
-    $.get('autre/', function(data) {
+    $.get('../autre/', function(data) {
         $('#autre').html(data);
     });
 

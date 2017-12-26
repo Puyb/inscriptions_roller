@@ -7,7 +7,7 @@
 {% get_available_languages as LANGUAGES %}
 {% if not update %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
 {% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
-<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="$('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); return actual_part > parseInt($('#id_nombre').val()); ">
+<form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="if (!good) { $('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); } return good">
     {% if errors %}
     <div class="panel panel-danger">
         {% if equipe_form.errors %}
@@ -168,18 +168,52 @@
     {% endif %}
     var I18N = {};
     {% if message %} alert("{{ message }}"); location.reload(true); {% endif %}
+    EXTRA_CATEGORIE = [{{ extra_categorie }}]
     TEST_EQUIPE = {};
     TEST_EQUIPIER = {};
-    {% for extra in course.extra_equipe.all %}
+    TEST_CATEGORIE = {};
+    {% for extra in course.extra_equipe %}
         {% if extra.required %}
+            {% if extra.page == 'Equipe' %}
             TEST_EQUIPE.extra{{ extra.id }} = /./;
+            {% else %}
+            TEST_CATEGORIE.extra{{ extra.id }} = /./;
+            {% endif %}
         {% endif %}
     {% endfor %}
-    {% for extra in course.extra_equipier.all %}
+    {% for extra in course.extra_equipier %}
         {% if extra.required %}
             TEST_EQUIPIER.extra{{ extra.id }} = /./;
         {% endif %}
     {% endfor %}
+    function prix_extra(data) {
+        var prix = 0;
+    {% for extra in course.extra_equipe %}
+        {% if extra.type == 'list' or extra.type == 'radio' %}
+        {% for choice in extra.choices.all %}
+        if (data.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        {% endfor %}
+        {% else %}
+        {% if extra.type == 'checkbox' %}
+        if (data.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        {% endif %}
+        {% endif %}
+    {% endfor %}
+    {% for extra in course.extra_equipier %}
+        data.equipiers.forEach(function(equipier) {
+        {% if extra.type == 'list' or extra.type == 'radio' %}
+        {% for choice in extra.choices.all %}
+        if (equipier.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        {% endfor %}
+        {% else %}
+        {% if extra.type == 'checkbox' %}
+        if (equipier.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        {% endif %}
+        {% endif %}
+        });
+    {% endfor %}
+        return prix;
+    }
 </script>
 <script src="{{ STATIC_URL }}form.js"></script>
 {% endblock %}

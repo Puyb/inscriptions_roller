@@ -1,6 +1,7 @@
 "use strict";
 /* globals COURSE, INSTANCE, CATEGORIES, UPDATE, STAFF, CHECK_URL, I18N */
 /* globals $ */
+var good = false;
 
 if(![].map)
     Array.prototype.map = function(fn) {
@@ -52,7 +53,7 @@ function serialize() {
     var data = $('form').serializeObject();
     disable_form_if_needed();
 
-    data.equipiers = [{}, {}, {}, {}, {}];
+    data.equipiers = [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}];
     data.nombre = parseFloat(data.nombre);
     for(var k in data)
         if(/^form-\d-/.test(k) && parseFloat(k.substr(5)) < data.nombre)
@@ -97,7 +98,6 @@ function check_nom(wait) {
 
 function check_step(data) {
     // check values
-    var ok = true;
     var prefix = '[name=';
     var test_data = data;
     var tests;
@@ -124,7 +124,7 @@ function check_step(data) {
             gerant_telephone:   /^\+?[0-9]{10,15}$/i,
             connu:              /^.+$/i
         };
-        $.extend(test, TEST_EQUIPE);
+        $.extend(tests, TEST_EQUIPE);
     } else {
         tests = {
             nom:                /^.+$/i,
@@ -137,22 +137,27 @@ function check_step(data) {
             justificatif:       /^(licence|certificat)$/,
             num_licence:        function(k) { return this.justificatif !== 'licence' || /^[0-9]{3,9}$/i.test(this[k]); }
         };
-        $.extend(test, TEST_EQUIPIER);
+        $.extend(tests, TEST_EQUIPIER);
         prefix = '[name=form-' + (actual_part - 1) + '-';
         test_data = data.equipiers[actual_part - 1];
     }
+    return apply_tests(tests, test_data, prefix);
+}
+
+function apply_tests(tests, test_data, prefix, message) {
+    message = message || '';
     for(var k in tests) {
         if(tests[k].test ? tests[k].test(test_data[k]) : tests[k].call(test_data, k)) {
             $(prefix + k + ']').parents('.form-group').removeClass('has-error');
         } else {
-            ok = false;
+            message += gettext('Veuillez corriger les champs en rouge.')
             $(prefix + k + ']').parents('.form-group').addClass('has-error');
         }
     }
-    if(!ok) {
-        return alert(message + gettext('Veuillez corriger les champs en rouge.'));
+    if(message !== '') {
+        return alert(message);
     }
-    return ok;
+    return !message;
 }
 
 function setup_categories(data) {
@@ -275,6 +280,10 @@ $(function() {
             $(this).remove();
     });
 
+    EXTRA_CATEGORIE.forEach(function(id) {
+        $('[name=extra' + id + ']').parents('.form-group').insertAfter($('#partlast .form-group:first'));
+    });
+
     $('input[name*=licence]').each(function() {
         var $this = $(this);
         var $formGroup = $this.parents('.form-group');
@@ -342,7 +351,7 @@ $(function() {
         // change page
         $('#button_prev').show();
         $('.parts').hide();
-        $('body').scrollTop(0);
+        $('html').scrollTop(0);
         actual_part++;
         if(actual_part > parseFloat($('#id_nombre').val())) {
             // last page
@@ -377,22 +386,39 @@ $(function() {
 
 
     $('#button_submit').on('mousedown', function(event) {
-        for(var i = actual_part; i <= TOTAL_FORMS; i++) $('#part' + i).remove();
+        good = true;
+        var message = '';
+        var data_categorie = {}
+        var data = serialize();
+
+        EXTRA_CATEGORIE.forEach(function(id) {
+            data_categorie['extra' + id] = data['extra' + id];
+        });
+        console.log(JSON.stringify(data, null, 4))
+        console.log(data_categorie);
         var categorie = $('input[name=categorie]').filter(function() { return this.checked; })[0].value;
-        $('#id_prix').val(CATEGORIES.filter(function(c) { return c.id === categorie; })[0].prix);
         if(!categorie) {
-            event.stopPropagation();
-            alert(gettext('Vous devez choisir une catégorie'));
+            good = false;
+            message += gettext('Vous devez choisir une catégorie. ');
         }
         if(!$('#id_conditions')[0].checked) {
-            event.stopPropagation();
-            alert(gettext('Vous devez accépter le règlement de la compétition'));
+            good = false;
+            message += gettext('Vous devez accépter le règlement de la compétition. ');
         }
-        $('input, select').each(function() {
-            this.disabled = false;
-        });
-        console.log(JSON.stringify($('form').serializeObject(), null, 4))
-            event.stopPropagation();
+        if(!apply_tests(TEST_CATEGORIE, data_categorie, '[name=', message)) {
+            good = false;
+        }
+        if (!good) {
+            $('input, select').each(function() {
+                this.disabled = false;
+            });
+        } else {
+            for(var i = actual_part; i <= TOTAL_FORMS; i++) $('#part' + i).remove();
+            var prix = CATEGORIES.filter(function(c) { return c.id === categorie; })[0].prix;
+            prix += prix_extra(data);
+            $('#id_prix').val(prix);
+        }
+        event.stopPropagation();
     });
 });
 

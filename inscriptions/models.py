@@ -22,7 +22,7 @@ from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
 from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
 from django import forms
-from django.contrib.postgres import JSONField
+from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
 import logging
 import traceback
@@ -57,28 +57,6 @@ ROLE_CHOICES = (
     ('admin', _(u'Administrateur')),
     ('organisateur', _(u'Organisateur')),
     ('validateur', _(u'Validateur')),
-)
-
-CONNU_CHOICES = (
-    (u'Site Roller en Ligne.com', _(u'Site Roller en Ligne.com')),
-    (u'Facebook', _('Facebook')),
-    (u'Presse', _(u'Presse')),
-    (u'Bouche à oreille', _(u'Bouche à oreille')),
-    (u'Flyer pendant une course', _(u'Flyer pendant une course')),
-    (u'Flyer pendant une randonnée', _(u'Flyer pendant une randonnée')),
-    (u'Affiche', _(u'Affiche')),
-    (u'Informations de la Mairie', _(u'Information de la Mairie')),
-    (u'Par mon club', _(u'Par mon club')),
-    (u'Autre', _(u'Autre')),
-)
-
-TAILLES_CHOICES = (
-    ('XS', _('XS')),
-    ('S', _('S')),
-    ('M', _('M')),
-    ('L', _('L')),
-    ('XL', _('XL')),
-    ('XXL', _('XXL')),
 )
 
 DESTINATAIRE_CHOICES = (
@@ -186,7 +164,6 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             "jours": {},
             "pays": {},
             "course": model_stats.copy(),
-            "connu": {},
             "clubs": {},
         }
 
@@ -261,12 +238,6 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                     result[key][index][stat] += value
             for stat, value in stats.items():
                 result['course'][stat] += value
-            if equipe.connu not in result['connu']:
-                result['connu'][equipe.connu] = 0;
-            result['connu'][equipe.connu] += 1;
-
-        result['connu'] = list(result['connu'].items())
-        sorted(result['connu'], key=itemgetter(1), reverse=True)
 
         result['villes'] = [
             {
@@ -405,13 +376,12 @@ class Equipe(models.Model):
     commentaires       = models.TextField(_(u'Commentaires'), blank=True)
     gerant_ville2      = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     numero             = models.IntegerField(_(u'Numéro'))
-    connu              = models.CharField(_('Comment avez vous connu la course ?'), max_length=200, choices=CONNU_CHOICES)
     date_facture       = models.DateField(_('Date facture'), blank=True, null=True)
     tours              = models.IntegerField(_('Nombre de tours'), blank=True, null=True)
     temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
-    extra              = JSONField()
+    extra              = JSONField(default={})
 
     class Meta:
         unique_together = ( ('course', 'numero'), )
@@ -560,9 +530,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True, help_text=PIECE_JOINTE_HELP)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
-    transpondeur      = models.CharField(_(u'Transpondeur'), max_length=20, blank=True)
-    taille_tshirt     = models.CharField(_(u'Taille T-shirt'), max_length=3, choices=TAILLES_CHOICES, blank=True)
-    extra             = JSONField()
+    extra             = JSONField(default={})
 
     # Pre-calculated fields
     verifier               = models.BooleanField(_(u'Verifier'), editable=False)
@@ -616,28 +584,72 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
         self.course.send_mail(nom, [self])
 
 class ExtraQuestion(models.Model):
+    PAGE_CHOICES = (
+        ('Equipe', _(u"Gerant d'équipe")),
+        ('Equipier', _(u'Equipier')),
+        ('Categorie', _(u'Page finale')),
+    )
     TYPE_CHOICES = (
         ('text', _('Texte')),
-        ('list', _('Liste')),
+        ('radio', _('Liste')),
+        ('list', _('Liste déroulante')),
         ('checkbox', _('Case à cocher')),
     )
-    course = models.ForeignKey(Course, related_name='extra')
-    attache = models.ForeignKey(ContentType, verbose_name=_('Rattaché à'), limit_choices_to={ 'app_label': 'inscriptions', 'model__in': ['Equipe', 'Equipier'], })
+    course = models.ForeignKey(Course, related_name='extra', on_delete=models.CASCADE)
+    page = models.CharField(_('Rattaché à'), max_length=20, choices=PAGE_CHOICES)
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
+    help_text = models.TextField(_('Texte d\'aide'), blank=True, default='')
+    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
+    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
     required = models.BooleanField()
-    options = JSONField()
+
+    def price(self):
+        price = self.price1 or 0
+        if self.course.date_augmentation < date.today():
+            price = self.price2 or 0
+        return price
 
     def getField(self):
+        choices = map(lambda x: (str(x), x.text()), self.choices.order_by('order'))
         if self.type == 'text':
-            field = forms.CharField(label=self.label, required=self.required)
+            field = forms.CharField(label=self.label, required=self.required, help_text=self.help_text)
+        if self.type == 'radio':
+            field = forms.ChoiceField(label=self.label, required=self.required, help_text=self.help_text, choices=choices, widget=forms.RadioSelect())
         if self.type == 'list':
-            field = forms.ChoiceField(label=self.label, required=self.required, choices=self.options.get('choices'))
+            field = forms.ChoiceField(label=self.label, required=self.required, help_text=self.help_text, choices=choices)
         if self.type == 'checkbox':
-            field = forms.BooleanField(label=self.label, required=self.required)
+            label = self.label
+            price = self.price()
+            if price:
+                label = '%s (%s€)' % (self.label, price)
+            field = forms.BooleanField(label=label, required=self.required, help_text=self.help_text)
         return {
             ('extra%s' % self.id): field,
         }
+
+class ExtraQuestionChoice(models.Model):
+    question = models.ForeignKey(ExtraQuestion, related_name='choices', on_delete=models.CASCADE)
+    label = models.CharField(_('Label'), max_length=200)
+    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
+    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
+    order = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.label
+
+    def price(self):
+        price = self.price1 or 0
+        if self.question.course.date_augmentation < date.today():
+            price = self.price2 or 0
+        return price
+
+    def text(self):
+        price = self.price()
+        if price:
+            return '%s (%s€)' % (self.label, price)
+        return self.label
+    
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)

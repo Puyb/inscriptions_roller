@@ -31,9 +31,10 @@ logger = logging.getLogger(__name__)
 @open_closed
 @transaction.atomic
 def form(request, course_uid, numero=None, code=None):
+    EQ = ExtraQuestion.objects.prefetch_related('choices')
     course = get_object_or_404(Course.objects.prefetch_related(
-            Prefetch('extra', queryset=ExtraQuestion.objects.filter(attache=ContentType.objects.get_for_model(Equipe)), to_attr='extra_equipe'),
-            Prefetch('extra', queryset=ExtraQuestion.objects.filter(attache=ContentType.objects.get_for_model(Equipier)), to_attr='extra_equipier'),
+            Prefetch('extra', queryset=EQ.filter(page__in=("Equipe", "Categorie")), to_attr='extra_equipe'),
+            Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
             'categories',
         ).annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
@@ -54,7 +55,7 @@ def form(request, course_uid, numero=None, code=None):
             if instance:
                 equipier_formset = EquipierFormset(request.POST, request.FILES, queryset=instance.equipier_set.all(), form_kwargs={ 'extra_questions': course.extra_equipier })
             else:
-                if date.today() >= course.date_fermeture or course.equipiers_count >= course.limite_participants:
+                if date.today() >= course.date_fermeture or equipiers_count >= course.limite_participants:
                     if not request.user.is_staff:
                         return redirect('/')
                 equipier_formset = EquipierFormset(request.POST, request.FILES, form_kwargs={ 'extra_questions': course.extra_equipier })
@@ -135,6 +136,7 @@ def form(request, course_uid, numero=None, code=None):
                     output_field=CharField()
                 )).values('range').annotate(count=Count('numero'))
         }
+    extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
     
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
@@ -143,9 +145,10 @@ def form(request, course_uid, numero=None, code=None):
         "instance": instance,
         "update": update,
         "nombres_par_tranche": nombres_par_tranche,
-        "equipiers_count": course.equipiers_count,
+        "equipiers_count": equipiers_count,
         "course": course,
         "message": message,
+        "extra_categorie": extra_categorie,
     })
 
 @open_closed

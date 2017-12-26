@@ -325,7 +325,7 @@ HELP_TEXT = """
         Réception d'un certificat médical :
         <ol>
             <li>Identifier à quel équipier il se rapporte</li>
-            <li>Vérifiez s'il a été émis après le 4 août 2012 et s'il autorise la pratique du roller en compétition</li>
+            <li>Vérifiez sa date et s'il autorise la pratique du roller en compétition</li>
             <li>Modifiez la case 'Certificat ou licence valide' de 'Inconnu' à 'Oui' ou 'Non' selon le cas</li>
         </ol>
     </li>
@@ -359,6 +359,7 @@ class EquipierInline(admin.StackedInline):
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
         (u'Coordonnées', { 'classes': ('collapse', 'collapsed'), 'fields': ('adresse1', 'adresse2', ('ville', 'code_postal'), 'pays', 'email') }),
         (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
+        (None, { 'classes': ('wide', ), 'fields': ('extra', ) }),
     )
 
 class StatusFilter(SimpleListFilter):
@@ -439,7 +440,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ("Instructions", { 'description': HELP_TEXT, 'classes': ('collapse', 'collapsed'), 'fields': () }),
         (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('paiement', 'prix', 'paiement_info'), 'commentaires')}),
         (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
-        ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': () }),
+        ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': ('extra', ) }),
 
     )
     actions = ['send_mails']
@@ -696,9 +697,16 @@ class MailAdmin(CourseFilteredObjectAdmin):
         js = ('custom_admin/mail.js', )
 site.register(Mail, MailAdmin)
 
+class ExtraQuestionChoiceInline(admin.TabularInline):
+    model = ExtraQuestionChoice
+    extra = 0
+    max_num = 20
+    fields = ('label', 'help_text', 'price1', 'price2', )
+
 class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/extraquestion.js', )
-    fields = ('attache', 'type', 'label', 'required', 'options', )
-    list_display = ('label', 'attache', 'type', )
+    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'price1', 'price2', )
+    list_display = ('label', 'page', 'type', )
+    inlines = [ ExtraQuestionChoiceInline ]
 site.register(ExtraQuestion, ExtraQuestionAdmin)

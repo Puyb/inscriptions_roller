@@ -14,7 +14,7 @@
 var COURSES_UID = [{% for a in request.user.accreditations.all %}{% if a.role %}"{{ a.course.uid }}"{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}];
 var COURSE_UID = "{{ COURSE.uid }}";
     </script>
-    <script src="{{ STATIC_URL }}/admin/js/jquery.js"></script>
+    <script src="{{ STATIC_URL }}/admin/js/vendor/jquery/jquery.js"></script>
     <script src="{{ STATIC_URL }}/admin.js"></script>
     {% include "admin/_scripts.html" %}
     {% include "admin/_styles.html" %}
