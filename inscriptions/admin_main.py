@@ -7,6 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.template.response import TemplateResponse
 from .forms import ChallengeForm
 
+ICON_OK = '✅'
+ICON_KO = '❎'
 
 site = admin.site
 
@@ -44,7 +46,7 @@ class CourseAdmin(admin.ModelAdmin):
     list_filter = ('active', )
 
     def active2(self, obj):
-        return obj.active and u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""" or u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+        return obj.active and ICON_OK or ICON_KO
     active2.allow_tags = True
     active2.short_description = 'Active'
 

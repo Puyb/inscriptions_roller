@@ -22,6 +22,8 @@ import re
 from Levenshtein import distance
 import csv, io
 
+ICON_OK = '✅'
+ICON_KO = '❎'
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
@@ -452,7 +454,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     documents_manquants2.short_description = u'✉'
 
     def paiement_complet2(self, obj):
-        return obj.paiement_complet() and u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""" or u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+        return obj.paiement_complet() and ICON_OK or ICON_KO
     paiement_complet2.allow_tags = True
     paiement_complet2.short_description = '€'
     
@@ -465,12 +467,12 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             return u"""<img alt="None" src="/static/admin/img/icon-unknown.gif">"""
         auto = obj.dossier_complet_auto()
         if auto:
-            return u"""<img alt="None" src="/static/admin/img/icon-yes.gif">"""
+            return ICON_OK
         if auto == False:
-            return u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+            return ICON_KO
         return u""
     dossier_complet_auto2.allow_tags = True
-    dossier_complet_auto2.short_description = mark_safe(u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""")
+    dossier_complet_auto2.short_description = mark_safe(ICON_OK)
 
     def has_add_permission(self, request):
         return False
@@ -643,7 +645,7 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
     readonly_fields = ('user_name', 'user_email', )
 
     def active(self, obj):
-        return obj.role != '' and u"""<img alt="None" src="/static/admin/img/icon-yes.gif">""" or u"""<img alt="None" src="/static/admin/img/icon-no.gif">"""
+        return obj.role != '' and ICON_OK or ICON_KO
     active.allow_tags = True
 
     def user_name(self, obj):
