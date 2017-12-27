@@ -701,7 +701,7 @@ class ExtraQuestionChoiceInline(admin.TabularInline):
     model = ExtraQuestionChoice
     extra = 0
     max_num = 20
-    fields = ('label', 'help_text', 'price1', 'price2', )
+    fields = ('label', 'price1', 'price2', )
 
 class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     class Media:

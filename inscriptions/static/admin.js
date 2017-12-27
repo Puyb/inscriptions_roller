@@ -8,7 +8,7 @@ django.jQuery(function() {
 
     if (/^\/admin\//.test(location.href))
         resetCookie();
-    if (!~COURSES_UID.indexOf(COURSE_UID) && !/\/course\/(choose|inscriptions\/course\/add|ask)\/$/.test(location.href))
+    if (!~COURSES_UID.indexOf(COURSE_UID) && !/^\/((course\/(choose|inscriptions\/course\/add|ask)\/$)|admin)/.test(location.href))
         location.href = '/course/choose/';
 
     $('#course_chooser').change(function() {

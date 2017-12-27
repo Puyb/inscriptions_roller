@@ -56,3 +56,8 @@ urlpatterns += [
     path(r'<str:course_uid>/listing/', admin_views.listing, name='inscriptions_listing'),
 ]
 
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        url(r'__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns
