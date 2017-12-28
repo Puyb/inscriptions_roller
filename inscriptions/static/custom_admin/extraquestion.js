@@ -4,30 +4,29 @@ django.jQuery(function() {
         var res = /course_id *= *(\d+)/.exec(document.cookie);
         $(this)
             .val(res[1])
-            .parents('.form-row').hide();
+            .hide();
     });
     function changeType() {
-        debugger;
         var v = $('#id_type').val();
         switch(v) {
             case 'text':
-                $('#id_required').parents('.form-row').show();
-                $('#id_price1').parents('.form-row').hide();
-                $('#id_price2').parents('.form-row').hide();
-                $('#id_#choice-group').hide();
+                $('.form-row.field-required').show();
+                $('.form-row.field-price1').hide();
+                $('.form-row.field-price2').hide();
+                $('#choices-group').hide();
                 break;
             case 'radio':
             case 'list':
-                $('#id_required').parents('.form-row').show();
-                $('#id_price1').parents('.form-row').hide();
-                $('#id_price2').parents('.form-row').hide();
-                $('#id_#choice-group').show();
+                $('.form-row.field-required').show();
+                $('.form-row.field-price1').hide();
+                $('.form-row.field-price2').hide();
+                $('#choices-group').show();
                 break;
             case 'checkbox':
-                $('#id_required').parents('.form-row').hide();
-                $('#id_price1').parents('.form-row').hide();
-                $('#id_price2').parents('.form-row').hide();
-                $('#id_#choice-group').hide();
+                $('.form-row.field-required').hide();
+                $('.form-row.field-price1').show();
+                $('.form-row.field-price2').show();
+                $('#choices-group').hide();
                 break;
         }
     }
