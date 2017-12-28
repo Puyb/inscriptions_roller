@@ -22,7 +22,6 @@ django.jQuery(function() {
     $.get('../autre/', function(data) {
         $('#autre').html(data);
     });
-
 });
 
 

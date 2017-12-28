@@ -361,7 +361,6 @@ class EquipierInline(admin.StackedInline):
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
         (u'Coordonnées', { 'classes': ('collapse', 'collapsed'), 'fields': ('adresse1', 'adresse2', ('ville', 'code_postal'), 'pays', 'email') }),
         (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
-        (None, { 'classes': ('wide', ), 'fields': ('extra', ) }),
     )
 
 class StatusFilter(SimpleListFilter):
@@ -442,7 +441,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ("Instructions", { 'description': HELP_TEXT, 'classes': ('collapse', 'collapsed'), 'fields': () }),
         (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('paiement', 'prix', 'paiement_info'), 'commentaires')}),
         (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
-        ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': ('extra', ) }),
+        ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': () }),
 
     )
     actions = ['send_mails']

@@ -78,8 +78,8 @@ def migrate_to_extra(apps, schema_editor):
             equipe.save()
         for equipier in Equipier.objects.filter(equipe__course=course):
             equipier.extra = {
-                'extra%s' % question2.id: equipier.transpondeur,
-                'extra%s' % question3.id: equipier.taille_tshirt,
+                'extra%s' % question2.id: equipier.taille_tshirt,
+                'extra%s' % question3.id: equipier.transpondeur,
             }
             equipier.save()
 
