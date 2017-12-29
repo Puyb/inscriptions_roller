@@ -444,7 +444,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': () }),
 
     )
-    actions = ['send_mails']
+    actions = ['send_mails', 'exports']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -570,6 +570,23 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             templates=TemplateMail.objects.filter(course=course),
         ))
     send_mails.short_description = _(u'Envoyer un mail groupé')
+
+    def exports(self, request, queryset=None):
+        request.current_app = self.admin_site.name
+        course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
+
+        if 'template' in request.POST and 'id' in request.POST:
+            mail = get_object_or_404(TemplateMail, id=request.POST['template'])
+            equipes = Equipe.objects.filter(id__in=request.POST['id'].split(','))
+            mail.send(equipes)
+            messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
+            return redirect('/course/inscriptions/equipe/')
+
+        return TemplateResponse(request, 'admin/equipe/exports.html', dict(self.admin_site.each_context(request),
+            queryset=queryset,
+            course=course,
+        ))
+    exports.short_description = _(u'Exporter')
 
     def autre(self, request, id):
         request.current_app = self.admin_site.name

@@ -1,5 +1,4 @@
-django.jQuery(function() {
-    var $ = django.jQuery;
+$(function() {
     if(!$('#equipe_form').length) return;
 
     $('.field-piece_jointe p, .field-autorisation p').each(function() {

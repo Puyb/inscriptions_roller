@@ -15,7 +15,7 @@
 {% if not COURSE %}<script>
 location.href = "choose/";
 </script>{% endif %}
-<script src="{% static "admin/js/jquery.js" %}"></script>
+<script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
 <div id="content-main">
 
     {% with COURSE.stats as stats %}

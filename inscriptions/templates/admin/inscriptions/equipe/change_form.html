@@ -1,0 +1,29 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+{{ block.super }}
+{% if original %}
+<script>
+    EXTRA = { {% for extra in original.course.extra.all %}
+        'extra{{ extra.id }}': '{{ extra.label|escapejs }}'{% if not forloop.last %},{% endif %}
+{% endfor %}     };
+
+    function build_extra(root, data) {
+        for(var k in data) {
+            var v = data[k];
+            root.append(
+'    <div class="form-row">' +
+'        <div>' +
+'            <label>' + EXTRA[k] + '</label>' +
+'            <div class="readonly">' + v + '</div>' +
+'        </div>' +
+'    </div>');
+        }
+    }
+    build_extra($('.description').parents('fieldset'), {{ original.extra|safe }});
+    {% for e in original.equipier_set.all %}
+    build_extra($('#equipier_set-{{ forloop.counter0 }} fieldset:last'), {{ e.extra|safe }});
+    {% endfor %}
+</script>
+{% endif %}
+{% endblock %}

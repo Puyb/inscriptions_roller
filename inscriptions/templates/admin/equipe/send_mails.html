@@ -3,8 +3,7 @@
 
 {% block extrahead %}
 {{ block.super }}
-<script type="text/javascript" src="/static/admin/js/jquery.js"></script>
-<script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}/admin/js/vendor/jquery/jquery.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +22,6 @@
     </select>
     <button id="preview_button" type="button">{% trans "Prévisualiser" %}</button>
     <script>
-        var $ = django.jQuery;
         $('#preview_button').click(function() {
             $.ajax('send/preview/', {
                 data: { template: $('[name=template]').val(), id: $('[name=preview]').val() },

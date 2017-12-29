@@ -41,7 +41,6 @@
     {% csrf_token %}
 </form>
 <script>
-(function($) {
     function upd() {
         $('#id_courses option').each(function() {
             $('#course_' + this.value)[this.selected ? 'show' : 'hide']()
@@ -49,6 +48,5 @@
     }
     $('#id_courses').change(upd)
     upd();
-})(django.jQuery);
 </script>
 {% endblock %}

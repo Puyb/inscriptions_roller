@@ -1,5 +1,4 @@
-django.jQuery(function() {
-    var $ = django.jQuery;
+$(function() {
     $('#id_course').each(function() {
         var res = /course_id *= *(\d+)/.exec(document.cookie);
         $(this)

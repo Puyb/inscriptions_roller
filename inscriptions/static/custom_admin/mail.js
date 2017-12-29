@@ -1,6 +1,4 @@
-django.jQuery(function() {
-    var $ = django.jQuery;
-
+$(function() {
     $('fieldset').after($('<div>').html($('.field-message p').text()))
     $('.field-message').remove();
 });
