@@ -1,0 +1,53 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrahead %}
+{{ block.super }}
+    <script type="text/javascript" src="{{ STATIC_URL }}/admin/js/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}/admin/js/vendor/jquery/jquery.init.js"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="/course/inscriptions/equipe/export/">
+    <h1>Envoyer un mail à {{ queryset|length }} equipe{% if queryset|length > 1 %}s{% endif %}.</h1>
+    <div>
+        <fieldset class="module aligned ">
+            <div class="form-row">
+                <div>
+                    <label for="id_objet">Objet:</label>
+                    <select name="objet" id="id_objet">
+                        <option value="equipes">{% blocktrans with equipes as equipes %}{{ equipes }} équipes{% endblocktrans %}</option>
+                        <option value="equipiers">{% blocktrans with equipiers as equipiers %}{{ equipiers }} équipiers{% endblocktrans %}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="id_commentaires">Colonnes:</label>
+                    <ul>
+                        <li><label><input type="checkbox" onclick="$('input').prop('checked', this.checked)" /> {% trans "Toutes les colonnes" %}</label></li>
+                    </ul>
+                    <ul>
+                        {% for field, label in fields.items %}
+                        <li><label><input type="checkbox" name="colonnes" value="{{ field }}" /> {% trans label %}</label></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </fieldset>
+        <div class="submit-row">
+            <input value="{% trans "Exporter" %}" class="default" name="_save" type="submit">
+        </div>
+    </div>
+    <input type="hidden" name="ids" value="[{% for equipe in queryset %}{{ equipe.id }}{% if not forloop.last %},{% endif %}{% endfor %}]" />
+    {% csrf_token %}
+    <script>
+        function filter() {
+            var action = $('#id_objet').val() === 'equipiers' ? 'show' : 'hide';
+            $('[value^="equipier."]').parents('li')[action]();
+        }
+        $('#id_objet').change(filter);
+        filter();
+    </script>
+</form>
+{% endblock %}

@@ -7,3 +7,6 @@ form .aligned p { font-size: 12px; margin-top: -1px; }
 .field-box.field-piece_jointe2_valide label { color: red; font-weight: bold; }
 .field-box.field-autorisation_valide label { color: red; font-weight: bold; }
 
+.dashboard .module table td a {
+    margin: 0 10px;
+}

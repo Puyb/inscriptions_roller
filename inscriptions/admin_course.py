@@ -21,6 +21,7 @@ import json
 import re
 from Levenshtein import distance
 import csv, io
+import inspect
 
 ICON_OK = '✅'
 ICON_KO = '❎'
@@ -444,7 +445,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ("Autre", { 'description': '<div id="autre"></div>', 'classes': ('collapse', 'collapsed'), 'fields': () }),
 
     )
-    actions = ['send_mails', 'exports']
+    actions = ['send_mails', 'export']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -482,6 +483,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         my_urls = [
             url(r'^version/$', self.version, name='equipe_version'),
             url(r'^send/$', self.send_mails, name='equipe_send_mails'),
+            url(r'^export/$', self.export, name='equipe_send_mails'),
             url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
             url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
             url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
@@ -558,9 +560,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         request.current_app = self.admin_site.name
         course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
 
-        if 'template' in request.POST and 'id' in request.POST:
+        if 'template' in request.POST and 'ids' in request.POST:
+            ids = json.loads(request.POST['ids'])
             mail = get_object_or_404(TemplateMail, id=request.POST['template'])
-            equipes = Equipe.objects.filter(id__in=request.POST['id'].split(','))
+            equipes = Equipe.objects.filter(id__in=ids)
             mail.send(equipes)
             messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
             return redirect('/course/inscriptions/equipe/')
@@ -571,22 +574,80 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ))
     send_mails.short_description = _(u'Envoyer un mail groupé')
 
-    def exports(self, request, queryset=None):
+    def export(self, request, queryset=None):
         request.current_app = self.admin_site.name
         course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
 
-        if 'template' in request.POST and 'id' in request.POST:
-            mail = get_object_or_404(TemplateMail, id=request.POST['template'])
-            equipes = Equipe.objects.filter(id__in=request.POST['id'].split(','))
-            mail.send(equipes)
-            messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
-            return redirect('/course/inscriptions/equipe/')
+        fields = {
+            'equipe.%s' % field.name: '%s - %s' % (_('Equipe'), field.verbose_name or field.name)
+            for field in Equipe._meta.get_fields()
+            if not field.one_to_many and field.name not in ('id', 'course', 'gerant_ville2', 'categorie', 'extra')
+        }
+        fields.update({
+            'equipe.extra%d' % extra.id: '%s - %s' % (_('Equipe'), extra.label)
+            for extra in course.extra.filter(page__in=('Equipe', 'Categorie'))
+        })
+        fields.update({
+            'equipier.%s' % field.name: '%s - %s' % (_('Equipier'), field.verbose_name or field.name)
+            for field in Equipier._meta.get_fields()
+            if not field.one_to_many and field.name not in ('id', 'equipe', 'ville2', 'extra')
+        })
+        fields.update({
+            'equipier.extra%d' % extra.id: '%s - %s' % (_('Equipier'), extra.label)
+            for extra in course.extra.filter(page='Equipier')
+        })
 
-        return TemplateResponse(request, 'admin/equipe/exports.html', dict(self.admin_site.each_context(request),
+        if 'ids' in request.POST:
+            objet = request.POST['objet']
+            delimiter = request.POST.get('delimiter', ';')
+            encoding = request.POST.get('encoding', 'utf-8')
+            name = request.POST.get('name', objet)
+            header = request.POST.get('header', 'yes')
+            ids = json.loads(request.POST['ids'])
+            if objet == 'equipes':
+                objects = Equipe.objects.filter(course=course)
+                if len(ids):
+                    objects = objects.filter(id__in=ids)
+            else:
+                objects = Equipier.objects.filter(equipe__course=course)
+                if len(ids):
+                    objects = objects.filter(equipe_id__in=ids)
+            response = HttpResponse(content_type='text/csv', charset=encoding)
+            response['Content-Disposition'] = 'attachment; filename=%s.csv' % name
+
+            writer = csv.writer(response, delimiter=delimiter)
+            def resolve(obj, field):
+                field = field.split('.')
+                if isinstance(obj, Equipier) and field[0] == 'equipe':
+                    obj = obj.equipe
+                if field[1].startswith('extra'):
+                    return obj.extra[field[1]]
+                v = getattr(obj, field[1])
+                if inspect.ismethod(v):
+                    return str(v())
+                return str(v)
+            
+            fieldnames = [ f for f in request.POST.getlist('colonnes') if objet == 'equipiers' or f.startswith('equipe.') ]
+
+            if header:
+                writer.writerow([ fields[f] for f in fieldnames ])
+            for obj in objects:
+                writer.writerow([
+                    resolve(obj, field).encode(encoding, 'replace').decode(encoding) 
+                    for field in fieldnames])
+
+            return response
+        
+        queryset = queryset or Equipe.objects.none()
+
+        return TemplateResponse(request, 'admin/equipe/export.html', dict(self.admin_site.each_context(request),
             queryset=queryset,
+            equipes=queryset.count() or course.equipe_set.count(),
+            equipiers=Equipier.objects.filter(equipe__in=queryset).count() or Equipier.objects.filter(equipe__course=course).count(),
             course=course,
+            fields=fields,
         ))
-    exports.short_description = _(u'Exporter')
+    export.short_description = _(u'Exporter')
 
     def autre(self, request, id):
         request.current_app = self.admin_site.name
