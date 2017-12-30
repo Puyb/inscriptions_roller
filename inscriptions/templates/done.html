@@ -11,9 +11,33 @@
         <div class="media-body">
             <h2>{% trans 'Votre inscription est enregistrée' %}</h2>
             <p>
-                <table>
+                <table class="table">
                     <tr><th>{% trans "Equipe :" %}</th><td>{{ instance.nom }}</td></tr>
                     <tr><th>{% trans "Dossard :" %}</th><td>{{ instance.numero }}</td></tr>
+                    <tr><th>{% trans "Categorie :" %}</th><td>{{ instance.categorie.code }} - {{ instance.categorie.nom }}</td></tr>
+                    <tr><th>{% trans "Prix :" %}</th><td>
+                        {% if instance.facture|length == 1 %}
+                        {{ instance.prix }} €
+                        {% else %}
+                        <table class="table">
+                            <tr>
+                                <th>{% trans "Quantité" %}</th>
+                                <th>{% trans "Label" %}</th>
+                                <th>{% trans "Prix unitaire" %}</th>
+                                <th>{% trans "Prix" %}</th>
+                            </tr>{% for line in instance.facture %}
+                            <tr>
+                                <td>{{ line.quantite }}</td>
+                                <td>{{ line.label }}</td>
+                                <td>{{ line.prix_unitaire }} €</td>
+                                <td>{{ line.prix }} €</td>
+                            </tr>
+                            {% endfor %}
+                            <tr><th colspan="3">Total: </th><td>{{ instance.prix }} €</td></tr>
+                        </table>
+                        {% endif %}
+                    </td></tr>
+
                 </table>
             </p>
             {% if create %}

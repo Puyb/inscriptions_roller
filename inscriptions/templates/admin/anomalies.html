@@ -26,7 +26,7 @@
         <td>{{ equipier.equipe.numero }}{{ equipier.numero }}</td>
         <td>{{ equipier.nom }} {{ equipier.prenom }}</td>
         <td>{{ equipier.date_de_naissance }}</td>
-        <td>{{ equipier.equipe.nom }}</td>
+        <td><a href="/course/inscriptions/equipe/{{ equipier.equipe.id }}/">{{ equipier.equipe.nom }}</a></td>
         <td>{{ equipier.equipe.categorie.code }}</td>
     </tr>
     {% endfor %}

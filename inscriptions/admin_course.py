@@ -96,10 +96,10 @@ class CourseAdminSite(admin.sites.AdminSite):
             if request.POST['value'] == 'yes' or request.POST['value'] == 'no':
                 equipier.piece_jointe_valide = request.POST['value'] == 'yes'
                 equipier.save()
-                equipier.equipe.commentaires = request.POST['commentaires']
-                equipier.equipe.save()
             else:
                 skip.append(str(equipier.id))
+            equipier.equipe.commentaires = request.POST['commentaires']
+            equipier.equipe.save()
         equipier = Equipier.objects.filter(equipe__course=course).exclude(id__in=skip).filter(verifier=True)
 
         if equipier.count() == 0:

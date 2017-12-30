@@ -11,7 +11,7 @@ from django.core.mail import EmailMessage
 import os, re, requests, json, sys
 from django.db import models, transaction
 from django.db.models.query import prefetch_related_objects
-from datetime import date, timedelta
+from datetime import datetime, date, timedelta
 from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
@@ -291,6 +291,16 @@ class Categorie(models.Model):
     def __str__(self):
         return self.code
 
+    def prix(self, d=None):
+        if isinstance(d, datetime):
+            d = d.date()
+        d = d or date.today()
+        prix = self.prix1 or 0
+        if self.course.date_augmentation < d:
+            prix = self.prix2 or 0
+        return prix
+
+
 class Ville(models.Model):
     lat      = models.DecimalField(max_digits=10, decimal_places=7)
     lng      = models.DecimalField(max_digits=10, decimal_places=7)
@@ -429,6 +439,45 @@ class Equipe(models.Model):
 
     def paiement_paypal(self):
         return self.paiement_info.startswith('Paypal ') # and self.prix_paypal() - Decimal('0.01') < self.paiement and self.paiement < self.prix_paypal() + Decimal('0.01')
+
+    def facture(self):
+        lines = [
+            {
+                'quantite': 1,
+                'label': '%s - %s' % (self.categorie.code, self.categorie.nom),
+                'prix_unitaire': self.categorie.prix(self.date),
+                'prix': self.categorie.prix(self.date),
+            },
+        ]
+        extra_equipiers = self.equipier_set.values('extra')
+        for extra in self.course.extra.exclude(type='text'):
+            values = []
+            if extra.page == 'Equipier':
+                values = [ v[extra.getId()] for v in extra_equipiers if extra.getId() in v ]
+            else:
+                if extra.getId() in self.extra:
+                    values.append(self.extra[extra.getId()])
+            if extra.type == 'checkbox' and extra.price(self.date):
+                lines.append({
+                    'quantite': len(values),
+                    'label': extra.label,
+                    'prix_unitaire': extra.price(self.date),
+                    'prix': extra.price(self.date) * len(values),
+                })
+            else:
+                options = defaultdict(int)
+                for value in values:
+                    options[value] += 1
+                for option, count in options.items():
+                    price = extra.getPriceByValue(self.date, option)
+                    if price:
+                        lines.append({
+                            'quantite': count,
+                            'label': '%s - %s' % (extra.label, option),
+                            'prix_unitaire': price,
+                            'prix': price * count,
+                        })
+        return lines
         
     def save(self, *args, **kwargs):
         if self.id:
@@ -604,11 +653,24 @@ class ExtraQuestion(models.Model):
     price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
     required = models.BooleanField()
 
-    def price(self):
+    def price(self, d=None):
+        if isinstance(d, datetime):
+            d = d.date()
+        d = d or date.today()
         price = self.price1 or 0
-        if self.course.date_augmentation < date.today():
+        if self.course.date_augmentation < d:
             price = self.price2 or 0
         return price
+
+    def getPriceByValue(self, d, value):
+        if self.type == 'text':
+            return None
+        if self.type == 'checkbox' and self.price(d):
+            return self.price(d) if value else None
+        if not hasattr(self, '_choices_prices'):
+            self._choice_prices = { x.label: x.price(d) for x in self.choices.all() }
+        return self._choice_prices.get(value, None)
+
 
     def getField(self):
         choices = map(lambda x: (str(x), x.text()), self.choices.order_by('order'))
@@ -625,8 +687,11 @@ class ExtraQuestion(models.Model):
                 label = '%s (%s€)' % (self.label, price)
             field = forms.BooleanField(label=label, required=self.required, help_text=self.help_text)
         return {
-            ('extra%s' % self.id): field,
+            self.getId(): field,
         }
+
+    def getId(self):
+        return 'extra%d' % self.id
 
 class ExtraQuestionChoice(models.Model):
     question = models.ForeignKey(ExtraQuestion, related_name='choices', on_delete=models.CASCADE)
@@ -638,9 +703,12 @@ class ExtraQuestionChoice(models.Model):
     def __str__(self):
         return self.label
 
-    def price(self):
+    def price(self, d=None):
+        if isinstance(d, datetime):
+            d = d.date()
+        d = d or date.today()
         price = self.price1 or 0
-        if self.question.course.date_augmentation < date.today():
+        if self.question.course.date_augmentation < d:
             price = self.price2 or 0
         return price
 
