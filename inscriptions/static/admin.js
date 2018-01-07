@@ -7,7 +7,7 @@ $(function() {
 
     if (/^\/admin\//.test(location.href))
         resetCookie();
-    if (!~COURSES_UID.indexOf(COURSE_UID) && !/^\/((course\/(choose|inscriptions\/course\/add|ask)\/$)|admin)/.test(location.pathname))
+    if (!~COURSES_UID.indexOf(COURSE_UID) && !/^\/((course\/(login|choose|inscriptions\/course\/add|ask)\/$)|admin)/.test(location.pathname))
         location.href = '/course/choose/';
 
     $('#course_chooser').change(function() {
