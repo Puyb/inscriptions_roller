@@ -13,3 +13,4 @@ form .aligned p { font-size: 12px; margin-top: -1px; }
 .dashboard #content { width: auto; }
 
 #equipier_set-group .add-row { display: none; }
+#equipier_set-group h3 .delete { display: none; }

@@ -1,0 +1,6 @@
+<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Nous avons bien re&ccedil;u votre paiement de {{ instance.paiement }} &euro; pour l'&eacute;quipe <strong>{{ instance.nom }}</strong>.</p>
+<p>Votre facture est téléchargeable en cliquant sur <a href="{{ ROOT_URL }}/{{ instance.course.uid }}/{{ instance.numero }}/facture/">ce lien</a>.</p>
+<p>--<br />{{ instance.course.organisateur }}</p>
+<hr />
+<p>Hi, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> We just received your payment of &euro; {{ instance.paiement }} for your team <strong>{{ instance.nom }}</strong>.</p>
+<p>--<br />{{ instance.course.organisateur }}</p>

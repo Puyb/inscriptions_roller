@@ -1,0 +1,120 @@
+<h1>{{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}<br />Changement de num&eacute;ro</h1>
+<table>
+<tbody>
+<tr><th>nom</th>
+<td>{{ instance.nom }}</td>
+</tr>
+<tr><th>club</th>
+<td>{{ instance.club }}</td>
+</tr>
+<tr><th>gerant_nom</th>
+<td>{{ instance.gerant_nom }}</td>
+</tr>
+<tr><th>gerant_prenom</th>
+<td>{{ instance.gerant_prenom }}</td>
+</tr>
+<tr><th>gerant_adresse1</th>
+<td>{{ instance.gerant_adresse1 }}</td>
+</tr>
+<tr><th>gerant_adress2</th>
+<td>{{ instance.gerant_adress2 }}</td>
+</tr>
+<tr><th>gerant_ville</th>
+<td>{{ instance.gerant_ville }}</td>
+</tr>
+<tr><th>gerant_code_postal</th>
+<td>{{ instance.gerant_code_postal }}</td>
+</tr>
+<tr><th>gerant_pays</th>
+<td>{{ instance.gerant_pays }}</td>
+</tr>
+<tr><th>gerant_email</th>
+<td>{{ instance.gerant_email }}</td>
+</tr>
+<tr><th>password</th>
+<td>{{ instance.password }}</td>
+</tr>
+<tr><th>gerant_telephone</th>
+<td>{{ instance.gerant_telephone }}</td>
+</tr>
+<tr><th>categorie</th>
+<td>{{ instance.categorie }}</td>
+</tr>
+<tr><th>course</th>
+<td>{{ instance.course }}</td>
+</tr>
+<tr><th>nombre</th>
+<td>{{ instance.nombre }}</td>
+</tr>
+<tr><th>paiement_info</th>
+<td>{{ instance.paiement_info }}</td>
+</tr>
+<tr><th>prix</th>
+<td>{{ instance.prix }}</td>
+</tr>
+<tr><th>paiement</th>
+<td>{{ instance.paiement }}</td>
+</tr>
+<tr><th>dossier_complet</th>
+<td>{{ instance.dossier_complet }}</td>
+</tr>
+<tr><th>date</th>
+<td>{{ instance.date }}</td>
+</tr>
+<tr><th>commentaires</th>
+<td>{{ instance.commentaires }}</td>
+</tr>
+<tr><th>gerant_ville2</th>
+<td>{{ instance.gerant_ville2 }}</td>
+</tr>
+<tr><th>numero</th>
+<td>{{ instance.numero }}</td>
+</tr>
+<tr><th>connu</th>
+<td>{{ instance.connu }}</td>
+</tr>
+</tbody>
+</table>
+<p>{% for instance in instance.equipier_set.all %}</p>
+<h2>Equipier {{ forloop.count }}</h2>
+<table>
+<tbody>
+<tr><th>nom</th>
+<td>{{ instance.nom }}</td>
+</tr>
+<tr><th>prenom</th>
+<td>{{ instance.prenom }}</td>
+</tr>
+<tr><th>sexe</th>
+<td>{{ instance.sexe }}</td>
+</tr>
+<tr><th>adresse1</th>
+<td>{{ instance.adresse1 }}</td>
+</tr>
+<tr><th>adresse2</th>
+<td>{{ instance.adresse2 }}</td>
+</tr>
+<tr><th>ville</th>
+<td>{{ instance.ville }}</td>
+</tr>
+<tr><th>code_postal</th>
+<td>{{ instance.code_postal }}</td>
+</tr>
+<tr><th>pays</th>
+<td>{{ instance.pays }}</td>
+</tr>
+<tr><th>email</th>
+<td>{{ instance.email }}</td>
+</tr>
+<tr><th>date_de_naissance</th>
+<td>{{ instance.date_de_naissance }}</td>
+</tr>
+<tr><th>justificatif</th>
+<td>{{ instance.justificatif }}</td>
+</tr>
+<tr><th>num_licence</th>
+<td>{{ instance.num_licence }}</td>
+</tr>
+</tbody>
+</table>
+<p>{% endfor %}</p>
