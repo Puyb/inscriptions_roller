@@ -458,12 +458,14 @@ class Equipe(models.Model):
                 if extra.getId() in self.extra:
                     values.append(self.extra[extra.getId()])
             if extra.type == 'checkbox' and extra.price(self.date):
-                lines.append({
-                    'quantite': len(values),
-                    'label': extra.label,
-                    'prix_unitaire': extra.price(self.date),
-                    'prix': extra.price(self.date) * len(values),
-                })
+                values = [ v for v in values if v ]
+                if len(values):
+                    lines.append({
+                        'quantite': len(values),
+                        'label': extra.label,
+                        'prix_unitaire': extra.price(self.date),
+                        'prix': extra.price(self.date) * len(values),
+                    })
             else:
                 options = defaultdict(int)
                 for value in values:

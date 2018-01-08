@@ -1,6 +1,7 @@
 {% extends "site_base.html" %}
 {% load i18n %}
 {% load l10n %}
+{% load json %}
 {% load bootstrap %}
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -168,7 +169,7 @@
     {% endif %}
     var I18N = {};
     {% if message %} alert("{{ message }}"); location.reload(true); {% endif %}
-    EXTRA_CATEGORIE = [{{ extra_categorie }}]
+    EXTRA_CATEGORIE = {{ extra_categorie|json }};
     TEST_EQUIPE = {};
     TEST_EQUIPIER = {};
     TEST_CATEGORIE = {};

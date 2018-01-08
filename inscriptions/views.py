@@ -66,11 +66,7 @@ def form(request, course_uid, numero=None, code=None):
                 new_instance.password = old_password
                 if not instance:
                     new_instance.password = '%06x' % random.randrange(0x100000, 0xffffff)
-                # FIXME: price is set client side... This is really bad... I'm lazy ! Shame on me !
-                #if instance and instance.categorie == new_instance.categorie and instance.prix:
-                #    new_instance.prix = instance.prix
-                #else:
-                #    new_instance.prix = CATEGORIES[new_instance.categorie]['prix']
+                new_instance.prix = reduce(lambda a, b: a + b['prix'], new_instance.facture(), 0)
                 new_instance.save()
                 for i in range(0, new_instance.nombre):
                     equipier_instance = equipier_formset.forms[i].save(commit=False)

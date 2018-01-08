@@ -1,4 +1,5 @@
 {% extends "admin/change_form.html" %}
+{% load json %}
 
 {% block content %}
 {{ block.super }}
@@ -11,6 +12,7 @@
     function build_extra(root, data) {
         for(var k in data) {
             var v = data[k];
+            if (v === false) continue;
             root.append(
 '    <div class="form-row">' +
 '        <div>' +
@@ -20,9 +22,9 @@
 '    </div>');
         }
     }
-    build_extra($('.description').parents('fieldset'), {{ original.extra|safe }});
+    build_extra($('.description').parents('fieldset'), {{ original.extra|json }});
     {% for e in original.equipier_set.all %}
-    build_extra($('#equipier_set-{{ forloop.counter0 }} fieldset:last'), {{ e.extra|safe }});
+    build_extra($('#equipier_set-{{ forloop.counter0 }} fieldset:last'), {{ e.extra|json }});
     {% endfor %}
 </script>
 {% endif %}
