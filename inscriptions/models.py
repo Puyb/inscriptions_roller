@@ -174,7 +174,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 licence_manquantes_count=Coalesce(Sum(Case(When(equipier__licence_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 certificat_manquants_count=Coalesce(Sum(Case(When(equipier__certificat_manquant=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 autorisation_manquantes_count=Coalesce(Sum(Case(When(equipier__autorisation_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
-                valide_count=Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                valide_count=Coalesce(Sum(Case(When(equipier__detail=VALIDE, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 erreur_count=Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 hommes_count=Coalesce(Sum(Case(When(equipier__homme=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             ).select_related('categorie', 'gerant_ville2')
@@ -256,14 +256,14 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         result['course']['documents_attendus'] = 0
         result['course']['licencies'] = 0
         for equipier in Equipier.objects.filter(equipe__course=self).select_related('equipe', 'equipe__course'):
-            if equipier.piece_jointe_valide:
+            if equipier.piece_jointe_detail == VALIDE:
                 result['course']['documents'] += 1
                 if equipier.piece_jointe:
                     result['course']['documents_electroniques'] += 1
             else:
                 result['course']['documents_attendus'] += 1
             if equipier.age() < 18:
-                if equipier.autorisation_valide:
+                if equipier.autorisation_detail == VALIDE:
                     result['course']['documents'] += 1
                     if equipier.autorisation:
                         result['course']['documents_electroniques'] += 1
@@ -575,11 +575,11 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
     autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True, help_text=AUTORISATION_HELP)
-    autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
+    autorisation_detail = models.CharField(_(u'Autorisation parentale valide'), max_length=200, blank=True)
     justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True, help_text=PIECE_JOINTE_HELP)
-    piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
+    piece_jointe_detail = models.CharField(_(u'Certificat ou licence valide'), max_length=200, blank=True)
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
 
@@ -604,24 +604,34 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     def __str__(self):
         return u'%d%d %s %s' % (self.equipe.numero, self.numero, self.nom, self.prenom)
 
+    def piece_jointe_valide(self):
+        if self.piece_jointe_detail == UNKNOWN:
+            return None
+        return self.piece_jointe_detail == VALIDE
+
+    def autorisation_valide(self):
+        if self.autorisation_detail == UNKNOWN:
+            return None
+        return self.autorisation_detail == VALIDE
+
     def save(self, *args, **kwargs):
         if self.id:
             original = Equipier.objects.get(id=self.id)
             if (original.nom != self.nom or 
                 original.prenom != self.prenom or
                 original.piece_jointe != self.piece_jointe):
-                self.piece_jointe_valide = None
+                self.piece_jointe_detail = UNKNOWN
             if (original.nom != self.nom or 
                 original.prenom != self.prenom or
                 original.autorisation != self.autorisation):
-                self.autorisation_valide = None
-        self.licence_manquante = self.justificatif == 'licence' and not self.piece_jointe_valide and not self.piece_jointe
-        self.certificat_manquant = self.justificatif == 'certificat' and not self.piece_jointe_valide and not self.piece_jointe
-        self.autorisation_manquante = self.age() < 18 and not self.autorisation_valide and not self.autorisation
-        self.verifier = ((bool(self.piece_jointe) and self.piece_jointe_valide == None) or
-                         (self.age() < 18 and bool(self.autorisation) and self.autorisation_valide == None))
-        self.erreur = self.piece_jointe_valide == False or (self.age() < 18 and self.autorisation_valide == False)
-        self.valide = self.piece_jointe_valide == True and (self.age() >= 18 or self.autorisation_valide == True)
+                self.autorisation_detail = UNKNOWN
+        self.licence_manquante = self.justificatif == 'licence' and self.piece_jointe_detail != VALIDE and not self.piece_jointe
+        self.certificat_manquant = self.justificatif == 'certificat' and self.piece_jointe_detail != VALIDE and not self.piece_jointe
+        self.autorisation_manquante = self.age() < 18 and self.autorisation_detail != VALIDE and not self.autorisation
+        self.verifier = ((bool(self.piece_jointe) and self.piece_jointe_detail == UNKNOWN) or
+                         (self.age() < 18 and bool(self.autorisation) and self.autorisation_detail == UNKNOWN))
+        self.erreur = self.piece_jointe_detail not in (VALIDE, UNKNOWN) or (self.age() < 18 and self.autorisation_detail not in (VALIDE, UNKNOWN))
+        self.valide = self.piece_jointe_detail == VALIDE and (self.age() >= 18 or self.autorisation_detail == VALIDE)
         self.homme = self.sexe == 'H'
 
         if not self.ville2:
