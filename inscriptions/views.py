@@ -123,8 +123,7 @@ def form(request, course_uid, numero=None, code=None):
             equipier_form.fields['piece_jointe'].help_text = _(Equipier.PIECE_JOINTE_HELP) % { 'link': certificat_link }
 
     nombres_par_tranche = { e['range']: e['count'] 
-            for e in Equipe.objects
-                .filter(course__uid='6hdp15')
+            for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
                     Value('-'),
@@ -145,6 +144,7 @@ def form(request, course_uid, numero=None, code=None):
         "course": course,
         "message": message,
         "extra_categorie": extra_categorie,
+        "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course).exclude(role='').count() > 0,
     })
 
 @open_closed

@@ -136,8 +136,8 @@
             numero_fin: {{ cat.numero_fin }}
         }{% if not forloop.last %},{% endif %}
     {% endfor %}];
-    var nombres_par_tranche = { {% for k, v in nombres_par_tranche.items %}"{{ k }}": {{ v }}{% if not forloop.last %},{% endif %}{% endfor %} };
-    {% if not user.is_staff %}
+    var nombres_par_tranche = {{ nombres_par_tranche|json }};
+    {% if not is_staff %}
     CATEGORIES = CATEGORIES.filter(function(categorie) {
         {% if update %}
         if(categorie.code === '{{ instance.categorie.code }}') return true;
@@ -164,7 +164,7 @@
     var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions_find_challenges_categories" course_uid=COURSE.uid %}';
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
-    {% if user.is_staff %}
+    {% if is_staff %}
     STAFF = true;
     {% endif %}
     var I18N = {};
