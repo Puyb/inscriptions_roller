@@ -142,7 +142,7 @@
         {% if update %}
         if(categorie.code === '{{ instance.categorie.code }}') return true;
         {% endif %}
-        return nombres_par_tranche[categorie.numero_debut + '-' + categorie.numero_fin] < categorie.numero_fin - categorie.numero_debut + 1;
+        return (nombres_par_tranche[categorie.numero_debut + '-' + categorie.numero_fin] || 0) < categorie.numero_fin - categorie.numero_debut + 1;
     });
     {% endif %}
     var COURSE = {
