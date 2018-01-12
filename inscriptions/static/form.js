@@ -254,6 +254,22 @@ function naissanceOnChange(n) {
 $(function() {
     $('#id_categorie').remove();
 
+    $.getJSON('/countries.json', function(r) {
+        $('[name*=pays]').each(function() {
+            var v = this.value;
+            var el = $('<select>')
+                .attr('name', this.name)
+                .attr('id', this.id)
+                .attr('class', this.className)
+                .appendTo(this.parentNode);
+            $(this).remove();
+            r.forEach(function(c) {
+                $('<option>').attr('value', c[0]).text(c[1]).appendTo(el);
+            });
+            el.find('[value=' + v + ']').attr('selected', true);
+        });
+    })
+
     var TOTAL_FORMS = parseFloat($('id_form-TOTAL_FORM').val())
     for(var i = 0; i < TOTAL_FORMS; i++) {
         $('#id_form-' + i + '-date_de_naissance_day').parent()[0].id = 'id_form-' + i + '-date_de_naissance';

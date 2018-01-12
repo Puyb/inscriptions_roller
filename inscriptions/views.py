@@ -25,6 +25,7 @@ from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge
 from .utils import MailThread, jsonDate
+from django_countries.data import COUNTRIES
 
 logger = logging.getLogger(__name__)
 
@@ -493,4 +494,6 @@ def live_push(request, course_uid):
                     logger.exception('Error importing row %s' % row)
         return HttpResponse()
 
+def countries(request):
+    return HttpResponse(json.dumps([ [k, str(v)] for k, v in COUNTRIES.items()]), content_type='application/json')
 
