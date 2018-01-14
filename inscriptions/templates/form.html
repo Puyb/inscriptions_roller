@@ -57,7 +57,7 @@
                         {% endif %}{% endif %}{% endif %}
                         {% blocktrans %}Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
                         {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
-                        {% url "inscriptions_views.contact" course_uid=COURSE.uid as url_contact %}
+                        {% url "contact" course_uid=COURSE.uid as url_contact %}
                         {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />
                     </div>
                 </div>

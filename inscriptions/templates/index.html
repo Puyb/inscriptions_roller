@@ -12,7 +12,11 @@
       <div class="row equal">{% endif %}
         <div class="col-md-4">
             <div class="thumbnail">
-                <a href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
+                <a href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block">
+                    {% for challenge in course.challenges.all %}
+                    <span class="badge" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 100px; width: 100px; display: block;"></span>
+                    {% endfor %}
+                </a>
                 <div class="caption">
                     <h3><a href="{{ course.url }}">{{ course.nom }}</a></h3>
                     <p>

@@ -153,7 +153,7 @@ def find_challenges_categories(request, course_uid):
     course = get_object_or_404(Course, uid=course_uid)
     if request.method != 'POST':
         return HttpResponse(status=405)
-    equipier_formset = EquipierFormset(request.POST)
+    equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })
 
     if not equipier_formset.is_valid():
         return HttpResponse(json.dumps(equipier_formset.errors), status=400, content_type='application/json')
@@ -162,7 +162,6 @@ def find_challenges_categories(request, course_uid):
         equipier = equipier_formset.forms[i].save(commit=False)
         equipier.numero = i + 1
         equipiers.append(equipier)
-    print(len(equipiers))
 
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
@@ -424,11 +423,18 @@ def facture(request, course_uid, numero):
     })
 
 def challenges(request):
-    challenges = Challenge.objects.filter(active=True).prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+    challenges = Challenge.objects.filter(active=True).order_by('nom').prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+    prochains_challenges = []
+    anciens_challenges = []
+    for challenge in challenges:
+        if len([course for course in challenge.courses.all() if course.date > date.today()]):
+            prochains_challenges.append(challenge)
+        else:
+            anciens_challenges.append(challenge)
 
     return TemplateResponse(request, 'challenges.html', {
-        'prochains_challenges': challenges.filter (courses__date__gt=date.today()).order_by('nom'),
-        'anciens_challenges':   challenges.exclude(courses__date__gt=date.today()).order_by('nom'),
+        'prochains_challenges': prochains_challenges, 
+        'anciens_challenges':   anciens_challenges,
     })
 
 def challenge(request, challenge_uid):
