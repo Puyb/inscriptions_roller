@@ -150,7 +150,9 @@ def form(request, course_uid, numero=None, code=None):
 
 @open_closed
 def find_challenges_categories(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(Course.objects.prefetch_related(
+            Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
+    )
     if request.method != 'POST':
         return HttpResponse(status=405)
     equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })

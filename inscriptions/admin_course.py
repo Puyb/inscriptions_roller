@@ -711,7 +711,7 @@ site.register(Categorie, CategorieAdmin)
 
 class TemplateMailAdmin(CourseFilteredObjectAdmin):
     class Media:
-        js  = ('http://tinymce.cachefly.net/4.0/tinymce.min.js', 'custom_admin/templatemail.js', )
+        js  = ('https://tinymce.cachefly.net/4.0/tinymce.min.js', 'custom_admin/templatemail.js', )
     list_display = ('nom', 'sujet', )
 site.register(TemplateMail, TemplateMailAdmin)
 
