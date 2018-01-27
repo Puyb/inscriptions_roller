@@ -1,0 +1,27 @@
+{% extends "_detail_paiement.html" %}
+{% load i18n %}
+
+{% block payment_form %}
+<p>
+    <form action="{{ PAYPAL_URL }}" method="post">
+        <input type="hidden" name="business"      value="{{ PAYPAL_BUSINESS }}" />
+        <input type="hidden" name="currency_code" value="EUR" />
+        <input type="hidden" name="return"        value="" id="paypal_return_url" />
+        <input type="hidden" name="cmd"           value="_cart" />
+        <input type="hidden" name="upload"        value="1" />
+        <input type="hidden" name="no_shipping"   value="1" />
+        <input type="hidden" name="item_name_1"   value="{{ COURSE.uid }} - {{ instance.categorie.code }}" />
+        <input type="hidden" name="invoice"       value="{{ instance.id }}{{ hour }}" />
+        <input type="hidden" name="amount_1"      value="{{ instance.prix_paypal|stringformat:".2f" }}" />
+        <input type="hidden" name="quantity_1"    value="1" />
+        {# LEAVE THE HANDLING CHARGE ALONE!  PAYPAL SHIPPING WILL INEVITABLY BE MESSED UP IF YOU USE THEIR SHIPPING METHODS #}
+        {# To work around their bizarre system, we are telling Paypal "no shipping" and adding all shipping charges as handling #}
+        <input type="hidden" name="handling_cart" value="0.00" />
+        <input type="hidden" name="tax_cart"      value="0.00" />
+        <input type="hidden" name="notify_url"    value="{{ paypal_ipn_url }}" />
+
+        <input type="submit" value="{% trans 'Paypal ou Carte bancaire' %}" class="btn btn-primary"><br />
+    </form>
+    <script> document.getElementById('paypal_return_url').value = location.href; </script>
+</p>
+{% endblock %}

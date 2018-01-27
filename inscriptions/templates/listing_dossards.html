@@ -53,10 +53,10 @@
         <tr class="{% cycle 'odd' 'even' %} pb">
             <td colspan="6">
                 {% for e2 in e.equipier_set.all %}
-                <span style="{% if e2.age < 18 %}{% if not e2.autorisation_valide %}color: red;{% endif %}{% endif %}{% if not e2.piece_jointe_valide %}color: red;{% endif %}">
+                <span style="{% if e2.age < 18 %}{% if e2.autorisation_detail != "oui" %}color: red;{% endif %}{% endif %}{% if e2.piece_jointe_detail != "oui" %}color: red;{% endif %}">
                     {{ e2.prenom }} {{ e2.nom }}
-                    <b>{% if e2.age < 18 %}{% if not e2.autorisation_valide %}Aut. parentale{% endif %}{% endif %}
-                        {% if not e2.piece_jointe_valide %}Certif.{% endif %}</b>
+                    <b>{% if e2.age < 18 %}{% if e2.autorisation_detail != "oui" %}Aut. parentale{% endif %}{% endif %}
+                        {% if e2.piece_jointe_detail != "oui" %}Certif.{% endif %}</b>
                 </span>{% if not forloop.last %},{% endif %}
                 {% endfor %}
             </td>

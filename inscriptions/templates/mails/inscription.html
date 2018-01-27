@@ -1,47 +1,38 @@
 <p><em>English translation below</em></p>
 <h1>Merci de vous &ecirc;tre inscrit aux {{ instance.course.nom }}</h1>
-<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>
-<p>{% if not instance.paiement_complet %}Pour r&eacute;gler votre inscription vous pouvez payer par internet : <a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">Paypal ou Carte bancaire</a>.<br />{% if instance.frais_paypal > 0 %} Pour tout paiement par internet, {{ instance.frais_paypal|floatformat:2 }} &euro; de frais seront ajout&eacute;s. Ces frais correspondent aux frais de transaction Paypal.<br />{% endif %} <br /> Ou envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de "{{ instance.course.ordre }}".</p>
-<p>{% else %}Votre paiement de {{ instance.paiement }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u. {% endif %}</p>
-<p>{% if instance.licence_manquantes %}Il manque les licences de :</p>
-<ul>{% for e in instance.licence_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if instance.certificat_manquantes %} Il manque les certificats m&eacute;dicaux de (<a href="{{ ROOT_URL }}/static/documents/certificat_medical.pdf" target="_blank">mod&egrave;le</a>):</p>
-<ul>{% for e in instance.certificat_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if instance.autorisation_manquantes %} Il manque les autorisations parentales (<a href="{{ ROOT_URL }}/static/documents/autorisation_parentale.pdf" target="_blank">mod&egrave;le</a>) :</p>
-<ul>{% for e in instance.autorisation_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}Merci d'envoyer le paiement et les justificatifs &agrave;</p>
-<p>{{ instance.course.adresse|linebreaksbr }}</p>
-<p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>. {% endif %}</p>
+<p>
+    Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />
+    Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.
+</p>
+{% include "_detail_paiement.html" %}
+{% include "_detail_equipiers.html" %}
+{% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
+    <p>Merci d'envoyer le paiement et les justificatifs &agrave;</p>
+    <p>{{ instance.course.adresse|linebreaksbr }}</p>
+    <p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>.</p>
+{% endif %}
 <p>Nous vous tiendrons au courant d&egrave;s que votre inscription sera d&eacute;finitive.</p>
 <p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">cliquant ici</a>.</p>
-<p>--<br />{{ instance.course.organisateur }}</p>
+<p>
+    --<br />
+    {{ instance.course.organisateur }}
+</p>
 <hr />
 <h1>Thank for registering at {{ instance.course.nom }}</h1>
-<p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />\
-Your team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>
-<p>{% if not instance.paiement_complet %}You can pay your registration online: <a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">Paypal or credit card</a>.<br />{% if instance.frais_paypal > 0 %} For online payment, &euro; {{ instance.frais_paypal|floatformat:2 }} fee will be added.<br />{% endif %} <br /> Or send a &euro; {{ instance.prix }} check payable to "{{ instance.course.ordre }}".</p>
-<p>{% else %}Your payment of &euro; {{ instance.paiement }} was received. {% endif %}</p>
-<p>{% if instance.licence_manquantes %}Missing licenses:</p>
-<ul>{% for e in instance.licence_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if instance.certificat_manquantes %} Missing medical certificate (<a href="{{ ROOT_URL }}/static/documents/certificat_medical.pdf" target="_blank">model in french</a>):</p>
-<ul>{% for e in instance.certificat_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if instance.autorisation_manquantes %} Missing parental authorizations (<a href="{{ ROOT_URL }}/static/documents/autorisation_parentale.pdf" target="_blank">model in french</a>) :</p>
-<ul>{% for e in instance.autorisation_manquantes %}
-<li>{{ e.prenom }} {{ e.nom }}</li>
-{% endfor %}</ul>
-<p>{% endif %} {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}You can send paiment and justificatives to;</p>
-<p>{{ instance.course.adresse|linebreaksbr }}</p>
-<p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. {% endif %}</p>
+<p>
+    Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />
+    Your team <strong>{{ instance.nom }}</strong> is booked to the {{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.
+</p>
+{% include "_detail_paiement.html" %}
+{% include "_detail_equipiers.html" %}
+{% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
+    <p>You can send paiment and justificatives to;</p>
+    <p>{{ instance.course.adresse|linebreaksbr }}</p>
+    <p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. </p>
+{% endif %}
 <p>You'll be informed as soon your registration is complete.</p>
 <p>If you wan't to modify an information or add a missing justificative, you can do it by <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">clicking herei</a>.</p>
-<p>--<br />{{ instance.course.organisateur }}</p>
+<p>
+    --<br />
+    {{ instance.course.organisateur }}
+</p>

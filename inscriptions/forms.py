@@ -42,7 +42,7 @@ class EquipeForm(ExtraModelForm):
 class EquipierForm(ExtraModelForm):
     class Meta:
         model = Equipier
-        exclude = ('equipe', 'numero', 'piece_jointe_valide', 'autorisation_valide', 'ville2', 'code_eoskates', 'extra')
+        exclude = ('equipe', 'numero', 'piece_jointe_detail', 'autorisation_detail', 'ville2', 'code_eoskates', 'extra')
         widgets = {
             'sexe':              Select(choices=SEXE_CHOICES),
             'date_de_naissance': SelectDateWidget(years=range(datetime.now().year , datetime.now().year - 100, -1)),

@@ -6,9 +6,9 @@ def update(apps, schema_editor):
     Equipier = apps.get_model('inscriptions', 'equipier')
     for e in  Equipier.objects.all():
         if e.autorisation_valide != None:
-            e.autorisation_detail = 'oui' if e.autorisation_valide else 'non'
+            e.autorisation_detail = 'oui' if e.autorisation_valide else 'Invalide'
         if e.piece_jointe_valide != None:
-            e.piece_jointe_detail = 'oui' if e.piece_jointe_valide else 'non'
+            e.piece_jointe_detail = 'oui' if e.piece_jointe_valide else 'Invalide'
         e.save()
 
 class Migration(migrations.Migration):

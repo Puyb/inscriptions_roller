@@ -1,0 +1,56 @@
+{% load i18n %}
+<table class="table">{% for equipier in instance.equipier_set.all %}
+    {% if equipier.numero <= instance.nombre %}
+    <tr>
+        <th>{{equipier.prenom}} {{equipier.prenom}}</th>
+        <td>
+            {% if equipier.piece_jointe_detail == "oui" %}
+                <p class="bg-success">{% if equipier.justificatif == "certificat" %}
+                    {% trans "Certificat reçu et valide" %}
+                {% else %}
+                    {% trans "Licence reçue et valide" %}
+                {% endif %}</p>
+            {% else %}
+                {% if not equipier.piece_jointe %}
+                    {% if equipier.justificatif == "certificat" %}
+                        {% trans "Certificat médical manquant" %}
+                    {% else %}
+                        {% trans "Licence manquante" %}
+                    {% endif %}
+                {% else %}
+                    <p class="{% if equipier.piece_jointe_detail %}bg-danger{% endif %}">
+                    {% if equipier.justificatif == "certificat" %}
+                        {% trans "Certificat reçu" %}
+                    {% else %}
+                        {% trans "Licence reçue" %}
+                    {% endif %}
+                    {% if not equipier.piece_jointe_detail %}
+                        {% trans " en cours de validation" %}
+                    {% else %}
+                        - {% trans equipier.piece_jointe_detail %}
+                    {% endif %}
+                    </p>
+                {% endif %}
+            {% endif %}
+            {% if equipier.age < 18 %}
+                <br />
+                {% if equipier.autorisation_detail == "oui" %}
+                    <p class="bg-success">{% trans "Autorisation parentale reçue et valide" %}</p>
+                {% else %}
+                    <p class="{% if equipier.autorisation_detail %}bg-danger{% endif %}">
+                    {% if not equipier.autorisation %}
+                        {% trans "Autorisation parentale manquante" %}
+                    {% else %}
+                        {% trans "Autorisation parentale reçue" %}
+                        {% if not equipier.autorisation_detail %}
+                            {% trans " en cours de validation" %}
+                        {% else %}
+                            - {% trans equipier.autorisation_detail %}
+                        {% endif %}
+                    {% endif %}
+                    </p>
+                {% endif %}
+            {% endif %}
+        </td>
+    </tr>{% endif %}{% endfor %}
+</table>

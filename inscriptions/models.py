@@ -66,6 +66,26 @@ DESTINATAIRE_CHOICES = (
     ('Tous', _(u'Tous')),
 )
 
+UNKNOWN = ''
+VALIDE = 'oui'
+MOTIFS_REFUS = (
+    'Erreur personne (le document ne concerne pas la personne inscrite)',
+    'Erreur dans la date de naissance',
+    'Numéro de licence ne correspondant pas à l inscription',
+    'Erreur discipline',
+    'Manque la mention "en compétition" obligatoire pour l\'épreuve concernée',
+    'Manque signature',
+    'Date dépassée donc document non valable à la date de la compétition',
+    'Document illisible',
+    'Format document non valide',
+    'Manque une des mention légale et obligatoire ( à préciser )',
+    'Manque le nom de la personne qui sera responsable le jour J',
+    'Manque le nom de la compétition concernée sur l autorisation parentale',
+    'Date du coument invalide',
+    'Pénom et / ou nom mal orthographié(s)',
+    'Document non recevable ou document ne concernant pas la compétition',
+)
+
 #class Chalenge(model.Model):
 #    nom = models.CharField(_('Nom'), max=200)
 
@@ -174,7 +194,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 licence_manquantes_count=Coalesce(Sum(Case(When(equipier__licence_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 certificat_manquants_count=Coalesce(Sum(Case(When(equipier__certificat_manquant=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 autorisation_manquantes_count=Coalesce(Sum(Case(When(equipier__autorisation_manquante=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
-                valide_count=Coalesce(Sum(Case(When(equipier__detail=VALIDE, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+                valide_count=Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 erreur_count=Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
                 hommes_count=Coalesce(Sum(Case(When(equipier__homme=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             ).select_related('categorie', 'gerant_ville2')

@@ -93,11 +93,14 @@ class CourseAdminSite(admin.sites.AdminSite):
             if 'skip' in request.POST and request.POST['skip'] != '':
                 skip = request.POST['skip'].split(',')
             equipier = Equipier.objects.get(id=request.POST['id'])
-            if request.POST['value'] == 'yes' or request.POST['value'] == 'no':
-                equipier.piece_jointe_valide = request.POST['value'] == 'yes'
-                equipier.save()
-            else:
+            val = request.POST['value'];
+            if val == 'skip':
                 skip.append(str(equipier.id))
+            else:
+                if equipier.piece_jointe:
+                    equipier.autorisation_detail = val
+                else:
+                    equipier.piece_jointe_detail = val
             equipier.equipe.commentaires = request.POST['commentaires']
             equipier.equipe.save()
         equipier = Equipier.objects.filter(equipe__course=course).exclude(id__in=skip).filter(verifier=True)
@@ -110,7 +113,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             count=equipier.count(),
             index=len(skip) + 1,
             equipier=equipier[0],
-            skip=','.join(skip)
+            skip=','.join(skip),
+            motifs_refus=MOTIF_REFUS,
         ))
 
     def listing_dossards(self, request):
@@ -361,7 +365,7 @@ class EquipierInline(admin.StackedInline):
     fieldsets = (
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
         (u'Coordonnées', { 'classes': ('collapse', 'collapsed'), 'fields': ('adresse1', 'adresse2', ('ville', 'code_postal'), 'pays', 'email') }),
-        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
+        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_detail', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_detail', 'piece_jointe')) }),
     )
 
 class StatusFilter(SimpleListFilter):

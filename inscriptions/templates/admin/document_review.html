@@ -105,26 +105,35 @@
                 {% csrf_token %}
                 <div class="submit-row">
                     <button onclick="yes()">Oui</button>
-                    <button onclick="no()">Non</button>
+                    <select onchange="no(this)">
+                        <option value="">Non</option>
+                        {% for r in motifs_refus %}
+                        <option value="{{ r }}">{% trans r %}</option>
+                        {% endfor %}
+                        <option value="autre">Autre</option>
+                    </select>
                     <button onclick="next()">Suivant</button>
                 </div>
             </form>
         </div>
-        <iframe style="position: absolute; left: 50%; width: 50%; height: 100%;" src="{% if equipier.piece_jointe_valide == None %}{% if equipier.piece_jointe %}{{ equipier.piece_jointe.url }}{% endif %}{% else %}{% if equipier.autorisation %}{{ equipier.autorisation.url }}{% endif %}{% endif %}"></iframe>
+        <iframe style="position: absolute; left: 50%; width: 50%; height: 100%;" src="{% if equipier.piece_jointe_detail == "" %}{% if equipier.piece_jointe %}{{ equipier.piece_jointe.url }}{% endif %}{% else %}{% if equipier.autorisation %}{{ equipier.autorisation.url }}{% endif %}{% endif %}"></iframe>
     </div>
 </div>
 <script>
     function yes() {
-        document.getElementById('id_value').value = 'yes';
-        document.getElementsByTagName('form')[0].submit();
+        $('#id_value').val('oui');
+        $('form').submit();
     }
-    function no() {
-        document.getElementById('id_value').value = 'no';
-        document.getElementsByTagName('form')[0].submit();
+    function no(sel) {
+        var val = $(sel).val();
+        if (!val) return;
+        if (val === 'autre') val = prompt('Motif de refus');
+        $('#id_value').val(val);
+        $('form').submit();
     }
     function next() {
-        document.getElementById('id_value').value = 'unknown';
-        document.getElementsByTagName('form')[0].submit();
+        $('#id_value').val('skip');
+        $('form').submit();
     }
 </script>
 
