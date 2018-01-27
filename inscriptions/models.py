@@ -296,7 +296,7 @@ class Categorie(models.Model):
             d = d.date()
         d = d or date.today()
         prix = self.prix1 or 0
-        if self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation < d:
             prix = self.prix2 or 0
         return prix
 
@@ -371,7 +371,7 @@ class Equipe(models.Model):
     gerant_adress2     = models.CharField(_(u'Adresse 2'), max_length=200, blank=True)
     gerant_ville       = models.CharField(_(u'Ville'), max_length=200)
     gerant_code_postal = models.CharField(_(u'Code postal'), max_length=200)
-    gerant_pays        = CountryField(_(u'Pays'), default='FR')
+    gerant_pays        = models.CharField(_(u'Pays'), max_length=2, default='FR')
     gerant_email       = models.EmailField(_(u'e-mail'), max_length=200)
     password           = models.CharField(_(u'Mot de passe'), max_length=200, blank=True)
     gerant_telephone   = models.CharField(_(u'Téléphone'), max_length=200, blank=True)
@@ -571,7 +571,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     adresse2          = models.CharField(_(u'Adresse'), max_length=200, blank=True)
     ville             = models.CharField(max_length=200)
     code_postal       = models.CharField(max_length=200)
-    pays              = CountryField(_(u'Pays'), default='FR')
+    pays              = models.CharField(_(u'Pays'), max_length=2, default='FR')
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
     autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True, help_text=AUTORISATION_HELP)
@@ -670,7 +670,7 @@ class ExtraQuestion(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation < d:
             price = self.price2 or 0
         return price
 
@@ -720,7 +720,7 @@ class ExtraQuestionChoice(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.question.course.date_augmentation < d:
+        if self.question.course.date_augmentation and self.question.course.date_augmentation < d:
             price = self.price2 or 0
         return price
 

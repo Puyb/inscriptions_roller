@@ -25,6 +25,7 @@ from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge
 from .utils import MailThread, jsonDate
+from django_countries.data import COUNTRIES
 
 logger = logging.getLogger(__name__)
 
@@ -123,8 +124,7 @@ def form(request, course_uid, numero=None, code=None):
             equipier_form.fields['piece_jointe'].help_text = _(Equipier.PIECE_JOINTE_HELP) % { 'link': certificat_link }
 
     nombres_par_tranche = { e['range']: e['count'] 
-            for e in Equipe.objects
-                .filter(course__uid='6hdp15')
+            for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
                     Value('-'),
@@ -145,6 +145,7 @@ def form(request, course_uid, numero=None, code=None):
         "course": course,
         "message": message,
         "extra_categorie": extra_categorie,
+        "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course).exclude(role='').count() > 0,
     })
 
 @open_closed
@@ -152,7 +153,7 @@ def find_challenges_categories(request, course_uid):
     course = get_object_or_404(Course, uid=course_uid)
     if request.method != 'POST':
         return HttpResponse(status=405)
-    equipier_formset = EquipierFormset(request.POST)
+    equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })
 
     if not equipier_formset.is_valid():
         return HttpResponse(json.dumps(equipier_formset.errors), status=400, content_type='application/json')
@@ -161,7 +162,6 @@ def find_challenges_categories(request, course_uid):
         equipier = equipier_formset.forms[i].save(commit=False)
         equipier.numero = i + 1
         equipiers.append(equipier)
-    print(len(equipiers))
 
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
@@ -423,11 +423,18 @@ def facture(request, course_uid, numero):
     })
 
 def challenges(request):
-    challenges = Challenge.objects.filter(active=True).prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+    challenges = Challenge.objects.filter(active=True).order_by('nom').prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+    prochains_challenges = []
+    anciens_challenges = []
+    for challenge in challenges:
+        if len([course for course in challenge.courses.all() if course.date > date.today()]):
+            prochains_challenges.append(challenge)
+        else:
+            anciens_challenges.append(challenge)
 
     return TemplateResponse(request, 'challenges.html', {
-        'prochains_challenges': challenges.filter (courses__date__gt=date.today()).order_by('nom'),
-        'anciens_challenges':   challenges.exclude(courses__date__gt=date.today()).order_by('nom'),
+        'prochains_challenges': prochains_challenges, 
+        'anciens_challenges':   anciens_challenges,
     })
 
 def challenge(request, challenge_uid):
@@ -493,4 +500,6 @@ def live_push(request, course_uid):
                     logger.exception('Error importing row %s' % row)
         return HttpResponse()
 
+def countries(request):
+    return HttpResponse(json.dumps([ [k, str(v)] for k, v in COUNTRIES.items()]), content_type='application/json')
 

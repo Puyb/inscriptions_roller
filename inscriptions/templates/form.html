@@ -57,7 +57,7 @@
                         {% endif %}{% endif %}{% endif %}
                         {% blocktrans %}Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
                         {% blocktrans with date=COURSE.date_fermeture %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
-                        {% url "inscriptions_views.contact" course_uid=COURSE.uid as url_contact %}
+                        {% url "contact" course_uid=COURSE.uid as url_contact %}
                         {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />
                     </div>
                 </div>
@@ -136,13 +136,13 @@
             numero_fin: {{ cat.numero_fin }}
         }{% if not forloop.last %},{% endif %}
     {% endfor %}];
-    var nombres_par_tranche = { {% for k, v in nombres_par_tranche.items %}"{{ k }}": {{ v }}{% if not forloop.last %},{% endif %}{% endfor %} };
-    {% if not user.is_staff %}
+    var nombres_par_tranche = {{ nombres_par_tranche|json }};
+    {% if not is_staff %}
     CATEGORIES = CATEGORIES.filter(function(categorie) {
         {% if update %}
         if(categorie.code === '{{ instance.categorie.code }}') return true;
         {% endif %}
-        return nombres_par_tranche[categorie.numero_debut + '-' + categorie.numero_fin] < categorie.numero_fin - categorie.numero_debut + 1;
+        return (nombres_par_tranche[categorie.numero_debut + '-' + categorie.numero_fin] || 0) < categorie.numero_fin - categorie.numero_debut + 1;
     });
     {% endif %}
     var COURSE = {
@@ -164,7 +164,7 @@
     var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions_find_challenges_categories" course_uid=COURSE.uid %}';
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
-    {% if user.is_staff %}
+    {% if is_staff %}
     STAFF = true;
     {% endif %}
     var I18N = {};

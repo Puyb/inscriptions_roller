@@ -25,6 +25,7 @@ urlpatterns += [
     path(r'', views.index, name='home'),
     path(r'organisteurs/', TemplateView.as_view(template_name='orga.html'), name='orga'),
     path(r'challenges/', views.challenges, name='inscriptions_challenges'),
+    path(r'countries.json', views.countries, name='countries'),
     path(r'challenges/<str:challenge_uid>/', views.challenge, name='inscriptions_challenge'),
     path(r'<str:course_uid>/vars.js', TemplateView.as_view(template_name='vars.js')),
     path(r'<str:course_uid>/<int:numero>/done/', views.done, name='inscriptions_done'),
