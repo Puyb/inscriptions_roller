@@ -9,6 +9,8 @@ Make sure you are using a virtual environment of some sort (e.g. `virtualenv` or
 
 ```
 pip install -r requirements.txt
+npm install
+npm run build
 ./manage.py migrate
 ./manage.py loaddata sites
 ./manage.py runserver
