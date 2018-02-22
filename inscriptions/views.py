@@ -150,7 +150,10 @@ def form(request, course_uid, numero=None, code=None):
 
 @open_closed
 def find_challenges_categories(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    EQ = ExtraQuestion.objects.prefetch_related('choices')
+    course = get_object_or_404(Course.objects.prefetch_related(
+            Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
+        ), uid=course_uid)
     if request.method != 'POST':
         return HttpResponse(status=405)
     equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })
@@ -177,7 +180,7 @@ def find_challenges_categories(request, course_uid):
                 'challenge': challenge,
                 'participation': len(participations) and participations[0],
             }
-            all_result[ec.code].append(render_to_string("_participation.html", ctx))
+            all_result[ec.code].append(render_to_string("_participation.html", ctx, request=request))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
 
 @open_closed
