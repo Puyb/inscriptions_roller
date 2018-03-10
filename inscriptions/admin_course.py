@@ -25,6 +25,8 @@ import inspect
 
 ICON_OK = '✅'
 ICON_KO = '❎'
+ICON_CHECK = '❔'
+ICON_MISSING = '✉'
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
@@ -369,10 +371,10 @@ class StatusFilter(SimpleListFilter):
     parameter_name = 'status'
     def lookups(self, request, model_admin):
         return (
-            ('verifier', _(u'À vérifier')),
-            ('complet', _(u'Complet')),
-            ('incomplet', _(u'Incomplet')),
-            ('erreur', _(u'Erreur')),
+            ('verifier', _('%s À vérifier') % ICON_CHECK),
+            ('complet', _('%s Complet') % ICON_OK),
+            ('incomplet', _('%s Incomplet') % ICON_MISSING),
+            ('erreur', _('%s Erreur') % ICON_KO),
         )
     def queryset(self, request, queryset):
         if self.value() == 'verifier':
@@ -464,13 +466,13 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def dossier_complet_auto2(self, obj):
         if obj.verifier():
-            return u"""<img alt="None" src="/static/admin/img/icon-unknown.gif">"""
+            return ICON_CHECK
         auto = obj.dossier_complet_auto()
         if auto:
             return ICON_OK
         if auto == False:
             return ICON_KO
-        return u""
+        return ICON_MISSING
     dossier_complet_auto2.allow_tags = True
     dossier_complet_auto2.short_description = mark_safe(ICON_OK)
 
