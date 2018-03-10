@@ -4,9 +4,23 @@
 <h1>{% trans "Sélectionnez votre course :" %}</h1>
 <ul>
     {% for course in courses %}
-    <li><a href="/{{ course.uid }}/admin/">{{ course.nom }} ({{ course.date }})</a></li>
+    <li><a href="/{{ course.uid }}/admin/">{{ course.nom }} ({{ course.date }})</a> {% if not course.active %}{% trans "(en attente de validation)" %}{% endif %}</li>
     {% endfor %}
 </ul>
+{% if request.user.is_superuser %}
+<h1>{% trans "Courses sans accreditation :" %}</h1>
+<ul>
+    {% for course in courses_admin %}
+    <li><a href="/{{ course.uid }}/admin/">{{ course.nom }} ({{ course.date }})</a> {% if not course.active %}{% trans "(en attente de validation)" %}{% endif %}</li>
+    {% endfor %}
+</ul>
+<a href="/admin/"><span>{% trans "Superadmin !" %}</span></a><br />
+{% endif %}
 <a href="/course/inscriptions/course/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
-<a href="/course/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a>
+<a href="/course/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a><br />
+{% if 'old' in request.GET %}
+    <a href="/course/choose/"><span>{% trans "Cacher les anciennes courses" %}</span></a>
+{% else%}
+    <a href="/course/choose/?old"><span>{% trans "Afficher les anciennes courses" %}</span></a>
+{% endif %}
 {% endblock %}

@@ -17,6 +17,7 @@ from django.conf import settings
 from .forms import CourseForm, ImportResultatForm
 from .utils import ChallengeUpdateThread
 from account.views import LogoutView
+from datetime import datetime, timedelta
 import json
 import re
 from Levenshtein import distance
@@ -37,7 +38,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
+        print(request.path)
+        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False
@@ -59,8 +61,13 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def course_choose(self, request):
         request.current_app = self.name
+        accreditations = request.user.accreditations.all()
+        qs = Course.objects.all()
+        if 'old' not in request.GET:
+            qs = qs.filter(date__gte=datetime.now() - timedelta(days=60))
         return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
-            courses=(a.course for a in request.user.accreditations.all()),
+            courses=qs.filter(accreditations__in=accreditations).order_by('date'),
+            courses_admin=qs.exclude(accreditations__in=accreditations).order_by('date') if request.user.is_superuser else None,
         ))
 
     def course_ask_accreditation(self, request, course_uid=None):
