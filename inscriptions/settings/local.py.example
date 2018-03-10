@@ -1,0 +1,30 @@
+from .default import *
+
+DEBUG = True
+TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
+
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_HOST = 'smtp.example.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'user'
+EMAIL_HOST_PASSWORD = 'password'
+DEFAULT_FROM_MAIL = 'sender@example.com'
+
+MAPQUEST_API_KEY = '1234567890abcdef'
+
+if DEBUG:
+    INSTALLED_APPS.append('debug_toolbar')
+    INSTALLED_APPS.append('django_extensions')
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    INTERNAL_IPS = ('127.0.0.1', )
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "inscription_roller",
+        "USER": "user",
+        "PASSWORD": "password",
+        "HOST": "localhost",
+    }
+}

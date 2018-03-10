@@ -110,8 +110,6 @@
                 </ul>
             </div>
             {% endif %}
-
-            {% if instance.certificat_manquantes %}
             <div class="clearfix">
                 {% blocktrans %}Il manque les certificats médicaux de (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf" target="_blank">modèle</a>):{% endblocktrans %}<ul>
                 {% for e in instance.certificat_manquantes %}
@@ -157,70 +155,5 @@
     {% endwith %}
 {% endfor %}
                 
-
-{% endblock %}
-
-{% block sidebar %}
-    <div id="recent-posts-2" class="sidebar-wrap clearfix">
-        <h3>{% trans "Partager" %}</h3>
-        {% trans "Partagez votre inscription sur les réseaux sociaux !" %}<br />
-        <br />
-
-        <div id="fb-root"></div>
-        <script id="facebook-jssdk" src="http://connect.facebook.net/en_US/all.js"></script>
-        <script>
-            window.fbAsyncInit = function() {
-                FB.init({
-                    appId      : '{{ FACEBOOK_APPID }}',
-                    status     : true,
-                    xfbml      : true
-                });
-            };
-        </script>
-        <script> 
-            var obj = {
-                method: 'feed',
-                redirect_uri: '{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}',
-                link: '{{ ROOT_URL }}{% url "inscriptions_create" course_uid=instance.course.uid %}', 
-                picture: 'http://www.6hdeparis.fr/wp-content/uploads/2013/03/logo-6h-paris-small.png',
-                description: '{% blocktrans %}Les 6h Roller de Paris sont une course d\'endurance à roller, en relai par équipe de 5 ou en solitaire. Ouverte à tous, elle aura lieu le 2 août 2015 dans le Bois de Boulogne, sur un circuit de 2,6 km fermé à la circulation.{% endblocktrans %}',
-                name: {% if instance.nombre == 1 %}
-                    '{% blocktrans with nom=instance.nom %}"{{ nom }}" est inscrit aux 6h de Paris.{% endblocktrans %}'
-                {% else %}{% if instance.nombre == 2 %}
-                    '{% blocktrans with nom=instance.nom %}Le duo "{{ nom }}" est inscrit aux 6h de Paris.{% endblocktrans %}'
-                {% else %}
-                    '{% blocktrans with nom=instance.nom %}L\'équipe "{{ nom }}" est inscrite aux 6h de Paris.{% endblocktrans %}'
-                {% endif %}{% endif %}
-            };
-            function postToFeed() {
-                // calling the API ...
-                function callback(response) {
-                }
-                FB.ui(obj, callback);
-            }
-        </script>
-        <a onclick="postToFeed()" style=" display: block; width: 100px; padding: 3px 5px; background-color: #EEE;
-                        background-image: linear-gradient(#FFF, #DEDEDE);
-                            border: 1px solid #CCC;
-                                border-radius: 3px;
-                                    color: #333;
-                                        font-weight: bold;
-                                            text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.5);
-                                                cursor: pointer;
-                                                    height: 18px;
-                                                        max-width: 98%;
-                                                        overflow: hidden;">
-            <img src="{{ STATIC_URL }}fb.png" style="width: 22px; height: 22px; margin-bottom: -5px;" />
-            Facebook
-        </a><br />
-
-        <a href="https://twitter.com/share" class="twitter-share-button" data-url="http://inscription.6hdeparis.fr/" data-text="" data-via="6hdeparis" data-size="large" data-hashtags="6hdp">
-            <img src="{{ STATIC_URL }}twitter.png" />
-            Tweet
-        </a>
-        <script>document.getElementsByClassName('twitter-share-button')[0].setAttribute('data-text', obj.description);</script>
-        <script  id="twitter-wjs" src="http://platform.twitter.com/widgets.js"></script>
-    </div>
-</div>
 
 {% endblock %}
