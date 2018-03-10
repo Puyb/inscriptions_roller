@@ -400,13 +400,13 @@ class Equipe(models.Model):
         return u'%s - %s - %s - %s' % (self.numero, self.course.uid, self.categorie, self.nom)
 
     def licence_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.licence_manquante]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.licence_manquante]
 
     def certificat_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.certificat_manquant]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.certificat_manquant]
 
     def autorisation_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.autorisation_manquante]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.autorisation_manquante]
 
     def verifier(self):
         if hasattr(self, 'verifier_count'):
