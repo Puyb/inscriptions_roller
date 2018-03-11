@@ -615,9 +615,17 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
                 original.prenom != self.prenom or
                 original.autorisation != self.autorisation):
                 self.autorisation_valide = None
-        self.licence_manquante = self.justificatif == 'licence' and not self.piece_jointe_valide
-        self.certificat_manquant = self.justificatif == 'certificat' and not self.piece_jointe_valide
-        self.autorisation_manquante = self.age() < 18 and not self.autorisation_valide
+        piece_jointe_manquante = (
+                (not self.piece_jointe and self.piece_jointe_valide != True) or 
+                (bool(self.piece_jointe) and self.piece_jointe_valide == False)
+            )
+        autorisation_manquante = (
+                (not self.autorisation and self.autorisation_valide != True) or
+                (bool(self.autorisation) and self.autorisation_valide == False)
+            )
+        self.licence_manquante = self.justificatif == 'licence' and piece_jointe_manquante
+        self.certificat_manquant = self.justificatif == 'certificat' and piece_jointe_manquante
+        self.autorisation_manquante = self.age() < 18 and autorisation_manquante
         self.verifier = ((bool(self.piece_jointe) and self.piece_jointe_valide == None) or
                          (self.age() < 18 and bool(self.autorisation) and self.autorisation_valide == None))
         self.erreur = self.piece_jointe_valide == False or (self.age() < 18 and self.autorisation_valide == False)

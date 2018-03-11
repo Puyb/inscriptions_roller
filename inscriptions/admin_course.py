@@ -320,7 +320,9 @@ class CourseFilteredObjectAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(course__uid=course_uid, course__accreditations__user=request.user)
+        qs = qs.filter(course__uid=course_uid)
+        if not request.user.is_superuser:
+            qs = qs.filter(course__accreditations__user=request.user)
         return qs
     pass
 
