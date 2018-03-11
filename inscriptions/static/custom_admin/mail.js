@@ -1,4 +1,4 @@
 $(function() {
-    $('fieldset').after($('<div>').html($('.field-message p').text()))
+    $('fieldset').after($('<div>').html($('.field-message .readonly').text()))
     $('.field-message').remove();
 });

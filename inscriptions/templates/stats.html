@@ -188,17 +188,6 @@
     <div class="panel panel-default">
         <div class="panel-heading">{% trans "Autres" %}</div>
         <div class="panel-body">
-            <div class="col-md-4">
-                <table>
-                    <tr><th>{% trans "Comment ont-il connu la course" %}</th><th>#</th><th>%</th></tr>
-                    {% for connu, count in stats.connu %}
-                    <tr><td>{{ connu }}</td><td>{{ count }}</td><td>{% widthratio count stats.course.equipes 100 %} %</td></tr>
-                    {% endfor %}
-                </table>
-            </div>
-            <div class="col-md-8">
-                <canvas id="canvas_connu"></canvas>
-            </div>
             {% if user.is_staff %}
             <div class="col-md-6">
                 <canvas id="canvas_paiement"></canvas>
@@ -408,20 +397,6 @@
         //g.labels[d - 2] = (d - 1) * tranche;
         g.labels[d - 1] = i * tranche;
         g.data('% / km', data.map(function(i) { return i / {{ stats.course.equipiers }} * 100; }));
-        g.draw();
-    </script>
-    <script>
-        var colors = {};
-        // pies
-        var g = new Bluff.Pie('canvas_connu', 400);
-        g.theme_pastel();
-        g.title = '';
-        g.tooltips = true;
-        g.sort = false;
-        g.zero_degree = -90;
-        {% for connu, count in stats.connu %}
-        g.data("{{ connu }}", {{ count }});
-        {% endfor %}
         g.draw();
     </script>
     {% if user.is_staff %}
