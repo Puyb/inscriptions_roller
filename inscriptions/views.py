@@ -107,7 +107,7 @@ def form(request, course_uid, numero=None, code=None):
         if not instance and 'course' in request.GET and 'numero' in request.GET:
             course2 = get_object_or_404(Course, uid=request.GET['course'])
             instance = get_object_or_404(Equipe, course=course2, numero=request.GET['numero'])
-            code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key, None))
+            code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key(), None))
             if instance.password != code:
                 raise Http404()
         equipe_form = EquipeForm(instance=instance, extra_questions=course.extra_equipe)
