@@ -289,6 +289,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                             code = equipe.categorie.code
                             equipe.position_categorie = position_categories[code]
                             position_categories[code] += 1
+
+                    # save and add to challenges newly created equiped
                     for equipe in equipes:
                         _id = equipe.id
                         super(Equipe, equipe).save()

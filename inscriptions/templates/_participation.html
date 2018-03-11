@@ -19,20 +19,23 @@
                     {% if course != COURSE %}
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                         <div class="thumbnail">
-                            <span class="hidden-xs" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></span>
+                            <{% if nolinks %}span{% else %}a href="{{ course.url }}"{% endif %} class="hidden-xs" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></{{ nolinks|yesno:"span,a" }}>
                             <div class="caption">
-                                <h3>{{ course.nom }}</h3>
+                                <h3>
+                                    {% if nolinks %}{{ course.nom }}
+                                    {% else %}<a href="{{ course.url }}">{{ course.nom }}</a>
+                                    {% endif %}
+                                </h3>
                                 <p>
                                     {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
-                                    {% blocktrans with organisateur=course.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}
                                 </p>
                                 {% with participation.equipes_dict|get:course.uid as ec2 %}
                                     {% if ec2 %}
-                                        <p>
+                                        <p class="bg-info">
                                         {% if ec2.points %}{% blocktrans with points=ec2.points %}Vous y avez déjà gagné {{ points }} points.{% endblocktrans %}
                                         {% else %}{% trans "Vous êtes déjà inscrit." %}{% endif %}
-                                        </p>
-                                        <p>Dossard {{ ec2.equipe.numero }} - {{ ec2.equipe.nom }}</p>
+                                        <br />
+                                        Dossard {{ ec2.equipe.numero }} - {{ ec2.equipe.nom }}</p>
                                     {% else %}
                                         {% if course.fermee %}
                                         <p>

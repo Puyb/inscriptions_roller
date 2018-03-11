@@ -150,11 +150,7 @@
 {% endif %}
 
 {% for ec in instance.challenges.all %}
-    {% with ec.participation as participation %}
-        {% with participation.challenge as challenge %}
-            {% include "_participation.html" %}
-        {% endwith %}
-    {% endwith %}
+    {% include "_participation.html" with participation=ec.participation challenge=ec.participation.challenge %}
 {% endfor %}
                 
 

@@ -889,7 +889,6 @@ class Challenge(models.Model):
 
 
     def inscription_equipe(self, equipe):
-        ParticipationChallenge.objects.filter(challenge=self, equipes__equipe=equipe).delete()
         if not any(c for c in self.categories.all() if c.valide(equipe)):
             return None
 
