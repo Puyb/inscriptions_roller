@@ -19,9 +19,9 @@
                     {% if course != COURSE %}
                     <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                         <div class="thumbnail">
-                            <a class="hidden-xs" href="{{ course.url }}" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
+                            <span class="hidden-xs" style="background: url({{ MEDIA_URL }}{{ course.logo }}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block"></a>
                             <div class="caption">
-                                <h3><a href="{{ course.url }}">{{ course.nom }}</a></h3>
+                                <h3>{{ course.nom }}</h3>
                                 <p>
                                     {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
                                     {% blocktrans with organisateur=course.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}
