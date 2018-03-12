@@ -158,7 +158,7 @@ def find_challenges_categories(request, course_uid):
         return HttpResponse(status=405)
     instance = None
     if 'id' in request.POST:
-        instance = get_object_or_404(Equipe, course=course, id=request.POST['ID'])
+        instance = get_object_or_404(Equipe, course=course, id=request.POST['instance_id'])
     equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })
 
     if not equipier_formset.is_valid():

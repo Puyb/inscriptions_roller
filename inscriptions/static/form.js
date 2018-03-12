@@ -230,7 +230,7 @@ function setup_categories(data) {
         return '&categories=' + c.code;
     }).join('');
     if (UPDATE) {
-        data += '&id=' + INSTANCE.ID;
+        data += '&instance_id=' + INSTANCE.ID;
     }
     $.ajax({
         url: CHALLENGES_CATEGORIES_URL,
