@@ -29,6 +29,12 @@ ICON_KO = '❎'
 ICON_CHECK = '❔'
 ICON_MISSING = '✉'
 
+def getCourse(request, qs=Course.objects.all()):
+    uid = request.COOKIES['course_uid']
+    if request.user.is_superuser:
+        return qs.get(uid=uid)
+    return qs.get(uid=uid, accreditations__user=request.user)
+
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
         if not request.user.is_authenticated:
@@ -91,8 +97,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def document_review(self, request):
         request.current_app = self.name
-        uid = request.COOKIES['course_uid']
-        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        course = getCourse(request)
         
         skip = []
         
@@ -124,8 +129,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def listing_dossards(self, request):
         request.current_app = self.name
-        uid = request.COOKIES['course_uid']
-        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        course = getCourse(request)
 
         if request.method == 'POST':
             equipes = Equipe.objects.filter(course=course).order_by(*request.GET.get('order','numero').split(','))
@@ -149,8 +153,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def anomalies(self, request):
         request.current_app = self.name
-        uid = request.COOKIES['course_uid']
-        course = Course.objects.get(uid=uid, accreditations__user=request.user)
+        course = getCourse(request)
         equipiers = list(Equipier.objects.filter(equipe__course=course).select_related('equipe__categorie'))
 
         doublons = []
@@ -175,8 +178,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def resultats(self, request):
         request.current_app = self.name
-        uid = request.COOKIES['course_uid']
-        course = Course.objects.prefetch_related('categories', 'challenges').get(uid=uid, accreditations__user=request.user)
+        course = getCourse(request, Course.objects.prefetch_related('categories', 'challenges'))
         form = ImportResultatForm()
 
         if request.method == 'POST':
@@ -571,7 +573,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def send_mails(self, request, queryset=None):
         request.current_app = self.admin_site.name
-        course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
+        course = getCourse(request)
 
         if 'template' in request.POST and 'ids' in request.POST:
             ids = json.loads(request.POST['ids'])
@@ -589,7 +591,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def export(self, request, queryset=None):
         request.current_app = self.admin_site.name
-        course = get_object_or_404(Course, uid=request.COOKIES['course_uid'], accreditations__user=request.user)
+        course = getCourse(request)
 
         fields = {
             'equipe.%s' % field.name: '%s - %s' % (_('Equipe'), field.verbose_name or field.name)
@@ -688,7 +690,9 @@ class CourseAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(uid=course_uid, accreditations__user=request.user)
+        qs = qs.filter(uid=course_uid)
+        if not request.user.is_superuser:
+            qs = qs.filter(accreditations__user=request.user)
         return qs
 
     def changelist_view(self, request):
