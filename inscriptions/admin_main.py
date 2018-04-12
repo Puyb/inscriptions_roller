@@ -160,7 +160,7 @@ class ChallengeAdmin(admin.ModelAdmin):
 
         if len(queryset) != 1:
             messages.add_message(request, messages.ERROR, _(u'Sélectionnez une seul course'))
-        challenge = queryset.prefetch_related('categories__categories').get()
+        challenge = queryset.prefetch_related('categories__categories', 'courses').get()
 
         return TemplateResponse(request, 'admin/challenge/courses.html', dict(self.admin_site.each_context(request),
             challenge=challenge,

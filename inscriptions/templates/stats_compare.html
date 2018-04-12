@@ -1,49 +1,47 @@
-{% extends "base.html" %}
+{% extends "site_base.html" %}
 {% load i18n %}
 {% load l10n %}
 {% load stats %}
 
-{% block main %}
-    <form id="formAlign">
-        <div class="clearfix grid_4">
-            Point de comparaison :
-            <ul>
-                <li>
-                    <input type="radio" name="align" id="align1" value="" {% if align == "" %}checked {% endif %}/>
-                    <label for="align1">Date de la course</label>
-                </li>
-                <li>
-                    <input type="radio" name="align" id="align2" value="augment" {% if align == "augment" %}checked {% endif %}/>
-                    <label for="align2">Date d'augmentation</label>
-                </li>
-                <li>
-                    <input type="radio" name="align" id="align3" value="start" {% if align == "start" %}checked {% endif %}/>
-                    <label for="align3">Date d'ouverture</label>
-                </li>
-            </ul>
-        </div>
-        <div class="clearfix grid_4">
-            Donnée :
-            <ul>
-                <li>
-                    <input type="radio" name="equipiers" id="equipiers1" value="" {% if request.GET.equipiers != "1" %}checked {% endif %}/>
-                    <label for="align1">Equipes</label>
-                </li>
-                <li>
-                    <input type="radio" name="equipiers" id="equipiers2" value="1" {% if request.GET.equipiers == "1" %}checked {% endif %}/>
-                    <label for="align2">Participants</label>
-                </li>
-            </ul>
-        </div>
-    </form>
-    <script>
-        [].forEach.call(document.getElementsByTagName('input'), function(e) {
-            e.addEventListener('click', function() {
-                document.getElementById('formAlign').submit();
-            });
-        });
-    </script>
+{% block body %}
+<form id="navbar">
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">{% trans "Equipes" %}</a>
+    </div>
 
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Point de comparaison" %} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a data-name="align" data-value="">{% if request.GET.align == "" %}<strong>{% endif %}{% trans "Date de la course" %}{% if request.GET.align == "" %}</strong>{% endif %}</a></li>
+            <li><a data-name="align" data-value="augment">{% if request.GET.align == "augment" %}<strong>{% endif %}{% trans "Date d'augmentation" %}{% if request.GET.align == "augment" %}</strong>{% endif %}</a></li>
+            <li><a data-name="align" data-value="start">{% if request.GET.align == "start" %}<strong>{% endif %}{% trans "Date d'ouverture" %}{% if request.GET.align == "start" %}</strong>{% endif %}</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Données" %} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a data-name="equipiers" data-value="">{% if request.GET.equipiers == "" %}<strong>{% endif %}{% trans "Equipes" %}{% if request.GET.equipiers == "" %}</strong>{% endif %}</a></li>
+            <li><a data-name="equipiers" data-value="1">{% if request.GET.equipiers == "1" %}<strong>{% endif %}{% trans "Participants" %}{% if request.GET.equipiers == "1" %}</strong>{% endif %}</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+<input type="hidden" name="align" value="{{ request.GET.align }}" />
+<input type="hidden" name="equipiers" value="{{ request.GET.equipiers }}" />
     <div class="clearfix grid_16" style="margin-bottom: 50px">
         <canvas id="canvas_time"></canvas>
     </div>

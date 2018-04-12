@@ -21,7 +21,7 @@
         <div class="readonly">
             <select onchange="var v=$(this).val(); if (v) location.href=v;">
                 <option></option>
-                <option value="../../mail/?equipe={{ instance.id }}">Historique des mails envoyés</option>
+                <option value="../../../mail/?equipe={{ instance.id }}">Historique des mails envoyés</option>
                 {% for template in templates %}
                 <option value="../send/{{ template.id }}">Envoyer un email "{{ template.nom }}"</option>
                 {% endfor %}

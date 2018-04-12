@@ -107,7 +107,7 @@ def form(request, course_uid, numero=None, code=None):
         if not instance and 'course' in request.GET and 'numero' in request.GET:
             course2 = get_object_or_404(Course, uid=request.GET['course'])
             instance = get_object_or_404(Equipe, course=course2, numero=request.GET['numero'])
-            code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key, None))
+            code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key(), None))
             if instance.password != code:
                 raise Http404()
         equipe_form = EquipeForm(instance=instance, extra_questions=course.extra_equipe)
@@ -150,9 +150,15 @@ def form(request, course_uid, numero=None, code=None):
 
 @open_closed
 def find_challenges_categories(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    EQ = ExtraQuestion.objects.prefetch_related('choices')
+    course = get_object_or_404(Course.objects.prefetch_related(
+            Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
+        ), uid=course_uid)
     if request.method != 'POST':
         return HttpResponse(status=405)
+    instance = None
+    if 'id' in request.POST:
+        instance = get_object_or_404(Equipe, course=course, id=request.POST['instance_id'])
     equipier_formset = EquipierFormset(request.POST, form_kwargs={ 'extra_questions': course.extra_equipier })
 
     if not equipier_formset.is_valid():
@@ -166,18 +172,22 @@ def find_challenges_categories(request, course_uid):
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
     all_result = defaultdict(list)
-    for challenge in course.challenges.all():
+    for challenge in course.challenges.prefetch_related(Prefetch('courses', Course.objects.order_by('date'))):
         result = challenge.find_categories(equipiers, course_categories, course)
         for ec, cc in result.items():
             participations = list(challenge.find_participation_for_equipe_raw(
                     course, request.POST['nom'], equipiers, ec
-                ).exclude(equipes__equipe__course=course).prefetch_related('equipes__equipe__course'))
+                ).exclude(
+                    equipes__equipe__course=course,
+                    equipes__equipe=instance,
+                ).prefetch_related('equipes__equipe__course'))
 
             ctx = {
                 'challenge': challenge,
                 'participation': len(participations) and participations[0],
+                'nolinks': True,
             }
-            all_result[ec.code].append(render_to_string("_participation.html", ctx))
+            all_result[ec.code].append(render_to_string("_participation.html", ctx, request=request))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
 
 @open_closed
@@ -186,8 +196,9 @@ def done(request, course_uid, numero):
     try:
         instance = Equipe.objects.select_related('course').prefetch_related(
 		'equipier_set',
-                Prefetch('challenges', EquipeChallenge.objects.select_related('participation').prefetch_related(
-                    Prefetch('participation__equipes', EquipeChallenge.objects.select_related('equipe__course'))
+                Prefetch('challenges', EquipeChallenge.objects.select_related('participation', 'participation__challenge').prefetch_related(
+                    Prefetch('participation__equipes', EquipeChallenge.objects.select_related('equipe__course')),
+                    Prefetch('participation__challenge__courses', Course.objects.order_by('date'))
                 )),
             ).get(course=course, numero=numero)
         #prefetch_related_objects([instance], [Prefetch('equipier_set', Equipier.objects.filter(numero__lte=instance.nombre))])

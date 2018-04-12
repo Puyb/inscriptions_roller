@@ -420,13 +420,13 @@ class Equipe(models.Model):
         return u'%s - %s - %s - %s' % (self.numero, self.course.uid, self.categorie, self.nom)
 
     def licence_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.licence_manquante]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.licence_manquante]
 
     def certificat_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.certificat_manquant]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.certificat_manquant]
 
     def autorisation_manquantes(self):
-        return [equipier for equipier in self.equipier_set.filter(numero__lte=self.nombre) if equipier.autorisation_manquante]
+        return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.autorisation_manquante]
 
     def verifier(self):
         if hasattr(self, 'verifier_count'):
@@ -645,9 +645,17 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
                 original.prenom != self.prenom or
                 original.autorisation != self.autorisation):
                 self.autorisation_detail = UNKNOWN
-        self.licence_manquante = self.justificatif == 'licence' and self.piece_jointe_detail != VALIDE and not self.piece_jointe
-        self.certificat_manquant = self.justificatif == 'certificat' and self.piece_jointe_detail != VALIDE and not self.piece_jointe
-        self.autorisation_manquante = self.age() < 18 and self.autorisation_detail != VALIDE and not self.autorisation
+        piece_jointe_manquante = (
+                (not self.piece_jointe and self.piece_jointe_detail != VALIDE) or 
+                (bool(self.piece_jointe) and self.piece_jointe_detail not in (VALIDE, UNKNOWN))
+            )
+        autorisation_manquante = (
+                (not self.autorisation and self.autorisation_detail != VALIDE) or
+                (bool(self.autorisation) and self.autorisation_detail not in (VALIDE, UNKNOWN))
+            )
+        self.licence_manquante = self.justificatif == 'licence' and piece_jointe_manquante
+        self.certificat_manquant = self.justificatif == 'certificat' and piece_jointe_manquante
+        self.autorisation_manquante = self.age() < 18 and autorisation_manquante
         self.verifier = ((bool(self.piece_jointe) and self.piece_jointe_detail == UNKNOWN) or
                          (self.age() < 18 and bool(self.autorisation) and self.autorisation_detail == UNKNOWN))
         self.erreur = self.piece_jointe_detail not in (VALIDE, UNKNOWN) or (self.age() < 18 and self.autorisation_detail not in (VALIDE, UNKNOWN))
@@ -911,7 +919,6 @@ class Challenge(models.Model):
 
 
     def inscription_equipe(self, equipe):
-        ParticipationChallenge.objects.filter(challenge=self, equipes__equipe=equipe).delete()
         if not any(c for c in self.categories.all() if c.valide(equipe)):
             return None
 

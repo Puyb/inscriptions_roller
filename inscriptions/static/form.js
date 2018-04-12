@@ -229,6 +229,9 @@ function setup_categories(data) {
     var data = $.param(data) + actual_categories.map(function(c) {
         return '&categories=' + c.code;
     }).join('');
+    if (UPDATE) {
+        data += '&instance_id=' + INSTANCE.ID;
+    }
     $.ajax({
         url: CHALLENGES_CATEGORIES_URL,
         method: 'post',

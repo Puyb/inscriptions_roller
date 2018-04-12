@@ -171,6 +171,13 @@
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
                 "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "facture",
+                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
+                "message": "{% include \"mails/facture.html\" %}",
+                "bcc": ""
             }
         ],
         "_name": "Challenge Grand Nord"
@@ -643,6 +650,13 @@
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
                 "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "facture",
+                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
+                "message": "{% include \"mails/facture.html\" %}",
+                "bcc": ""
             }
         ],
         "_name": "Grol Race"
@@ -828,6 +842,13 @@
                 "nom": "change_request",
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
+                "bcc": ""
+            },
+            {
+                "destinataire": "Equipe",
+                "nom": "facture",
+                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
+                "message": "{% include \"mails/facture.html\" %}",
                 "bcc": ""
             }
         ],
