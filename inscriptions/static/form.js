@@ -60,12 +60,12 @@ function serialize() {
         if(/^form-\d-/.test(k) && parseFloat(k.substr(5)) < data.nombre)
             data.equipiers[parseFloat(k.substr(5))][k.substr(7)] = data[k];
     data.age_moyen = 0;
-    data.equipiers.forEach(function(eq) {
+    data.equipiers.forEach(function(eq, i) {
+        if (i > nombre) return;
         eq.age = age2(eq);
-        if (eq.age != null)
-            data.age_moyen += eq.age
+        data.age_moyen += eq.age
     });
-    data.age_moyen /= data.equipiers.length;
+    data.age_moyen /= data.nombre;
     data.nombre_h = data.equipiers.filter(function(i) { return i.sexe === 'H'; }).length;
     data.nombre_f = data.equipiers.filter(function(i) { return i.sexe === 'F'; }).length;
     return data;
