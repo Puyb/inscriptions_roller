@@ -61,7 +61,8 @@ function serialize() {
     data.age_moyen = 0;
     data.equipiers.forEach(function(eq) {
         eq.age = age2(eq);
-        data.age_moyen += eq.age
+        if (eq.age != null)
+            data.age_moyen += eq.age
     });
     data.age_moyen /= data.equipiers.length;
     data.nombre_h = data.equipiers.filter(function(i) { return i.sexe === 'H'; }).length;
