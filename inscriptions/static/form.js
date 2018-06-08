@@ -61,7 +61,7 @@ function serialize() {
             data.equipiers[parseFloat(k.substr(5))][k.substr(7)] = data[k];
     data.age_moyen = 0;
     data.equipiers.forEach(function(eq, i) {
-        if (i > nombre) return;
+        if (i > data.nombre) return;
         eq.age = age2(eq);
         data.age_moyen += eq.age
     });
