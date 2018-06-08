@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block content %}
+<form method="post">
+    {{ paiement_form.as_p }}
+    {{ repartition_formset.management_form }}
+    <table id="repartition">
+        <tr>
+            <th>Course</th>
+            <th>Numero</th>
+            <th>Equipe</th>
+            <th>Prix</th>
+            <th>Déjà payé</th>
+            <th>Reste à payer</th>
+            <th>Montant</th>
+        </tr>
+    </table>
+    <p><label for="id_search">Chercher une equipe</label><input id="id_search" /><p>
+    {% for course in courses %}
+    <ul>
+        <li><label><input type="checkbox" name="course" value="{{course.id}}"> {{course.nom}}</label></li>
+    </ul>
+    {% endfor %}
+    <table id="search_results" style="display: none">
+        <tr>
+            <th>Course</th>
+            <th>Numero</th>
+            <th>Equipe</th>
+            <th>Prix</th>
+            <th>Déjà payé</th>
+            <th>Reste à payer</th>
+        </tr>
+    </table>
+    <button type="submit">{% trans "Enregistrer" %}</button>
+    {% csrf_token %}
+</form>
+<script>
+    function tr(equipe) {
+        return $('<tr>')
+            .append($('<td>').text(equipe.course))
+            .append($('<td>').text(equipe.numero))
+            .append($('<td>').text(equipe.nom))
+            .append($('<td>').text(equipe.prix))
+            .append($('<td>').text(equipe.paiement))
+            .append($('<td>').text(equipe.prix - equipe.paiement));
+    }
+    var i = 0;
+
+    $('#id_search').on('keyup', function() {
+        $.ajax('/course/paiement/search/equipe/', {
+            method: 'post',
+            data: {
+                search: this.value,
+            },
+            success: function(r) {
+                var data = JSON.parse(r);
+                $('#search_results td').remove()
+                data.equipes.forEach(function(equipe) {
+                    $('#search_results tbody').append(
+                        tr(equipe).click(function() {
+                            $('#repartition').append(
+                                tr(equipe).append(
+                                    $('<td>')
+                                        .append($('<input>').attr('name', 'form' + i + '-equipe_id').attr('type', 'hidden').val(equipe.id))
+                                        .append($('<input>').attr('name', 'form' + i + '-montant'))
+                                )
+                            );
+                            i++;
+                        })
+                    );
+                });
+                $('#search_results').show()
+            }
+        })
+    });
+</script>
+{% endblock %}
