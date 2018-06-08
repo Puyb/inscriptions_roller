@@ -60,8 +60,8 @@ function serialize() {
             data.equipiers[parseFloat(k.substr(5))][k.substr(7)] = data[k];
     data.age_moyen = 0;
     data.equipiers.forEach(function(eq) {
-        data.age_moyen += eq.age
         eq.age = age2(eq);
+        data.age_moyen += eq.age
     });
     data.age_moyen /= data.equipiers.length;
     data.nombre_h = data.equipiers.filter(function(i) { return i.sexe === 'H'; }).length;
