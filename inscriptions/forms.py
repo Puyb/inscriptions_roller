@@ -7,7 +7,7 @@ from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
-from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
+from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
@@ -143,3 +143,15 @@ class ChallengeForm(ModelForm):
             instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
         return instance
 
+class AdminPaiementForm(ModelForm):
+    class Meta:
+        model = Paiement
+        fields = ('type', 'montant', 'detail')
+
+class PaiementRepartitionForm(ModelForm):
+    class Meta:
+        model = PaiementRepartition
+        exclude = ('paiement',)
+
+PaiementRepartitionFormset = formset_factory(PaiementRepartitionForm, formset=BaseModelFormSet, extra=0)
+PaiementRepartitionFormset.model = PaiementRepartition

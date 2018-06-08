@@ -140,7 +140,6 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             "hommes": 0,
             "femmes": 0,
             "paiement": 0,
-            "paiement_paypal": 0,
             "prix": 0,
             "nbcertifenattente": 0,
             "documents": 0,
@@ -223,9 +222,6 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             stats['prix'] = float(equipe.prix)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
             stats[equipe.categorie.code] += 1;
-            if equipe.paiement_paypal():
-                stats['paiement_paypal'] += 1
-
 
             for key, index in keys.items():
                 if index not in result[key]:
@@ -378,7 +374,6 @@ class Equipe(models.Model):
     categorie          = models.ForeignKey(Categorie, on_delete=models.CASCADE)
     course             = models.ForeignKey(Course, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
-    paiement_info      = models.CharField(_(u'Détails'), max_length=200, blank=True)
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
     paiement           = models.DecimalField(_(u'Paiement reçu'), max_digits=5, decimal_places=2, null=True, blank=True)
     dossier_complet    = models.NullBooleanField(_(u'Dossier complet'))
@@ -1068,10 +1063,10 @@ class EquipeChallenge(models.Model):
 
 def _or(*conds):
     conds = list(conds)
-    r = conds.pop(0)
+    res = conds.pop(0)
     while conds:
-        r = r | conds.pop(0)
-    return r
+        res = res | conds.pop(0)
+    return res
 
 class Levenshtein(Func):
     function = 'levenshtein'
@@ -1118,3 +1113,29 @@ class LiveResult(models.Model):
     meilleur_tour = models.DecimalField(max_digits=8, decimal_places=3)
     penalité = models.IntegerField()
 
+class Paiement(models.Model):
+    TYPE_CHOICES = (
+        ('espèce', _('espèce')),
+        ('chèque', _('chèque')),
+        ('paypal', _('paypal')),
+        ('virement', _('virement')),
+        ('autre', _('autre')),
+    )
+    date = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=200, choices=TYPE_CHOICES)
+    montant = models.DecimalField(max_digits=7, decimal_places=2)
+    detail = models.TextField()
+
+class PaiementRepartition(models.Model):
+    paiement = models.ForeignKey(Paiement, related_name='equipes', on_delete=models.CASCADE)
+    equipe = models.ForeignKey(Equipe, related_name='paiements', on_delete=models.CASCADE)
+    montant = models.DecimalField(max_digits=7, decimal_places=2)
+
+    def paye(self):
+        paiements = self.equipe.paiements.all()
+        if self.id:
+            paiements = paiements.exclude(id=self.id)
+        return paiements.aggregate(m=Sum('montant'))['m'] or Decimal('0.00')
+
+    def reste(self):
+        return self.equipe.prix - self.paye()

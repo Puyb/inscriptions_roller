@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import operator
+from functools import reduce
 from inscriptions.models import *
 from django.contrib import admin
 from django.core.mail import EmailMessage
@@ -14,7 +16,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
-from .forms import CourseForm, ImportResultatForm
+from django.views.decorators.csrf import csrf_exempt
+from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, PaiementRepartitionFormset
 from .utils import ChallengeUpdateThread
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -62,6 +65,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
+            url(r'^paiement/add/$', self.paiement_add, name='paiement_add'),
+            url(r'^paiement/search/equipe/$', self.paiement_search_equipe, name='paiement_search_equipe'),
         ] + super().get_urls()
         return urls
 
@@ -312,8 +317,56 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
+    def paiement_add(self, request):
+        if request.method == 'POST':
+            paiement_form = AdminPaiementForm(request.POST)
+            repartition_formset = PaiementRepartitionFormset(request.POST)
+            with transaction.atomic():
+                paiement = paiement_form.save()
+                montant = 0
+                for repartition_form in repartition_formset.forms:
+                    repartition = repartition_form.save(commit=False)
+                    repartition.paiement = paiement
+                    repartition.save()
+                    repartition.equipe.paiement += repartition.montant
 
+                    montant += repartition.montant
+                if montant != paiement.montant:
+                    raise Exception('montant incorrecte')
+                return redirect('/course/inscriptions/paiement/%s/' % (paiement.id, ))
 
+        paiement_form = AdminPaiementForm()
+        repartition_formset = PaiementRepartitionFormset(queryset=PaiementRepartition.objects.none())
+        courses = Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
+        return TemplateResponse(request, 'admin/paiement/add.html', dict(self.each_context(request),
+            courses=courses,
+            paiement_form=paiement_form,
+            repartition_formset=repartition_formset,
+        ))
+
+    @csrf_exempt
+    def paiement_search_equipe(self, request):
+        search = request.POST['search']
+
+        courses = Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
+
+        equipes = Equipe.objects.filter(course__in=courses).distinct()
+        for bit in search.split():
+            or_queries = [ Q(**{field + '__icontains': bit})
+                            for field in EquipeAdmin.search_fields ]
+            equipes = equipes.filter(reduce(operator.or_, or_queries))
+        print(equipes.query.sql_with_params())
+
+        return HttpResponse(json.dumps({
+            'equipes': [{
+                'id': e.id,
+                'course': e.course.nom,
+                'numero': e.numero,
+                'nom': e.nom,
+                'prix': str(e.prix),
+                'paiement': str(e.paiement or '0'),
+            } for e in equipes],
+        }))
 
     index_template = 'admin/dashboard.html'
 
@@ -673,7 +726,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ))
 
 
-
 #main_site.disable_action('delete_selected')
 site.register(Equipe, EquipeAdmin)
 
@@ -806,3 +858,32 @@ class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     list_display = ('label', 'page', 'type', )
     inlines = [ ExtraQuestionChoiceInline ]
 site.register(ExtraQuestion, ExtraQuestionAdmin)
+
+class PaiementRepartitionInline(admin.TabularInline):
+    model = PaiementRepartition
+    extra = 0
+    max_num = 20
+    fields = ('course', 'equipe_numero', 'equipe_nom', 'prix', 'paye', 'reste', 'montant', )
+    readonly_fields = ('course', 'equipe_numero', 'equipe_nom', 'prix', 'paye', 'reste', )
+    def course(self, obj):
+        return obj.equipe.course.nom
+    def equipe_numero(self, obj):
+        return obj.equipe.numero
+    def equipe_nom(self, obj):
+        return obj.equipe.nom
+    def prix(self, obj):
+        return obj.equipe.prix
+
+class PaiementAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        course_uid = request.COOKIES['course_uid']
+        qs = qs.filter(equipes__equipe__course__uid=course_uid)
+        if not request.user.is_superuser:
+            qs = qs.filter(equipes__equipe__course__accreditations__user=request.user)
+        return qs
+    fields = ('montant', 'type', 'date', 'detail', )
+    readonly_fields = ('date', )
+    list_display = ('montant', 'type', 'date', )
+    inlines = [ PaiementRepartitionInline ]
+site.register(Paiement, PaiementAdmin)
