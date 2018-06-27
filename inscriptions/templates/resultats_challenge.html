@@ -22,6 +22,7 @@
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
+                        {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         <th>Points</th>
                     </tr>
                 {% endifchanged %}
@@ -35,6 +36,7 @@
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
+                        {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         <th>Points</th>
                     </tr>
                 {% endif %}
@@ -50,6 +52,7 @@
                             <th>{% trans "Position" %}</th>
                             <th>{% trans "Tours" %}</th>
                             <th>{% trans "Temps" %}</th>
+                            {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
                         <tr>
                             <th>{{ c.nom }}</th>
@@ -60,6 +63,7 @@
                             <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                             <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
+                            {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance }}</td>{% endif %}
                         </tr>
                         {% endwith %}{% endfor %}</table>
                     ">
@@ -70,6 +74,7 @@
                     {% for c in challenge.courses.all %}
                     <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{{ participation.equipes_dict|get:c.uid|get:"points"|default:"" }}</td>
                     {% endfor %}
+                    {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance }}</td>{% endif %}
                     <td>{{ participation.points }}</td>
                 </tr>
             {% endfor %}
