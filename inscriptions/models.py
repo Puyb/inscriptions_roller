@@ -823,11 +823,17 @@ class Mail(models.Model):
 # test:
 # from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
 class Challenge(models.Model):
+    MODE_CHOICES = (
+        ('nord2017', _('Points / Participations (égalités possibles)')),
+        ('nord2018', _('Points / Participations / Distance')),
+    )
+
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
     courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
+    mode = models.CharField(max_length=20, choices=MODE_CHOICES)
 
     def add_course(self, course, course_categories=None):
         if course in self.courses.all():
@@ -868,24 +874,33 @@ class Challenge(models.Model):
 
     def compute_challenge(self):
         cats = defaultdict(lambda: 0)
-        courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
-        #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
-        previous_position = defaultdict(lambda: None)
-        for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
-            if p.c == 0:
-                continue
-            pp = previous_position[p.categorie.code]
-            print(p.categorie.code, p.equipes.all()[0].equipe.nom, p.position)
-            if not pp or pp.p != p.p or pp.c != p.c:
-                cats[p.categorie.code] += 1
-            else: # equality
-                if [k for k, v in courses_points if getattr(p, k) and getattr(pp, k)]:
-                    print ('course commune');
+        if self.mode == 'nord2017': 
+            courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
+            previous_position = defaultdict(lambda: None)
+            for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
+                if p.c == 0:
+                    continue
+                pp = previous_position[p.categorie.code]
+                print(p.categorie.code, p.equipes.all()[0].equipe.nom, p.position)
+                if not pp or pp.p != p.p or pp.c != p.c:
                     cats[p.categorie.code] += 1
+                else: # equality
+                    if [k for k, v in courses_points if getattr(p, k) and getattr(pp, k)]:
+                        print ('course commune');
+                        cats[p.categorie.code] += 1
 
-            previous_position[p.categorie.code] = p
-            p.position = cats[p.categorie.code]
-            p.save()
+                previous_position[p.categorie.code] = p
+                p.position = cats[p.categorie.code]
+                p.save()
+        elif self.mode == 'nord2018':
+            for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=models.DecimalField())).order_by('-p', 'c', 'd'):
+                if p.c == 0 or p.p == 0:
+                    p.position = None
+                    p.save()
+                    continue
+                cats[p.categorie.code] += 1
+                p.position = cats[p.categorie.code]
+                p.save()
 
 
     def inscription_equipe(self, equipe):

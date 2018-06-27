@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMessage
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
@@ -459,7 +459,13 @@ def challenge(request, challenge_uid):
     participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe__categorie', 'equipes__equipe__course').select_related('categorie')
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
-    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'), position2=Coalesce('position', 10000)).filter(count__gt=0)
+    participations = participations.annotate(
+        nom=Min('equipes__equipe__nom'),
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        position2=Coalesce('position', 10000),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField())
+    ).filter(count__gt=0)
     s = []
     if request.GET.get('by_categories') == '1':
         s.append('categorie__code')
