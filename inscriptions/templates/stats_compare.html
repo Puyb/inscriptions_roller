@@ -100,6 +100,7 @@
             {% endfor %}
         }
         g2.labels = g.labels;
+
         g.draw();
         g._d.stroke = 'white';
         g._d.stroke_width = 1;
@@ -107,11 +108,16 @@
             var x = g._graph_left + (g.x_increment * index);
             g._d.line(x, g._graph_bottom, x, g._graph_top);
         }
+
         {% for d in data %}
         g._d.stroke = g._data[{{ d.index }}][2];
         var x = g._graph_left + (g.x_increment * ({{ d.augment }} + {{ d.delta }} - min));
         g._d.line(x, g._graph_bottom, x, g._graph_top);
         {% endfor %}
+
+        var x = g._graph_left + (g.x_increment * ({{ today }} - min));
+        g._d.stroke = '#000';
+        g._d.line(x, g._graph_bottom, x, g._graph_top);
 
         g2.draw();
         g2._d.stroke = '#ccc';
@@ -120,6 +126,10 @@
             var x = g2._graph_left + (g2.x_increment * index);
             g2._d.line(x, g2._graph_bottom, x, g2._graph_top);
         }
+
+        var x = g2._graph_left + (g2.x_increment * ({{ today }} - min));
+        g2._d.stroke = '#000';
+        g2._d.line(x, g2._graph_bottom, x, g2._graph_top);
 
 
         // var e = document.getElementById('canvas_time').parentNode;

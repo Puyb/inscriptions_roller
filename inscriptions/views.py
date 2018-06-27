@@ -386,6 +386,7 @@ def stats_compare(request, course_uid, course_uid2):
 
     return TemplateResponse(request, 'stats_compare.html', {
         'data': res,
+        'today': (date.today() - course1.date_ouverture).days,
         'align': request.GET.get('align', '')
     });
 
