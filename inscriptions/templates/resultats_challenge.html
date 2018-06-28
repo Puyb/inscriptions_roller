@@ -63,7 +63,7 @@
                             <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                             <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
-                            {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance }}</td>{% endif %}
+                            {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
                         </tr>
                         {% endwith %}{% endfor %}</table>
                     ">
@@ -72,9 +72,9 @@
                     <td>{{ participation.position|default_if_none:"" }}</td>
                     <td>{{ participation.count }}</td>
                     {% for c in challenge.courses.all %}
-                    <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{{ participation.equipes_dict|get:c.uid|get:"points"|default:"" }}</td>
+                    <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{% if participation.equipes_dict|get:c.uid %}{{ participation.equipes_dict|get:c.uid|get:"points"|default:"Inscrit" }}{% endif %}</td>
                     {% endfor %}
-                    {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance }}</td>{% endif %}
+                    {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance|default_if_none:"" }}</td>{% endif %}
                     <td>{{ participation.points }}</td>
                 </tr>
             {% endfor %}

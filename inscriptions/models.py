@@ -554,6 +554,9 @@ class Equipe(models.Model):
     def cookie_key(self):
         return 'code_%s' % self.id
 
+    def distance(self):
+        return self.tours * self.course.distance if self.tours else None
+
 class Equipier(models.Model):
     PIECE_JOINTE_HELP = _("""Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s).""")
@@ -893,7 +896,7 @@ class Challenge(models.Model):
                 p.position = cats[p.categorie.code]
                 p.save()
         elif self.mode == 'nord2018':
-            for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=models.DecimalField())).order_by('-p', 'c', 'd'):
+            for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=models.DecimalField())).order_by('-p', '-c', '-d'):
                 if p.c == 0 or p.p == 0:
                     p.position = None
                     p.save()

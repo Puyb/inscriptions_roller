@@ -450,8 +450,8 @@ def challenges(request):
     })
 
 def challenge(request, challenge_uid):
-    sorts = ['position2', 'count', 'nom', 'categorie__code']
-    (_('position2'), _('count'), _('nom'), _('categorie__code'))
+    sorts = ['position2', 'count', 'nom', 'categorie__code', 'distance' ]
+    (_('position2'), _('count'), _('nom'), _('categorie__code'), _('distance'))
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
         Prefetch('courses', Course.objects.order_by('date')),
         'categories',
@@ -471,7 +471,13 @@ def challenge(request, challenge_uid):
     if request.GET.get('by_categories') == '1':
         s.append('categorie__code')
     if request.GET.get('sort') in (sorts + [ '-' + i for i in sorts ]):
-        s.append(request.GET['sort'])
+        if request.GET['sort'].endswith('distance'):
+            if request.GET['sort'].startswith('-'):
+                s.append(F('distance').desc(nulls_last=True))
+            else:
+                s.append(F('distance').asc(nulls_first=True))
+        else:
+            s.append(request.GET['sort'])
     else:
         s.append(sorts[0])
     participations = participations.order_by(*s)
