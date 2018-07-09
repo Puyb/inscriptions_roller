@@ -64,8 +64,24 @@
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                             <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
                             {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
-                        </tr>
-                        {% endwith %}{% endfor %}</table>
+                        </tr>{% endwith %}{% endfor %}
+                    </table>
+                    <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
+                        <tr>
+                            <th>{% trans "Équipier" %}</th>
+                            {% for c in challenge.courses.all %}
+                            <th>{{ c.uid }}</th>
+                            {% endfor %}
+                        </tr>{% for e in participation.equipiers.all %}
+                        <tr>
+                            <th>{{ e.prenom }} {{ e.nom }}</th>
+                            {% for c in challenge.courses.all %}
+                            <th {% if c in e.courses %}class=&quot;bg-success&quot;{% endif %}></th>
+                            {% endfor %}
+                        </tr>{% endfor %}
+                    </table>
+                            
+
                     ">
                     <td>{{ participation.nom }}</td>
                     <td>{{ participation.categorie.code }}</td>

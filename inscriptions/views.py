@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier
 from .utils import MailThread, jsonDate
 from django_countries.data import COUNTRIES
 
@@ -457,11 +457,16 @@ def challenge(request, challenge_uid):
         'categories',
     ), uid=challenge_uid)
 
-    participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe__categorie', 'equipes__equipe__course').select_related('categorie')
+    participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
     participations = participations.annotate(
-        nom=Min('equipes__equipe__nom'),
         points=Sum('equipes__points'),
         count=Count('equipes'),
         position2=Coalesce('position', 10000),
