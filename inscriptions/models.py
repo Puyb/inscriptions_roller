@@ -847,6 +847,8 @@ class Challenge(models.Model):
         for c in self.categories.all():
             if c in course_categories:
                 c.categories.add(*course_categories[c])
+        prefetch_related_objects([self], 'categories')
+        prefetch_related_objects([self], 'categories__categories')
         print(self.categories.all()[0].categories.filter(course=course))
         equipes_skiped = [ equipe for equipe in course.equipe_set.select_related('categorie').prefetch_related(Prefetch('equipier_set', Equipier.objects.filter(numero__lte=F('equipe__nombre')))) if not self.inscription_equipe(equipe) ]
         self.compute_course(course)
@@ -907,13 +909,13 @@ class Challenge(models.Model):
 
 
     def inscription_equipe(self, equipe):
-        if not any(c for c in self.categories.all() if c.valide(equipe)):
+        if not any(c for c in self.categories.prefetch_related('categories') if c.valide(equipe)):
             return None
 
-        participations = list(self.find_participation_for_equipe(equipe)[:2])
+        participations = list(self.find_participation_for_equipe(equipe).prefetch_related('challenge__categories', 'challenge__categories__categories')[:2])
         if participations:
             if len(participations) > 1:
-                logger.warning('found multiple participation to challenge', equipe, self)
+                logger.warning('found multiple participation to challenge %s %s' % (equipe, self))
             participations[0].add_equipe(equipe=equipe)
             return participations[0]
         p = ParticipationChallenge(challenge=self)
@@ -939,6 +941,14 @@ class Challenge(models.Model):
     def find_participation_for_equipe_raw(self, course, equipe_nom, equipiers_data, categorie):
         if len(equipiers_data) == 0:
             return self.participations.none()
+
+        participation_qs = self.participations.annotate(
+            d=CompareNames('nom', Value(equipe_nom)),
+        ).filter(
+            Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
+            d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
+        )
+        
         annotate = {}
         annotate.update({
             'equipiers__nom%s' % e.numero: CompareNames('equipiers__nom', Value(e.nom))
@@ -953,35 +963,21 @@ class Challenge(models.Model):
                 'equipiers__nom%s__lt' % equipier.numero: CHALLENGE_LEVENSHTEIN_DISTANCE,
                 'equipiers__prenom%s__lt' % equipier.numero: CHALLENGE_LEVENSHTEIN_DISTANCE,
             })
-            if equipier.justificatif == 'certificat':
+            if equipier.justificatif == 'licence':
                 return Q(equipiers__num_licence=equipier.num_licence) | filtre
             return filtre
 
         filters = [ match_equipier_filter(e) for e in equipiers_data ]
-        participation_qs = self.participations.annotate(
-            d=CompareNames('nom', Value(equipe_nom)),
-        ).filter(
-            Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
-            d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
-        )
         equipiers_qs = ParticipationEquipier.objects.filter(
             participation__in=participation_qs
         ).annotate(
+            c=Count('equipiers'),
             **annotate,
         ).filter(
+            Q(c__gt=0) &
             _or(*filters),
         ).values('participation__id').annotate(c=Count('id')).filter(c__gte=len(equipiers_data) / 2)
         return self.participations.filter(id__in=[ e['participation__id'] for e in equipiers_qs ])
-        return self.participations.annotate(
-            d=CompareNames('nom', Value(equipe_nom)),
-            e=Count('equipiers'),
-            **annotate
-        ).filter(
-            Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
-            _or(*filters),
-            d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
-            e__gte=len(equipiers_data) / 2
-        )
 
     def test_participation(self):
         count=0
@@ -1003,6 +999,9 @@ class Challenge(models.Model):
                         print(course, len(ps), e.id, e, e.challenges.values('participation'), ps)
 
         print (count, ko, dup)
+
+    def __str__(self):
+        return self.nom
 
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories', on_delete=models.CASCADE)
@@ -1118,6 +1117,9 @@ class ParticipationChallenge(models.Model):
             e.equipiers.remove(equipiers)   
         self.equipiers.annotate(c=Count('equipiers')).filter(c=0).delete()
         self.equipes.filter(equipe=equipe).delete()
+
+    def __str__(self):
+        return 'Participation %s %s' % (self.challenge, self.nom)
         
 
 class EquipeChallenge(models.Model):
@@ -1127,6 +1129,9 @@ class EquipeChallenge(models.Model):
 
     class Meta:
         unique_together = (('equipe', 'participation'), )
+
+    def __str__(self):
+        return 'Participation %s - %s' % (self.participation, self.equipe)
 
 class ParticipationEquipier(models.Model):
     participation = models.ForeignKey(ParticipationChallenge, related_name='equipiers', on_delete=models.CASCADE)
@@ -1139,6 +1144,8 @@ class ParticipationEquipier(models.Model):
     def courses(self):
         return [ e.equipe.course for e in self.equipiers.all() ]
 
+    def __str__(self):
+        return 'ParticipationEquipier %s - %s %s' % (self.participation, self.nom, self.prenom)
 
 def _or(*conds):
     conds = list(conds)

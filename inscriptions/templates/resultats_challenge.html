@@ -76,8 +76,9 @@
                         <tr>
                             <th>{{ e.prenom }} {{ e.nom }}</th>
                             {% for c in challenge.courses.all %}
-                            <th {% if c in e.courses %}class=&quot;bg-success&quot;{% endif %}></th>
-                            {% endfor %}
+                            {% if c in e.courses %}<td class=&quot;bg-success&quot;>{% cycle "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" %}</td>
+                            {% else %}<td></td>
+                            {% endif %}{% endfor %}{% resetcycle %}
                         </tr>{% endfor %}
                     </table>
                             
