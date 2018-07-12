@@ -909,6 +909,9 @@ class Challenge(models.Model):
 
 
     def inscription_equipe(self, equipe):
+        for old_participation in challenge.participations.filter(equipes__equipe=equipe):
+            old_participation.del_equipe(equipe)
+
         if not any(c for c in self.categories.prefetch_related('categories') if c.valide(equipe)):
             return None
 
@@ -1120,6 +1123,8 @@ class ParticipationChallenge(models.Model):
                 e.equipiers.remove(equipier)   
         self.equipiers.annotate(c=Count('equipiers')).filter(c=0).delete()
         self.equipes.filter(equipe=equipe).delete()
+        if self.equipes.count() == 0:
+            self.delete()
 
     def __str__(self):
         return 'Participation %s %s' % (self.challenge, self.nom)
