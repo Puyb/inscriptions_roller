@@ -84,7 +84,7 @@
                             
 
                     ">
-                    <td>{{ participation.nom }}</td>
+                    <td><a href="{{ participation.id }}/">{{ participation.nom }}</a></td>
                     <td>{{ participation.categorie.code }}</td>
                     <td>{{ participation.position|default_if_none:"" }}</td>
                     <td>{{ participation.count }}</td>

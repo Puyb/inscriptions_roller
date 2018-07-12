@@ -1058,22 +1058,25 @@ class ParticipationChallenge(models.Model):
     def equipes_dict(self):
         return { e.equipe.course.uid: e for e in self.equipes.all() }
 
-    def add_equipe(self, equipe, point=0):
+    def add_equipe(self, equipe, points=0):
         EquipeChallenge.objects.filter(participation__challenge=self.challenge, equipe=equipe).delete()
         e = self.equipes.create(
             participation=self,
             equipe=equipe,
-            points=0,
+            points=points,
         )
+        modified = False
         if not self.nom:
             self.nom = equipe.nom
-            self.save()
+            modified = True
         if not self.categorie:
             for c in self.challenge.categories.all():
                 if c.valide(equipe):
                     self.categorie = c
-                    self.save()
+                    modified = True
                     break
+        if modified:
+            self.save()
 
         pequipiers = list(self.equipiers.all())
         annotate = {}
@@ -1112,9 +1115,9 @@ class ParticipationChallenge(models.Model):
         return e
 
     def del_equipe(self, equipe):
-        equipiers = list(equipe.equipier_set.all())
-        for e in self.equipiers.all():
-            e.equipiers.remove(equipiers)   
+        for equipier in equipe.equipier_set.all():
+            for e in self.equipiers.all():
+                e.equipiers.remove(equipier)   
         self.equipiers.annotate(c=Count('equipiers')).filter(c=0).delete()
         self.equipes.filter(equipe=equipe).delete()
 

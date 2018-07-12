@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames
 from .utils import MailThread, jsonDate
 from django_countries.data import COUNTRIES
 
@@ -498,6 +498,80 @@ def challenge(request, challenge_uid):
         'split_categories':  request.GET.get('by_categories') == '1',
     })
 
+def challenge_participation(request, challenge_uid, participation_id):
+    if request.method == 'POST' and request.user.is_superuser:
+        with transaction.atomic():
+            participation = get_object_or_404(ParticipationChallenge, id=participation_id)
+            challenge = participation.challenge
+            equipe_challenge = get_object_or_404(participation.equipes.all(), equipe__course__uid=request.POST['course_uid'])
+            equipe = equipe_challenge.equipe
+            participation.del_equipe(equipe)
+            if request.POST['participation']:
+                new_participation = get_object_or_404(ParticipationChallenge.objects.filter(challenge=challenge), id=request.POST['participation'])
+            else:
+                new_participation = ParticipationChallenge(challenge=challenge)
+                new_participation.save()
+            new_participation.add_equipe(equipe, points=equipe_challenge.points)
+            challenge.compute_challenge()
+            return redirect('inscriptions_challenge', challenge_uid=challenge.uid)
+
+    challenge = get_object_or_404(Challenge.objects.prefetch_related(
+        Prefetch('courses', Course.objects.order_by('date')),
+        'categories',
+    ), uid=challenge_uid)
+    participations = ParticipationChallenge.objects.prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
+    participations = participations.annotate(
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField())
+    )
+    participation = get_object_or_404(participations, id=participation_id)
+    return TemplateResponse(request, 'participation_challenge.html', {
+        'challenge': challenge,
+        'participation': participation,
+    })
+
+def get_participations_to_move(request, challenge_uid, participation_id, course_uid):
+    challenge = get_object_or_404(Challenge.objects.prefetch_related(
+        Prefetch('courses', Course.objects.order_by('date')),
+        'categories',
+    ), uid=challenge_uid)
+    course = get_object_or_404(Course, uid=course_uid)
+    participation = get_object_or_404(ParticipationChallenge.objects.select_related('categorie'), id=participation_id)
+    participations = ParticipationChallenge.objects.filter(
+        challenge=challenge,
+        categorie=participation.categorie,
+    ).exclude(
+        id=participation.id,
+    ).exclude(
+        equipes__equipe__course=course,
+    ).prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
+    participations = participations.annotate(
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField()),
+        d=CompareNames('nom', Value(participation.equipes.select_related('equipe').get(equipe__course=course).equipe.nom)),
+    ).order_by('d')
+    return TemplateResponse(request, 'selection_participation.html', {
+        'challenge': challenge,
+        'course': course,
+        'participations': participations,
+        'participation': participation,
+    })
+
+    
 def model_certificat(request, course_uid):
     return redirect(settings.STATIC_URL + '/certificat_medical.pdf')
 
