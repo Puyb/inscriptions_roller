@@ -186,6 +186,7 @@ def find_challenges_categories(request, course_uid):
                 'challenge': challenge,
                 'participation': len(participations) and participations[0],
                 'nolinks': True,
+                'preview': True,
             }
             all_result[ec.code].append(render_to_string("_participation.html", ctx, request=request))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')

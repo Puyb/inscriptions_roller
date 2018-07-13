@@ -13,6 +13,7 @@
             </div>
             <div class="media-body">
                 <p>{% trans "Vous participez au challenge." %}</p>
+                {% if preview %}<p>{% trans "Le nombre de points affiché n'est donné qu'a titre d'information et ne sera peut être pas exact tant que vous n'aurez pas validé votre inscription." %}</p>{% endif %}
                 <p>{% trans "Le challenge comporte les courses suivantes :" %}</p>
                 <div class="row equal">
                     {% for course in challenge.courses.all %}
