@@ -909,7 +909,7 @@ class Challenge(models.Model):
 
 
     def inscription_equipe(self, equipe):
-        for old_participation in challenge.participations.filter(equipes__equipe=equipe):
+        for old_participation in self.participations.filter(equipes__equipe=equipe):
             old_participation.del_equipe(equipe)
 
         if not any(c for c in self.categories.prefetch_related('categories') if c.valide(equipe)):
