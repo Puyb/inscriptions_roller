@@ -8,7 +8,7 @@ from django.template.response import TemplateResponse
 from .forms import ChallengeForm
 
 ICON_OK = '✅'
-ICON_KO = '❎'
+ICON_KO = '🚫'
 
 site = admin.site
 

@@ -82,7 +82,7 @@
                     <td>{{ equipe.club }}</td>
                     <td>{{ equipe.categorie.code }}</td>
                     <td>{{ equipe.gerant_ville2.nom }}</td>
-                    <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays.name }}" /></td>
+                    <td><img src="/static/flags/{{ equipe.gerant_pays|lower }}.png" alt="{{ equipe.gerant_pays }}" title="{{ equipe.gerant_pays }}" /></td>
                     {% if user_is_staff %}
                     <td>{{ equipe.nombre }}</td>
                     <td>{{ equipe.date }}</td>

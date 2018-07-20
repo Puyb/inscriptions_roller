@@ -25,7 +25,7 @@ import csv, io
 import inspect
 
 ICON_OK = '✅'
-ICON_KO = '❎'
+ICON_KO = '🚫'
 ICON_CHECK = '❔'
 ICON_MISSING = '✉'
 
