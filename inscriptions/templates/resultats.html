@@ -2,7 +2,8 @@
 {% load i18n %}
 
 {% block body %}
-    {% with categories=COURSE.categories.all %}
+    {% with categories=COURSE.categories.all page="resultats" %}
+    {% include "_course_header.html" %}
     {% include "_list_filter.html" %}
     {% endwith %}
     <div class="panel panel-default">

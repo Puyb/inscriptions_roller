@@ -22,6 +22,7 @@
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
+                        {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         <th>Points</th>
                     </tr>
                 {% endifchanged %}
@@ -35,6 +36,7 @@
                         {% for c in challenge.courses.all %}
                         <th>{{ c.uid }}</th>
                         {% endfor %}
+                        {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         <th>Points</th>
                     </tr>
                 {% endif %}
@@ -50,6 +52,7 @@
                             <th>{% trans "Position" %}</th>
                             <th>{% trans "Tours" %}</th>
                             <th>{% trans "Temps" %}</th>
+                            {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                         </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
                         <tr>
                             <th>{{ c.nom }}</th>
@@ -60,16 +63,35 @@
                             <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
                             <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                             <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
-                        </tr>
-                        {% endwith %}{% endfor %}</table>
+                            {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
+                        </tr>{% endwith %}{% endfor %}
+                    </table>
+                    <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
+                        <tr>
+                            <th>{% trans "Équipier" %}</th>
+                            {% for c in challenge.courses.all %}
+                            <th>{{ c.uid }}</th>
+                            {% endfor %}
+                        </tr>{% for e in participation.equipiers.all %}
+                        <tr>
+                            <th>{{ e.prenom }} {{ e.nom }}</th>
+                            {% for c in challenge.courses.all %}
+                            {% if c in e.courses %}<td class=&quot;{% cycle "bg-info" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" %}&quot;></td>
+                            {% else %}<td></td>
+                            {% endif %}{% endfor %}{% resetcycle %}
+                        </tr>{% endfor %}
+                    </table>
+                            
+
                     ">
-                    <td>{{ participation.nom }}</td>
+                    <td><a href="{{ participation.id }}/">{{ participation.nom }}</a></td>
                     <td>{{ participation.categorie.code }}</td>
                     <td>{{ participation.position|default_if_none:"" }}</td>
                     <td>{{ participation.count }}</td>
                     {% for c in challenge.courses.all %}
-                    <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{{ participation.equipes_dict|get:c.uid|get:"points"|default:"" }}</td>
+                    <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{% if participation.equipes_dict|get:c.uid %}{{ participation.equipes_dict|get:c.uid|get:"points"|default:"Inscrit" }}{% endif %}</td>
                     {% endfor %}
+                    {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance|default_if_none:"" }}</td>{% endif %}
                     <td>{{ participation.points }}</td>
                 </tr>
             {% endfor %}

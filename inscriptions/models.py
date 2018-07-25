@@ -549,6 +549,9 @@ class Equipe(models.Model):
     def cookie_key(self):
         return 'code_%s' % self.id
 
+    def distance(self):
+        return self.tours * self.course.distance if self.tours else None
+
 class Equipier(models.Model):
     PIECE_JOINTE_HELP = _("""Si vous le pouvez, scannez le certificat ou la licence et ajoutez le en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s).""")
@@ -814,15 +817,21 @@ class Mail(models.Model):
             message.content_subtype = "html"
             message.send()
 
-
+CHALLENGE_LEVENSHTEIN_DISTANCE = 3
 # test:
 # from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
 class Challenge(models.Model):
+    MODE_CHOICES = (
+        ('nord2017', _('Points / Participations (égalités possibles)')),
+        ('nord2018', _('Points / Participations / Distance')),
+    )
+
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
     courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
+    mode = models.CharField(max_length=20, choices=MODE_CHOICES)
 
     def add_course(self, course, course_categories=None):
         if course in self.courses.all():
@@ -833,6 +842,8 @@ class Challenge(models.Model):
         for c in self.categories.all():
             if c in course_categories:
                 c.categories.add(*course_categories[c])
+        prefetch_related_objects([self], 'categories')
+        prefetch_related_objects([self], 'categories__categories')
         print(self.categories.all()[0].categories.filter(course=course))
         equipes_skiped = [ equipe for equipe in course.equipe_set.select_related('categorie').prefetch_related(Prefetch('equipier_set', Equipier.objects.filter(numero__lte=F('equipe__nombre')))) if not self.inscription_equipe(equipe) ]
         self.compute_course(course)
@@ -863,34 +874,46 @@ class Challenge(models.Model):
 
     def compute_challenge(self):
         cats = defaultdict(lambda: 0)
-        courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
-        #for p in self.participations.annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours') / Coalesce(F('equipes__equipe__temps'), Value(1)))).order_by('-p', 'c', 'd'):
-        previous_position = defaultdict(lambda: None)
-        for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
-            if p.c == 0:
-                continue
-            pp = previous_position[p.categorie.code]
-            print(p.categorie.code, p.equipes.all()[0].equipe.nom, p.position)
-            if not pp or pp.p != p.p or pp.c != p.c:
-                cats[p.categorie.code] += 1
-            else: # equality
-                if [k for k, v in courses_points if getattr(p, k) and getattr(pp, k)]:
-                    print ('course commune');
+        if self.mode == 'nord2017': 
+            courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
+            previous_position = defaultdict(lambda: None)
+            for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
+                if p.c == 0:
+                    continue
+                pp = previous_position[p.categorie.code]
+                print(p.categorie.code, p.equipes.all()[0].equipe.nom, p.position)
+                if not pp or pp.p != p.p or pp.c != p.c:
                     cats[p.categorie.code] += 1
+                else: # equality
+                    if [k for k, v in courses_points if getattr(p, k) and getattr(pp, k)]:
+                        print ('course commune');
+                        cats[p.categorie.code] += 1
 
-            previous_position[p.categorie.code] = p
-            p.position = cats[p.categorie.code]
-            p.save()
+                previous_position[p.categorie.code] = p
+                p.position = cats[p.categorie.code]
+                p.save()
+        elif self.mode == 'nord2018':
+            for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), d=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=models.DecimalField())).order_by('-p', '-c', '-d'):
+                if p.c == 0 or p.p == 0:
+                    p.position = None
+                    p.save()
+                    continue
+                cats[p.categorie.code] += 1
+                p.position = cats[p.categorie.code]
+                p.save()
 
 
     def inscription_equipe(self, equipe):
-        if not any(c for c in self.categories.all() if c.valide(equipe)):
+        for old_participation in self.participations.filter(equipes__equipe=equipe):
+            old_participation.del_equipe(equipe)
+
+        if not any(c for c in self.categories.prefetch_related('categories') if c.valide(equipe)):
             return None
 
-        participations = list(self.find_participation_for_equipe(equipe)[:2])
+        participations = list(self.find_participation_for_equipe(equipe).prefetch_related('challenge__categories', 'challenge__categories__categories')[:2])
         if participations:
             if len(participations) > 1:
-                logger.warning('found multiple participation to challenge', equipe, self)
+                logger.warning('found multiple participation to challenge %s %s' % (equipe, self))
             participations[0].add_equipe(equipe=equipe)
             return participations[0]
         p = ParticipationChallenge(challenge=self)
@@ -910,57 +933,49 @@ class Challenge(models.Model):
         return result
 
     def find_participation_for_equipe(self, equipe):
-        return self.participations.filter(
-            Q(categorie__isnull=True) | Q(categorie__in=equipe.categorie.challenge_categories.filter(challenge=self)),
-            equipes__equipe__in=self.get_match_equipe_query(equipe)
-        ).distinct('id')
+        equipiers = list(equipe.equipier_set.all())
+        return self.find_participation_for_equipe_raw(equipe.course, equipe.nom, equipiers, equipe.categorie)
 
     def find_participation_for_equipe_raw(self, course, equipe_nom, equipiers_data, categorie):
-        return self.participations.filter(
+        if len(equipiers_data) == 0:
+            return self.participations.none()
+
+        participation_qs = self.participations.annotate(
+            d=CompareNames('nom', Value(equipe_nom)),
+        ).filter(
             Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
-            equipes__equipe__in=self.get_match_equipe_query_raw(course, equipe_nom, equipiers_data)
+            d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
         )
-
-    def get_match_equipe_query(self, equipe):
-        equipiers = list(equipe.equipier_set.all())
-        return self.get_match_equipe_query_raw(equipe.course, equipe.nom, equipiers)
-            
-
-    def get_match_equipe_query_raw(self, course, nom, equipiers):
-        annotate = { 'equipier__licence': Value(0, output_field=models.IntegerField()) }
-        equipiers_licence = [ e.num_licence for e in equipiers if e.justificatif == 'licence']
-        if equipiers_licence:
-            annotate['equipier__licence'] = CompareLicences(equipiers_licence)
+        
+        annotate = {}
         annotate.update({
-            'equipier__nom%s' % e.numero: CompareNames('equipier__nom', Value(e.nom)) for e in equipiers if e.justificatif != 'licence'
+            'equipiers__nom%s' % e.numero: CompareNames('equipiers__nom', Value(e.nom))
+            for e in equipiers_data
         })
         annotate.update({
-            'equipier__prenom%s' % e.numero: CompareNames('equipier__prenom', Value(e.prenom)) for e in equipiers if e.justificatif != 'licence'
+            'equipiers__prenom%s' % e.numero: CompareNames('equipiers__prenom', Value(e.prenom))
+            for e in equipiers_data
         })
-        filters = [
-            Q(**{'equipier__nom%s__lt' % e.numero: 3, 'equipier__prenom%s__lt' % e.numero: 3})
-                for e in equipiers if e.justificatif != 'licence'
-        ]
+        def match_equipier_filter(equipier):
+            filtre = Q(**{
+                'equipiers__nom%s__lt' % equipier.numero: CHALLENGE_LEVENSHTEIN_DISTANCE,
+                'equipiers__prenom%s__lt' % equipier.numero: CHALLENGE_LEVENSHTEIN_DISTANCE,
+            })
+            if equipier.justificatif == 'licence':
+                return Q(equipiers__num_licence=equipier.num_licence) | filtre
+            return filtre
 
-        subquery = Equipe.objects.filter(
-                course__in=self.courses.exclude(id=course.id)
-            ).annotate(
-                d=CompareNames('nom', Value(nom)),
-                e=Count('equipier'),
-                **annotate
-            ).filter(
-                _or(Q(equipier__licence=1), *filters),
-                d__lt=3,
-                e__gte=len(equipiers) / 2
-            ).values('id', 'd')
-
-        sql, params = subquery.query.sql_with_params()
-
-        return Equipe.objects.raw("""
-            SELECT id FROM
-                (SELECT id, d, first_value(d) OVER(ORDER BY d) AS min_d FROM (%s) AS a) AS b
-                WHERE d = min_d
-        """ % sql, params=params)
+        filters = [ match_equipier_filter(e) for e in equipiers_data ]
+        equipiers_qs = ParticipationEquipier.objects.filter(
+            participation__in=participation_qs
+        ).annotate(
+            c=Count('equipiers'),
+            **annotate,
+        ).filter(
+            Q(c__gt=0) &
+            _or(*filters),
+        ).values('participation__id').annotate(c=Count('id')).filter(c__gte=len(equipiers_data) / 2)
+        return self.participations.filter(id__in=[ e['participation__id'] for e in equipiers_qs ])
 
     def test_participation(self):
         count=0
@@ -982,6 +997,9 @@ class Challenge(models.Model):
                         print(course, len(ps), e.id, e, e.challenges.values('participation'), ps)
 
         print (count, ko, dup)
+
+    def __str__(self):
+        return self.nom
 
 class ChallengeCategorie(models.Model):
     challenge       = models.ForeignKey(Challenge, related_name='categories', on_delete=models.CASCADE)
@@ -1033,24 +1051,78 @@ class ParticipationChallenge(models.Model):
     challenge = models.ForeignKey(Challenge, related_name='participations', on_delete=models.CASCADE)
     categorie = models.ForeignKey(ChallengeCategorie, related_name='participations', default=None, null=True, blank=True, on_delete=models.SET_NULL)
     position = models.IntegerField(null=True, blank=True)
+    nom = models.CharField(_(u"Nom d'équipe"), max_length=30)
 
     def equipes_dict(self):
         return { e.equipe.course.uid: e for e in self.equipes.all() }
 
-    def add_equipe(self, equipe, point=0):
+    def add_equipe(self, equipe, points=0):
         EquipeChallenge.objects.filter(participation__challenge=self.challenge, equipe=equipe).delete()
         e = self.equipes.create(
             participation=self,
             equipe=equipe,
-            points=0,
+            points=points,
         )
+        modified = False
+        if not self.nom:
+            self.nom = equipe.nom
+            modified = True
         if not self.categorie:
             for c in self.challenge.categories.all():
                 if c.valide(equipe):
                     self.categorie = c
-                    self.save()
+                    modified = True
                     break
+        if modified:
+            self.save()
+
+        pequipiers = list(self.equipiers.all())
+        annotate = {}
+        annotate.update({
+            'nom%s' % e.id: CompareNames('nom', Value(e.nom))
+            for e in pequipiers
+        })
+        annotate.update({
+            'prenom%s' % e.id: CompareNames('prenom', Value(e.prenom))
+            for e in pequipiers
+        })
+        count = 0
+        for equipier in equipe.equipier_set.annotate(**annotate):
+            matched_pequipier = None
+            for pequipier in pequipiers:
+                if equipier.num_licence == pequipier.num_licence or (
+                    getattr(equipier, 'nom%s' % pequipier.id) < CHALLENGE_LEVENSHTEIN_DISTANCE and 
+                    getattr(equipier, 'prenom%s' % pequipier.id) < CHALLENGE_LEVENSHTEIN_DISTANCE):
+                    matched_pequipier = pequipier
+                    break
+            if not matched_pequipier:
+                count += 1
+                matched_pequipier = ParticipationEquipier(
+                    nom=equipier.nom,
+                    prenom=equipier.prenom,
+                    sexe=equipier.sexe,
+                    num_licence=equipier.num_licence,
+                    participation=self,
+                )
+                matched_pequipier.save()
+            if not matched_pequipier.num_licence and equipier.num_licence:
+                matched_pequipier.num_licence = equipier.num_licence
+                matched_pequipier.save()
+            matched_pequipier.equipiers.add(equipier)
+        logger.info('add equipe %s to participation %s, %s not matched' % (equipe, self, count))
         return e
+
+    def del_equipe(self, equipe):
+        for equipier in equipe.equipier_set.all():
+            for e in self.equipiers.all():
+                e.equipiers.remove(equipier)   
+        self.equipiers.annotate(c=Count('equipiers')).filter(c=0).delete()
+        self.equipes.filter(equipe=equipe).delete()
+        if self.equipes.count() == 0:
+            self.delete()
+
+    def __str__(self):
+        return 'Participation %s %s' % (self.challenge, self.nom)
         
 
 class EquipeChallenge(models.Model):
@@ -1060,6 +1132,23 @@ class EquipeChallenge(models.Model):
 
     class Meta:
         unique_together = (('equipe', 'participation'), )
+
+    def __str__(self):
+        return 'Participation %s - %s' % (self.participation, self.equipe)
+
+class ParticipationEquipier(models.Model):
+    participation = models.ForeignKey(ParticipationChallenge, related_name='equipiers', on_delete=models.CASCADE)
+    nom           = models.CharField(_(u'Nom'), max_length=200)
+    prenom        = models.CharField(_(u'Prénom'), max_length=200, blank=True)
+    sexe          = models.CharField(_(u'Sexe'), max_length=1, choices=SEXE_CHOICES)
+    num_licence   = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
+    equipiers     = models.ManyToManyField(Equipier, related_name='particpations')
+
+    def courses(self):
+        return [ e.equipe.course for e in self.equipiers.all() ]
+
+    def __str__(self):
+        return 'ParticipationEquipier %s - %s %s' % (self.participation, self.nom, self.prenom)
 
 def _or(*conds):
     conds = list(conds)
@@ -1086,16 +1175,6 @@ class CompareNames(Func):
     def get_group_by_cols(self):
         cols = []
         for source in self._parse_expressions([self.a, self.b]):
-            cols.extend(source.get_group_by_cols())
-        return cols
-
-class CompareLicences(Case):
-    def __init__(self, licences):
-        equipiers_licence = [ Q(equipier__num_licence=l) for l in licences ]
-        super().__init__(When(_or(*equipiers_licence), then=Value(1)), default=Value(0), output_field=models.IntegerField())
-    def get_group_by_cols(self):
-        cols = []
-        for source in self._parse_expressions(['equipiers_licence']):
             cols.extend(source.get_group_by_cols())
         return cols
 

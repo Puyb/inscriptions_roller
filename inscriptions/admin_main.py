@@ -8,7 +8,7 @@ from django.template.response import TemplateResponse
 from .forms import ChallengeForm
 
 ICON_OK = '✅'
-ICON_KO = '❎'
+ICON_KO = '🚫'
 
 site = admin.site
 
@@ -112,7 +112,7 @@ class ChallengeAdmin(admin.ModelAdmin):
             challenge = Challenge.objects.filter(id=int(request.POST['challenge_id'])).prefetch_related('categories__categories__course').get()
             challenge_categories = { c.id: c for c in challenge.categories.all() }
 
-            courses = Course.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories')
+            courses = Course.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories').order_by('date')
             courses_by_id = { c.id: { 'course': c, 'categories': { cat.id: cat for cat in c.categories.all() } } for c in courses }
             categories = defaultdict(lambda: defaultdict(set)) # nested object, keys : Course, ChallengeCategorie, value: array of Categorie
             for key in request.POST.keys():

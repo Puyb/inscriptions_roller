@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMessage
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames
 from .utils import MailThread, jsonDate
 from django_countries.data import COUNTRIES
 
@@ -186,6 +186,7 @@ def find_challenges_categories(request, course_uid):
                 'challenge': challenge,
                 'participation': len(participations) and participations[0],
                 'nolinks': True,
+                'preview': True,
             }
             all_result[ec.code].append(render_to_string("_participation.html", ctx, request=request))
     return HttpResponse(json.dumps(all_result, default=jsonDate), content_type='application/json')
@@ -386,6 +387,7 @@ def stats_compare(request, course_uid, course_uid2):
 
     return TemplateResponse(request, 'stats_compare.html', {
         'data': res,
+        'today': (date.today() - course1.date_ouverture).days,
         'align': request.GET.get('align', '')
     });
 
@@ -449,22 +451,39 @@ def challenges(request):
     })
 
 def challenge(request, challenge_uid):
-    sorts = ['position2', 'count', 'nom', 'categorie__code']
-    (_('position2'), _('count'), _('nom'), _('categorie__code'))
+    sorts = ['position2', 'count', 'nom', 'categorie__code', 'distance' ]
+    (_('position2'), _('count'), _('nom'), _('categorie__code'), _('distance'))
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
         Prefetch('courses', Course.objects.order_by('date')),
         'categories',
     ), uid=challenge_uid)
 
-    participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')), 'equipes__equipe__categorie', 'equipes__equipe__course').select_related('categorie')
+    participations = ParticipationChallenge.objects.filter(challenge=challenge).prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
     if request.GET.get('search'):
         participations = participations.filter(Q(equipes__equipe__nom__icontains=request.GET['search']) | Q(equipes__equipe__club__icontains=request.GET['search']))
-    participations = participations.annotate(nom=Min('equipes__equipe__nom'), points=Sum('equipes__points'), count=Count('equipes'), position2=Coalesce('position', 10000)).filter(count__gt=0)
+    participations = participations.annotate(
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        position2=Coalesce('position', 10000),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField())
+    ).filter(count__gt=0)
     s = []
     if request.GET.get('by_categories') == '1':
         s.append('categorie__code')
     if request.GET.get('sort') in (sorts + [ '-' + i for i in sorts ]):
-        s.append(request.GET['sort'])
+        if request.GET['sort'].endswith('distance'):
+            if request.GET['sort'].startswith('-'):
+                s.append(F('distance').desc(nulls_last=True))
+            else:
+                s.append(F('distance').asc(nulls_first=True))
+        else:
+            s.append(request.GET['sort'])
     else:
         s.append(sorts[0])
     participations = participations.order_by(*s)
@@ -480,6 +499,80 @@ def challenge(request, challenge_uid):
         'split_categories':  request.GET.get('by_categories') == '1',
     })
 
+def challenge_participation(request, challenge_uid, participation_id):
+    if request.method == 'POST' and request.user.is_superuser:
+        with transaction.atomic():
+            participation = get_object_or_404(ParticipationChallenge, id=participation_id)
+            challenge = participation.challenge
+            equipe_challenge = get_object_or_404(participation.equipes.all(), equipe__course__uid=request.POST['course_uid'])
+            equipe = equipe_challenge.equipe
+            participation.del_equipe(equipe)
+            if request.POST['participation']:
+                new_participation = get_object_or_404(ParticipationChallenge.objects.filter(challenge=challenge), id=request.POST['participation'])
+            else:
+                new_participation = ParticipationChallenge(challenge=challenge)
+                new_participation.save()
+            new_participation.add_equipe(equipe, points=equipe_challenge.points)
+            challenge.compute_challenge()
+            return redirect('inscriptions_challenge', challenge_uid=challenge.uid)
+
+    challenge = get_object_or_404(Challenge.objects.prefetch_related(
+        Prefetch('courses', Course.objects.order_by('date')),
+        'categories',
+    ), uid=challenge_uid)
+    participations = ParticipationChallenge.objects.prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
+    participations = participations.annotate(
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField())
+    )
+    participation = get_object_or_404(participations, id=participation_id)
+    return TemplateResponse(request, 'participation_challenge.html', {
+        'challenge': challenge,
+        'participation': participation,
+    })
+
+def get_participations_to_move(request, challenge_uid, participation_id, course_uid):
+    challenge = get_object_or_404(Challenge.objects.prefetch_related(
+        Prefetch('courses', Course.objects.order_by('date')),
+        'categories',
+    ), uid=challenge_uid)
+    course = get_object_or_404(Course, uid=course_uid)
+    participation = get_object_or_404(ParticipationChallenge.objects.select_related('categorie'), id=participation_id)
+    participations = ParticipationChallenge.objects.filter(
+        challenge=challenge,
+        categorie=participation.categorie,
+    ).exclude(
+        id=participation.id,
+    ).exclude(
+        equipes__equipe__course=course,
+    ).prefetch_related(
+        Prefetch('equipes', EquipeChallenge.objects.order_by('equipe__course__date')),
+        'equipes__equipe__categorie',
+        'equipes__equipe__course',
+        Prefetch('equipiers', ParticipationEquipier.objects.annotate(m=Min('equipiers__equipe__date')).order_by('m')),
+        'equipiers__equipiers__equipe__course'
+    ).select_related('categorie')
+    participations = participations.annotate(
+        points=Sum('equipes__points'),
+        count=Count('equipes'),
+        distance=Sum(F('equipes__equipe__course__distance') * F('equipes__equipe__tours'), output_field=DecimalField()),
+        d=CompareNames('nom', Value(participation.equipes.select_related('equipe').get(equipe__course=course).equipe.nom)),
+    ).order_by('d')
+    return TemplateResponse(request, 'selection_participation.html', {
+        'challenge': challenge,
+        'course': course,
+        'participations': participations,
+        'participation': participation,
+    })
+
+    
 def model_certificat(request, course_uid):
     return redirect(settings.STATIC_URL + '/certificat_medical.pdf')
 
