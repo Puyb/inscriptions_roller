@@ -64,33 +64,9 @@
             -ms-transform: rotate(270deg) scaleY(-1);
         }
     </style>
-    <div class="jumbotron">
-        <div class="media">
-            <div class="media-left">
-                <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
-                <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
-            </div>
-            <div class="media-body">
-                <h2>{{ COURSE.nom }}</h2>
-                <p>
-                    {% blocktrans with date=COURSE.date ville=COURSE.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
-                    {% blocktrans with organisateur=COURSE.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}<br />
-                </p>
-                <ul class="nav nav-pills">
-                    {% if not COURSE.fermee %}
-                    <li role="presentation"><a href="{% url "inscriptions_create" course_uid=COURSE.uid %}">{% trans "Inscription" %}</a></li>
-                    {% endif %}
-                    <li role="presentation"><a href="{{ COURSE.url }}">{% trans "Site de la course" %}</a></li>
-                    <li role="presentation"><a href="{{ COURSE.url_reglement }}">{% trans "Règlement" %}</a></li>
-                    <li role="presentation"><a href="{% url "inscriptions_list" course_uid=COURSE.uid %}">{% trans "Liste des inscrits" %}</a></li>
-                    <li role="presentation" class="active"><a href="{% url "inscriptions_stats" course_uid=COURSE.uid %}">{% trans "Statistiques" %}</a></li>
-                    {% for challenge in COURSE.challenges.all %}
-                    <li role="presentation"><a href="{% url "inscriptions_challenge" challenge_uid=challenge.uid %}">{{ challenge.nom }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-    </div>
+    {% with page="stats" %}
+    {% include "_course_header.html" %}
+    {% endwith %}
     <div class="panel panel-default">
         <div class="panel-heading">{% trans "Origine des participants" %}</div>
         <div class="panel-body">
