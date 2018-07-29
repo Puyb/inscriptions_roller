@@ -49,6 +49,8 @@ def form(request, course_uid, numero=None, code=None):
         old_password = instance.password
         if instance.password != code:
             raise Http404()
+        if instance.verrou and not request.user.is_staff:
+            return TemplateResponse(request, 'locked.html', {})
         update = True
     if request.method == 'POST':
         try:

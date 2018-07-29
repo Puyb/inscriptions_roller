@@ -457,7 +457,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ("Instructions", { 'description': HELP_TEXT, 'classes': ('collapse', 'collapsed'), 'fields': () }),
         (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('paiement', 'prix', 'paiement_info'), 'commentaires')}),
         (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
-        (None, { 'description': '<div id="autre"></div>', 'fields': () }),
+        (None, { 'description': '<div id="autre"></div>', 'fields': ('verrou', ) }),
 
     )
     actions = ['send_mails', 'export']
