@@ -247,6 +247,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                     if data.get('time_column'):
                                         if data['time_format'] == 'HMS':
                                             s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
+                                            print(s, equipe)
                                             time = Decimal(0)
                                             n = Decimal(1)
                                             while len(s):
