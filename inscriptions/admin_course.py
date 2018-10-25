@@ -252,6 +252,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                     if data.get('time_column'):
                                         if data['time_format'] == 'HMS':
                                             s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
+                                            print(s, equipe)
                                             time = Decimal(0)
                                             n = Decimal(1)
                                             while len(s):
@@ -658,7 +659,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         fields.update({
             'equipier.%s' % field.name: '%s - %s' % (_('Equipier'), field.verbose_name or field.name)
             for field in Equipier._meta.get_fields()
-            if not field.one_to_many and field.name not in ('id', 'equipe', 'ville2', 'extra')
+            if not field.one_to_many and field.name not in ('id', 'equipe', 'ville2', 'extra', 'participations') and hasattr(field, 'verbose_name')
         })
         fields.update({
             'equipier.extra%d' % extra.id: '%s - %s' % (_('Equipier'), extra.label)
@@ -689,7 +690,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 if isinstance(obj, Equipier) and field[0] == 'equipe':
                     obj = obj.equipe
                 if field[1].startswith('extra'):
-                    return obj.extra[field[1]]
+                    return (obj.extra[field[1]] if field[1] in obj.extra else '')
                 v = getattr(obj, field[1])
                 if inspect.ismethod(v):
                     return str(v())

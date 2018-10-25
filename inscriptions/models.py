@@ -542,7 +542,7 @@ class Equipe(models.Model):
             f = ('%06' if not s else '%02') if t > 60 else '%'
             f += 'd' if s else '.3f'
             s.append(f % (t % 60))
-            t = (t / 60).to_integral()
+            t = (t // 60).to_integral()
         s.reverse()
         return ':'.join(s)
 
