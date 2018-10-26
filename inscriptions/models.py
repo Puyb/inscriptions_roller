@@ -108,6 +108,10 @@ class Course(models.Model):
     def fermee(self):
         return not self.active or self.date_fermeture <= date.today()
 
+    @property
+    def dernier_jour_inscription(self):
+        return self.date_fermeture - timedelta(days=1)
+
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
@@ -536,7 +540,7 @@ class Equipe(models.Model):
 
     @property
     def date_annulation(self):
-        return self.date + timedelta(days=31)
+        return min(self.date + timedelta(days=31), self.course.date)
 
     def temps_humain(self):
         if not self.temps:

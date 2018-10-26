@@ -336,9 +336,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
-
-
-
     index_template = 'admin/dashboard.html'
 
 
@@ -660,7 +657,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 if isinstance(obj, Equipier) and field[0] == 'equipe':
                     obj = obj.equipe
                 if field[1].startswith('extra'):
-                    return (obj.extra[field[1]] if field[1] in obj.extra else '')
+                    return (str(obj.extra[field[1]]) if field[1] in obj.extra else '')
                 v = getattr(obj, field[1])
                 if inspect.ismethod(v):
                     return str(v())
