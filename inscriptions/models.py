@@ -540,7 +540,7 @@ class Equipe(models.Model):
 
     @property
     def date_annulation(self):
-        return min(self.date + timedelta(days=31), self.course.date)
+        return min(self.date.date() + timedelta(days=31), self.course.date)
 
     def temps_humain(self):
         if not self.temps:
