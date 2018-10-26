@@ -300,10 +300,14 @@ def _list(course_uid, equipes, request, template, sorts):
     if request.GET.get('categorie'):
         equipes = equipes.filter(categorie__code=request.GET['categorie'])
     if request.GET.get('top'):
-        if request.GET.get('by_categories') == '1':
-            equipes = equipes.filter(position_categorie__lte=request.GET.get('top'))
-        else:
-            equipes = equipes.filter(position_generale__lte=request.GET.get('top'))
+        try:
+            top = int(request.GET.get('top'))
+            if request.GET.get('by_categories') == '1':
+                equipes = equipes.filter(position_categorie__lte=top)
+            else:
+                equipes = equipes.filter(position_generale__lte=top)
+        except ValueError as e:
+            pass
 
     stats = equipes.aggregate(
         count     = Count('id'),
