@@ -18,6 +18,7 @@ from .forms import CourseForm, ImportResultatForm
 from .utils import ChallengeUpdateThread
 from account.views import LogoutView
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import json
 import re
 from Levenshtein import distance
@@ -453,6 +454,23 @@ class CategorieFilter(SimpleListFilter):
             return queryset.filter(categorie__code=self.value())
         return queryset
 
+class MineurFilter(SimpleListFilter):
+    title = _(u'Mineurs')
+    parameter_name = 'mineurs'
+    def lookups(self, request, model_admin):
+        return [
+            ('1', _('Avec mineurs')),
+            ('0', _('Sans mineur')),
+        ]
+    def queryset(self, request, queryset):
+        course = getCourse(request)
+        date = course.date - relativedelta(years=18)
+        if self.value() == '1':
+            return queryset.filter(equipier__date_de_naissance__gt=date)
+        if self.value() == '0':
+            return queryset.exclude(equipier__date_de_naissance__gt=date)
+        return queryset
+
 class EquipeAdmin(CourseFilteredObjectAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -470,7 +488,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
     list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
-    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', 'date']
+    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
     inlines = [ EquipierInline ]
 
