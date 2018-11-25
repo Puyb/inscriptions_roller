@@ -147,11 +147,12 @@ class AdminPaiementForm(ModelForm):
     class Meta:
         model = Paiement
         fields = ('type', 'montant', 'detail')
-
-class PaiementRepartitionForm(ModelForm):
-    class Meta:
-        model = PaiementRepartition
-        exclude = ('paiement',)
-
-PaiementRepartitionFormset = formset_factory(PaiementRepartitionForm, formset=BaseModelFormSet, extra=0)
-PaiementRepartitionFormset.model = PaiementRepartition
+    initials = {
+        'type': 'chèque',
+    }
+    type = CharField(
+        label=_("Type de paiement"),
+        widget=AdminRadioSelect(
+            choices=Paiement.MANUAL_TYPE_CHOICES
+        ),
+    )

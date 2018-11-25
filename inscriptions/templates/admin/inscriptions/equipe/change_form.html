@@ -26,6 +26,12 @@
     {% for e in original.equipier_set.all %}
     build_extra($('#equipier_set-{{ forloop.counter0 }} fieldset:last'), {{ e.extra|json }});
     {% endfor %}
+    $('.form-row.field-prix>div').addClass('field-box');
+    $('.form-row.field-prix').append(
+'        <div class="field-box">' +
+'            <label>Paiement</label>' +
+'            <div class="readonly"><a href="../../../paiement/?equipe_id={{ original.id }}">{{ original.montant_paiements }}</a> <button type="button" onclick="location.href=\'../../../paiement/add?equipe_id={{ original.id }}\';">Ajouter un paiement</button></div>' +
+'        </div>')
 </script>
 {% endif %}
 {% endblock %}

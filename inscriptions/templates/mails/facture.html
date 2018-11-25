@@ -22,9 +22,23 @@
     <br />
     Equipe : {{ instance.numero }}<br />
     {{ instance.nom }}<br />
-    Catégorie : {{ instance.categorie.code }} - {{ instance.categorie.nom }}<br />
-    Prix: {{ instance.prix }} €<br />
-    Facture acquittée<br />
+                        <table class="table">
+                            <tr>
+                                <th>{% trans "Quantité" %}</th>
+                                <th>{% trans "Label" %}</th>
+                                <th>{% trans "Prix unitaire" %}</th>
+                                <th>{% trans "Prix" %}</th>
+                            </tr>{% for line in instance.facture %}
+                            <tr>
+                                <td>{{ line.quantite }}</td>
+                                <td>{{ line.label }}</td>
+                                <td>{{ line.prix_unitaire }} €</td>
+                                <td>{{ line.prix }} €</td>
+                            </tr>
+                            {% endfor %}
+                            <tr><th colspan="3">Total: </th><td>{{ instance.prix }} €</td></tr>
+                        </table>
+    {% if instance.paiement_complet %}Facture acquittée{% endif %}<br />
     <br />
     
     <br />

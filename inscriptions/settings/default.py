@@ -121,7 +121,6 @@ ROOT_URLCONF = "inscriptions.urls"
 WSGI_APPLICATION = "inscriptions.wsgi.application"
 
 INSTALLED_APPS = [
-    #"bootstrap_admin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -130,15 +129,11 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-
-    # theme
     "bootstrapform",
+    "formadmin",
     "pinax_theme_bootstrap",
-
-    # external
     "account",
-
-    # project
+    "pinax.stripe",
     "inscriptions",
 ]
 

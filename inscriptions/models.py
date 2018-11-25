@@ -27,6 +27,7 @@ from django.contrib.contenttypes.models import ContentType
 import logging
 import traceback
 import pytz
+from pinax.stripe.models import Charge
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +96,9 @@ class Course(models.Model):
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
     paypal              = models.EmailField(_(u'Adresse paypal'), blank=True)
     frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
+    stripe_secret       = models.CharField(_('Stripe Secret Key'), max_length=200, blank=True, null=True)
+    stripe_public       = models.CharField(_('Stripe Public Key'), max_length=200, blank=True, null=True)
+    frais_stripe_inclus = models.BooleanField(_(u'Frais stripe inclus'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
@@ -181,8 +185,15 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             .prefetch_related('equipier_set__equipe')
             .prefetch_related('equipier_set__equipe__course')
         )
+        montants_equipes = {
+            equipe.id: equipe._montant_paiements
+            for equipe in Equipe.objects.filter(course=self).annotate(
+                _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+            )
+        }
         tz = pytz.timezone('Europe/Paris')
         for equipe in equipes:
+            equipe._montant_paiements = montants_equipes[equipe.id]
             stats = model_stats.copy()
             keys = {
                 "categories": equipe.categorie_id and equipe.categorie.code or '',
@@ -218,7 +229,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                     token += 'c'
             stats[token] = 1
 
-            stats['paiement'] = float(equipe.paiement or 0)
+            stats['paiement'] = float(equipe.montant_paiements)
             stats['prix'] = float(equipe.prix)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
             stats[equipe.categorie.code] += 1;
@@ -375,7 +386,6 @@ class Equipe(models.Model):
     course             = models.ForeignKey(Course, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
-    paiement           = models.DecimalField(_(u'Paiement reçu'), max_digits=5, decimal_places=2, null=True, blank=True)
     dossier_complet    = models.NullBooleanField(_(u'Dossier complet'))
     date               = models.DateTimeField(_(u"Date d'insciption"), auto_now_add=True)
     commentaires       = models.TextField(_(u'Commentaires'), blank=True)
@@ -408,9 +418,6 @@ class Equipe(models.Model):
             return self.verifier_count > 0
         return len([equipier for equipier in self.equipier_set.all().filter(numero__lte=self.nombre) if equipier.verifier]) > 0
 
-    def paiement_complet(self):
-        return (self.paiement or Decimal(0)) >= self.prix
-    
     def dossier_complet_auto(self):
         if hasattr(self, 'erreur_count'):
             if self.erreur_count > 0:
@@ -424,16 +431,28 @@ class Equipe(models.Model):
             return None
         return True
 
-    def frais_paypal(self):
-        if self.course.frais_paypal_inclus:
-            return Decimal('0.00')
-        return ( self.prix + Decimal('0.25') ) / ( Decimal('1.000') - Decimal('0.034') ) - self.prix
+    @property
+    def montant_paiements(self):
+        if hasattr(self, '_montant_paiements'):
+            return self._montant_paiements or Decimal(0)
+        return self.paiements.filter(paiement__montant__isnull=False).aggregate(sum=Sum('montant'))['sum'] or Decimal(0)
 
-    def prix_paypal(self):
-        return self.prix + self.frais_paypal()
+    @property
+    def reste_a_payer(self):
+        return self.prix - self.montant_paiements
 
-    def paiement_paypal(self):
-        return self.paiement_info.startswith('Paypal ') # and self.prix_paypal() - Decimal('0.01') < self.paiement and self.paiement < self.prix_paypal() + Decimal('0.01')
+    def paiement_complet(self):
+        return self.montant_paiements >= self.prix
+
+    @property
+    def paiements_en_attente(self):
+        return Decimal('0.00');
+        # return self.paiements.filter(montant__isnull=True).aggregate(sum=Sum('strip_charge__amount'))['sum'] or Decimal(0)
+
+    def paiement_complet_en_attente(self):
+        montant = self.montant_paiements
+        montant += self.paiements_en_attente
+        return montant >= self.prix
 
     def facture(self):
         lines = [
@@ -486,17 +505,6 @@ class Equipe(models.Model):
                     traceback.print_exc()
                 try:
                     self.send_mail('changement_numero_admin')
-                except Exception as e:
-                    traceback.print_exc()
-
-            paiement = Equipe.objects.get(id=self.id).paiement
-            if paiement != self.paiement:
-                try:
-                    self.send_mail('paiement')
-                except Exception as e:
-                    traceback.print_exc()
-                try:
-                    self.send_mail('paiement_admin')
                 except Exception as e:
                     traceback.print_exc()
         else:
@@ -1197,18 +1205,40 @@ class Paiement(models.Model):
         ('espèce', _('espèce')),
         ('chèque', _('chèque')),
         ('paypal', _('paypal')),
+        ('stripe', _('stripe')),
+        ('virement', _('virement')),
+        ('autre', _('autre')),
+    )
+    MANUAL_TYPE_CHOICES = (
+        ('espèce', _('espèce')),
+        ('chèque', _('chèque')),
         ('virement', _('virement')),
         ('autre', _('autre')),
     )
     date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
-    montant = models.DecimalField(max_digits=7, decimal_places=2)
-    detail = models.TextField()
+    montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    detail = models.TextField(blank=True)
+    stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
+
+    def save(self, *args, **kwargs):
+        equipes = [ e.equipe for e in self.equipes.all() ]
+        try:
+            mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement')
+            mail.send(equipes)
+        except Exception as e:
+            traceback.print_exc()
+        try:
+            mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement_admin')
+            mail.send(equipes)
+        except Exception as e:
+            traceback.print_exc()
+        super().save(*args, **kwargs)
 
 class PaiementRepartition(models.Model):
     paiement = models.ForeignKey(Paiement, related_name='equipes', on_delete=models.CASCADE)
     equipe = models.ForeignKey(Equipe, related_name='paiements', on_delete=models.CASCADE)
-    montant = models.DecimalField(max_digits=7, decimal_places=2)
+    montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
 
     def paye(self):
         paiements = self.equipe.paiements.all()

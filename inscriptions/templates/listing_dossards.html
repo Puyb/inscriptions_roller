@@ -46,7 +46,8 @@
             <td>{{ e.gerant_prenom }} {{ e.gerant_nom }}</td>
             <td class="r">{{ e.nombre }}</td>
             <td style="color: red">
-                {% if not e.paiement_complet %}{{ e.prix }}€{% endif %}
+                {% if e.reste_a_payer > 0 %}{{ e.reste_a_payer }}€ du{% endif %}
+                {% if e.reste_a_payer < 0 %}trop perçu {{ e.reste_a_payer }}€{% endif %}
             </td>
             <td></td>
         </tr>

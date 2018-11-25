@@ -2,6 +2,7 @@
 import operator
 from functools import reduce
 from inscriptions.models import *
+from django.conf.urls import url
 from django.contrib import admin
 from django.core.mail import EmailMessage
 from django.http import HttpResponse
@@ -9,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.contrib import messages
-from django.db.models import Sum, Value, F, Q, Max
+from django.db.models import Sum, Value, F, Q, Max, Prefetch
 from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
@@ -17,7 +18,7 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, PaiementRepartitionFormset
+from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
 from .utils import ChallengeUpdateThread
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -47,7 +48,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        print(request.path)
         if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
@@ -65,8 +65,9 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
-            url(r'^paiement/add/$', self.paiement_add, name='paiement_add'),
-            url(r'^paiement/search/equipe/$', self.paiement_search_equipe, name='paiement_search_equipe'),
+            url(r'^inscriptions/paiement/add/$', self.paiement_change, name='paiement_add'),
+            url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.paiement_change, name='paiement_change'),
+            url(r'^inscriptions/paiement/search/equipe/$', self.paiement_search_equipe, name='paiement_search_equipe'),
         ] + super().get_urls()
         return urls
 
@@ -252,7 +253,6 @@ class CourseAdminSite(admin.sites.AdminSite):
                                     if data.get('time_column'):
                                         if data['time_format'] == 'HMS':
                                             s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
-                                            print(s, equipe)
                                             time = Decimal(0)
                                             n = Decimal(1)
                                             while len(s):
@@ -318,45 +318,102 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
-    def paiement_add(self, request):
+    def paiement_change(self, request, id=None):
+        paiement = None
+        course = getCourse(request, Course.objects.all())
+        courses = set(Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60)))
+        courses.add(course)
+
+        equipes = {}
+        montants = {}
+        initials = {}
+        repartitions = []
+        
+        if id:
+            paiement = get_object_or_404(Paiement, id=id)
+            repartitions = [{
+                'equipe': r.equipe,
+                'montant': r.montant,
+                'paiement': r.equipe.montant_paiements - r.montant,
+                'reste': r.equipe.prix - r.equipe.montant_paiements + r.montant,
+            } for r in paiement.equipes.all()]
+        elif request.GET.get('equipe_id'):
+            repartitions = []
+            initials['montant'] = Decimal(0)
+            for equipe in Equipe.objects.filter(id__in=request.GET.getlist('equipe_id'), course__in=courses):
+                repartitions.append({
+                    'equipe': equipe,
+                    'montant': None,
+                    'paiement': equipe.montant_paiements,
+                    'reste': equipe.prix - equipe.montant_paiements,
+                });
+                initials['montant'] += equipe.prix - equipe.montant_paiements
+
+        paiement_form = AdminPaiementForm(instance=paiement, initial=initials)
+
         if request.method == 'POST':
-            paiement_form = AdminPaiementForm(request.POST)
-            repartition_formset = PaiementRepartitionFormset(request.POST)
-            with transaction.atomic():
-                paiement = paiement_form.save()
-                montant = 0
-                for repartition_form in repartition_formset.forms:
-                    repartition = repartition_form.save(commit=False)
-                    repartition.paiement = paiement
-                    repartition.save()
-                    repartition.equipe.paiement += repartition.montant
+            paiement_form = AdminPaiementForm(request.POST, instance=paiement)
+            equipes = { str(e.id): e for e in Equipe.objects.filter(id__in=request.POST.getlist('equipe_id'), course__in=courses) }
+            montants = zip(request.POST.getlist('equipe_id'), request.POST.getlist('repartition'))
 
-                    montant += repartition.montant
-                if montant != paiement.montant:
-                    raise Exception('montant incorrecte')
-                return redirect('/course/inscriptions/paiement/%s/' % (paiement.id, ))
+            class PaiementException(Exception):
+                pass
+            try:
+                with transaction.atomic():
+                    paiement = paiement_form.save()
+                    paiement.equipes.all().delete()
+                    montant = Decimal(0)
+                    repartitions = []
+                    for equipe_id, repartition_montant in montants:
+                        repartition = PaiementRepartition(
+                            paiement=paiement,
+                            equipe=equipes[equipe_id],
+                            montant=Decimal(repartition_montant.replace(',', '.')),
+                        )
+                        repartition.save()
+                        repartitions.append({
+                            'equipe': repartition.equipe,
+                            'montant': repartition.montant,
+                            'paiement': repartition.equipe.montant_paiements,
+                            'reste': repartition.equipe.prix - repartition.equipe.montant_paiements,
+                        })
 
-        paiement_form = AdminPaiementForm()
-        repartition_formset = PaiementRepartitionFormset(queryset=PaiementRepartition.objects.none())
-        courses = Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
+                        montant += repartition.montant
+                        print(montant, equipe_id, repartition_montant, montant, paiement.montant)
+                    if montant != paiement.montant:
+                        raise PaiementException('montant incorrect')
+                    print('len equipe_id', len(request.GET.getlist('equipe_id')))
+                    if len(request.GET.getlist('equipe_id')) == 1:
+                        return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
+                    return redirect('/course/inscriptions/paiement/')
+            except PaiementException as e:
+                messages.add_message(request, messages.ERROR, u'Répartition des montants incorrectes')
+
         return TemplateResponse(request, 'admin/paiement/add.html', dict(self.each_context(request),
             courses=courses,
             paiement_form=paiement_form,
-            repartition_formset=repartition_formset,
+            repartitions=repartitions,
+            app_label='inscriptions',
         ))
 
     @csrf_exempt
     def paiement_search_equipe(self, request):
         search = request.POST['search']
 
+        course = getCourse(request, Course.objects.all())
         courses = Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
 
-        equipes = Equipe.objects.filter(course__in=courses).distinct()
+        equipes = Equipe.objects.filter(Q(course__in=courses) | Q(course=course)).distinct()
         for bit in search.split():
             or_queries = [ Q(**{field + '__icontains': bit})
                             for field in EquipeAdmin.search_fields ]
             equipes = equipes.filter(reduce(operator.or_, or_queries))
-        print(equipes.query.sql_with_params())
+        repartitions = {}
+        if request.GET.get('id'):
+            repartitions = {
+                r.equipe_id: r.montant
+                for r in PaiementRepartition.object.filter(paiement_id=request.GET.get('id'))
+            }
 
         return HttpResponse(json.dumps({
             'equipes': [{
@@ -365,7 +422,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'numero': e.numero,
                 'nom': e.nom,
                 'prix': str(e.prix),
-                'paiement': str(e.paiement or '0'),
+                'paiement': str(e.montant_paiements or '0'),
+                'montant': str(repartitions.get(e.id, '0')),
             } for e in equipes],
         }))
 
@@ -383,44 +441,6 @@ class CourseFilteredObjectAdmin(admin.ModelAdmin):
             qs = qs.filter(course__accreditations__user=request.user)
         return qs
     pass
-
-HELP_TEXT = """
-<ul>
-    <li>
-        Réception d'un chèque : 
-        <ol>
-            <li>saisissez le montant du chèque dans la case 'Paiement reçu'.</li>
-            <li>Au besoin, vous pouvez saisir une information complétentaire dans la case 'Détails'</li>
-        </ol>
-    </li>
-    <li>
-        Réception d'un certificat médical :
-        <ol>
-            <li>Identifier à quel équipier il se rapporte</li>
-            <li>Vérifiez sa date et s'il autorise la pratique du roller en compétition</li>
-            <li>Modifiez la case 'Certificat ou licence valide' de 'Inconnu' à 'Oui' ou 'Non' selon le cas</li>
-        </ol>
-    </li>
-    <li>
-        Réception d'une licence FFRS :
-        <ol>
-            <li>Identifier à quel équipier il se rapporte</li>
-            <li>Vérifiez qu'elle est en cours de validité et qu'elle comporte la mention 'competition'</li>
-            <li>Modifiez la case 'Certificat ou licence valide' de 'Inconnu' à 'Oui' ou 'Non' selon le cas</li>
-        </ol>
-    </li>
-    <li>
-        Réception d'une autorisation parentale :
-        <ol>
-            <li>Identifier à quel équipier il se rapporte</li>
-            <li>Vérifiez qu'elle est valide</li>
-            <li>Modifiez la case 'Autorisation parentale' de 'Inconnu' à 'Oui' ou 'Non' selon le cas</li>
-        </ol>
-    </li>
-</ul>
-<p>Au besoin, vous pouvez saisir des informations complémentaires dans la case 'commentaires'.</p>
-<p>Une fois terminer, cliquer sur le bouton 'Enregistrer' en bas de page.</p>
-"""
 
 class EquipierInline(admin.StackedInline):
     model = Equipier
@@ -459,6 +479,7 @@ class StatusFilter(SimpleListFilter):
         return queryset
 
 class PaiementCompletFilter(SimpleListFilter):
+    #TODO
     title = _('Paiement complet')
     parameter_name = 'paiement_complet'
     def lookups(self, request, model_admin):
@@ -507,9 +528,9 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     ordering = ['-date', ]
     inlines = [ EquipierInline ]
 
+#TODO add paiements amount, and link to add a new one
     fieldsets = (
-        ("Instructions", { 'description': HELP_TEXT, 'classes': ('collapse', 'collapsed'), 'fields': () }),
-        (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('paiement', 'prix', 'paiement_info'), 'commentaires')}),
+        (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('prix',), 'commentaires')}),
         (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
         (None, { 'description': '<div id="autre"></div>', 'fields': () }),
 
@@ -547,7 +568,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return False
 
     def get_urls(self):
-        from django.conf.urls import url
         urls = super().get_urls()
         my_urls = [
             url(r'^version/$', self.version, name='equipe_version'),
@@ -875,16 +895,44 @@ class PaiementRepartitionInline(admin.TabularInline):
     def prix(self, obj):
         return obj.equipe.prix
 
+class PaiementEquipeFilter(SimpleListFilter):
+    title = _('Equipe')
+    parameter_name = 'equipe_id'
+    def lookups(self, request, model_admin):
+        if self.value():
+            return (
+                (self.value(), Equipe.objects.get(id=self.value())),
+            )
+        return ()
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(equipes__equipe__id=self.value())
+        return queryset
+
 class PaiementAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(equipes__equipe__course__uid=course_uid)
+        qs = qs.filter(equipes__equipe__course__uid=course_uid).distinct()
         if not request.user.is_superuser:
             qs = qs.filter(equipes__equipe__course__accreditations__user=request.user)
+        qs = qs.prefetch_related(Prefetch('equipes', PaiementRepartition.objects.select_related('equipe', 'equipe__course')))
         return qs
     fields = ('montant', 'type', 'date', 'detail', )
     readonly_fields = ('date', )
-    list_display = ('montant', 'type', 'date', )
+    list_display = ('equipes', 'montant', 'type', 'date', )
+    list_filter = ('type', PaiementEquipeFilter, )
     inlines = [ PaiementRepartitionInline ]
+
+    def equipes(self, obj):
+        #TODO hide course if t's the current one
+        if obj.equipes.count() == 1:
+            return str(obj.equipes.get().equipe)
+        courses = defaultdict(lambda: [])
+        for e in obj.equipes.all():
+            courses[e.equipe.course.uid].append(str(e.equipe.numero))
+        if obj.equipes.count() < 4:
+            return ', '.join('%s: [%s]' % (uid, ', '.join(numeros)) for uid, numeros in courses.items())
+        return str(len(obj.equipes.count()))
+
 site.register(Paiement, PaiementAdmin)

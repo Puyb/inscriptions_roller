@@ -23,9 +23,13 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
 from .utils import MailThread, jsonDate
 from django_countries.data import COUNTRIES
+from pinax.stripe.actions import charges
+from pinax.stripe.views import Webhook
+import stripe
+from .templatetags import stripe as stripe_templatetags
 
 logger = logging.getLogger(__name__)
 
@@ -240,10 +244,17 @@ def ipn(request, course_uid):
             return HttpResponse()
 
         equipe = get_object_or_404(Equipe, id=data['invoice'][0:-4], course__uid=course_uid)
-        equipe.paiement = data['mc_gross']
-        equipe.paiement_info = 'Paypal %s %s' % (datetime.now(), data['txn_id'])
-        equipe.save()
 
+        paiement = Paiement(
+            type='paypal',
+            montant=data['mc_gross'],
+            detail='Paypal %s %s' % (datetime.now(), data['txn_id'])
+        )
+        paiement.save()
+        paiement.equipes.create(
+            equipe=equipe,
+            montant=montant,
+        )
     except:
         logger.exception('error handling paypal ipn')
 
@@ -606,4 +617,60 @@ def live_push(request, course_uid):
 
 def countries(request):
     return HttpResponse(json.dumps([ [k, str(v)] for k, v in COUNTRIES.items()]), content_type='application/json')
+
+class StripeWebhook(Webhook):
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(Course, uid=self.kwargs['course_uid'])
+        stripe.api_key = course.stripe_secret
+        return super().post(request, *args, **kwargs)
+
+def stripe_paiement(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    equipes = course.equipe_set.filter(numero__in=request.GET.getlist('equipe'))
+    if len(equipes) == 0:
+        raise Http404()
+
+    token = request.POST['token']
+
+    montant = 0
+    for equipe in equipes:
+        montant += equipe.reste_a_payer
+        if not course.frais_stripe_inclus:
+            montant += stripe_templatetags.frais(equipe.reste_a_payer)
+
+    stripe.api_key = course.stripe_secret
+    charge = charges.create(
+        amount=montant,
+        #customer=request.user.customer,
+        source=token,
+        currency='EUR',
+        description='%s' % (equipe, ),
+        capture=True,
+    )
+
+    paiement = Paiement(
+        type='stripe',
+        stripe_charge=charge,
+        montant=montant
+    )
+    paiement.save()
+    for equipe in equipes:
+        montant = equipe.reste_a_payer
+        if not course.frais_stripe_inclus:
+            montant += stripe_templatetags.frais(equipe.reste_a_payer)
+        paiement.equipes.create(
+            equipe=equipe,
+            montant=montant,
+        )
+
+    return HttpResponse(json.dumps({
+        'success': True,
+    }))
+
+def equipe_payee(request, course_uid, equipe_numero):
+    course = get_object_or_404(Course, uid=course_uid)
+    equipe = get_object_or_404(Equipe, course=course, numero=equipe_numero)
+    return HttpResponse(json.dumps({
+        'success': equipe.paiement_complet(),
+    }))
 

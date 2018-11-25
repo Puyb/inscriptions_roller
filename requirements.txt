@@ -1,15 +1,23 @@
 ## The following requirements were added by pip freeze:
+certifi==2018.10.15
 Django==2.0
 django-appconf==1.0.2
 django-bootstrap-form==3.3
 django-countries==5.0
+django-form-admin==0.5.1
+django-ipware==2.1.0
 django-jsonfield==0.9.15
 django-user-accounts==2.0.3
+idna==2.6
+jsonfield==2.0.2
 # Pillow==5.0.0
+pinax-stripe==4.4.0
 pinax-theme-bootstrap==7.1.1
 # psycopg2-binary==2.7.4
 python-Levenshtein==0.12.0
 pytz==2017.3
-requests==2.18.4
+requests==2.20.1
 sqlparse==0.2.4
+stripe==2.12.1
 typing==3.6.2
+urllib3==1.22
