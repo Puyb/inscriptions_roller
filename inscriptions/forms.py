@@ -105,6 +105,7 @@ class CourseForm(ModelForm):
 class ContactForm(Form):
     name = CharField()
     email = EmailField()
+    subject = CharField()
     message = CharField(widget=Textarea())
 
 class ImportResultatForm(Form):

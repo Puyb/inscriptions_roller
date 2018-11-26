@@ -15,6 +15,7 @@ pinax-stripe==4.4.0
 pinax-theme-bootstrap==7.1.1
 # psycopg2-binary==2.7.4
 python-Levenshtein==0.12.0
+python-dateutil==2.7.5
 pytz==2017.3
 requests==2.20.1
 sqlparse==0.2.4

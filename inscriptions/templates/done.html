@@ -63,7 +63,7 @@
         {% else %}
         <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Pour régler votre inscription vous pouvez envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
         {% endif %}
-        <p>{% blocktrans with date=instance.date_annulation.date %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
+        <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
         {% else %}
         <p>{% blocktrans with prix=instance.montant_paiements %}Votre paiement de {{ prix }} € à bien été reçu.{% endblocktrans %}</p>
         {% endif %}

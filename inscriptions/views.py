@@ -36,10 +36,10 @@ logger = logging.getLogger(__name__)
 @open_closed
 @transaction.atomic
 def form(request, course_uid, numero=None, code=None):
-    EQ = ExtraQuestion.objects.prefetch_related('choices')
+    eq = ExtraQuestion.objects.prefetch_related('choices')
     course = get_object_or_404(Course.objects.prefetch_related(
-            Prefetch('extra', queryset=EQ.filter(page__in=("Equipe", "Categorie")), to_attr='extra_equipe'),
-            Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
+            Prefetch('extra', queryset=eq.filter(page__in=("Equipe", "Categorie")), to_attr='extra_equipe'),
+            Prefetch('extra', queryset=eq.filter(page="Equipier"), to_attr='extra_equipier'),
             'categories',
         ).annotate(min_age=Min('categories__min_age')), uid=course_uid)
     instance = None
@@ -311,10 +311,14 @@ def _list(course_uid, equipes, request, template, sorts):
     if request.GET.get('categorie'):
         equipes = equipes.filter(categorie__code=request.GET['categorie'])
     if request.GET.get('top'):
-        if request.GET.get('by_categories') == '1':
-            equipes = equipes.filter(position_categorie__lte=request.GET.get('top'))
-        else:
-            equipes = equipes.filter(position_generale__lte=request.GET.get('top'))
+        try:
+            top = int(request.GET.get('top'))
+            if request.GET.get('by_categories') == '1':
+                equipes = equipes.filter(position_categorie__lte=top)
+            else:
+                equipes = equipes.filter(position_generale__lte=top)
+        except ValueError as e:
+            pass
 
     stats = equipes.aggregate(
         count     = Count('id'),
@@ -409,25 +413,30 @@ def index(request):
     })
 
 def contact(request, course_uid):
-    course = get_object_or_404(Course, uid=request.path.split('/')[1])
+    course = get_object_or_404(Course, uid=course_uid)
     name = request.POST.get('name', '')
+    subject = request.POST.get('subject', '')
     message = request.POST.get('message', '')
     from_email = request.POST.get('email', '')
 
     if message and from_email:
-        message = EmailMessage('[%s] Message' % course.uid, """Nom: %s
+        message = EmailMessage(
+            '[%s] Message enduroller : %s' % (course.uid, subject),
+            """Nom: %s
 Email: %s
 
-%s""" % (name, from_email, message), settings.DEFAULT_FROM_EMAIL, [ course.email_contact ], reply_to=[from_email,])
+%s""" % (name, from_email, message),
+            settings.DEFAULT_FROM_EMAIL,
+            [course.email_contact],
+            reply_to=[from_email,]
+        )
         MailThread([message]).start()
         return HttpResponseRedirect('thankyou/')
-    else:
-        return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
-
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
 def contact_done(request, course_uid):
-    return TemplateResponse(request, 'contact_done.html')
+    course = get_object_or_404(Course, uid=course_uid)
+    return TemplateResponse(request, 'contact_done.html', {'course': course})
 
 def facture(request, course_uid, numero):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)

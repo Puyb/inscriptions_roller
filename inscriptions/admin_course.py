@@ -22,6 +22,7 @@ from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
 from .utils import ChallengeUpdateThread
 from account.views import LogoutView
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import json
 import re
 from Levenshtein import distance
@@ -193,6 +194,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                 csv_file = request.FILES['csv']
                 data = form.cleaned_data
 
+                class AbortException(Exception):
+                    pass
+                try:
                 with transaction.atomic():
                     course.equipe_set.all().update(
                         tours              = None,
@@ -223,8 +227,18 @@ class CourseAdminSite(admin.sites.AdminSite):
                                     except:
                                         return None
 
+                                    line = 0
                                 for row in csv_reader:
+                                        line += 1
+                                        try:
                                     numero = int(g(row, 'dossard_column'))
+                                        except ValueError as e:
+                                            messages.add_message(
+                                                request,
+                                                messages.ERROR,
+                                                _(u'Numéro d\'équipe incorrect dans la colonne %d à la ligne %d (%s)') % (data['dossard_column'], line, g(row, 'dossard_column'))
+                                            )
+                                            raise AbortException()
                                     equipe = equipes_by_numero.get(numero)
                                     if not equipe:
                                         if data.get('categorie_column'):
@@ -251,6 +265,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
                                     equipe.tours = g(row, 'tours_column', intOrNone)
                                     if data.get('time_column'):
+                                            try:
                                         if data['time_format'] == 'HMS':
                                             s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
                                             time = Decimal(0)
@@ -260,6 +275,13 @@ class CourseAdminSite(admin.sites.AdminSite):
                                                 n *= Decimal(60)
                                         else:
                                             time = Decimal(g(row, 'time_column'))
+                                            except:
+                                                messages.add_message(
+                                                    request,
+                                                    messages.ERROR,
+                                                    _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['time_column'], line, g(row, 'time_column'))
+                                                )
+                                                raise AbortException()
                                         equipe.temps = time
                                     equipe.position_generale  = g(row, 'position_generale_column', intOrNone)
                                     equipe.position_categorie = g(row, 'position_categorie_column', intOrNone)
@@ -313,6 +335,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                     equipes=course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
                     equipes_manquantes=course.equipe_set.filter(numero__in=numeros),
                 ))
+                except AbortException as e:
+                    pass
         return TemplateResponse(request, 'admin/import_resultat_form.html', dict(self.each_context(request),
             course=course,
             form=form,
@@ -507,6 +531,23 @@ class CategorieFilter(SimpleListFilter):
             return queryset.filter(categorie__code=self.value())
         return queryset
 
+class MineurFilter(SimpleListFilter):
+    title = _(u'Mineurs')
+    parameter_name = 'mineurs'
+    def lookups(self, request, model_admin):
+        return [
+            ('1', _('Avec mineurs')),
+            ('0', _('Sans mineur')),
+        ]
+    def queryset(self, request, queryset):
+        course = getCourse(request)
+        date = course.date - relativedelta(years=18)
+        if self.value() == '1':
+            return queryset.filter(equipier__date_de_naissance__gt=date)
+        if self.value() == '0':
+            return queryset.exclude(equipier__date_de_naissance__gt=date)
+        return queryset
+
 class EquipeAdmin(CourseFilteredObjectAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -524,7 +565,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
     list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
-    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', 'date']
+    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
     inlines = [ EquipierInline ]
 
@@ -710,7 +751,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 if isinstance(obj, Equipier) and field[0] == 'equipe':
                     obj = obj.equipe
                 if field[1].startswith('extra'):
-                    return (obj.extra[field[1]] if field[1] in obj.extra else '')
+                    return (str(obj.extra[field[1]]) if field[1] in obj.extra else '')
                 v = getattr(obj, field[1])
                 if inspect.ismethod(v):
                     return str(v())
