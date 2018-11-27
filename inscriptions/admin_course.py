@@ -197,41 +197,41 @@ class CourseAdminSite(admin.sites.AdminSite):
                 class AbortException(Exception):
                     pass
                 try:
-                with transaction.atomic():
-                    course.equipe_set.all().update(
-                        tours              = None,
-                        temps              = None,
-                        position_generale  = None,
-                        position_categorie = None,
-                    )
+                    with transaction.atomic():
+                        course.equipe_set.all().update(
+                            tours              = None,
+                            temps              = None,
+                            position_generale  = None,
+                            position_categorie = None,
+                        )
 
-                    for enc in ('utf-8', 'iso8859-1'):
-                        try:
-                            csv_file.seek(0)
-                            with io.StringIO(csv_file.read().decode(enc)) as io_file:
-                                csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
-                                if data.get('skip_first'):
-                                    next(csv_reader)
+                        for enc in ('utf-8', 'iso8859-1'):
+                            try:
+                                csv_file.seek(0)
+                                with io.StringIO(csv_file.read().decode(enc)) as io_file:
+                                    csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                                    if data.get('skip_first'):
+                                        next(csv_reader)
 
-                                def g(row, n, f=lambda x: x):
-                                    if not data.get(n):
-                                        return None
-                                    return f(row[data[n] - 1])
-                                equipes = list(course.equipe_set.select_related('categorie'))
-                                numeros = [ e.numero for e in equipes]
-                                equipes_by_numero = { e.numero: e for e in equipes }
+                                    def g(row, n, f=lambda x: x):
+                                        if not data.get(n):
+                                            return None
+                                        return f(row[data[n] - 1])
+                                    equipes = list(course.equipe_set.select_related('categorie'))
+                                    numeros = [ e.numero for e in equipes]
+                                    equipes_by_numero = { e.numero: e for e in equipes }
 
-                                def intOrNone(x):
-                                    try:
-                                        return int(x)
-                                    except:
-                                        return None
+                                    def intOrNone(x):
+                                        try:
+                                            return int(x)
+                                        except:
+                                            return None
 
-                                    line = 0
-                                for row in csv_reader:
+                                        line = 0
+                                    for row in csv_reader:
                                         line += 1
                                         try:
-                                    numero = int(g(row, 'dossard_column'))
+                                            numero = int(g(row, 'dossard_column'))
                                         except ValueError as e:
                                             messages.add_message(
                                                 request,
@@ -239,42 +239,42 @@ class CourseAdminSite(admin.sites.AdminSite):
                                                 _(u'Numéro d\'équipe incorrect dans la colonne %d à la ligne %d (%s)') % (data['dossard_column'], line, g(row, 'dossard_column'))
                                             )
                                             raise AbortException()
-                                    equipe = equipes_by_numero.get(numero)
-                                    if not equipe:
-                                        if data.get('categorie_column'):
-                                            categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                        equipe = equipes_by_numero.get(numero)
+                                        if not equipe:
+                                            if data.get('categorie_column'):
+                                                categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                            else:
+                                                categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
+                                            equipe = Equipe(
+                                                numero=numero,
+                                                course=course,
+                                                categorie=categorie,
+                                                nom=g(row, 'nom_column') or ('Equipe non inscrite %s' % numero),
+                                                gerant_nom='?',
+                                                gerant_prenom='?',
+                                                gerant_ville='?',
+                                                gerant_code_postal='?',
+                                                gerant_email=course.email_contact,
+                                                nombre=categorie.max_equipiers,
+                                                prix=Decimal(0),
+                                            )
+                                            equipes.append(equipe)
+                                            equipes_by_numero[numero] = equipe
                                         else:
-                                            categorie = course.categories.filter(numero_debut__lte=numero, numero_fin__gte=numero)[0]
-                                        equipe = Equipe(
-                                            numero=numero,
-                                            course=course,
-                                            categorie=categorie,
-                                            nom=g(row, 'nom_column') or ('Equipe non inscrite %s' % numero),
-                                            gerant_nom='?',
-                                            gerant_prenom='?',
-                                            gerant_ville='?',
-                                            gerant_code_postal='?',
-                                            gerant_email=course.email_contact,
-                                            nombre=categorie.max_equipiers,
-                                            prix=Decimal(0),
-                                        )
-                                        equipes.append(equipe)
-                                        equipes_by_numero[numero] = equipe
-                                    else:
-                                        numeros.remove(numero)
+                                            numeros.remove(numero)
 
-                                    equipe.tours = g(row, 'tours_column', intOrNone)
-                                    if data.get('time_column'):
+                                        equipe.tours = g(row, 'tours_column', intOrNone)
+                                        if data.get('time_column'):
                                             try:
-                                        if data['time_format'] == 'HMS':
-                                            s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
-                                            time = Decimal(0)
-                                            n = Decimal(1)
-                                            while len(s):
-                                                time += n * Decimal(s.pop().replace(',', '.'))
-                                                n *= Decimal(60)
-                                        else:
-                                            time = Decimal(g(row, 'time_column'))
+                                                if data['time_format'] == 'HMS':
+                                                    s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
+                                                    time = Decimal(0)
+                                                    n = Decimal(1)
+                                                    while len(s):
+                                                        time += n * Decimal(s.pop().replace(',', '.'))
+                                                        n *= Decimal(60)
+                                                else:
+                                                    time = Decimal(g(row, 'time_column'))
                                             except:
                                                 messages.add_message(
                                                     request,
@@ -282,59 +282,59 @@ class CourseAdminSite(admin.sites.AdminSite):
                                                     _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['time_column'], line, g(row, 'time_column'))
                                                 )
                                                 raise AbortException()
-                                        equipe.temps = time
-                                    equipe.position_generale  = g(row, 'position_generale_column', intOrNone)
-                                    equipe.position_categorie = g(row, 'position_categorie_column', intOrNone)
+                                            equipe.temps = time
+                                        equipe.position_generale  = g(row, 'position_generale_column', intOrNone)
+                                        equipe.position_categorie = g(row, 'position_categorie_column', intOrNone)
 
 
-                                    #super(Equipe, equipe).save()
-                            break
-                        except UnicodeDecodeError as exc:
-                            if enc == 'iso8859-1':
-                                raise exc
+                                        #super(Equipe, equipe).save()
+                                break
+                            except UnicodeDecodeError as exc:
+                                if enc == 'iso8859-1':
+                                    raise exc
 
-                    # compute positions
-                    equipes_to_compute = None
-                    if data.get('time_column') and data.get('tours_column'):
-                        #equipes = course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('tours', 'temps')
-                        equipes_to_compute = [ e for e in equipes if e.numero not in numeros ]
-                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps)
-                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours, reverse=True)
+                        # compute positions
+                        equipes_to_compute = None
+                        if data.get('time_column') and data.get('tours_column'):
+                            #equipes = course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('tours', 'temps')
+                            equipes_to_compute = [ e for e in equipes if e.numero not in numeros ]
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps)
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours, reverse=True)
 
-                    elif not data.get('position_categorie_column') and data.get('position_generale_column'):
-                        #equipes = course.equipe_set.exclude(numero__in=numeros).filter(position_generale__isnull=False).select_related('categorie').order_by('position_generale')
-                        equipes_to_compute = [ e for e in equipes if e.numero not in numeros and e.position_generale is not None ]
-                        equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.position_generale)
+                        elif not data.get('position_categorie_column') and data.get('position_generale_column'):
+                            #equipes = course.equipe_set.exclude(numero__in=numeros).filter(position_generale__isnull=False).select_related('categorie').order_by('position_generale')
+                            equipes_to_compute = [ e for e in equipes if e.numero not in numeros and e.position_generale is not None ]
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.position_generale)
 
-                    if equipes_to_compute:
-                        position = 1
-                        position_categories = {}
-                        for categorie in course.categories.all():
-                            position_categories[categorie.code] = 1
+                        if equipes_to_compute:
+                            position = 1
+                            position_categories = {}
+                            for categorie in course.categories.all():
+                                position_categories[categorie.code] = 1
 
-                        for equipe in equipes_to_compute:
-                            if not data.get('position_generale_column'):
-                                equipe.position_generale = position
-                                position += 1
-                            code = equipe.categorie.code
-                            equipe.position_categorie = position_categories[code]
-                            position_categories[code] += 1
+                            for equipe in equipes_to_compute:
+                                if not data.get('position_generale_column'):
+                                    equipe.position_generale = position
+                                    position += 1
+                                code = equipe.categorie.code
+                                equipe.position_categorie = position_categories[code]
+                                position_categories[code] += 1
 
-                    # save and add to challenges newly created equiped
-                    for equipe in equipes:
-                        _id = equipe.id
-                        super(Equipe, equipe).save()
-                        if not _id:
-                            for challenge in course.challenges.all():
-                                challenge.inscription_equipe(equipe)
+                        # save and add to challenges newly created equiped
+                        for equipe in equipes:
+                            _id = equipe.id
+                            super(Equipe, equipe).save()
+                            if not _id:
+                                for challenge in course.challenges.all():
+                                    challenge.inscription_equipe(equipe)
 
-                ChallengeUpdateThread(course).start()
+                    ChallengeUpdateThread(course).start()
 
-                return TemplateResponse(request, 'admin/import_resultat_done.html', dict(self.each_context(request),
-                    course=course,
-                    equipes=course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
-                    equipes_manquantes=course.equipe_set.filter(numero__in=numeros),
-                ))
+                    return TemplateResponse(request, 'admin/import_resultat_done.html', dict(self.each_context(request),
+                        course=course,
+                        equipes=course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('position_generale'),
+                        equipes_manquantes=course.equipe_set.filter(numero__in=numeros),
+                    ))
                 except AbortException as e:
                     pass
         return TemplateResponse(request, 'admin/import_resultat_form.html', dict(self.each_context(request),
