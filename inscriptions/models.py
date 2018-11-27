@@ -149,6 +149,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             "femmes": 0,
             "paiement": 0,
             "prix": 0,
+            "reste_a_payer": 0,
             "nbcertifenattente": 0,
             "documents": 0,
             "documents_electroniques": 0,
@@ -235,6 +236,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
 
             stats['paiement'] = float(equipe.montant_paiements)
             stats['prix'] = float(equipe.prix)
+            stats['reste_a_payer'] = float(equipe.reste_a_payer)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
             stats[equipe.categorie.code] += 1;
 

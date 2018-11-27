@@ -504,19 +504,34 @@ class StatusFilter(SimpleListFilter):
 
 class PaiementCompletFilter(SimpleListFilter):
     #TODO
-    title = _('Paiement complet')
-    parameter_name = 'paiement_complet'
+    title = _('Paiement')
+    parameter_name = 'paiement'
     def lookups(self, request, model_admin):
         return (
-            ('paye', _(u'Payé')),
-            ('impaye', _(u'Impayé')),
+            ('complet', _('%s Paiement complet') % ICON_OK),
+            ('incomplet', _('%s Impayé ou partiel') % ICON_KO),
+            ('trop', _('> Trop payé')),
+            ('exact', _('= Paiement exact')),
+            ('partiel', _('< Partiel')),
+            ('impaye', _('0 Impayé')),
         )
     def queryset(self, request, queryset):
-        if self.value() == 'paye':
-            return queryset.filter(paiement__gte=F('prix'))
+        qs = Equipe.objects.filter(course=getCourse(request)).annotate(
+            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+        )
+        if self.value() == 'complet':
+            qs = qs.filter(_montant_paiements__gte=F('prix'))
+        if self.value() == 'incomplet':
+            qs = qs.filter(Q(_montant_paiements__lt=F('prix')) | Q(_montant_paiements__isnull=True))
+        if self.value() == 'trop':
+            qs = qs.filter(_montant_paiements__gt=F('prix'))
+        if self.value() == 'exact':
+            qs = qs.filter(_montant_paiements=F('prix'))
+        if self.value() == 'partiel':
+            qs = qs.filter(_montant_paiements__lt=F('prix'), _montant_paiements__gt=0, _montant_paiements__isnull=False)
         if self.value() == 'impaye':
-            return queryset.filter(Q(paiement__isnull=True) | Q(paiement__lt=F('prix')))
-        return queryset
+            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True))
+        return queryset.filter(id__in=qs);
 
 class CategorieFilter(SimpleListFilter):
     title = _(u'Catégories')
