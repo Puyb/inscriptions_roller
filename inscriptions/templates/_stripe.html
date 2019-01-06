@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="error" role="alert"></div>
-        <p>{% blocktrans %}Les informations de paiements sont transférées au prestataire de paiement <a href="https://stripe.com" target="_blank">Stripe</a> via une connexion sécurisée. Ni {{ COURSE.organisateur }}, ni enduroller n'ont accès à ces informations.{% endblocktrans %}</p>
+        <p>{% blocktrans with organisateur=COURSE.organisateur %}Les informations de paiements sont transférées au prestataire de paiement <a href="https://stripe.com" target="_blank">Stripe</a> via une connexion sécurisée. Ni {{ organisateur }}, ni enduroller n'ont accès à ces informations.{% endblocktrans %}</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>

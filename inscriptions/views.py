@@ -289,6 +289,9 @@ def check_name(request, course_uid):
 
 def equipe_list(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid).select_related('categorie', 'gerant_ville2')
+    equipes = equipes.annotate(
+        _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=DecimalField(max_digits=7, decimal_places=2)))
+    )
     (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
     return _list(course_uid, equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
 
@@ -323,8 +326,8 @@ def _list(course_uid, equipes, request, template, sorts):
     stats = equipes.aggregate(
         count     = Count('id'),
         prix      = Sum('prix'), 
-        nbpaye    = Count('paiement'), 
-        paiement  = Sum('paiement'), 
+        nbpaye    = Count('_montant_paiements'), 
+        paiement  = Sum('_montant_paiements'), 
         club      = Count('club', distinct=True),
         villes    = Count('gerant_ville2__nom', distinct=True),
         pays      = Count('gerant_ville2__pays', distinct=True),
