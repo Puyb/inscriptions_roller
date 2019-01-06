@@ -1,8 +1,13 @@
 <p><em>English translation below</em></p>
 <h1>Merci de vous &ecirc;tre inscrit aux {{ instance.course.nom }}</h1>
 <p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>
-<p>{% if not instance.paiement_complet %}Pour r&eacute;gler votre inscription vous pouvez payer par internet : <a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">Paypal ou Carte bancaire</a>.<br />{% if instance.frais_paypal > 0 %} Pour tout paiement par internet, {{ instance.frais_paypal|floatformat:2 }} &euro; de frais seront ajout&eacute;s. Ces frais correspondent aux frais de transaction Paypal.<br />{% endif %} <br /> Ou envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de "{{ instance.course.ordre }}".</p>
-<p>{% else %}Votre paiement de {{ instance.paiement }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u. {% endif %}</p>
+{% if not instance.paiement_complet %}
+<p>Pour r&eacute;gler votre inscription vous pouvez 
+{% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">payer par internet</a> ou
+{% endif %}envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de "{{ instance.course.ordre }}".</p>
+{% else %}
+<p>Votre paiement de {{ instance.montant_paiements }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u.</p>
+{% endif %}
 <p>{% if instance.licence_manquantes %}Il manque les licences de :</p>
 <ul>{% for e in instance.licence_manquantes %}
 <li>{{ e.prenom }} {{ e.nom }}</li>
@@ -25,8 +30,13 @@
 <h1>Thank for registering at {{ instance.course.nom }}</h1>
 <p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />\
 Your team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>
-<p>{% if not instance.paiement_complet %}You can pay your registration online: <a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">Paypal or credit card</a>.<br />{% if instance.frais_paypal > 0 %} For online payment, &euro; {{ instance.frais_paypal|floatformat:2 }} fee will be added.<br />{% endif %} <br /> Or send a &euro; {{ instance.prix }} check payable to "{{ instance.course.ordre }}".</p>
-<p>{% else %}Your payment of &euro; {{ instance.paiement }} was received. {% endif %}</p>
+{% if not instance.paiement_complet %}
+<p>You can pay your registration {% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">online</a>or
+{% endif %}send a &euro; {{ instance.prix }} check payable to "{{ instance.course.ordre }}".</p>
+Ou {% endif %}envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de "{{ instance.course.ordre }}".</p>
+{% else %}
+<p>Your payment of &euro; {{ instance.montant_paiements }} was received.</p>
+{% endif %}
 <p>{% if instance.licence_manquantes %}Missing licenses:</p>
 <ul>{% for e in instance.licence_manquantes %}
 <li>{{ e.prenom }} {{ e.nom }}</li>

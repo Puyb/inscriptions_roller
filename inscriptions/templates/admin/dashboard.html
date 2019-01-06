@@ -17,7 +17,7 @@
 {% block content %}
 {% if not COURSE %}<script>
 location.href = "choose/";
-</script>{% endif %}
+</script>{% else %}
 <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
 <div id="content-main">
 
@@ -301,6 +301,7 @@ location.href = "choose/";
         </table>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block sidebar %}

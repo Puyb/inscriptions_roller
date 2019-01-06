@@ -81,6 +81,9 @@
     </div>
 </form>
 <script>
+    function round(value) {
+        return Math.round(value * 100) / 100;
+    }
     function tr(equipe) {
         return $('<tr class="form-row">')
             .append($('<td>').append($('<p>').text(equipe.course)))
@@ -88,7 +91,7 @@
             .append($('<td>').append($('<p>').text(equipe.nom)))
             .append($('<td>').append($('<p>').text(equipe.prix)))
             .append($('<td>').append($('<p>').text(equipe.paiement - equipe.montant)))
-            .append($('<td>').append($('<p>').text(equipe.prix - equipe.paiement + equipe.montant)));
+            .append($('<td>').append($('<p>').text(round(equipe.prix - equipe.paiement + equipe.montant))));
     }
     var i = 0;
 
@@ -110,6 +113,9 @@
                 $('#results-div').show();
                 $('#search_results td').remove();
                 data.equipes.forEach(function(equipe) {
+                    equipe.prix = parseFloat(equipe.prix);
+                    equipe.paiement = parseFloat(equipe.paiement);
+                    equipe.montant = parseFloat(equipe.montant);
                     if (!$('[name=equipe_id][value=' + equipe.id + ']').length)
                         $('#search_results tbody').append(
                             tr(equipe).click(selectEquipe.bind(this, equipe))
