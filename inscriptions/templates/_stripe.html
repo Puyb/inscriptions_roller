@@ -43,8 +43,13 @@
         <p>{% blocktrans %}Les informations de paiements sont transférées au prestataire de paiement <a href="https://stripe.com" target="_blank">Stripe</a> via une connexion sécurisée. Ni {{ COURSE.organisateur }}, ni enduroller n'ont accès à ces informations.{% endblocktrans %}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-        <button type="submit" class="btn btn-primary">Payer</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+            Payer
+            <i class="fa fa-spinner fa-spin"></i>
+        </button>
       </div>
     </div>
   </div>
@@ -164,7 +169,6 @@ function registerElements(elements) {
 
     // Show a loading screen...
     form.classList.add('submitting');
-    form.querySelector('button[type=submit]').innerHTML += '<i class="fa fa-spinner fa-spin" style="font-size:24px"></i>';
 
     // Disable all inputs.
     disableInputs();
@@ -174,7 +178,6 @@ function registerElements(elements) {
     // in the additional customer data we collected in our form.
     stripe.createToken(elements[0], {}).then(function(result) {
     // Stop loading!
-    form.classList.remove('submitting');
 
     if (result.token) {
         // If we received a token, show the token ID.
@@ -186,6 +189,7 @@ function registerElements(elements) {
                 token: result.token.id,
             },
             success: function() { 
+                form.classList.remove('submitting');
                 $('#stripe-btn').text('Paiement par carte en attente de validation').attr('disabled', true);
                 $('#paymentModal').modal('hide');
                 $('#paymentModal2').modal('show');
@@ -203,6 +207,7 @@ function registerElements(elements) {
         form.classList.add('submitted');
     } else {
         // Otherwise, un-disable inputs.
+        form.classList.remove('submitting');
         enableInputs();
     }
     });

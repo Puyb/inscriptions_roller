@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="adresse">
     {{ instance.course.club }}<br />
     {{ instance.course.adresse|linebreaks }}<br />
@@ -37,6 +38,16 @@
                             </tr>
                             {% endfor %}
                             <tr><th colspan="3">Total: </th><td>{{ instance.prix }} €</td></tr>
+                            {% for paiement in instance.paiements.all %}
+                            {% if paiement.montant_frais %}
+                            <tr>
+                                <td></td>
+                                <td>Frais {{ paiement.paiement.type }}</td>
+                                <td>{{ paiement.montant_frais }} €</td>
+                                <td>{{ paiement.montant_frais }} €</td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
                         </table>
     {% if instance.paiement_complet %}Facture acquittée{% endif %}<br />
     <br />

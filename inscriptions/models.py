@@ -444,6 +444,12 @@ class Equipe(models.Model):
         return self.paiements.filter(paiement__montant__isnull=False).aggregate(sum=Sum('montant'))['sum'] or Decimal(0)
 
     @property
+    def montant_frais(self):
+        if hasattr(self, '_montant_frais'):
+            return self._montant_frais or Decimal(0)
+        return self.paiements.filter(paiement__montant__isnull=False).aggregate(sum=Sum('montant_frais'))['sum'] or Decimal(0)
+
+    @property
     def reste_a_payer(self):
         return self.prix - self.montant_paiements
 
@@ -1224,19 +1230,19 @@ class Paiement(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     detail = models.TextField(blank=True)
     stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
 
     def save(self, *args, **kwargs):
-        equipes = [ e.equipe for e in self.equipes.all() ]
         try:
             mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement')
-            mail.send(equipes)
+            mail.send(self)
         except Exception as e:
             traceback.print_exc()
         try:
             mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement_admin')
-            mail.send(equipes)
+            mail.send(self)
         except Exception as e:
             traceback.print_exc()
         super().save(*args, **kwargs)
@@ -1245,6 +1251,7 @@ class PaiementRepartition(models.Model):
     paiement = models.ForeignKey(Paiement, related_name='equipes', on_delete=models.CASCADE)
     equipe = models.ForeignKey(Equipe, related_name='paiements', on_delete=models.CASCADE)
     montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
+    montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
 
     def paye(self):
         paiements = self.equipe.paiements.all()
