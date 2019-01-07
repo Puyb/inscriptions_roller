@@ -2,6 +2,7 @@
 import sys, requests, random, json
 import logging
 from datetime import datetime, date
+from decimal import Decimal
 from functools import reduce
 from collections import defaultdict
 from django.conf import settings
