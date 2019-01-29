@@ -154,6 +154,7 @@ function apply_tests(tests, test_data, prefix, message) {
         } else {
             message += gettext('Veuillez corriger les champs en rouge.')
             $(prefix + k + ']').parents('.form-group').addClass('has-error');
+            $(prefix + k + '_day]').parents('.form-group').addClass('has-error');
         }
     }
     if(message !== '') {
