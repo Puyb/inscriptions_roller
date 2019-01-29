@@ -310,16 +310,27 @@ $(function() {
         var $this = $(this);
         var $formGroup = $this.parents('.form-group');
         var id = this.id.split('-').slice(0, 2).join('-');
-        $formGroup.hide()
-            .next().hide();
+        $formGroup.hide() // num_licence
+            .next().hide() // piece_jointe
+            .next().hide(); // cerfa
+        $formGroup
+            .next().find('.certificat, .licence').hide() // piece_jointe
         var handler = function() {
+            $formGroup.hide() // num_licence
+                .next().hide() // piece_jointe
+                .next().hide(); // cerfa
+            $formGroup
+                .next().find('.certificat, .licence').hide() // piece_jointe
             if($('#' + id + '-justificatif_1')[0].checked) {
                 $formGroup.show()
                     .next().show().find('label').html(gettext('Licence') + ':');
+                $formGroup.next().find('.licence').show();
             }
             if($('#' + id + '-justificatif_2')[0].checked) {
                 $formGroup.hide()
                     .next().show().find('label').html(gettext('Certificat médical') + ':');
+                $formGroup.next().find('.certificat').show();
+                $formGroup.next().next().show();
             }
         };
         var ie = /msie/i.test(navigator.userAgent);
