@@ -588,7 +588,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         css = {"all": ("admin.css",)}
         js = ('custom_admin/equipe.js', )
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
-    list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2', 'montant_paiements']
+    list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
     list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
