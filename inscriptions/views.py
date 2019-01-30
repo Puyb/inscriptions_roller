@@ -159,12 +159,6 @@ def form(request, course_uid, numero=None, code=None):
         "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course).exclude(role='').count() > 0,
     })
 
-def test(request, course_uid):
-    course = get_object_or_404(Course.objects.prefetch_related('categories'), uid=course_uid)
-    return TemplateResponse(request, "test.html", {
-        "course": course,
-    })
-
 @open_closed
 def find_challenges_categories(request, course_uid):
     EQ = ExtraQuestion.objects.prefetch_related('choices')

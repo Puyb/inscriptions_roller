@@ -22,13 +22,13 @@ location.href = "choose/";
 <div id="content-main">
 
     {% with COURSE.stats as stats %}
-    <div class="module">
+    <div class="module summary">
         <table>
             <caption>
                 {% blocktrans %}Résumé{% endblocktrans %}
             </caption>
             <tr>
-                <th>Dossiers</th>
+                <th colspan="2">Dossiers</th>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
                         ✅ Complets
@@ -54,9 +54,11 @@ location.href = "choose/";
             <tr>
                 <th>
                     <a href="inscriptions/equipe/?paiement=complet">Payés</a>
+                </th>
+                <td>
                     {{ stats.course.paiement }}€
                     ({% widthratio stats.course.paiement stats.course.prix 100 %}%)
-                </th>
+                </td>
                 <td>
                     <a href="inscriptions/equipe/?paiement=complet&status=complet">
                         {{ stats.course.pc }}
@@ -91,9 +93,11 @@ location.href = "choose/";
             <tr>
                 <th>
                     <a href="inscriptions/equipe/?paiement=incomplet">Impayés</a>
+                </th>
+                <td>
                     {{ stats.course.reste_a_payer }}€
                     ({% widthratio stats.course.reste_a_payer stats.course.prix 100 %}%)
-                </th>
+                </td>
                 <td>
                     <a href="inscriptions/equipe/?paiement=incomplet&status=complet">
                         {{ stats.course.ipc }}
@@ -127,8 +131,11 @@ location.href = "choose/";
             </tr>
             <tr>
                 <th>
-                    Total {{ stats.course.prix }}€
+                    Total
                 </th>
+                <td>
+                    {{ stats.course.prix }}€
+                </td>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
                         {{ stats.course.pc|add:stats.course.ipc }}
@@ -207,6 +214,10 @@ location.href = "choose/";
                     <a href="inscriptions/categorie/">
                         <i class="fa fa-trophy"></i><br />
                         <label>{% blocktrans %}Categories{% endblocktrans %}</label>
+                    </a>
+                    <a href="inscriptions/categorie/test/">
+                        <i class="fa fa-trophy"></i><br />
+                        <label>{% blocktrans %}Test des categories{% endblocktrans %}</label>
                     </a>
                     <a href="inscriptions/accreditation/">
                         <i class="fa fa-unlock-alt"></i><br />

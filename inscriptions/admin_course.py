@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.contrib import messages
-from django.db.models import Sum, Value, F, Q, Max, Prefetch
+from django.db.models import Sum, Value, F, Q, Max, Prefetch, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
@@ -66,9 +66,10 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
-            url(r'^inscriptions/paiement/add/$', self.paiement_change, name='paiement_add'),
-            url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.paiement_change, name='paiement_change'),
-            url(r'^inscriptions/paiement/search/equipe/$', self.paiement_search_equipe, name='paiement_search_equipe'),
+            url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
+            url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
+            url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
+            url(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
         ] + super().get_urls()
         return urls
 
@@ -451,6 +452,12 @@ class CourseAdminSite(admin.sites.AdminSite):
             } for e in equipes],
         }))
 
+    def test_categories(self, request):
+        course = getCourse(request, Course.objects.all())
+        return TemplateResponse(request, "admin/test_categories.html", {
+            "course": course,
+        })
+
     index_template = 'admin/dashboard.html'
 
 
@@ -566,11 +573,14 @@ class MineurFilter(SimpleListFilter):
 class EquipeAdmin(CourseFilteredObjectAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.prefetch_related('equipier_set')
+        qs = qs.prefetch_related('equipier_set', 'paiements')
         qs = qs.annotate(
             verifier_count = Coalesce(Sum(Case(When(equipier__verifier=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             valide_count   = Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             erreur_count   = Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
+            _montant_paiements=Subquery(
+                PaiementRepartition.objects.filter(equipe=OuterRef('pk')).annotate(sum=Sum(Case(When(paiement__montant__isnull=False, then=F('montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))).values('sum')[:1]
+            )
         )
         return qs
 
@@ -578,7 +588,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         css = {"all": ("admin.css",)}
         js = ('custom_admin/equipe.js', )
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
-    list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
+    list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2', 'montant_paiements']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
     list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
@@ -972,7 +982,7 @@ class PaiementAdmin(admin.ModelAdmin):
         qs = qs.filter(equipes__equipe__course__uid=course_uid).distinct()
         if not request.user.is_superuser:
             qs = qs.filter(equipes__equipe__course__accreditations__user=request.user)
-        qs = qs.prefetch_related(Prefetch('equipes', PaiementRepartition.objects.select_related('equipe', 'equipe__course')))
+        qs = qs.prefetch_related(Prefetch('equipes', PaiementRepartition.objects.select_related('equipe', 'equipe__course', 'equipe__categorie')))
         return qs
     fields = ('montant', 'type', 'date', 'detail', )
     readonly_fields = ('date', )
@@ -982,13 +992,14 @@ class PaiementAdmin(admin.ModelAdmin):
 
     def equipes(self, obj):
         #TODO hide course if t's the current one
-        if obj.equipes.count() == 1:
-            return str(obj.equipes.get().equipe)
+        equipes = list(obj.equipes.all())
+        if len(equipes) == 1:
+            return str(equipes[0].equipe)
         courses = defaultdict(lambda: [])
-        for e in obj.equipes.all():
+        for e in equipes:
             courses[e.equipe.course.uid].append(str(e.equipe.numero))
-        if obj.equipes.count() < 4:
+        if len(equipes) < 4:
             return ', '.join('%s: [%s]' % (uid, ', '.join(numeros)) for uid, numeros in courses.items())
-        return str(len(obj.equipes.count()))
+        return str(len(equipes))
 
 site.register(Paiement, PaiementAdmin)
