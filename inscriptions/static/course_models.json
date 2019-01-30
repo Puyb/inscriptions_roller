@@ -162,7 +162,7 @@
                 "destinataire": "Organisateur",
                 "nom": "changement_numero_admin",
                 "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mail/changement_numero_admin.html\" %}",
+                "message": "{% include \"mails/changement_numero_admin.html\" %}",
                 "bcc": ""
             },
             {
@@ -170,13 +170,6 @@
                 "nom": "change_request",
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "facture",
-                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
-                "message": "{% include \"mails/facture.html\" %}",
                 "bcc": ""
             }
         ],
@@ -641,7 +634,7 @@
                 "destinataire": "Organisateur",
                 "nom": "changement_numero_admin",
                 "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mail/changement_numero_admin.html\" %}",
+                "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
                 "bcc": ""
             },
             {
@@ -649,13 +642,6 @@
                 "nom": "change_request",
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "facture",
-                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
-                "message": "{% include \"mails/facture.html\" %}",
                 "bcc": ""
             }
         ],
@@ -834,7 +820,7 @@
                 "destinataire": "Organisateur",
                 "nom": "changement_numero_admin",
                 "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mail/changement_numero_admin.html\" %}",
+                "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
                 "bcc": ""
             },
             {
@@ -842,13 +828,6 @@
                 "nom": "change_request",
                 "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
                 "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "facture",
-                "sujet": "Facture {{ instance.course.uid }}-{{ instance.numero }}",
-                "message": "{% include \"mails/facture.html\" %}",
                 "bcc": ""
             }
         ],

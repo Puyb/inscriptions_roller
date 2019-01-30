@@ -13,7 +13,6 @@
 {% endfor %}
 <p>--<br />{{ instance.course.organisateur }}</p>
 <hr />
-{% with instance.equipes.first.equipe as equipe %}
 <p>Hi, {{ equipe.gerant_prenom }} {{ equipe.gerant_nom }}<br /> We just received your payment of &euro; {{ instance.montant }} for:</p>
 <ul>
 {% for equipe_paiement in instance.equipes %}
@@ -22,3 +21,4 @@
 </ul>
 
 <p>--<br />{{ instance.course.organisateur }}</p>
+{% endwith %}

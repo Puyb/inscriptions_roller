@@ -459,13 +459,8 @@ def facture(request, course_uid, numero):
     if not equipe.date_facture:
         equipe.date_facture = date.today();
         equipe.save()
-    tpl = TemplateMail.objects.get(nom='facture', course__uid=course_uid);
-    context = Context({
-        "instance": equipe,
-    })
-    content = Template(tpl.message).render(context)
     return TemplateResponse(request, 'facture.html', {
-        'content': content,
+        "instance": equipe,
     })
 
 def challenges(request):
