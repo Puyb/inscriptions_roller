@@ -483,7 +483,7 @@ class Equipe(models.Model):
         for extra in self.course.extra.exclude(type='text'):
             values = []
             if extra.page == 'Equipier':
-                values = [ v[extra.getId()] for v in extra_equipiers if extra.getId() in v ]
+                values = [ v['extra'][extra.getId()] for v in extra_equipiers if extra.getId() in v['extra'] ]
             else:
                 if extra.getId() in self.extra:
                     values.append(self.extra[extra.getId()])

@@ -11,4 +11,4 @@ npm run build
 ./manage.py collectstatic
 deactivate
 
-sudo systemctl restart uwsgi@preprod.enduroller.fr
+sudo systemctl restart uwsgi@$(basename $(pwd))
