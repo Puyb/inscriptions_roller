@@ -28,7 +28,7 @@
                     <th>☺</th>
                     <th>Date</th>
                     <th>€</th>
-                    <th><img alt="None" src="/static/admin/img/icon-yes.gif"></th>
+                    <th>✅</th>
                     {% endif %}
                 </tr>
                 {% endifchanged %}
@@ -45,7 +45,7 @@
                     <th>☺</th>
                     <th>Date</th>
                     <th>€</th>
-                    <th><img alt="None" src="/static/admin/img/icon-yes.gif"></th>
+                    <th>✅</th>
                     {% endif %}
                 </tr>
                 {% endif %}
@@ -60,9 +60,9 @@
                     {% if user_is_staff %}
                     <td>{{ equipe.nombre }}</td>
                     <td>{{ equipe.date }}</td>
-                    <td>{{ equipe.prix }}€ {% if equipe.paiement_complet %}<img alt="None" src="/static/admin/img/icon-yes.gif">{% endif %}</td>
+                    <td>{{ equipe.montant_paiements }} / {{ equipe.prix }}€ {% if equipe.paiement_complet %}✅{% endif %}</td>
                     <td>
-                        {% if equipe.dossier_complet_auto %}<img alt="None" src="/static/admin/img/icon-yes.gif">{% endif %}
+                        {% if equipe.dossier_complet_auto %}✅{% endif %}
                         <script>
                             nbcomplet += {{ equipe.dossier_complet_auto|yesno:"1,0,0" }};
                         </script>
@@ -78,8 +78,8 @@
                     <td>{{ stats.pays }} pays</td>
                     {% if user_is_staff %}
                     <td>{{ stats.equipiers }}</td>
-                    <td colspan="2" style="text-align: right;">{{ stats.paiement }}€ / {{ stats.prix }}€ ({{ stats.nbpaye }}<img alt="None" src="/static/admin/img/icon-yes.gif">)</td>
-                    <td><script>document.write(nbcomplet);</script><img alt="None" src="/static/admin/img/icon-yes.gif"></td>
+                    <td colspan="2" style="text-align: right;">{{ stats.paiement }}€ / {{ stats.prix }}€ ({{ stats.nbpaye }}✅)</td>
+                    <td><script>document.write(nbcomplet);</script>✅</td>
                     {% endif %}
                 </tr>
             </table>

@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.mail import EmailMessage
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
@@ -308,9 +308,15 @@ def check_name(request, course_uid):
 
 def equipe_list(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid).select_related('categorie', 'gerant_ville2')
-    equipes = equipes.annotate(
-        _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=DecimalField(max_digits=7, decimal_places=2)))
-    )
+    if request.user and request.user.is_staff:
+        equipes = equipes.annotate(
+            verifier_count = Coalesce(Sum(Case(When(equipier__verifier=True, then=Value(1)), default=Value(0), output_field=IntegerField())), Value(0)),
+            valide_count   = Coalesce(Sum(Case(When(equipier__valide=True,   then=Value(1)), default=Value(0), output_field=IntegerField())), Value(0)),
+            erreur_count   = Coalesce(Sum(Case(When(equipier__erreur=True,   then=Value(1)), default=Value(0), output_field=IntegerField())), Value(0)),
+            _montant_paiements=Subquery(
+                Equipe.objects.filter(pk=OuterRef('pk')).annotate(sum=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=DecimalField(max_digits=7, decimal_places=2)))).values('sum')[:1]
+            )
+        )
     (_('date'), _('numero'), _('nom'), _('club'), _('categorie__code'))
     return _list(course_uid, equipes, request, template='list.html', sorts=['date', 'numero', 'nom', 'club', 'categorie__code'])
 
@@ -342,20 +348,21 @@ def _list(course_uid, equipes, request, template, sorts):
         except ValueError as e:
             pass
 
+    user_is_staff = (request.user and request.user.is_staff and 
+        request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
     stats = equipes.aggregate(
         count     = Count('id'),
-        prix      = Sum('prix'), 
-        nbpaye    = Count('_montant_paiements'), 
-        paiement  = Sum('_montant_paiements'), 
         club      = Count('club', distinct=True),
         villes    = Count('gerant_ville2__nom', distinct=True),
         pays      = Count('gerant_ville2__pays', distinct=True),
     )
-    stats['equipiers'] = equipes.aggregate(
-        equipiers = Count('equipier'),
-    )['equipiers']
-    user_is_staff = (request.user and request.user.is_staff and 
-        request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
+    if user_is_staff:
+        stats.update(equipes.aggregate(
+            prix      = Sum('prix'), 
+            nbpaye    = Count('_montant_paiements'), 
+            paiement  = Sum('_montant_paiements'), 
+            equipiers = Sum('nombre'),
+        ))
     return TemplateResponse(request, template, {
         'user_is_staff': user_is_staff,
         'stats': stats,
