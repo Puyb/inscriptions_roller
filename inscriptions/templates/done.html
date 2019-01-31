@@ -88,7 +88,7 @@
 
             {% if instance.certificat_manquantes %}
             <div class="clearfix">
-                {% blocktrans %}Il manque les certificats médicaux de (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf" target="_blank">modèle</a>):{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux de (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>):{% endblocktrans %}<ul>
                 {% for e in instance.certificat_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}
@@ -98,7 +98,7 @@
 
             {% if instance.autorisation_manquantes %}
             <div class="clearfix">
-                {% blocktrans %}Il manque les autorisations parentales (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
                 {% for e in instance.autorisation_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}

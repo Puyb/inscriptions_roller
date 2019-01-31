@@ -17,7 +17,7 @@
     </ul>
 {% endif %}
 {% if instance.certificat_manquantes %}
-    <p>Il manque les certificats m&eacute;dicaux de (<a href="{{ ROOT_URL }}/static/documents/certificat_medical.pdf" target="_blank">mod&egrave;le</a>):</p>
+<p>Il manque les certificats m&eacute;dicaux de (<a href="{{ ROOT_URL }}{% url "inscriptions_model_autorisation" course_uid=instance.course.uid %}" target="_blank">mod&egrave;le</a>):</p>
     <ul>
         {% for e in instance.certificat_manquantes %}
             <li>{{ e.prenom }} {{ e.nom }}</li>
@@ -25,7 +25,7 @@
     </ul>
 {% endif %}
 {% if instance.autorisation_manquantes %}
-    <p>Il manque les autorisations parentales (<a href="{{ ROOT_URL }}/static/documents/autorisation_parentale.pdf" target="_blank">mod&egrave;le</a>) :</p>
+    <p>Il manque les autorisations parentales (<a href="{{ ROOT_URL }}{% url "inscriptions_model_certificat" course_uid=instance.course.uid %}" target="_blank">mod&egrave;le</a>) :</p>
     <ul>
         {% for e in instance.autorisation_manquantes %}
             <li>{{ e.prenom }} {{ e.nom }}</li>
