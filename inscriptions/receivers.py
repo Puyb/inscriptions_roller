@@ -45,5 +45,7 @@ def handle_charge_postsave(sender, instance, **kwargs):
     try:
         instance.paiement.montant = instance.amount
         instance.paiement.save()
+        instance.paiement.send_equipes_mail()
+        instance.paiement.send_admin_mail()
     except Paiement.DoesNotExist:
         pass

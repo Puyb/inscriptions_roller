@@ -1,2 +1,6 @@
-<p>Paiement de {{ instance.paiement }} &euro; re&ccedil;u pour l'&eacute;quipe {{ instance.numero }} - {{ instance.nom }} {{ instance.info_paiement }}</p>
-<p>--<br />{{ instance.course.organisateur }}</p>
+<p>Paiement de {{ paiement.montant }} &euro; re&ccedil;u par {{ paiement.type }} pour :</p>
+<ul>
+{% for equipe_paiement in paiement.equipes.all %}
+<li><strong>{{ equipe_paiement.equipe.course.uid }} {{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }}</strong>.</li>
+{% endfor %}
+</ul>

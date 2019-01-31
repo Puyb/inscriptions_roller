@@ -65,7 +65,7 @@
         {% endif %}
         <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
         {% else %}
-        <p>{% blocktrans with prix=instance.montant_paiements %}Votre paiement de {{ prix }} € à bien été reçu.{% endblocktrans %}</p>
+        <p>{% blocktrans with prix=instance.montant_paiements %}Vos frais d'inscription ({{ prix }} €) ont bien été reçu.{% endblocktrans %}</p>
         {% endif %}
     </div>
 </div>

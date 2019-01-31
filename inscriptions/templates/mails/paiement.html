@@ -1,24 +1,24 @@
-{% with instance.equipes.first.equipe as equipe %}
-<p>Bonjour, {{ equipe.gerant_prenom }} {{ equipe.gerant_nom }}<br /> Nous avons bien re&ccedil;u votre paiement de {{ instance.montant }} &euro; pour :</p>
+{% with instance.paiements.last.paiement as paiement %}
+<p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Nous avons bien re&ccedil;u votre paiement de {{ paiement.montant }} &euro; pour :</p>
 <ul>
-{% for equipe_paiement in instance.equipes %}
+{% for equipe_paiement in paiement.equipes.all %}
 <li><strong>{{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }}</strong>.</li>
 {% endfor %}
 </ul>
 
-{% for equipe_paiement in instance.equipes %}
+{% for equipe_paiement in paiement.equipes.all %}
 {% if equipe_paiement.equipe.paiement_complet %}
 <p>Votre facture pour l'équipe {{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }} est téléchargeable en cliquant sur <a href="{{ ROOT_URL }}/{{ equipe_paiement.equipe.course.uid }}/{{ equipe_paiement.equipe.numero }}/facture/">ce lien</a>.</p>
 {% endif %}
 {% endfor %}
-<p>--<br />{{ instance.course.organisateur }}</p>
+<p>--<br />{{ paiement.course.organisateur }}</p>
 <hr />
-<p>Hi, {{ equipe.gerant_prenom }} {{ equipe.gerant_nom }}<br /> We just received your payment of &euro; {{ instance.montant }} for:</p>
+<p>Hi, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> We just received your payment of &euro; {{ paiement.montant }} for:</p>
 <ul>
-{% for equipe_paiement in instance.equipes %}
+{% for equipe_paiement in paiement.equipes.all %}
 <li><strong>{{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }}</strong>.</li>
 {% endfor %}
 </ul>
 
-<p>--<br />{{ instance.course.organisateur }}</p>
+<p>--<br />{{ paiement.course.organisateur }}</p>
 {% endwith %}

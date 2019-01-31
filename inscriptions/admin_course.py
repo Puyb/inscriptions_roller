@@ -408,6 +408,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                     if montant != paiement.montant:
                         raise PaiementException('montant incorrect')
                     print('len equipe_id', len(request.GET.getlist('equipe_id')))
+                    paiement.send_equipes_mail()
                     if len(request.GET.getlist('equipe_id')) == 1:
                         return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
                     return redirect('/course/inscriptions/paiement/')

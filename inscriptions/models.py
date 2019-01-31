@@ -787,7 +787,7 @@ class TemplateMail(models.Model):
         if isinstance(instances, list):
             prefetch_related_objects(instances, 'equipier_set')
         elif hasattr(instances, 'prefetch_related'):
-            instances.prefetch_related('equipiers')
+            instances.prefetch_related('equipier_set')
         for instance in instances:
             dests = set()
             if self.destinataire in ('Organisateur', 'Tous'):
@@ -1241,18 +1241,27 @@ class Paiement(models.Model):
     detail = models.TextField(blank=True)
     stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
 
-    def save(self, *args, **kwargs):
-        try:
-            mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement')
-            mail.send(self)
-        except Exception as e:
-            traceback.print_exc()
-        try:
-            mail = TemplateMail.objects.select_related('course').get(course=self, nom='paiement_admin')
-            mail.send(self)
-        except Exception as e:
-            traceback.print_exc()
-        super().save(*args, **kwargs)
+    def send_equipes_mail(self):
+        if self.montant:
+            try:
+                equipes = Equipe.objects.filter(paiements__paiement=self)
+                courses = Course.objects.filter(equipe__in=equipes).distinct()
+                for course in courses:
+                    mail = TemplateMail.objects.select_related('course').get(course=course, nom='paiement')
+                    mail.send(equipes.filter(course=course))
+            except Exception as e:
+                traceback.print_exc()
+
+    def send_admin_mail(self):
+        subject = 'Paiement reçu %s' % (', '.join(str(e.equipe) for e in self.equipes.all()), )
+        message = render_to_string('mails/paiement_admin.html', {
+            'paiement': self,
+        })
+        dest = [ c.email_contact for c in Course.objects.filter(equipe__paiements__paiement=self) ]
+        m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ dest ], [])
+        m.content_subtype = "html"
+        MailThread([m]).start()
+
 
 class PaiementRepartition(models.Model):
     paiement = models.ForeignKey(Paiement, related_name='equipes', on_delete=models.CASCADE)

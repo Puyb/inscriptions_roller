@@ -272,6 +272,8 @@ def ipn(request, course_uid):
             montant=montant,
             montant_frais=frais,
         )
+        paiement.send_equipes_mail()
+        paiement.send_admin_mail()
     except:
         logger.exception('error handling paypal ipn')
 
@@ -676,7 +678,7 @@ def stripe_paiement(request, course_uid):
     paiement = Paiement(
         type='stripe',
         stripe_charge=charge,
-        montant=montant + frais,
+        montant=None, # will be updated when confirmation is received from stripe
         montant_frais=frais or None,
     )
     paiement.save()
