@@ -538,7 +538,7 @@ class PaiementCompletFilter(SimpleListFilter):
         if self.value() == 'partiel':
             qs = qs.filter(_montant_paiements__lt=F('prix'), _montant_paiements__gt=0, _montant_paiements__isnull=False)
         if self.value() == 'impaye':
-            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True))
+            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(prix=0)
         return queryset.filter(id__in=qs);
 
 class CategorieFilter(SimpleListFilter):
@@ -580,7 +580,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             valide_count   = Coalesce(Sum(Case(When(equipier__valide=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             erreur_count   = Coalesce(Sum(Case(When(equipier__erreur=True, then=Value(1)), default=Value(0), output_field=models.IntegerField())), Value(0)),
             _montant_paiements=Subquery(
-                PaiementRepartition.objects.filter(equipe=OuterRef('pk')).annotate(sum=Sum(Case(When(paiement__montant__isnull=False, then=F('montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))).values('sum')[:1]
+                Equipe.objects.filter(pk=OuterRef('pk')).annotate(sum=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))).values('sum')[:1]
             )
         )
         return qs
@@ -611,7 +611,11 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     documents_manquants2.short_description = u'✉'
 
     def paiement_complet2(self, obj):
-        return obj.paiement_complet() and ICON_OK or ICON_KO
+        span = '<span title="%(title)s">%(text)s</span>';
+        return mark_safe(span % {
+            'text': obj.paiement_complet() and ICON_OK or ICON_KO,
+            'title': '%s / %s €' % (obj.montant_paiements, obj.prix),
+        })
     paiement_complet2.allow_tags = True
     paiement_complet2.short_description = '€'
     
