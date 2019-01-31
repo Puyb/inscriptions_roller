@@ -36,5 +36,5 @@ def course(request):
 def import_settings(request):
     return {
         'PAYPAL_URL':      settings.PAYPAL_URL,
-        'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+        'ROOT_URL': 'https://%s' % Site.objects.get_current(),
     }
