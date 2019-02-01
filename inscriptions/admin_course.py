@@ -822,6 +822,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 site.register(Equipe, EquipeAdmin)
 
 class CourseAdmin(admin.ModelAdmin):
+    class Media:
+        js = ('custom_admin/course.js', )
     exclude = ('active', )
     def get_fieldsets(self, request, obj=None):
         return (
