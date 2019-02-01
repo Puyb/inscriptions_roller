@@ -20,6 +20,8 @@ urlpatterns += [
     path(r'jsi18n/', JavaScriptCatalog.as_view(), { 'packages': 'inscriptions', 'domain': 'djangojs' }, name='javascript_catalog'),
     path(r'<str:course_uid>/admin/', admin.course_setter, name='admin_course_setter'),
     path(r'course/', admin.course_site.urls),
+    path('notifications/', include('django_nyt.urls')),
+    path('wiki/', include('wiki.urls')),
 ]
 urlpatterns += [
     path(r'', views.index, name='home'),

@@ -98,6 +98,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "account.context_processors.account",
                 "pinax_theme_bootstrap.context_processors.theme",
+                'sekizai.context_processors.sekizai',
                 "inscriptions.context_processors.import_settings",
                 "inscriptions.context_processors.course",
             ],
@@ -126,7 +127,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.messages",
     "django.contrib.sessions",
-    "django.contrib.sites",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "bootstrapform",
@@ -134,6 +134,19 @@ INSTALLED_APPS = [
     "pinax_theme_bootstrap",
     "account",
     "pinax.stripe",
+
+    'django.contrib.sites.apps.SitesConfig',
+    'django.contrib.humanize.apps.HumanizeConfig',
+    'django_nyt.apps.DjangoNytConfig',
+    'mptt',
+    'sekizai',
+    'sorl.thumbnail',
+    'wiki.apps.WikiConfig',
+    'wiki.plugins.attachments.apps.AttachmentsConfig',
+    'wiki.plugins.notifications.apps.NotificationsConfig',
+    'wiki.plugins.images.apps.ImagesConfig',
+    'wiki.plugins.macros.apps.MacrosConfig',
+
     "inscriptions",
 ]
 
@@ -222,4 +235,5 @@ FACEBOOK_APPID = ''
 
 MAX_EQUIPIERS = 8
 
+WIKI_ACCOUNT_HANDLING = False
 
