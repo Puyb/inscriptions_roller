@@ -28,6 +28,7 @@ import logging
 import traceback
 import pytz
 from pinax.stripe.models import Charge
+from Levenshtein import distance
 
 logger = logging.getLogger(__name__)
 
@@ -290,6 +291,29 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 result['course']['licencies'] +=1
 
         return result
+
+    def equipiers_commun(self, course2):
+        equipiers = Equipier.objects.annotate(
+            n=Unaccent(Lower(RegexpReplace('nom', Value('[ -]\\+'), Value(' ')))),
+            p=Unaccent(Lower(RegexpReplace('prenom', Value('[ -]\\+'), Value(' ')))),
+        )
+        equipiers1 = equipiers.filter(equipe__course=self)
+        if isinstance(course2, Course):
+            equipiers2 = equipiers.filter(equipe__course=course2)
+        else:
+            equipiers2 = equipiers.filter(equipe__course__in=course2)
+
+        doublons = defaultdict(lambda: [])
+        for e in equipiers1:
+            if e.numero > e.equipe.nombre:
+                continue
+            for e2 in equipiers2:
+                if e2.numero > e2.equipe.nombre:
+                    continue
+                if distance(e.n, e2.n) < 3 and distance(e.p, e2.p) < 3:
+                    doublons[e].append(e2)
+
+        return doublons
 
 class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)

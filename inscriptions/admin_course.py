@@ -162,7 +162,10 @@ class CourseAdminSite(admin.sites.AdminSite):
     def anomalies(self, request):
         request.current_app = self.name
         course = getCourse(request)
-        equipiers = list(Equipier.objects.filter(equipe__course=course).select_related('equipe__categorie'))
+        equipiers = list(Equipier.objects.annotate(
+            n=Unaccent(Lower(RegexpReplace('nom', Value('[ -]\\+'), Value(' ')))),
+            p=Unaccent(Lower(RegexpReplace('prenom', Value('[ -]\\+'), Value(' ')))),
+        ).filter(equipe__course=course).select_related('equipe__categorie'))
 
         doublons = []
         for i, e in enumerate(equipiers):
@@ -173,12 +176,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                 e2 = equipiers[j]
                 if e2.numero > e2.equipe.nombre:
                     continue
-                if distance((e.nom + ' ' + e.prenom).lower(), (e2.nom + ' ' + e2.prenom).lower()) < 3:
-                    dbl.append(e2)
-            if dbl:
-                dbl.insert(0, e)
-                doublons.append(dbl)
-
+                if distance(e.n, e2.n) < 3 and distance(e.p, e2.p) < 3:
+                    doublons.append([e, e2])
         return TemplateResponse(request, 'admin/anomalies.html', dict(self.each_context(request),
             doublons=doublons,
             course=course,
