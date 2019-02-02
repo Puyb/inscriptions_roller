@@ -21,7 +21,14 @@
     <ul class="nav navbar-nav">
         <li{% if request.resolver_match.url_name == "home" %} class="active"{% endif %}><a href="{% url "home" %}">{% trans "Courses" %}</a></li>
         <li{% if request.resolver_match.url_name == "inscriptions_challenges" %} class="active"{% endif %}><a href="{% url "inscriptions_challenges" %}">{% trans "Challenges" %}</a></li>
-        <li{% if request.resolver_match.url_name == "orga" %} class="active"{% endif %}><a href="{% url "orga" %}">{% trans "Organisateurs" %}</a></li>
+        <li class="dropdown{% if request.resolver_match.url_name == "orga" %} active{% endif %}">
+          <a href="{% url "orga" %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Organisateurs" %}<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="{% url "orga" %}">{% trans "Organisateurs" %}</a></li>
+            <li><a href="{% url 'account_login' %}">{% trans "Courses" %}</a></li>
+            <li><a href="/wiki/">{% trans "Wiki organisateurs" %}</a></li>
+          </ul>
+        </li>
     </ul>
 {% endblock %}
 
