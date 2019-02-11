@@ -259,17 +259,21 @@ data : <pre id="data"></pre>
         });
         $('#data').text(JSON.stringify(data, null, 4));
     }
-    var CATEGORIES = [
+    var CATEGORIES = []
     {% for cat in COURSE.categories.all %}
-        {
+    try {
+        CATEGORIES.push({
             code:  "{{ cat.code|escapejs }}",
             min_equipiers: {{ cat.min_equipiers }},
             max_equipiers: {{ cat.max_equipiers }},
             min_age: {{ cat.min_age }},
             sexe: '{{ cat.sexe }}',
             valid: {{ cat.validation|safe }},
-        }{% if not forloop.last %},{% endif %}
-    {% endfor %}];
+        });
+    } catch (err) {
+        alert('Erreur dans le code de validation de {{ cat.code }}.\n' + err.stack);
+    }
+    {% endfor %}
     var COURSE = {
         YEAR: {{ YEAR }},
         MONTH: {{ MONTH }},
