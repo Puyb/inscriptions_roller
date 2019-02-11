@@ -139,7 +139,7 @@ class ChallengeForm(ModelForm):
         instance = super().save(commit=False)
         instance.save()
 
-        fields = ChallengeCategorie._meta.get_all_field_names()
+        fields = [ f.name for f in ChallengeCategorie._meta.get_fields() ]
         for cat in COURSE_MODELS[model]['categories']:
             instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
         return instance
