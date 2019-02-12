@@ -10,7 +10,7 @@
         <input type="hidden" name="no_shipping"   value="1" />
         <input type="hidden" name="item_name_1"   value="{{ COURSE.uid }} - {{ instance.categorie.code }}" />
         <input type="hidden" name="invoice"       value="{{ instance.id }}{{ hour }}" />
-        <input type="hidden" name="amount_1"      value="{% if not COURSE.frais_paypal_inclus %}{{ instance.reste_a_payer|prix_paypal|floatformat:2 }}{% else %}{{ instance.reste_a_payer }}{% endif %}" />
+        <input type="hidden" name="amount_1"      value="{% if not COURSE.frais_paypal_inclus %}{{ instance.reste_a_payer|prix_paypal|stringformat:".2f" }}{% else %}{{ instance.reste_a_payer|stringformat:".2f" }}{% endif %}" />
         <input type="hidden" name="quantity_1"    value="1" />
         {# LEAVE THE HANDLING CHARGE ALONE!  PAYPAL SHIPPING WILL INEVITABLY BE MESSED UP IF YOU USE THEIR SHIPPING METHODS #}
         {# To work around their bizarre system, we are telling Paypal "no shipping" and adding all shipping charges as handling #}
