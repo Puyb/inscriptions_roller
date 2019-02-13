@@ -56,7 +56,7 @@ location.href = "choose/";
                     <a href="inscriptions/equipe/?paiement=complet">Payés</a>
                 </th>
                 <td>
-                    {{ stats.course.paiement }}€
+                    {{ stats.course.paiement|floatformat:2 }}€
                     ({% widthratio stats.course.paiement stats.course.prix 100 %}%)
                 </td>
                 <td>
@@ -95,7 +95,7 @@ location.href = "choose/";
                     <a href="inscriptions/equipe/?paiement=incomplet">Impayés</a>
                 </th>
                 <td>
-                    {{ stats.course.reste_a_payer }}€
+                    {{ stats.course.reste_a_payer|floatformat:2 }}€
                     ({% widthratio stats.course.reste_a_payer stats.course.prix 100 %}%)
                 </td>
                 <td>
@@ -134,7 +134,7 @@ location.href = "choose/";
                     Total
                 </th>
                 <td>
-                    {{ stats.course.prix }}€
+                    {{ stats.course.prix|floatformat:2 }}€
                 </td>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">

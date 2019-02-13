@@ -147,7 +147,7 @@ class ChallengeForm(ModelForm):
 class AdminPaiementForm(ModelForm):
     class Meta:
         model = Paiement
-        fields = ('type', 'montant', 'detail')
+        fields = ('type', 'montant', 'montant_frais', 'detail')
     initials = {
         'type': 'chèque',
     }
@@ -157,3 +157,6 @@ class AdminPaiementForm(ModelForm):
             choices=Paiement.MANUAL_TYPE_CHOICES
         ),
     )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['montant_frais'].widget.attrs['readonly'] = True

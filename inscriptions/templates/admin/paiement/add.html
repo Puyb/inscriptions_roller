@@ -151,7 +151,7 @@
         $('#repartition .repartition-montant').each(function() {
             sum += parseFloat(this.value) || 0;
         });
-        var reste = $('#id_montant').val() - sum;
+        var reste = $('#id_montant').val() - $('#id_montant_frais').val() - sum;
         var last;
         $('#repartition .repartition-montant').each(function() {
             if (!this.value) {
@@ -162,7 +162,7 @@
                 }
             }
         });
-        $('#reste').text('Reste à répartir : ' + reste);
+        $('#reste').text('Reste à répartir : ' + Math.round(reste * 100) / 100);
         $('[type=submit]').attr('disabled', !!reste);
         return reste;
     }

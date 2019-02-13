@@ -31,6 +31,7 @@ from pinax.stripe.actions import charges
 from pinax.stripe.views import Webhook
 import stripe
 from .templatetags import stripe as stripe_templatetags
+from .templatetags import paypal as paypal_templatetags
 
 logger = logging.getLogger(__name__)
 
@@ -252,26 +253,31 @@ def ipn(request, course_uid):
             return HttpResponse()
 
         course = get_object_or_404(Course, uid=course_uid)
-        equipe = course.equipe_set(id=data['invoice'][0:-4])
+        equipes = list(course.equipe_set.filter(id=data['invoice'][0:-4]))
 
-        frais = None
-        montant = Decimal(data['mc_gross'])
+        montant = 0
+        frais = Decimal(0)
+        for equipe in equipes:
+            montant += equipe.reste_a_payer
         if not course.frais_paypal_inclus:
             frais = paypal_templatetags.frais(montant)
-            montant += frais
 
         paiement = Paiement(
             type='paypal',
-            montant=montant,
-            montant_frais=frais,
-            detail='Paypal %s %s' % (datetime.now(), data['txn_id'])
+            montant=Decimal(data['mc_gross']),
+            montant_frais=frais or None,
         )
         paiement.save()
-        paiement.equipes.create(
-            equipe=equipe,
-            montant=montant,
-            montant_frais=frais,
-        )
+        frais_equipes = repartition_frais([
+            equipe.reste_a_payer for equipe in equipes
+        ], frais)
+        for (equipe, frais_equipe) in zip(equipes, frais_equipes):
+            paiement.equipes.create(
+                equipe=equipe,
+                montant=equipe.reste_a_payer,
+                montant_frais=frais_equipe,
+            )
+
         paiement.send_equipes_mail()
         paiement.send_admin_mail()
     except:
@@ -699,9 +705,9 @@ def stripe_paiement(request, course_uid):
             montant_frais=frais_equipe,
         )
 
-        return HttpResponse(json.dumps({
-            'success': True,
-        }))
+    return HttpResponse(json.dumps({
+        'success': True,
+    }))
 
 def equipe_payee(request, course_uid, numero):
     course = get_object_or_404(Course, uid=course_uid)
