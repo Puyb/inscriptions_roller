@@ -175,4 +175,11 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 
 site.register(Challenge, ChallengeAdmin)
+site.register(Equipe)
+site.register(Equipier)
+site.register(TemplateMail)
+site.register(Mail)
+class PaiementAdmin(admin.ModelAdmin):
+    list_display = ('date', 'type', 'montant', 'montant_frais', )
+site.register(Paiement, PaiementAdmin)
     

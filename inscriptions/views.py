@@ -540,7 +540,11 @@ def challenge(request, challenge_uid):
     if request.GET.get('categorie'):
         participations = participations.filter(categorie__code=request.GET['categorie'])
     if request.GET.get('top'):
-        participations = participations.filter(position__lte=request.GET.get('top'))
+        try:
+            top = int(request.GET.get('top'))
+            participations = participations.filter(position__lte=top)
+        except ValueError as e:
+            pass
 
     return TemplateResponse(request, 'resultats_challenge.html', {
         'challenge': challenge,
