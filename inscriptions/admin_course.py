@@ -416,6 +416,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
         return TemplateResponse(request, 'admin/paiement/add.html', dict(self.each_context(request),
             courses=courses,
+            readonly=paiement.type in ('stripe', 'paypal') if paiement else False,
             paiement_form=paiement_form,
             repartitions=repartitions,
             app_label='inscriptions',

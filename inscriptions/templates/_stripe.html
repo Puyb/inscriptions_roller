@@ -188,8 +188,11 @@ function registerElements(elements) {
                 csrfmiddlewaretoken: csrfToken,
                 token: result.token.id,
             },
-            success: function() { 
+            success: function(r) { 
                 form.classList.remove('submitting');
+                var data = JSON.parse(r);
+                if (!data.success) return alert('Votre carte a été refusée. Veuillez verifiez que vous avez saisi les bonnes informations.');
+
                 $('#stripe-btn').text('Paiement par carte en attente de validation').attr('disabled', true);
                 $('#paymentModal').modal('hide');
                 $('#paymentModal2').modal('show');

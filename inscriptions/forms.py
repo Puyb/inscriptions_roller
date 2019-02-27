@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
-from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField
+from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField, TextInput
 from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
@@ -159,4 +159,8 @@ class AdminPaiementForm(ModelForm):
     )
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.type in ('stripe', 'paypal'):
+            self.fields['type'].widget = TextInput()
+            for field in ('type', 'montant', 'montant_frais', 'detail'):
+                self.fields[field].widget.attrs['readonly'] = True
         self.fields['montant_frais'].widget.attrs['readonly'] = True

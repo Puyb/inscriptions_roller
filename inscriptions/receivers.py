@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 
@@ -43,9 +44,15 @@ def handle_charge_postsave(sender, instance, **kwargs):
     if not instance.paid:
         return
     try:
-        instance.paiement.montant = instance.amount
-        instance.paiement.save()
-        instance.paiement.send_equipes_mail()
-        instance.paiement.send_admin_mail()
+        if not instance.refunded:
+            instance.paiement.montant = instance.amount
+            instance.paiement.detail = '\nConfirmed on %s' % datetime.now()
+            instance.paiement.save()
+            instance.paiement.send_equipes_mail()
+            instance.paiement.send_admin_mail()
+        else:
+            instance.paiement.montant = None
+            instance.paiement.detail += '\nRefunded on %s' % datetime.now()
+            instance.paiement.save()
     except Paiement.DoesNotExist:
         pass

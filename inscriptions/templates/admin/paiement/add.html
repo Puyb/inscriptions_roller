@@ -8,7 +8,7 @@
     <div>
         {{ paiement_form|as_django_admin }}
         <fieldset class="module">
-            <div class="form-row">
+            <div class="form-row"{% if readonly %} style="display: none;"{% endif %}>
                 <div class="field-box">
                     <label for="id_search">Ajouter une equipe</label>
                     <input id="id_search" /><p>
@@ -46,7 +46,7 @@
                             <td><p>{{ r.reste }}</p></td>
                             <td>
                                 <input name="equipe_id" type="hidden" value="{{ r.equipe.id }}" />
-                                <input name="repartition" class="repartition-montant" value="{{ r.montant|default:"" }}" onchange="updateReste()" />
+                                <input name="repartition" class="repartition-montant" value="{{ r.montant|default:"" }}" onchange="updateReste()" {% if readonly %}readonly {% endif %}/>
                                 <button type="button" onclick="removeRepartition()">X</button>
                             </td>
                         </tr>
@@ -76,7 +76,9 @@
         </fieldset>
         {% csrf_token %}
         <div class="submit-row">
+            {% if not readonly %}
             <input value="Enregistrer" class="default" name="_save" type="submit">
+            {% endif %}
         </div>
     </div>
 </form>

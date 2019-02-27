@@ -668,6 +668,7 @@ class StripeWebhook(Webhook):
         return super().post(request, *args, **kwargs)
 
 def stripe_paiement(request, course_uid):
+    success = False
     course = get_object_or_404(Course, uid=course_uid)
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
     if not equipes:
@@ -683,34 +684,38 @@ def stripe_paiement(request, course_uid):
         frais = stripe_templatetags.frais(montant)
 
     stripe.api_key = course.stripe_secret
-    charge = charges.create(
-        amount=montant + frais,
-        #customer=request.user.customer,
-        source=token,
-        currency='EUR',
-        description=', '.join('%s' % (equipe, ) for equipe in equipes),
-        capture=True,
-    )
-
-    paiement = Paiement(
-        type='stripe',
-        stripe_charge=charge,
-        montant=None, # will be updated when confirmation is received from stripe
-        montant_frais=frais or None,
-    )
-    paiement.save()
-    frais_equipes = repartition_frais([
-        equipe.reste_a_payer for equipe in equipes
-    ], frais)
-    for (equipe, frais_equipe) in zip(equipes, frais_equipes):
-        paiement.equipes.create(
-            equipe=equipe,
-            montant=equipe.reste_a_payer,
-            montant_frais=frais_equipe,
+    try: 
+        charge = charges.create(
+            amount=montant + frais,
+            #customer=request.user.customer,
+            source=token,
+            currency='EUR',
+            description=', '.join('%s' % (equipe, ) for equipe in equipes),
+            capture=True,
         )
 
+        paiement = Paiement(
+            type='stripe',
+            stripe_charge=charge,
+            montant=None, # will be updated when confirmation is received from stripe
+            montant_frais=frais or None,
+        )
+        paiement.save()
+        frais_equipes = repartition_frais([
+            equipe.reste_a_payer for equipe in equipes
+        ], frais)
+        for (equipe, frais_equipe) in zip(equipes, frais_equipes):
+            paiement.equipes.create(
+                equipe=equipe,
+                montant=equipe.reste_a_payer,
+                montant_frais=frais_equipe,
+            )
+        success = True
+    except Exception as e:
+        logger.exception('error handling stripe webhook')
+
     return HttpResponse(json.dumps({
-        'success': True,
+        'success': success,
     }))
 
 def equipe_payee(request, course_uid, numero):
