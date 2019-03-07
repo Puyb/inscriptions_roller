@@ -7,7 +7,6 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.validators import RegexValidator
 from django.template import Template, Context
-from django.core.mail import EmailMessage
 import os, re, requests, json, sys
 from django.db import models, transaction
 from django.db.models.query import prefetch_related_objects
@@ -20,7 +19,7 @@ from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
-from .utils import iriToUri, MailThread, ChallengeInscriptionEquipe
+from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
@@ -121,14 +120,22 @@ class Course(models.Model):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
         if not self.id:
-            message = EmailMessage('Nouvelle course %s' % self.nom, """%s.
-""" % self.nom, settings.DEFAULT_FROM_EMAIL, settings.ADMINS)
-            MailThread([message]).start()
+            send_mail(
+                subject='Nouvelle course %s' % self.nom,
+                body="""%s.
+""" % self.nom,
+                to=settings.ADMINS,
+                type='text',
+            )
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
-            message = EmailMessage('Votre course %s est activée' % self.nom, """Votre course %s est activée.
+            send_mail(
+                subject='Votre course %s est activée' % self.nom,
+                body="""Votre course %s est activée.
 Les inscriptions pourront commencer à la date que vous avez choisi.
-""" % self.nom, settings.DEFAULT_FROM_EMAIL, [ self.email_contact ])
-            MailThread([message]).start()
+""" % self.nom,
+                to=[self.email_contact],
+                type='text',
+            )
         super(Course, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -787,10 +794,15 @@ class Accreditation(models.Model):
 
     def save(self, *args, **kwargs):
         if self.role and self.id  and not Accreditation.objects.get(id=self.id).role:
-            message = EmailMessage('[%s] Accès autorisé' % self.course.uid, """Votre demande d'accès à la course %s est acceptée.
+            send_mail(
+                subject='[%s] Accès autorisé' % self.course.uid,
+                body="""Votre demande d'accès à la course %s est acceptée.
 Connectez vous sur enduroller pour y accéder.
-""" % self.course.nom, settings.DEFAULT_FROM_EMAIL, [ self.user.email ], reply_to=[self.course.email_contact,])
-            MailThread([message]).start()
+""" % self.course.nom,
+                to=[self.user.email],
+                reply_to=[self.course.email_contact,],
+                type='text',
+            )
         super().save(*args, **kwargs)
 
 class TemplateMail(models.Model):
@@ -845,9 +857,8 @@ class TemplateMail(models.Model):
                 sujet=subject,
                 message=message,
             )
-            mails.append(m)
             m.save()
-        MailThread(mails).start()
+            m.send()
 
 class Mail(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -864,9 +875,13 @@ class Mail(models.Model):
         if not self.id:
             self.save()
         for dest in self.destinataires:
-            message = EmailMessage(self.sujet, self.message, settings.DEFAULT_FROM_EMAIL, [ dest ], self.bcc, reply_to=[self.emeteur,])
-            message.content_subtype = "html"
-            message.send()
+            send_mail(
+                subject=self.sujet,
+                body=self.message,
+                to=[dest],
+                bcc=self.bcc,
+                reply_to=[self.emeteur,],
+            )
 
 CHALLENGE_LEVENSHTEIN_DISTANCE = 3
 # test:
@@ -1282,9 +1297,11 @@ class Paiement(models.Model):
             'paiement': self,
         })
         dest = [ c.email_contact for c in Course.objects.filter(equipe__paiements__paiement=self) ]
-        m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, dest, [])
-        m.content_subtype = "html"
-        MailThread([m]).start()
+        send_mail(
+            subject=subject,
+            body=message,
+            to=dest,
+        )
 
 
 class PaiementRepartition(models.Model):

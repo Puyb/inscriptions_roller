@@ -120,6 +120,7 @@ ROOT_URLCONF = "inscriptions.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = "inscriptions.wsgi.application"
+ASGI_APPLICATION = "inscriptions.routing.application"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -146,6 +147,7 @@ INSTALLED_APPS = [
     'wiki.plugins.notifications.apps.NotificationsConfig',
     'wiki.plugins.images.apps.ImagesConfig',
     'wiki.plugins.macros.apps.MacrosConfig',
+    'channels',
 
     "inscriptions",
 ]
@@ -232,3 +234,12 @@ MAX_EQUIPIERS = 8
 
 WIKI_ACCOUNT_HANDLING = False
 WIKI_CHECK_SLUG_URL_AVAILABLE  = False
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get('REDIS_HOST', 'localhost'), 6379)],
+        },
+    },
+}

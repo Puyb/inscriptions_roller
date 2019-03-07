@@ -7,7 +7,6 @@ from functools import reduce
 from collections import defaultdict
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.mail import EmailMessage
 from django.urls import reverse
 from django.db import transaction
 from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery
@@ -25,7 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
-from .utils import MailThread, jsonDate, repartition_frais
+from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 from pinax.stripe.actions import charges
 from pinax.stripe.views import Webhook
@@ -103,9 +102,12 @@ def form(request, course_uid, numero=None, code=None):
                 for f in equipier_formset:
                     text += json.dumps(f.errors) + '\n'
                 text += json.dumps(request.POST)
-                mail = EmailMessage('Error in form submit', text, settings.DEFAULT_FROM_EMAIL, settings.ADMINS)
-                mail.content_subtype = "text"
-                MailThread([ mail ]).start()
+                send_mail(
+                    subject='Error in form submit',
+                    body=text,
+                    to=settings.ADMINS,
+                    type='text',
+                )
         except NoPlaceLeftException as e:
             message = _(u"Désolé, il n'y a plus de place dans cette catégorie")
         except Exception as e:
@@ -455,17 +457,16 @@ def contact(request, course_uid):
     from_email = request.POST.get('email', '')
 
     if message and from_email:
-        message = EmailMessage(
-            '[%s] Message enduroller : %s' % (course.uid, subject),
-            """Nom: %s
+        send_mail(
+            subject='[%s] Message enduroller : %s' % (course.uid, subject),
+            body="""Nom: %s
 Email: %s
 
 %s""" % (name, from_email, message),
-            settings.DEFAULT_FROM_EMAIL,
-            [course.email_contact],
+            name=name,
+            to=[course.email_contact],
             reply_to=[from_email,]
         )
-        MailThread([message]).start()
         return HttpResponseRedirect('thankyou/')
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 

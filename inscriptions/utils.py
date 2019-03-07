@@ -6,8 +6,8 @@ from decimal import Decimal
 from urllib.parse import urlparse, urlunparse
 from threading import Thread
 from django.contrib import messages
-#from django.template.loader import render_to_string
-#from django.core.mail import EmailMessage
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 logger = logging.getLogger(__name__)
 
@@ -20,21 +20,6 @@ def iriToUri(iri):
         part.encode('idna') if parti==1 else urlEncodeNonAscii(part.encode('utf-8'))
         for parti, part in enumerate(parts)
     ])
-
-class MailThread(Thread):
-    def __init__ (self, mails):
-        Thread.__init__(self)
-        self.mails = mails
-
-    def run(self):  
-        for mail in self.mails:
-            try:
-                logger.debug('send mail %s' % mail)
-                mail.send()
-                logger.debug('mail sent %s' % mail)
-            except Exception as e:
-                logger.exception('error send mail')
-
 
 class ChallengeUpdateThread(Thread):
     def __init__(self, course):
@@ -110,3 +95,7 @@ def repartition_frais(montants, frais):
             item[0] += Decimal('0.01')
             montant_arrondis += Decimal('0.01')
     return (item[0] for item in frais_list)
+
+def send_mail(**kwargs):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.send)("send-mail", kwargs)

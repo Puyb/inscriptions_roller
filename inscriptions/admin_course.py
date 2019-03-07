@@ -4,7 +4,6 @@ from functools import reduce
 from inscriptions.models import *
 from django.conf.urls import url
 from django.contrib import admin
-from django.core.mail import EmailMessage
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
@@ -19,7 +18,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
-from .utils import ChallengeUpdateThread, MailThread
+from .utils import ChallengeUpdateThread, send_mail
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -97,12 +96,11 @@ class CourseAdminSite(admin.sites.AdminSite):
             ).save()
             messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
 
-            subject = "Demande d'accès à %s" % (course.uid, )
-            message = render_to_string('mails/ask_accreditation.html', { 'course': course })
-            logger.info(message)
-            m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ course.email_contact ], [])
-            m.content_subtype = "html"
-            MailThread([m]).start()
+            send_mail(
+                subject="Demande d'accès à %s" % (course.uid, ),
+                body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
+                to=[course.email_contact],
+            )
             return redirect('../')
 
         courses = Course.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
