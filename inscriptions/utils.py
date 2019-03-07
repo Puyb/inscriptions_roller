@@ -28,7 +28,13 @@ class MailThread(Thread):
 
     def run(self):  
         for mail in self.mails:
-            mail.send()
+            try:
+                logger.debug('send mail %s' % mail)
+                mail.send()
+                logger.debug('mail sent %s' % mail)
+            except Exception as e:
+                logger.exception('error send mail')
+
 
 class ChallengeUpdateThread(Thread):
     def __init__(self, course):

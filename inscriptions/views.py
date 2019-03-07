@@ -103,7 +103,7 @@ def form(request, course_uid, numero=None, code=None):
                 for f in equipier_formset:
                     text += json.dumps(f.errors) + '\n'
                 text += json.dumps(request.POST)
-                mail = EmailMessage('Error in form submit', text, settings.DEFAULT_FROM_EMAIL, [ settings.SERVER_EMAIL ], reply_to=[course.email_contact,])
+                mail = EmailMessage('Error in form submit', text, settings.DEFAULT_FROM_EMAIL, settings.ADMINS)
                 mail.content_subtype = "text"
                 MailThread([ mail ]).start()
         except NoPlaceLeftException as e:

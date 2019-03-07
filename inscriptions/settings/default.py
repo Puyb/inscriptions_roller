@@ -175,13 +175,8 @@ LOGGING = {
         }
     },
     "loggers": {
-        "inscriptions.models": {
+        "inscriptions": {
             "handlers": ["console", "mail_admins"],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "inscriptions.views": {
-            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": True,
         },

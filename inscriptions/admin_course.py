@@ -19,7 +19,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
-from .utils import ChallengeUpdateThread
+from .utils import ChallengeUpdateThread, MailThread
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -28,6 +28,9 @@ import re
 from Levenshtein import distance
 import csv, io
 import inspect
+
+import logging
+logger = logging.getLogger(__name__)
 
 ICON_OK = '✅'
 ICON_KO = '🚫'
@@ -93,6 +96,13 @@ class CourseAdminSite(admin.sites.AdminSite):
                 course=course,
             ).save()
             messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
+
+            subject = "Demande d'accès à %s" % (course.uid, )
+            message = render_to_string('mails/ask_accreditation.html', { 'course': course })
+            logger.info(message)
+            m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ course.email_contact ], [])
+            m.content_subtype = "html"
+            MailThread([m]).start()
             return redirect('../')
 
         courses = Course.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
@@ -892,7 +902,7 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
         return obj.user.username
 
     def user_email(self, obj):
-        return '<a href="mailto:%s">%s</a>' % (obj.user.email, obj.user.email)
+        return mark_safe('<a href="mailto:%s">%s</a>' % (obj.user.email, obj.user.email))
     user_email.allow_tags = True
 
     def has_add_permission(self, request):

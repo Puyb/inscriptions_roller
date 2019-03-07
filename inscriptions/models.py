@@ -122,7 +122,7 @@ class Course(models.Model):
             self.uid = self.nom.lower().replace(' ', '_')
         if not self.id:
             message = EmailMessage('Nouvelle course %s' % self.nom, """%s.
-""" % self.nom, settings.DEFAULT_FROM_EMAIL, [ settings.SERVER_EMAIL ])
+""" % self.nom, settings.DEFAULT_FROM_EMAIL, settings.ADMINS)
             MailThread([message]).start()
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             message = EmailMessage('Votre course %s est activée' % self.nom, """Votre course %s est activée.
@@ -1282,7 +1282,7 @@ class Paiement(models.Model):
             'paiement': self,
         })
         dest = [ c.email_contact for c in Course.objects.filter(equipe__paiements__paiement=self) ]
-        m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [ dest ], [])
+        m = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, dest, [])
         m.content_subtype = "html"
         MailThread([m]).start()
 
