@@ -11,4 +11,5 @@ npm run build
 ./manage.py collectstatic --no-input
 deactivate
 
+sudo systemctl restart django-consumers@$(basename $(pwd))
 sudo systemctl restart uwsgi@$(basename $(pwd))
