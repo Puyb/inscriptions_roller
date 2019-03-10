@@ -1,8 +1,8 @@
 from channels.routing import ProtocolTypeRouter, ChannelNameRouter
-from .consumers import send_mail
+from .consumers import MailConsumer
 
 application = ProtocolTypeRouter({
-    'channels': ChannelNameRouter({
-        'send-mail': send_mail,
+    'channel': ChannelNameRouter({
+        'mail': MailConsumer,
     }),
 })

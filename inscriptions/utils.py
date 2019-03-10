@@ -98,4 +98,8 @@ def repartition_frais(montants, frais):
 
 def send_mail(**kwargs):
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.send)("send-mail", kwargs)
+    message = {
+        'type': 'send.mail',
+    }
+    message.update(kwargs)
+    async_to_sync(channel_layer.send)("mail", message)

@@ -1,21 +1,21 @@
 import logging
+from channels.consumer import SyncConsumer
 from django.conf import settings
 from django.core.mail import EmailMessage
 
+logger = logging.getLogger(__name__)
 
-logger = logging.getLogger('email')
-
-def send_mail(message):
-    print('popopopo')
-    try:
-        name = message.content.pop('from', 'Enduroller')
-        type = message.content.pop('type', 'html')
-        logger.info(message.content)
-        mail = EmailMessage(
-            from_email='%s <%s>' % (name, settings.DEFAULT_FROM_EMAIL),
-            **message.content,
-        )
-        mail.content_subtype = type
-        mail.send()
-    except Exception:
-        logger.exception('error sending mail')
+class MailConsumer(SyncConsumer):
+    def send_mail(self, message):
+        try:
+            message.pop('type')
+            name = message.pop('name', 'Enduroller')
+            content_type = message.pop('content_type', 'html')
+            mail = EmailMessage(
+                from_email='%s <%s>' % (name, settings.DEFAULT_FROM_EMAIL),
+                **message,
+            )
+            mail.content_subtype = content_type
+            mail.send()
+        except Exception:
+            logger.exception('error sending mail')

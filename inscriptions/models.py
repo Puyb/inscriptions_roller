@@ -125,7 +125,7 @@ class Course(models.Model):
                 body="""%s.
 """ % self.nom,
                 to=settings.ADMINS,
-                type='text',
+                content_type='text',
             )
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             send_mail(
@@ -134,7 +134,7 @@ class Course(models.Model):
 Les inscriptions pourront commencer à la date que vous avez choisi.
 """ % self.nom,
                 to=[self.email_contact],
-                type='text',
+                content_type='text',
             )
         super(Course, self).save(*args, **kwargs)
 
@@ -801,7 +801,7 @@ Connectez vous sur enduroller pour y accéder.
 """ % self.course.nom,
                 to=[self.user.email],
                 reply_to=[self.course.email_contact,],
-                type='text',
+                content_type='text',
             )
         super().save(*args, **kwargs)
 
@@ -878,6 +878,7 @@ class Mail(models.Model):
             send_mail(
                 subject=self.sujet,
                 body=self.message,
+                name=self.course.nom,
                 to=[dest],
                 bcc=self.bcc,
                 reply_to=[self.emeteur,],

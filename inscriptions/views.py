@@ -106,7 +106,7 @@ def form(request, course_uid, numero=None, code=None):
                     subject='Error in form submit',
                     body=text,
                     to=settings.ADMINS,
-                    type='text',
+                    content_type='text',
                 )
         except NoPlaceLeftException as e:
             message = _(u"Désolé, il n'y a plus de place dans cette catégorie")

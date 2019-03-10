@@ -86,6 +86,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             courses_admin=qs.exclude(accreditations__in=accreditations).order_by('date') if request.user.is_superuser else None,
         ))
 
+    @transaction.atomic
     def course_ask_accreditation(self, request, course_uid=None):
         request.current_app = self.name
         if course_uid:
