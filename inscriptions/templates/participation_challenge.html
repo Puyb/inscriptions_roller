@@ -1,0 +1,127 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load stats %}
+
+{% block body %}
+<div class="jumbotron">
+    <div class="media">
+        <div class="media-left">
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
+        </div>
+        <div class="media-body">
+            <p>{{ challenge.nom }}</p>
+            <p>{{ participation.nom }}</p>
+            <p>
+                <table class="table">
+                    <tr>
+                        <th>Catégorie</th>
+                        <td>{{ participation.categorie.code }} - {{ participation.categorie.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Classement</th>
+                        <td>{{ participation.position }}</td>
+                    </tr>
+                    <tr>
+                        <th>Participations</th>
+                        <td>{{ participation.count }}</td>
+                    </tr>{% if challenge.mode == 'nord2018' %}
+                    <tr>
+                        <th>Distance</th>
+                        <td>{{ participation.distance }}</td>
+                    </tr>{% endif %}
+                </table>
+            </p>
+        </div>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">Resultats</div>
+    <div class="panel-body">
+        <table style="width: 100%" class="table table-striped">
+            <tr>
+                <th>{% trans "Course" %}</th>
+                <th>{% trans "#" %}</th>
+                <th>{% trans "Générale" %}</th>
+                <th>{% trans "Cat." %}</th>
+                <th>{% trans "Points" %}</th>
+                <th>{% trans "Position" %}</th>
+                <th>{% trans "Tours" %}</th>
+                <th>{% trans "Temps" %}</th>
+                {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
+                {% if request.user.is_superuser %}<th>Actions</th>{% endif %}
+            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
+            <tr>
+                <th>{{ c.nom }}</th>
+                <td title="{{ e.equipe.nom }}">{{ e.equipe.numero|default_if_none:"" }}</td>
+                <td>{{ e.equipe.position_generale|default_if_none:"" }}</td>
+                <td>{{ e.equipe.categorie|default_if_none:"" }}</td>
+                <td>{{ e.points|default:"" }}</td>
+                <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
+                <td>{{ e.equipe.tours|default_if_none:"" }}</td>
+                <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
+                {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
+                {% if request.user.is_superuser %}<td>{% if e %}<button class="action-move" data-course="{{ c.uid }}">Déplacer</button>{% endif %}</td>{% endif %}
+            </tr>{% endwith %}{% endfor %}
+        </table>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-heading">Équipiers</div>
+    <div class="panel-body">
+        <table style="width: 100%" class="table table-striped">
+            <tr>
+                <th>{% trans "Équipier" %}</th>
+                {% for c in challenge.courses.all %}
+                <th>{{ c.uid }}</th>
+                {% endfor %}
+            </tr>{% for e in participation.equipiers.all %}
+            <tr>
+                <th>{{ e.prenom }} {{ e.nom }}</th>
+                {% for c in challenge.courses.all %}
+                {% if c in e.courses %}<td class="{% cycle "bg-info" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "bg-success" "10" %}"></td>
+                {% else %}<td></td>
+                {% endif %}{% endfor %}{% resetcycle %}
+            </tr>{% endfor %}
+        </table>
+    </div>
+</div>
+{% if request.user.is_superuser %}
+<div id="action-move" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Déplacer dans une autre participation</h4>
+                </div>
+                <div class="modal-body" id="selection_participation"></div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Déplacer la participation</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_body %}
+{% if request.user.is_superuser %}
+<script>
+$('.action-move').click(function() {
+    var course = this.getAttribute('data-course');
+    $.ajax(course + '/', {
+        success: function(r) {
+            $('#selection_participation').html(r);
+            $('#action-move').modal('show');
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}
+

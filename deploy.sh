@@ -4,11 +4,12 @@ set -e
 
 source env/bin/activate
 pip install -r requirements.txt
-./manage.py compilemessages
+./manage.py compilemessages -l fr -l en
 ./manage.py migrate
 npm install
 npm run build
-./manage.py collectstatic
+./manage.py collectstatic --no-input
 deactivate
 
-sudo service uwsgi restart
+sudo systemctl restart django-consumers@$(basename $(pwd))
+sudo systemctl restart uwsgi@$(basename $(pwd))

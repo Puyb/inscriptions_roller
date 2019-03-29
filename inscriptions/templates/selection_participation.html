@@ -1,0 +1,84 @@
+{% load i18n %}
+{% load stats %}
+<input type="hidden" name="course_uid" value="{{ course.uid }}"/>
+<table class="table table-striped" style="width: 100%">
+{% for participation in participations %}
+    {% if forloop.first %}
+        <tr>
+            <th>Nom</th>
+            <th>Pos.</th>
+            <th>Courses</th>
+            {% for c in challenge.courses.all %}
+            {% if c.uid != course.uid %}
+            <th>{{ c.uid }}</th>{% endif %}
+            {% endfor %}
+            {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
+            <th>Points</th>
+        </tr>
+        <tr>
+            <td><label><input type="radio" name="participation" value="" checked/>Nouvelle participation</label></td>
+            <td></td>
+            <td></td>
+            {% for c in challenge.courses.all %}
+            {% if c.uid != course.uid %}
+            <td></td>{% endif %}
+            {% endfor %}
+            {% if challenge.mode == 'nord2018' %}<td></td>{% endif %}
+            <td></td>
+        </tr>
+    {% endif %}
+    <tr data-toggle="popover" data-trigger="click" title="Détails" data-placement="bottom" data-content="
+        <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
+            <tr>
+                <th>{% trans "Course" %}</th>
+                <th>{% trans "#" %}</th>
+                <th>{% trans "Générale" %}</th>
+                <th>{% trans "Cat." %}</th>
+                <th>{% trans "Points" %}</th>
+                <th>{% trans "Position" %}</th>
+                <th>{% trans "Tours" %}</th>
+                <th>{% trans "Temps" %}</th>
+                {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
+            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
+            <tr>
+                <th>{{ c.nom }}</th>
+                <td>{{ e.equipe.numero|default_if_none:"" }}</td>
+                <td>{{ e.equipe.position_generale|default_if_none:"" }}</td>
+                <td>{{ e.equipe.categorie|default_if_none:"" }}</td>
+                <td>{{ e.points|default:"" }}</td>
+                <td>{{ e.equipe.position_categorie|default_if_none:"" }}</td>
+                <td>{{ e.equipe.tours|default_if_none:"" }}</td>
+                <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
+                {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
+            </tr>{% endwith %}{% endfor %}
+        </table>
+        <table style=&quot;width: 100%&quot; class=&quot;table table-striped&quot;>
+            <tr>
+                <th>{% trans "Équipier" %}</th>
+                {% for c in challenge.courses.all %}
+                <th>{{ c.uid }}</th>
+                {% endfor %}
+            </tr>{% for e in participation.equipiers.all %}
+            <tr>
+                <th>{{ e.prenom }} {{ e.nom }}</th>
+                {% for c in challenge.courses.all %}
+                {% if c in e.courses %}<td class=&quot;bg-success&quot;>{% cycle "1" "2" "3" "4" "5" "6" "7" "8" "9" "10" %}</td>
+                {% else %}<td></td>
+                {% endif %}{% endfor %}{% resetcycle %}
+            </tr>{% endfor %}
+        </table>
+                
+
+        ">
+        <td><label><input type="radio" name="participation" value="{{participation.id }}" />{{ participation.nom }}</label></td>
+        <td>{{ participation.position|default_if_none:"" }}</td>
+        <td>{{ participation.count }}</td>
+        {% for c in challenge.courses.all %}
+        {% if c.uid != course.uid %}
+        <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{% if participation.equipes_dict|get:c.uid %}{{ participation.equipes_dict|get:c.uid|get:"points"|default:"Inscrit" }}{% endif %}</td>{% endif %}
+        {% endfor %}
+        {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance|default_if_none:"" }}</td>{% endif %}
+        <td>{{ participation.points }}</td>
+    </tr>
+{% endfor %}
+</table>

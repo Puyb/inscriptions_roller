@@ -17,18 +17,18 @@
 {% block content %}
 {% if not COURSE %}<script>
 location.href = "choose/";
-</script>{% endif %}
+</script>{% else %}
 <script src="{% static "admin/js/vendor/jquery/jquery.js" %}"></script>
 <div id="content-main">
 
     {% with COURSE.stats as stats %}
-    <div class="module">
+    <div class="module summary">
         <table>
             <caption>
                 {% blocktrans %}Résumé{% endblocktrans %}
             </caption>
             <tr>
-                <th>Dossiers</th>
+                <th colspan="2">Dossiers</th>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
                         ✅ Complets
@@ -41,7 +41,7 @@ location.href = "choose/";
                 </th>
                 <td>
                     <a href="inscriptions/equipe/?status=erreur">
-                        ❎ En Erreurs
+                        🚫 En Erreurs
                     </a>
                 </th>
                 <td>
@@ -49,62 +49,120 @@ location.href = "choose/";
                         ❔A vérifier
                     </a>
                 </th>
+                <th></th>
             </tr>
             <tr>
                 <th>
-                    <a href="inscriptions/equipe/?paiement_complet=paye">Payés</a>
+                    <a href="inscriptions/equipe/?paiement=complet">Payés</a>
                 </th>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=paye&status=complet">
+                    {{ stats.course.paiement|floatformat:2 }}€
+                    ({% widthratio stats.course.paiement stats.course.prix 100 %}%)
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement=complet&status=complet">
                         {{ stats.course.pc }}
                         ({% widthratio stats.course.pc stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=paye&status=incomplet">
+                    <a href="inscriptions/equipe/?paiement=complet&status=incomplet">
                         {{ stats.course.pi }}
                         ({% widthratio stats.course.pi stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=paye&status=erreur">
+                    <a href="inscriptions/equipe/?paiement=complet&status=erreur">
                         {{ stats.course.pe }}
                         ({% widthratio stats.course.pe stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=paye&status=verifier">
+                    <a href="inscriptions/equipe/?paiement=complet&status=verifier">
                         {{ stats.course.pv }}
                         ({% widthratio stats.course.pv stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement=complet">
+                        {{ stats.course.p }}
+                        ({% widthratio stats.course.p stats.course.equipes 100 %}%)
                     </a>
                 </td>
             </tr>
             <tr>
                 <th>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye">Impayés</a>
+                    <a href="inscriptions/equipe/?paiement=incomplet">Impayés</a>
                 </th>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=complet">
+                    {{ stats.course.reste_a_payer|floatformat:2 }}€
+                    ({% widthratio stats.course.reste_a_payer stats.course.prix 100 %}%)
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement=incomplet&status=complet">
                         {{ stats.course.ipc }}
                         ({% widthratio stats.course.ipc stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=incomplet">
+                    <a href="inscriptions/equipe/?paiement=incomplet&status=incomplet">
                         {{ stats.course.ipi }}
                         ({% widthratio stats.course.ipi stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=erreur">
+                    <a href="inscriptions/equipe/?paiement=incomplet&status=erreur">
                         {{ stats.course.ipe }}
                         ({% widthratio stats.course.ipe stats.course.equipes 100 %}%)
                     </a>
                 </td>
                 <td>
-                    <a href="inscriptions/equipe/?paiement_complet=impaye&status=verifier">
+                    <a href="inscriptions/equipe/?paiement=incomplet&status=verifier">
                         {{ stats.course.ipv }}
                         ({% widthratio stats.course.ipv stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?paiement=incomplet">
+                        {{ stats.course.ip }}
+                        ({% widthratio stats.course.ip stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <td>
+                    {{ stats.course.prix|floatformat:2 }}€
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?status=complet">
+                        {{ stats.course.pc|add:stats.course.ipc }}
+                        ({% widthratio stats.course.pc|add:stats.course.ipc stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?status=incomplet">
+                        {{ stats.course.pi|add:stats.course.ipi }}
+                        ({% widthratio stats.course.pi|add:stats.course.ipi stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?status=erreur">
+                        {{ stats.course.pe|add:stats.course.ipe }}
+                        ({% widthratio stats.course.pe|add:stats.course.ipe stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/?status=verifier">
+                        {{ stats.course.pv|add:stats.course.ipv }}
+                        ({% widthratio stats.course.pv|add:stats.course.ipv stats.course.equipes 100 %}%)
+                    </a>
+                </td>
+                <td>
+                    <a href="inscriptions/equipe/">
+                        {{ stats.course.equipes }}
                     </a>
                 </td>
             </tr>
@@ -126,6 +184,10 @@ location.href = "choose/";
                         <i class="fa fa-check-circle"></i><br />
                         <label>{% blocktrans %}Documents à vérifier{% endblocktrans %}</a>
                     </a>
+                    <a href="inscriptions/paiement/">
+                        <i class="fa fa-eur"></i><br />
+                        <label>{% blocktrans %}Paiements{% endblocktrans %}</a>
+                    </a>
                     <a href="/{{ COURSE.uid }}/stats/">
                         <i class="fa fa-line-chart"></i><br />
                         <label>{% blocktrans %}Statistiques{% endblocktrans %}</a>
@@ -133,6 +195,10 @@ location.href = "choose/";
                     <a href="anomalies/">
                         <i class="fa fa-exclamation-triangle"></i><br />
                         <label>{% blocktrans %}Anomalies{% endblocktrans %}</a>
+                    </a>
+                    <a href="/wiki/" target="_blank">
+                        <i class="fa fa-book"></i><br />
+                        <label>{% blocktrans %}Wiki{% endblocktrans %}</a>
                     </a>
                 </td>
             </tr>
@@ -152,6 +218,10 @@ location.href = "choose/";
                     <a href="inscriptions/categorie/">
                         <i class="fa fa-trophy"></i><br />
                         <label>{% blocktrans %}Categories{% endblocktrans %}</label>
+                    </a>
+                    <a href="inscriptions/categorie/test/">
+                        <i class="fa fa-trophy"></i><br />
+                        <label>{% blocktrans %}Test des categories{% endblocktrans %}</label>
                     </a>
                     <a href="inscriptions/accreditation/">
                         <i class="fa fa-unlock-alt"></i><br />
@@ -246,6 +316,7 @@ location.href = "choose/";
         </table>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block sidebar %}

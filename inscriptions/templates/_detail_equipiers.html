@@ -54,3 +54,10 @@
         </td>
     </tr>{% endif %}{% endfor %}
 </table>
+{% if instance.certificat_manquantes %}
+<p><a href="/{{ COURSE.uid }}/model/certificat/" target="_blank">{% trans "Modèle de certificat médical" %}</a></p>
+{% endif %}
+{% if instance.autorisation_manquantes %}
+<p><a href="/{{ COURSE.uid }}/model/autorisation/" target="_blank">{% trans "Modèle d'autorisation parentale" %}</a></p>
+{% endif %}
+

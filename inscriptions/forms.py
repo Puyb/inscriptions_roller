@@ -2,12 +2,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
-from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField
+from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField, TextInput
 from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
-from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
+from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
@@ -105,6 +105,7 @@ class CourseForm(ModelForm):
 class ContactForm(Form):
     name = CharField()
     email = EmailField()
+    subject = CharField()
     message = CharField(widget=Textarea())
 
 class ImportResultatForm(Form):
@@ -138,8 +139,28 @@ class ChallengeForm(ModelForm):
         instance = super().save(commit=False)
         instance.save()
 
-        fields = ChallengeCategorie._meta.get_all_field_names()
+        fields = [ f.name for f in ChallengeCategorie._meta.get_fields() ]
         for cat in COURSE_MODELS[model]['categories']:
             instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
         return instance
 
+class AdminPaiementForm(ModelForm):
+    class Meta:
+        model = Paiement
+        fields = ('type', 'montant', 'montant_frais', 'detail')
+    initials = {
+        'type': 'chèque',
+    }
+    type = CharField(
+        label=_("Type de paiement"),
+        widget=AdminRadioSelect(
+            choices=Paiement.MANUAL_TYPE_CHOICES
+        ),
+    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.type in ('stripe', 'paypal'):
+            self.fields['type'].widget = TextInput()
+            for field in ('type', 'montant', 'montant_frais', 'detail'):
+                self.fields[field].widget.attrs['readonly'] = True
+        self.fields['montant_frais'].widget.attrs['readonly'] = True

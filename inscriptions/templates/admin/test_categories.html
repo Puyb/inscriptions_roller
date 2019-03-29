@@ -1,0 +1,288 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+{% load l10n %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% block content %}
+
+<label for="nombre">Nombre d'équipiers;</label>
+<input id="nombre" value="1">
+
+<table id="equipiers">
+    <thead>
+        <tr>
+            <th>Equipier</th>
+            <th>Sexe</th>
+            <th>Age</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>
+                <select id="equipier1_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier1_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>
+                <select id="equipier2_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier2_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>
+                <select id="equipier3_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier3_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>
+                <select id="equipier4_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier4_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>
+                <select id="equipier5_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier5_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>
+                <select id="equipier6_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier6_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>
+                <select id="equipier7_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier7_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>
+                <select id="equipier8_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier8_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>
+                <select id="equipier9_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier9_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>
+                <select id="equipier10_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier10_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>
+                <select id="equipier11_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier11_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>
+                <select id="equipier12_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier12_age" value="18" /></td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>
+                <select id="equipier13_sexe">
+                    <option>H</option>
+                    <option>F</option>
+                </select>
+            </td>
+            <td><input id="equipier13_age" value="18" /></td>
+        </tr>
+    </tbody>
+</table>
+<table id="result">
+    <thead>
+        <tr>
+            <th>Categorie</th>
+            <th>Nombre</th>
+            <th>Age mini</th>
+            <th>Sexe</th>
+            <th>Validation</th>
+            <th>OK</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+data : <pre id="data"></pre>
+
+
+
+
+<script>
+
+    function age(a) {
+        return function(eq) {
+            var b = COURSE.YEAR - parseFloat(eq.date_de_naissance_year);
+            if(b !== a) return b > a;
+            if(parseFloat(eq.date_de_naissance_month) !== COURSE.MONTH)
+                return parseFloat(eq.date_de_naissance_month) < COURSE.MONTH;
+            return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY;
+        };
+    }
+    function age2(eq) {
+        var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));
+        var course = new Date(COURSE.YEAR, COURSE.MONTH -1, COURSE.DAY);
+        var age = course.getFullYear() - birthday.getFullYear();
+        birthday.setFullYear(COURSE.YEAR);
+        if (!age) return null;
+        if (birthday > course) return age - 1;
+        return age;
+    }
+
+    function nombre() {
+        var nombre = parseInt($('#nombre').val());
+        $('#equipiers tbody tr').each(function(i) {
+            if (i < nombre)
+                $(this).show();
+            else
+                $(this).hide();
+        });
+        equipiers();
+    }
+
+    function equipiers() {
+        var data = {
+            nombre: parseInt($('#nombre').val()),
+            equipiers: []
+        };
+        for (var i = 1; i <= data.nombre; i++) {
+
+            data.equipiers.push({
+                sexe: $('#equipier' + i + '_sexe').val(),
+                date_de_naissance_day: COURSE.DAY,
+                date_de_naissance_month: COURSE.MONTH,
+                date_de_naissance_year: COURSE.YEAR - parseInt($('#equipier' + i + '_age').val()),
+            });
+        }
+        data.age_moyen = 0;
+        data.equipiers.forEach(function(eq, i) {
+            if (i > data.nombre) return;
+            eq.age = age2(eq);
+            data.age_moyen += eq.age
+        });
+        data.age_moyen /= data.nombre;
+        data.nombre_h = data.equipiers.filter(function(i) { return i.sexe === 'H'; }).length;
+        data.nombre_f = data.equipiers.filter(function(i) { return i.sexe === 'F'; }).length;
+        $('#result tbody tr').remove();
+
+        var OK = '✅';
+        var KO = '🚫';
+        CATEGORIES.forEach(function(c) {
+            var _nombre = c.min_equipiers <= data.nombre && data.nombre <= c.max_equipiers;
+            var _age =  data.equipiers.filter(age(c.min_age)).length === data.nombre;
+            var _sexe = (c.sexe === 'H' && data.nombre === data.nombre_h) ||
+                    (c.sexe === 'F' && data.nombre === data.nombre_f) ||
+                    (c.sexe === 'HX' && data.nombre_h >= 1) ||
+                    (c.sexe === 'FX' && data.nombre_f >= 1) ||
+                    (c.sexe === 'X' && data.nombre_h >= 1 && data.nombre_f >= 1) ||
+                    (c.sexe === '');
+            var _valid = false;
+            var _valid_err = KO;
+            try {
+                _valid = c.valid(data);
+            } catch (err) {
+                _valid_err = err;
+            }
+            $('#result tbody').append($('<tr>')
+                .append($('<td>').text(c.code))
+                .append($('<td>').text(_nombre ? OK : KO).attr('title', 'entre ' + c.min_equipiers + ' et ' + c.max_equipiers))
+                .append($('<td>').text(_age ? OK : KO).attr('title', c.min_age))
+                .append($('<td>').text(_sexe ? OK : KO).attr('title', c.sexe))
+                .append($('<td>').text(_valid ? OK : _valid_err).attr('title', c.valid.toString()))
+                .append($('<td>').text(_nombre && _age && _sexe && _valid ? OK : KO))
+            )
+        });
+        $('#data').text(JSON.stringify(data, null, 4));
+    }
+    var CATEGORIES = []
+    {% for cat in COURSE.categories.all %}
+    try {
+        CATEGORIES.push({
+            code:  "{{ cat.code|escapejs }}",
+            min_equipiers: {{ cat.min_equipiers }},
+            max_equipiers: {{ cat.max_equipiers }},
+            min_age: {{ cat.min_age }},
+            sexe: '{{ cat.sexe }}',
+            valid: {{ cat.validation|safe }},
+        });
+    } catch (err) {
+        alert('Erreur dans le code de validation de {{ cat.code }}.\n' + err.stack);
+    }
+    {% endfor %}
+    var COURSE = {
+        YEAR: {{ YEAR }},
+        MONTH: {{ MONTH }},
+        DAY: {{ DAY }},
+    };
+
+    $('#equipiers input, #equipiers select').change(equipiers)
+    $('#nombre').change(nombre);
+    nombre();
+    
+</script>
+{% endblock %}

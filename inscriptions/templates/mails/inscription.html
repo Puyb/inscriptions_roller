@@ -7,7 +7,7 @@
 {% include "_detail_paiement.html" %}
 {% include "_detail_equipiers.html" %}
 {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
-    <p>Merci d'envoyer le paiement et les justificatifs &agrave;</p>
+    <p>Si vous souhaitez envoyer votre paiement ou vos justificatifs par courrier, merci de les envoyer &agrave;</p>
     <p>{{ instance.course.adresse|linebreaksbr }}</p>
     <p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>.</p>
 {% endif %}
@@ -28,10 +28,10 @@
 {% if not instance.paiement_complet or instance.licence_manquantes or instance.certificat_manquantes or instance.autorisation_manquantes %}
     <p>You can send paiment and justificatives to;</p>
     <p>{{ instance.course.adresse|linebreaksbr }}</p>
-    <p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>. </p>
+    <p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>.</p>
 {% endif %}
 <p>You'll be informed as soon your registration is complete.</p>
-<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">clicking herei</a>.</p>
+<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">clicking here</a>.</p>
 <p>
     --<br />
     {{ instance.course.organisateur }}

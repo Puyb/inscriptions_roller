@@ -52,7 +52,21 @@
         <h3 class="panel-title">{% trans "Paiement :" %}</h3>
     </div>
     <div class="panel-body">
-        {% include "_detail_paiement_paypal.html" %}
+        {% if not instance.paiement_complet %}
+        {% if COURSE.paypal or COURSE.stripe_public %}
+        <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
+
+        {% if COURSE.paypal %}{% include "_paypal.html" %}{% endif %}
+        {% if COURSE.stripe_public %}{% include "_stripe.html" %}{% endif %}
+
+        <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
+        {% else %}
+        <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Pour régler votre inscription vous pouvez envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
+        {% endif %}
+        <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
+        {% else %}
+        <p>{% blocktrans with prix=instance.montant_paiements %}Vos frais d'inscription ({{ prix }} €) ont bien été reçus.{% endblocktrans %}</p>
+        {% endif %}
     </div>
 </div>
 

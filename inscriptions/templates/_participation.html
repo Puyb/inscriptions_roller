@@ -13,6 +13,7 @@
             </div>
             <div class="media-body">
                 <p>{% trans "Vous participez au challenge." %}</p>
+                {% if preview %}<p>{% trans "Le nombre de points affiché n'est donné qu'a titre d'information et ne sera peut être pas exact tant que vous n'aurez pas validé votre inscription." %}</p>{% endif %}
                 <p>{% trans "Le challenge comporte les courses suivantes :" %}</p>
                 <div class="row equal">
                     {% for course in challenge.courses.all %}
@@ -47,7 +48,7 @@
                                             <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions_create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
                                             {% endif %}
                                             <p>
-                                                {% blocktrans with fermeture=course.date_fermeture %}Fermeture des inscriptions le {{ fermeture }}{% endblocktrans %}<br />
+                                                {% blocktrans with date=course.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}<br />
                                             </p>
                                             {% else %}
                                             <p>
