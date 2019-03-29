@@ -1,4 +1,5 @@
 import decimal
+import json
 import logging
 import re
 import time
@@ -102,4 +103,5 @@ def send_mail(**kwargs):
         'type': 'send.mail',
     }
     message.update(kwargs)
+    #message['to'] = json.dumps(message['to'])
     async_to_sync(channel_layer.send)("mail", message)
