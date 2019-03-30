@@ -56,6 +56,7 @@ urlpatterns += [
     path(r'<str:course_uid>/model/certificat/', views.model_certificat, name='inscriptions_model_certificat'),
     path(r'<str:course_uid>/model/autorisation/', TemplateView.as_view(template_name='autorisation.html'), name='inscriptions_model_autorisation'),
     path(r'<str:course_uid>/live/', views.live_push, name='inscriptions_live_push'),
+    path(r'6hdeparis2019/bonus/', views.poisson, name='inscriptions_poisson'),
 ]
 urlpatterns += [
     path(r'<str:course_uid>/equipiers/', admin_views.equipiers, name='inscriptions_equipiers'),

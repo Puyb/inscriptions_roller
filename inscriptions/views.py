@@ -726,3 +726,29 @@ def equipe_payee(request, course_uid, numero):
         'success': equipe.paiement_complet(),
     }))
 
+def poisson(request, course_uid='6hdeparis2019'):
+    equipes = Equipe.objects.raw("""
+select b.*, d.code,
+max(participations) as participations,
+min(c.position) as position
+from inscriptions_equipier a
+left join inscriptions_equipe b on a.equipe_id=b.id
+left join (
+        select b.id as id, count(distinct c.equipe_id) as participations, min(d.position_categorie) as position 
+        from inscriptions_equipier a
+        left join inscriptions_equipe b on a.equipe_id=b.id
+        left join inscriptions_equipier c 
+            on levenshtein(unaccent(lower(regexp_replace(a.nom, '[ -]\\+', ' '))), unaccent(lower(regexp_replace(c.nom, '[ -]\\+', ' ')))) < 3
+            and levenshtein(unaccent(lower(regexp_replace(a.prenom, '[ -]\\+', ' '))), unaccent(lower(regexp_replace(c.prenom, '[ -]\\+', ' ')))) < 3
+        left join inscriptions_equipe d on c.equipe_id=d.id 
+            and d.course_id in (select id from inscriptions_course where uid like '6hdp%%' or uid='6hdeparis18')
+        where b.course_id=21 group by 1
+) c on b.id = c.id
+left join inscriptions_categorie d on b.categorie_id = d.id
+where b.course_id=21 group by 1, d.code
+    """)
+
+    return TemplateResponse(request, 'poisson.html', {
+        'equipes': equipes,
+    })
+
