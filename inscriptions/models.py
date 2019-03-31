@@ -1319,3 +1319,16 @@ class PaiementRepartition(models.Model):
 
     def reste(self):
         return self.equipe.prix - self.paye()
+
+class Vote(models.Model):
+    equipe = models.ForeignKey(Equipe, on_delete=models.CASCADE)
+    cookie = models.CharField(max_length=40)
+    up = models.BooleanField()
+    ip = models.CharField(max_length=50)
+    ua = models.CharField(max_length=200)
+    date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = (
+            ('equipe', 'cookie'),
+        )

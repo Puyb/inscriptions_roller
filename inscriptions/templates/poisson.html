@@ -26,7 +26,7 @@
                 <div class="panel-body">
                     <p>Votre fidélité aux 6h de Paris est récompensée. Si vous avez déjà participé a une édition précédente des 6h de Paris, vous partez avec un tour d'avance par participation (dans la limite de 3 tours).</p>
                     <p> Pour les équipes honorant leur première participation cette année, 20 packs “tour d’honneur” (2 tours) seront également disponibles pour un supplément de 10€ sur l’inscription.</p>
-                    <p>Dans une course d'endurance, la régularité est une des qualités les plus importante. Tous les tours que vous avez fait lors des précédentes éditions sont bonifiés.</p>
+                    <p>Dans une course d'endurance, la régularité est une des qualités les plus importantes. Tous les tours que vous avez fait lors des précédentes éditions sont bonifiés.</p>
                     <img src="{{ STATIC_URL }}/tourdhonneur.png" class="img-responsive" />
                 </div>
             </div>
@@ -37,8 +37,8 @@
                     <h3 class="panel-title">Tour de force</h3>
                 </div>
                 <div class="panel-body">
-                    <p>Pour permettre à de nouveaux sportifs de monter sur le podium, les médaillés des éditions précédente partent avec 2 tous de pénalités.</p>
-                    <p>Nul doute que celà va permettre de chambouler un peu les classements. Ce malus permet de compenser les tours d'honneurs accumulé par les meilleurs équipes.</p>
+                    <p>Pour permettre à de nouveaux sportifs de monter sur le podium, les médaillés des éditions précédente partent avec 2 tours de pénalités.</p>
+                    <p>Nul doute que celà va permettre de chambouler un peu les classements. Ce malus permet de compenser les tours d'honneurs accumulés par les meilleurs équipes.</p>
                     <img src="https://www.6hdeparis.fr/wp-content/uploads/2016/07/tours-eiffels.jpg" class="img-responsive" />
                 </div>
             </div>
@@ -50,7 +50,7 @@
                 </div>
                 <div class="panel-body">
                     <p>Vous ne participez pas à la course, mais vous voulez soutenir votre équipe favorite. Votez pour elle (ou contre).</p>
-                    <p>Les trois équipes ayant reçu le plus grand nombre de vote le jour de la course se véront attribué respectivement 3, 2 et un tours de bonus.</p>
+                    <p>Les trois équipes ayant reçu le plus grand nombre de vote le jour de la course se verront attribué respectivement 3, 2 et un tours de bonus.</p>
                     <p>L'équipe la moins populaire partira avec un tour de malus.</p>
                     <img src="https://images.frandroid.com/wp-content/uploads/2017/06/carton-rouge.jpg" class="img-responsive" />
                 </div>
@@ -67,8 +67,8 @@
                     <img src="https://scontent.fcdg1-1.fna.fbcdn.net/v/t1.15752-9/s2048x2048/55916089_259856681632376_6679329282411462656_n.jpg?_nc_cat=103&_nc_ht=scontent.fcdg1-1.fna&oh=1ca1125261d62bed8beea09bb091f2c4&oe=5D4B04CD" class="pull-left img-circle img-responsive" />
                 </div>
                 <div class="col-md-10">
-                    <p>Ça fait plusieurs années, qu'on finis au pied du podium à quelques tours des 3èmes... Cette années, grâce au nouveau réglement, nous espérons bien pouvoir monter dessus !</p>
-                    <p class="pull-right">Damien, capitaine des Roulage People</p>
+                    <p>Ça fait plusieurs années, qu'on finit au pied du podium à quelques tours des 3èmes... Cette année, grâce au nouveau réglement, nous espérons bien pouvoir monter dessus !</p>
+                    <p class="pull-right">Damien, capitaine des Roulage Peoples</p>
                 </div>
             </div>
         </div>
@@ -77,7 +77,7 @@
         var nbcomplet = 0;
     </script>
     <div class="panel panel-default">
-        <div class="panel-heading">Consultez l'état de vos tous</div>
+        <div class="panel-heading">Consultez l'état de vos tours</div>
         <div class="panel-body">
             <table class="list_inscrits">
             {% for equipe in equipes %}
@@ -107,18 +107,18 @@
                 </tr>
                 {% endif %}
             {% endif %}
-                <tr class="{% cycle 'odd' 'even' %}">
+                <tr class="{% cycle 'odd' 'even' %}" onclick="location.href='/6hdeparis2019/bonus/vote/{{equipe.numero}}';">
                     <td>{{ equipe.numero }}</td>
                     <td>{{ equipe.nom }}</td>
                     <td>{{ equipe.club }}</td>
                     <td>{{ equipe.code }}</td>
                     <td>{% if equipe.participations >= 1 %}+ {% if equipe.participations < 3 %}{{ equipe.participations }}{% else %}3{% endif %} tours{% endif %}</td>
                     <td>{% if equipe.position < 4 %}- 2 tours{% endif %}</td>
-                    <td style="padding: 2px">Voter 
-                        <button type="button" class="btn btn-success btn-xs" onclick="alert('Votre vote a été pris en compte')">
+                    <td style="padding: 2px">{{ equipe.votes }} vote{{ equipe.votes|pluralize }}
+                        <button type="button" class="btn btn-success btn-xs" onclick="vote({{ equipe.id }},1)">
                             <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
                         </button>
-                        <button type="button" class="btn btn-danger btn-xs" onclick="alert('Votre vote a été pris en compte')">
+                        <button type="button" class="btn btn-danger btn-xs" onclick="vote({{ equipe.id }}, 0)">
                             <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
                         </button>
                     </td>
@@ -135,4 +135,24 @@
             </table>
         </div>
     </div>
+    <script>
+        function vote(id, up) {
+            $.ajax({
+                url: '/6hdeparis2019/bonus/vote/',
+                method: 'post',
+                data: {
+                    equipe: id,
+                    up: up
+                },
+                success: function(r) {
+                    if (r.ok) {
+                        alert('Votre vote a été pris en compte');
+                        location.reload();
+                    } else {
+                        alert('Vous avez déjà voté pour cette équipe');
+                    }
+                }
+            });
+        }
+    </script>
 {% endblock %}

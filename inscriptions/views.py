@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Vote
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 from pinax.stripe.actions import charges
@@ -31,6 +31,7 @@ from pinax.stripe.views import Webhook
 import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
+from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
@@ -730,7 +731,8 @@ def poisson(request, course_uid='6hdeparis2019'):
     equipes = Equipe.objects.raw("""
 select b.*, d.code,
 max(participations) as participations,
-min(c.position) as position
+min(c.position) as position,
+(select coalesce(sum(case when v.up then 1 else -1 end), 0) from inscriptions_vote v where v.equipe_id=b.id) as votes
 from inscriptions_equipier a
 left join inscriptions_equipe b on a.equipe_id=b.id
 left join (
@@ -752,3 +754,48 @@ where b.course_id=21 group by 1, d.code
         'equipes': equipes,
     })
 
+def vote(request):
+    equipe = get_object_or_404(Equipe, course__uid='6hdeparis2019', id=request.POST.get('equipe'))
+
+    cookie = request.COOKIES.get('vote_id', uuid4())
+
+    ok = True
+    try:
+        Vote(
+            equipe=equipe,
+            cookie=cookie,
+            up=request.POST.get('up', '1') == '1',
+            ip=request.META['REMOTE_ADDR'],
+            ua=request.META['HTTP_USER_AGENT']
+        ).save()
+    except Exception as e:
+        logger.exception('error vote')
+        ok = False
+    response = HttpResponse(json.dumps({
+        'ok': ok,
+    }), content_type='application/json')
+    response.set_cookie('vote_id', cookie)
+    return response
+
+def vote_equipe(request, numero, course_uid='6hdeparis2019'):
+    course = get_object_or_404(Course, uid=request.path.split('/')[1])
+    try:
+        instance = Equipe.objects.get(course=course, numero=numero)
+        #prefetch_related_objects([instance], [Prefetch('equipier_set', Equipier.objects.filter(numero__lte=instance.nombre))])
+        if instance.course != course:
+            raise Http404()
+        pour = instance.vote_set.filter(up=True).count()
+        contre = instance.vote_set.filter(up=False).count()
+        ctx = {
+            "instance": instance,
+            "pour": pour,
+            "contre": contre,
+            "total": pour - contre,
+            "nombre": course.equipe_set.count(),
+            "position": course.equipe_set.annotate(
+                p = Coalesce(Sum(Case(When(vote__up=True, then=Value(1)), default=Value(-1), output_field=IntegerField())), Value(0)),
+            ).filter(p__gt=pour - contre).count() + 1,
+        }
+        return TemplateResponse(request, 'vote.html', ctx)
+    except Equipe.DoesNotExist as e:
+        raise Http404()

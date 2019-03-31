@@ -46,6 +46,7 @@ urlpatterns += [
     path(r'<str:course_uid>/list/', views.equipe_list, name='inscriptions_list'),
     path(r'<str:course_uid>/resultats/', views.resultats, name='inscriptions_resultats'),
     path(r'<str:course_uid>/change/<int:numero>/', views.change, name='inscriptions_change'),
+    path(r'<str:course_uid>/change/<int:numero>/', views.change, name='inscriptions_change'),
     path(r'<str:course_uid>/change/sent/', views.change, { 'sent': True }, 'inscriptions.change_sent'),
     path(r'<str:course_uid>/change/', views.change, name='inscriptions_change'),
     path(r'<str:course_uid>/stats/', views.stats, name='inscriptions_stats'),
@@ -57,6 +58,8 @@ urlpatterns += [
     path(r'<str:course_uid>/model/autorisation/', TemplateView.as_view(template_name='autorisation.html'), name='inscriptions_model_autorisation'),
     path(r'<str:course_uid>/live/', views.live_push, name='inscriptions_live_push'),
     path(r'6hdeparis2019/bonus/', views.poisson, name='inscriptions_poisson'),
+    path(r'6hdeparis2019/bonus/vote/<int:numero>/', views.vote_equipe, name='inscriptions_vote_equipe'),
+    path(r'6hdeparis2019/bonus/vote/', views.vote, name='inscriptions_vote'),
 ]
 urlpatterns += [
     path(r'<str:course_uid>/equipiers/', admin_views.equipiers, name='inscriptions_equipiers'),

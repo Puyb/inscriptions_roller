@@ -1,0 +1,65 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% block body %}
+<div class="jumbotron">
+    <div class="media">
+        <div class="media-left">
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
+            <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
+        </div>
+        <div class="media-body">
+            <h2>Tour des fans</h2>
+            <p>
+                <table class="table">
+                    <tr><th>{% trans "Equipe :" %}</th><td>{{ instance.nom }}</td></tr>
+                    <tr><th>{% trans "Dossard :" %}</th><td>{{ instance.numero }}</td></tr>
+                    <tr><th>{% trans "Categorie :" %}</th><td>{{ instance.categorie.code }} - {{ instance.categorie.nom }}</td></tr>
+                </table>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Votez pour {{ instance.nom }} :</h3>
+    </div>
+    <div class="panel-body">
+
+        <p>
+            <button type="button" class="btn btn-success btn-xl" onclick="vote({{ equipe.id }},1)">
+                <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+            </button>
+            <button type="button" class="btn btn-danger btn-xl" onclick="vote({{ equipe.id }}, 0)">
+                <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"></span>
+            </button>
+        </p>
+        <p>Déjà {{ pour }} votes en faveur de cette équipe, et {{ contre }} en défaveur.</p>
+        <p>Cette équipe se classe {{ position }} / {{ nombre }} avec {{ total }} points</p>
+
+        <p><a href="/6hdeparis2019/bonus/">Revenir à la liste de toutes les équipes.</a></p>
+    </div>
+</div>
+    <script>
+        function vote(id, up) {
+            $.ajax({
+                url: '/6hdeparis2019/bonus/vote/',
+                method: 'post',
+                data: {
+                    equipe: id,
+                    up: up
+                },
+                success: function(r) {
+                    if (r.ok) {
+                        alert('Votre vote a été pris en compte');
+                        location.reload();
+                    } else {
+                        alert('Vous avez déjà voté pour cette équipe');
+                    }
+                }
+            });
+        }
+    </script>
+
+{% endblock %}
