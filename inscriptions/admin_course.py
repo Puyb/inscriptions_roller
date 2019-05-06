@@ -236,7 +236,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         except:
                                             return None
 
-                                        line = 0
+                                    line = 0
                                     for row in csv_reader:
                                         line += 1
                                         try:

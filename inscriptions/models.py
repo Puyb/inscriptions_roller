@@ -344,7 +344,7 @@ class Categorie(models.Model):
             d = d.date()
         d = d or date.today()
         prix = self.prix1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation <= d:
             prix = self.prix2 or 0
         return prix
 
@@ -724,7 +724,7 @@ class ExtraQuestion(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation <= d:
             price = self.price2 or 0
         return price
 
@@ -774,7 +774,7 @@ class ExtraQuestionChoice(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.question.course.date_augmentation and self.question.course.date_augmentation < d:
+        if self.question.course.date_augmentation and self.question.course.date_augmentation <= d:
             price = self.price2 or 0
         return price
 
