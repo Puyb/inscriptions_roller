@@ -22,6 +22,7 @@ from .utils import ChallengeUpdateThread, send_mail
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from pathlib import Path
 import json
 import re
 from Levenshtein import distance
@@ -650,7 +651,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            url(r'^version/$', self.version, name='equipe_version'),
             url(r'^send/$', self.send_mails, name='equipe_send_mails'),
             url(r'^export/$', self.export, name='equipe_send_mails'),
             url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
@@ -720,10 +720,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             'subject': sujet,
             'message': message,
         }))
-
-    def version(self, request):
-        import django
-        return HttpResponse(django.__file__ + ' ' + json.dumps(list(django.VERSION)))
 
     def send_mails(self, request, queryset=None):
         request.current_app = self.admin_site.name
@@ -871,6 +867,33 @@ class CourseAdmin(admin.ModelAdmin):
         response.set_cookie('course_id',  obj.id)
         response.set_cookie('course_nom', obj.nom)
         return response
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            url(r'^models/$', self.get_models, name='models'),
+        ]
+        return my_urls + urls
+
+    def get_models(self, request):
+        models = {}
+        with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+            models = json.load(f)
+        for course in Course.objects.filter(accreditations__user=request.user):
+            models[course.id] = {
+                '_name': str(course),
+                'categories': [
+                    {
+                        'code': cat.code,
+                        'nom': cat.nom,
+                        'prix1': str(cat.prix1),
+                        'prix2': str(cat.prix2),
+                    } for cat in course.categories.all()
+                ],
+            }
+            
+        return HttpResponse(json.dumps(models))
+
 site.register(Course, CourseAdmin)
 
 
