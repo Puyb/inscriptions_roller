@@ -243,3 +243,4 @@ CHANNEL_LAYERS = {
         },
     },
 }
+NYT_CHANNELS_DISABLE = True
