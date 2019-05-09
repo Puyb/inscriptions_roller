@@ -152,7 +152,7 @@
         DAY: {{ DAY }},
         CLOSE_DATE: new Date({{ CLOSE_YEAR }},{{ CLOSE_MONTH }}-1,{{ CLOSE_DAY }}),
         MIN_AGE: {{ MIN_AGE|default:0 }},
-        EQUIPIERS_COUNT: {{ equipiers_count }},
+        EQUIPIERS_COUNT: {{ equipiers_count }}{% if instance %} - {{ instance.nombre }}{% endif %},
         MAX_EQUIPIERS: {{ COURSE.limite_participants }},
         URL: "{{ COURSE.url|escapejs }}"
     };
