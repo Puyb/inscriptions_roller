@@ -23,6 +23,7 @@ from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
+from pathlib import Path
 import logging
 import traceback
 import pytz
@@ -607,6 +608,17 @@ class Equipe(models.Model):
     def distance(self):
         return self.tours * self.course.distance if self.tours else None
 
+def equipier_piece_jointe_filename(static_name=None):
+    def func(instance, filename):
+        name = static_name or instance.justificatif
+        pj = Path(filename)
+        dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
+        dest.mkdir(parents=True, exist_ok=True)
+        new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
+        print(new_pj)
+        return new_pj
+    return func
+
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Si vous avez un certificat de moins de trois ans, vous pouvez remplire le questionnaire %(link_cerfa)s et si vous répondez non à toutes les questions, cocher la case ci dessous. Sinon, votre certificat doit avoir moins d'un an au moment de la course.""")
@@ -629,11 +641,11 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     pays              = models.CharField(_(u'Pays'), max_length=2, default='FR')
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
-    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True, help_text=AUTORISATION_HELP)
+    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_piece_jointe_filename('autorisation'), blank=True, help_text=AUTORISATION_HELP)
     autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
     justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
-    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True)
+    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename(), blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
     cerfa_valide      = models.BooleanField(_('Cerfa QS-SPORT'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)

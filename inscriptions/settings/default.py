@@ -243,3 +243,4 @@ CHANNEL_LAYERS = {
         },
     },
 }
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024

@@ -14,7 +14,7 @@ from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
@@ -27,6 +27,7 @@ import re
 from Levenshtein import distance
 import csv, io
 import inspect
+import zipstream
 
 import logging
 logger = logging.getLogger(__name__)
@@ -611,7 +612,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         (None, { 'description': '<div id="autre"></div>', 'fields': () }),
 
     )
-    actions = ['send_mails', 'export']
+    actions = ['send_mails', 'export', 'download']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -652,7 +653,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         my_urls = [
             url(r'^version/$', self.version, name='equipe_version'),
             url(r'^send/$', self.send_mails, name='equipe_send_mails'),
-            url(r'^export/$', self.export, name='equipe_send_mails'),
+            url(r'^export/$', self.export, name='equipe_export'),
+            url(r'^download/$', self.download, name='equipe_downloads'),
             url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
             url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
             url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
@@ -817,6 +819,37 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             fields=fields,
         ))
     export.short_description = _(u'Exporter')
+
+    def download(self, request, queryset=None):
+        request.current_app = self.admin_site.name
+        course = getCourse(request)
+
+        queryset = queryset or Equipe.objects.all()
+        queryset = queryset.filter(course=course)
+        equipiers = Equipier.objects.filter(equipe__course=course, equipe__in=queryset)
+
+        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+        for equipier in equipiers:
+            if equipier.piece_jointe:
+                path = Path(settings.MEDIA_ROOT) / equipier.piece_jointe.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - %s%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        equipier.justificatif,
+                        path.suffix
+                    )
+                    print(path, dest)
+                    z.write(path, dest)
+
+        response = StreamingHttpResponse(z, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{} - Justificatifs de {} equipes.sip"'.format(course.nom, queryset.count())
+        return response
+    download.short_description = _(u'Télécharger les justificatifs')
 
     def autre(self, request, id):
         request.current_app = self.admin_site.name
