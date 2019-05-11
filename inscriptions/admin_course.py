@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import operator
-from functools import reduce
+from functools import reduce, update_wrapper
 from inscriptions.models import *
 from django.conf.urls import url
 from django.contrib import admin
@@ -14,6 +14,7 @@ from django.db.models.functions import Coalesce
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -113,6 +114,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         )
         return TemplateResponse(request, 'admin/course_ask_accreditation.html', context)
 
+    @staff_member_required
     def document_review(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -145,6 +147,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             skip=','.join(skip)
         ))
 
+    @staff_member_required
     def listing_dossards(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -169,6 +172,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             ))
         return TemplateResponse(request, 'admin/listing_dossards_form.html', dict(self.each_context(request), course=course))
 
+    @staff_member_required
     def anomalies(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -193,6 +197,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             course=course,
         ))
 
+    @staff_member_required
     def resultats(self, request):
         request.current_app = self.name
         course = getCourse(request, Course.objects.prefetch_related('categories', 'challenges'))
@@ -352,6 +357,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
+    @staff_member_required
     def paiement_change(self, request, id=None):
         paiement = None
         course = getCourse(request, Course.objects.all())
@@ -433,6 +439,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         ))
 
     @csrf_exempt
+    @staff_member_required
     def paiement_search_equipe(self, request):
         search = request.POST['search']
 
@@ -463,6 +470,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             } for e in equipes],
         }))
 
+    @staff_member_required
     def test_categories(self, request):
         course = getCourse(request, Course.objects.all())
         return TemplateResponse(request, "admin/test_categories.html", {
@@ -650,14 +658,19 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
         my_urls = [
             url(r'^version/$', self.version, name='equipe_version'),
-            url(r'^send/$', self.send_mails, name='equipe_send_mails'),
-            url(r'^export/$', self.export, name='equipe_export'),
-            url(r'^download/$', self.download, name='equipe_downloads'),
-            url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
-            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
-            url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
+            url(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
+            url(r'^export/$', wrap(self.export), name='equipe_export'),
+            url(r'^download/$', wrap(self.download), name='equipe_downloads'),
+            url(r'^send/preview/$', wrap(self.preview_mail), name='equipe_preview_mail'),
+            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', wrap(self.send_mail), name='equipe_send_mail'),
+            url(r'^(?P<id>\d+)/autre/$', wrap(self.autre), name='equipe_autre'),
         ]
         return my_urls + urls
 
@@ -843,7 +856,19 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                         equipier.justificatif,
                         path.suffix
                     )
-                    print(path, dest)
+                    z.write(path, dest)
+            if equipier.autorisation:
+                path = Path(settings.MEDIA_ROOT) / equipier.autorisation.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - autorisation parentale%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        path.suffix
+                    )
                     z.write(path, dest)
 
         response = StreamingHttpResponse(z, content_type='application/zip')
