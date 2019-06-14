@@ -69,6 +69,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
+            url(r'^resultats/tours/$', self.admin_view(self.resultats_tours), name='course_resultats_tours'),
             url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
             url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
             url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
@@ -348,6 +349,108 @@ class CourseAdminSite(admin.sites.AdminSite):
                 except AbortException as e:
                     pass
         return TemplateResponse(request, 'admin/import_resultat_form.html', dict(self.each_context(request),
+            course=course,
+            form=form,
+        ))
+
+    def resultats_tours(self, request):
+        request.current_app = self.name
+        course = getCourse(request, Course.objects.prefetch_related('categories')
+        form = ImportResultatForm()
+
+        equipiers = {
+            '%d%d' % (e.equipe.numero, e.numero)
+            for e in Equipier.objects.filter(equipe__course__in=course).select_related('equipe', 'equipe__categorie')
+        }
+
+        equipes = {
+            e.numero
+            for e in Equipe.objects.filter(course__in=course).select_related('categorie')
+        }
+
+        equipiers_manquants = set()
+
+        if request.method == 'POST':
+            form = ImportResultatForm(request.POST, request.FILES)
+            if form.is_valid():
+                csv_file = request.FILES['csv']
+                data = form.cleaned_data
+
+                class AbortException(Exception):
+                    pass
+                try:
+                    with transaction.atomic():
+                        csv_file.seek(0)
+                        with io.StringIO(csv_file.read()) as io_file:
+                            csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                            if data.get('skip_first'):
+                                next(csv_reader)
+
+                            def g(row, n, f=lambda x: x):
+                                if not data.get(n):
+                                    return None
+                                return f(row[data[n] - 1])
+                            
+                            lines = []
+                            line = 0
+                            for row in csv_reader:
+                                line += 1
+
+                                try:
+                                    if data['time_format'] == 'HMS':
+                                        s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
+                                        time = Decimal(0)
+                                        n = Decimal(1)
+                                        while len(s):
+                                            time += n * Decimal(s.pop().replace(',', '.'))
+                                            n *= Decimal(60)
+                                    else:
+                                        time = Decimal(g(row, 'time_column'))
+                                except:
+                                    messages.add_message(
+                                        request,
+                                        messages.ERROR,
+                                        _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['time_column'], line, g(row, 'time_column'))
+                                    )
+                                    raise AbortException()
+                                lines.append((
+                                    g(row, 'numero_column'),
+                                    time,
+                                ))
+                            lines = sorted(lines, key=1)
+
+                            pasages_equipe = defaultdict(lambda: { 'passage': 0 })
+                            pasages_equipier = defaultdict(int)
+                            for (numero, temps) in lines:
+                                if numero not in equipiers:
+                                    equipiers_manquants.add(numero)
+                                    next
+                                equipier = equipiers[numero]
+                                passages_equipe[equipier.equipe.numero]['passage'] += 1
+                                temps_tour = temps - passages_equipe[equipier.equipe.numero]['temps']
+                                passages_equipe[equipier.equipe.numero]['temps'] = temps
+                                passages_equipe[numero] += 1
+                                
+                                passage = passages_equipe[equipier.equipe.numero]['passage']
+
+                                EquipierTour(
+                                    equipier=equipier,
+                                    temps_tour=temps_tour,
+                                    temps_total=temps,
+                                    passage_equipier=passage_equipier,
+                                    passage_equipe=passage_equipe,
+                                    position_generale=len(d for d in passages_equipe.values() if d['temps'] <= temps and d['passage'] >= passage)
+                                    position_categorie=len(d for n, d in passages_equipe.items() if d['temps'] <= temps and d['passage'] >= passage and equipier.equipe.categorie == equipes[n].categorie),
+                                ).save()
+
+                    return TemplateResponse(request, 'admin/import_resultat_tours_done.html', dict(self.each_context(request),
+                        course=course,
+                        equipes=EquipierTour.objects.select_related('equipier', 'equipier__equipe', 'equipier__equipe__categorie').sort('temps_total'),
+                        equipiers_manquants=equipiers_manquants,
+                    ))
+                except AbortException as e:
+                    pass
+        return TemplateResponse(request, 'admin/import_resultat_tours_form.html', dict(self.each_context(request),
             course=course,
             form=form,
         ))

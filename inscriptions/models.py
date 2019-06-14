@@ -1319,3 +1319,12 @@ class PaiementRepartition(models.Model):
 
     def reste(self):
         return self.equipe.prix - self.paye()
+
+class EquipierTour(models.Model):
+    equipier = models.ForeignKey(Equipier, related_name='tours', on_delete=models.CASCADE)
+    passage_equipier = models.IntegerField()
+    passage_equipe = models.IntegerField()
+    temps_tour = models.DecimalField(_('Temps tour (en secondes)'), max_digits=9, decimal_places=3)
+    temps_total = models.DecimalField(_('Temps total (en secondes)'), max_digits=9, decimal_places=3)
+    position_generale = models.IntegerField(_('Position générale'))
+    position_categorie = models.IntegerField(_('Position catégorie'))
