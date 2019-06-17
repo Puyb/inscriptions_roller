@@ -114,6 +114,7 @@ MIDDLEWARE= [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "inscriptions.middleware.tracking_middleware",
 ]
 
 ROOT_URLCONF = "inscriptions.urls"

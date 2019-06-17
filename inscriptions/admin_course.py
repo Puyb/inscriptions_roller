@@ -685,7 +685,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         try:
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             sujet   = Template(template.sujet).render(context)
             message = Template(template.message).render(context)
@@ -708,7 +708,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         try:
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             sujet   = Template(mail.sujet).render(context)
             message = Template(mail.message).render(context)

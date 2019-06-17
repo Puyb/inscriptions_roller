@@ -26,6 +26,7 @@ from django.contrib.contenttypes.models import ContentType
 import logging
 import traceback
 import pytz
+import uuid
 from pinax.stripe.models import Charge
 from Levenshtein import distance
 
@@ -839,7 +840,7 @@ class TemplateMail(models.Model):
             
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             subject = Template(self.sujet).render(context)
             message = Template(self.message).render(context)
@@ -870,9 +871,13 @@ class Mail(models.Model):
     sujet = models.CharField(max_length=200)
     message = models.TextField()
     date = models.DateTimeField(auto_now=True)
+    uid = models.CharField(max_length=200)
+    error = models.TextField(max_length=200, null=True, blank=True)
+    read = models.DateTimeField(null=True, default=None)
 
     def send(self):
         if not self.id:
+            self.uid = uuid.uuid4().hex
             self.save()
         for dest in self.destinataires:
             send_mail(
@@ -882,6 +887,7 @@ class Mail(models.Model):
                 to=[dest],
                 bcc=self.bcc,
                 reply_to=[self.emeteur,],
+                message_id=self.uid,
             )
 
 CHALLENGE_LEVENSHTEIN_DISTANCE = 3
