@@ -820,6 +820,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return TemplateResponse(request, 'admin/equipe/autre.html', dict(self.admin_site.each_context(request),
             templates=instance.course.templatemail_set.all(),
             instance=instance,
+            mail_error=instance.mail_set.filter(error__isnull=False).count(),
         ))
 
 
@@ -963,12 +964,20 @@ class MailAdmin(CourseFilteredObjectAdmin):
         qs = qs.select_related('equipe__categorie', 'equipe__course', 'template')
         return qs
 
-    list_display = ('date', 'equipe', 'sujet', 'template')
-    fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
-    readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
+    list_display = ('date', 'equipe', 'sujet', 'template', 'status')
+    fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
+    readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
     list_filter = [EquipeFilter, TemplateMailFilter, 'date']
     class Media:
         js = ('custom_admin/mail.js', )
+    def status(self, obj):
+        if obj.read:
+            return ICON_OK
+        if obj.error:
+            return ICON_KO
+        return ''
+    status.allow_tags = True
+    status.short_description = mark_safe(ICON_OK)
 site.register(Mail, MailAdmin)
 
 class ExtraQuestionChoiceInline(admin.TabularInline):

@@ -872,8 +872,8 @@ class Mail(models.Model):
     message = models.TextField()
     date = models.DateTimeField(auto_now=True)
     uid = models.CharField(max_length=200)
-    error = models.TextField(max_length=200, null=True, blank=True)
-    read = models.DateTimeField(null=True, default=None)
+    error = models.TextField(_('Erreur d\'envoi'), max_length=200, null=True, blank=True)
+    read = models.DateTimeField(_('Lu le'), null=True, default=None)
 
     def send(self):
         if not self.id:

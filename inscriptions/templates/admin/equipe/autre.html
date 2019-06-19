@@ -32,6 +32,7 @@
                 <option value="../send/{{ template.id }}">Envoyer un email "{{ template.nom }}"</option>
                 {% endfor %}
             </select>
+            {% if mail_error %}<span style="color: red">Notifications d'erreur de livraison reçues sur cet email.</span>{% endif %}
         </div>
     </div>
 </div>
