@@ -774,7 +774,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 if len(ids):
                     objects = objects.filter(id__in=ids)
             else:
-                objects = Equipier.objects.filter(equipe__course=course)
+                objects = Equipier.objects.filter(equipe__course=course, numero__lte=F('equipe__nombre'))
                 if len(ids):
                     objects = objects.filter(equipe_id__in=ids)
             response = HttpResponse(content_type='text/csv', charset=encoding)
@@ -808,7 +808,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return TemplateResponse(request, 'admin/equipe/export.html', dict(self.admin_site.each_context(request),
             queryset=queryset,
             equipes=queryset.count() or course.equipe_set.count(),
-            equipiers=Equipier.objects.filter(equipe__in=queryset).count() or Equipier.objects.filter(equipe__course=course).count(),
+            equipiers=queryset.aggregate(Sum('nombre'))['nombre__sum'] or course.equipe_set.aggregate(Sum('nombre'))['nombre__sum'] or 0,
             course=course,
             fields=fields,
         ))

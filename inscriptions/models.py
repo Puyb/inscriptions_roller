@@ -271,7 +271,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 'lat': float(ville.lat),
                 'lng': float(ville.lng),
                 'count': ville.count,
-            } for ville in Ville.objects.filter(equipier__equipe__course=self).annotate(count=Count('equipier'))
+            } for ville in Ville.objects.filter(equipier__equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
             if ville.count > 0 ]
         sorted(result['villes'], key=itemgetter('nom'))
         sorted(result['villes'], key=itemgetter('count'), reverse=True)
