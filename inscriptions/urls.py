@@ -27,6 +27,7 @@ urlpatterns += [
     path(r'', views.index, name='home'),
     path(r'organisteurs/', TemplateView.as_view(template_name='orga.html'), name='orga'),
     path(r'challenges/', views.challenges, name='inscriptions_challenges'),
+    path(r'blank.gif', views.blank, name='inscriptions_blank'),
     path(r'countries.json', views.countries, name='countries'),
     path(r'challenges/<str:challenge_uid>/', views.challenge, name='inscriptions_challenge'),
     path(r'challenges/<str:challenge_uid>/<int:participation_id>/', views.challenge_participation, name='inscriptions_challenge_participation'),

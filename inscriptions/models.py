@@ -877,7 +877,7 @@ class Mail(models.Model):
 
     def send(self):
         if not self.id:
-            self.uid = uuid.uuid4().hex
+            self.uid = '%s@%s' % (uuid.uuid4().hex, Site.objects.get_current())
             self.save()
         for dest in self.destinataires:
             send_mail(

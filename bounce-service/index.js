@@ -26,39 +26,49 @@ const getMessage = async msg => {
     });
 };
 
-const handleMessage = async (msg, seqno) => {
-    try {
-        const bh = new BounceHandler();
-        const buffer = await getMessage(msg);
-        const [bounce] = bh.parse_email(buffer);
-        if (!bounce) return;
-
-        const ids = await knex('inscriptions_mail')
-            .where({
-                uid: bounce.messageid,
-                destinataires: [bounce.recipient],
-            }).update({
-                error: bounce.status,
-            }, ['id'])
-        if (ids.length) {
-            imap.addFlags(seqno, '\\Deleted', err => {
-                if (err) console.error(err);
-            });
-        }
-    } catch (err) {
-        console.error(err);
-    }
-};
-
 const fetchNewMails = async imap => {
-    const box = await imap.openBoxAsync('INBOX', true);
-    const results = await imap.searchAsync([ 'UNSEEN', ['SINCE', 'May 20, 2010'] ]);
-    return new Promise((resolve, reject) => {
+    const box = await imap.openBoxAsync('INBOX', false);
+    const results = await Promise.fromCallback(cb => imap.seq.search([ 'UNSEEN' ], cb));
+    console.log(results)
+
+    const toDelete = [];
+    const handleMessage = async (msg, seqno) => {
+        try {
+            const bh = new BounceHandler();
+            const buffer = await getMessage(msg);
+            const [bounce] = bh.parse_email(buffer);
+            if (!bounce) return;
+
+            console.log('found bounce', bounce);
+            const ids = await knex('inscriptions_mail')
+                .where({
+                    uid: bounce.messageid,
+                    destinataires: [bounce.recipient],
+                }).update({
+                    error: bounce.status,
+                }, ['id'])
+            if (ids.length) {
+                toDelete.push(seqno);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    await new Promise((resolve, reject) => {
         var f = imap.seq.fetch(results, { bodies: '' });
-        f.on('message', handleMessage);
+        const promises = [];
+        f.on('message', (msg, seqno) => {
+            promises.push(handleMessage(msg, seqno));
+        });
         f.once('error', reject);
-        f.once('end', resolve);
+        f.once('end', () => resolve(Promise.all(promises)));
     });
+    console.log('toDelete', toDelete);
+    if (toDelete.length) {
+        await Promise.fromCallback(cb => imap.seq.setFlags(toDelete, '\\Deleted', cb));
+        await imap.expungeAsync();
+    }
 };
 
 const imapConnect = (messageHandler) => {
@@ -67,7 +77,7 @@ const imapConnect = (messageHandler) => {
     imap.once('ready', async function() {
         try {
             await fetchNewMails(imap);
-            imap.on('mails', async () => {
+            imap.on('mail', async () => {
                 try {
                     await fetchNewMails(imap);
                 } catch (err) {
