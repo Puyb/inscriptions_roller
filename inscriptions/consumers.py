@@ -1,11 +1,13 @@
 import logging
 import json
 import re
+import smtplib
 from channels.consumer import SyncConsumer
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMessage
 from django.urls import reverse
+from .models import Mail
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +27,8 @@ class MailConsumer(SyncConsumer):
                     r'\1?\3&message_id=%s\4' % message_id,
                     body
                 )
-                body += '<img src="https://%s%sblank.gif?message_id=%s" width=1 height=1 />' % (
+                body += '<img src="https://%s/blank.gif?message_id=%s" width=1 height=1 />' % (
                     Site.objects.get_current(),
-                    settings.STATIC_URL,
                     message_id,
                 )
             mail = EmailMessage(
@@ -38,6 +39,11 @@ class MailConsumer(SyncConsumer):
                 **message,
             )
             mail.content_subtype = content_type
-            mail.send()
+            try:
+                mail.send()
+            except smtplib.SMTPRecipientsRefused as e:
+                to = message['to']
+                logger.exception('error sending mail %s' % e.recipients[to[0]][1])
+                Mail.objects.filter(uid=message_id, destinataires=to).update(error=e.recipients[to[0]][1])
         except Exception:
             logger.exception('error sending mail')

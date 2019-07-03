@@ -31,6 +31,7 @@ from pinax.stripe.views import Webhook
 import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -726,3 +727,6 @@ def equipe_payee(request, course_uid, numero):
         'success': equipe.paiement_complet(),
     }))
 
+def blank(request):
+    with open(Path(settings.STATIC_ROOT) / 'blank.gif', 'rb') as f:
+        return HttpResponse(f, content_type="image/gif")
