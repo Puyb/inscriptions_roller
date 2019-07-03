@@ -11,5 +11,10 @@ npm run build
 ./manage.py collectstatic --no-input
 deactivate
 
+cd bounce-service
+npm install
+cd ..
+
 sudo systemctl restart django-consumers@$(basename $(pwd))
+sudo systemctl restart django-bounce@$(basename $(pwd))
 sudo systemctl restart uwsgi@$(basename $(pwd))
