@@ -668,7 +668,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 course=instance.course,
                 template=None,
                 equipe=instance,
-                emeteur=request.POST['sender'],
+                emetteur=request.POST['sender'],
                 destinataires=[ request.POST['mail'], ],
                 bcc=[],
                 sujet=request.POST['subject'],
@@ -965,8 +965,8 @@ class MailAdmin(CourseFilteredObjectAdmin):
         return qs
 
     list_display = ('date', 'equipe', 'sujet', 'template', 'status')
-    fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
-    readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
+    fields = ('equipe', 'template', 'date', 'emetteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
+    readonly_fields = ('equipe', 'template', 'date', 'emetteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
     list_filter = [EquipeFilter, TemplateMailFilter, 'date']
     class Media:
         js = ('custom_admin/mail.js', )

@@ -852,7 +852,7 @@ class TemplateMail(models.Model):
                 course=self.course,
                 template=self,
                 equipe=instance if isinstance(instance, Equipe) else None,
-                emeteur=self.course.email_contact,
+                emetteur=self.course.email_contact,
                 destinataires=list(dests),
                 bcc=bcc,
                 sujet=subject,
@@ -865,7 +865,7 @@ class Mail(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     template = models.ForeignKey(TemplateMail, null=True, on_delete=models.SET_NULL)
     equipe = models.ForeignKey(Equipe, null=True, on_delete=models.SET_NULL)
-    emeteur = models.EmailField()
+    emetteur = models.EmailField()
     destinataires = ArrayField(models.EmailField())
     bcc = ArrayField(models.EmailField(), blank=True)
     sujet = models.CharField(max_length=200)
@@ -886,7 +886,7 @@ class Mail(models.Model):
                 name=self.course.nom,
                 to=[dest],
                 bcc=self.bcc,
-                reply_to=[self.emeteur,],
+                reply_to=[self.emetteur,],
                 message_id=self.uid,
             )
 
