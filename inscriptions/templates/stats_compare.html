@@ -32,8 +32,9 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Données" %} <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a data-name="equipiers" data-value="">{% if request.GET.equipiers == "" %}<strong>{% endif %}{% trans "Equipes" %}{% if request.GET.equipiers == "" %}</strong>{% endif %}</a></li>
-            <li><a data-name="equipiers" data-value="1">{% if request.GET.equipiers == "1" %}<strong>{% endif %}{% trans "Participants" %}{% if request.GET.equipiers == "1" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="equipes">{% if request.GET.data == "equipes" %}<strong>{% endif %}{% trans "Equipes" %}{% if request.GET.data == "equipes" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="equipiers">{% if request.GET.data == "equipiers" %}<strong>{% endif %}{% trans "Participants" %}{% if request.GET.data == "equipiers" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="prix">{% if request.GET.data == "prix" %}<strong>{% endif %}{% trans "Prix" %}{% if request.GET.data == "prix" %}</strong>{% endif %}</a></li>
           </ul>
         </li>
       </ul>
@@ -41,7 +42,7 @@
   </div><!-- /.container-fluid -->
 </nav>
 <input type="hidden" name="align" value="{{ request.GET.align }}" />
-<input type="hidden" name="equipiers" value="{{ request.GET.equipiers }}" />
+<input type="hidden" name="data" value="{{ request.GET.data }}" />
     <div class="clearfix grid_16" style="margin-bottom: 50px">
         <canvas id="canvas_time"></canvas>
     </div>
@@ -53,13 +54,19 @@
     <script src="{{ STATIC_URL }}/bluff-src.js"></script>
 
     <script>
-        var equipiers = /[?&]equipiers=1/.test(location.href);
+        const urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                      .exec(window.location.search);
+            return (results !== null) ? results[1] || 0 : false;
+        };
+
+        var data = urlParam('data') || 'equipes';
         var g = new Bluff.Line('canvas_time', 900);
         g.theme_pastel();
         g.title = '';
         g.tooltips = true;
         g.marker_font_size = 12;
-        g.y_axis_increment = equipiers ? 25 : 10;
+        g.y_axis_increment = { equipes: 10, equipiers: 25, prix: 500 }[data];
         g.hide_dots = true;
         g.line_width = 2;
         var g2 = new Bluff.Bar('canvas_time2', 900);
@@ -67,7 +74,7 @@
         g2.title = '';
         g2.tooltips = true;
         g2.marker_font_size = 12;
-        g2.y_axis_increment = equipiers ? 10 : 2;
+        g2.y_axis_increment = { equipes: 2, equipiers: 10, prix: 100 }[data];
 
         var stats = [{% for d in data %}{{ d.json|safe }}{% if not forloop.last %},{% endif %}{% endfor %}];
 
@@ -81,7 +88,7 @@
         for(var i = min; i < max; i++) {
             var a = 0;
             if(i - {{ d.delta }} in stats[{{ d.index }}].jours)
-                a = stats[{{ d.index }}].jours[i - {{ d.delta }}][equipiers ? 'equipiers' : 'equipes'];
+                a = stats[{{ d.index }}].jours[i - {{ d.delta }}][data];
             if(i <= {{ d.stats.jours.keys|get_max }} + {{ d.delta }}) 
                 dataPlot.push(a);
         }
