@@ -1,0 +1,152 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+{% load l10n %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% block content %}
+<div id="settings">
+    <label><input type="radio" name="align" value="course" checked> Date de la course</label>
+    <label><input type="radio" name="align" value="augmentation"> Date d'augmentation</label>
+    <label><input type="radio" name="align" value="start"> Date de début</label>
+    <label><input type="radio" name="data" value="equipes"> Equipes</label>
+    <label><input type="radio" name="data" value="equipiers"> Participants</label>
+    <label><input type="radio" name="data" value="prix" checked> Chiffre d'affaire</label>
+</div>
+
+
+<script>
+
+
+courses = [];
+const addCourse = async uid => {
+    const response = await fetch(`${uid}/`);
+    const data = await response.json();
+    courses.push(data);
+    draw();
+};
+const draw = () => {
+    $('#canvas_time').remove();
+    $('#settings').append('<canvas id="canvas_time"></canvas>');
+    //const settings = $('#settings').serialize(true);
+    const settings = { align: 'course', data: 'prix' };
+    console.log(settings);
+
+    const colors = Object.values({
+        red: 'rgb(255, 99, 132)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 205, 86)',
+        green: 'rgb(75, 192, 192)',
+        blue: 'rgb(54, 162, 235)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)'
+    });
+
+    const maxDelta = Math.max(...courses.map(c => c.delta[settings.align]));
+    const maxAfterDelta = Math.max(...courses.map(c => c.delta.course - c.delta[settings.align]));
+    console.log(maxDelta, maxAfterDelta);
+    console.log(courses.map(c => c.delta));
+    const config = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [],
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Evolution des inscriptions',
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    title: (data) => {
+                        const settings = $('#settings').serialize(true)
+                        const label = data[0].label;
+                        if (align === 'course') 
+                            return label + ' jours avant la course';
+                        if (align === 'augment') 
+                            if (label < 0) 
+                                return label + ' jours avant l\'augmentation des tarifs';
+                            else
+                                return label + ' jours après l\'augmentation des tarifs';
+                        if (align === 'start') 
+                            return label + ' jours après l\'ouverture des inscriptions';
+                    },
+                    label: (tooltip, data) => {
+                        const index = tooltip.datasetIndex;
+                        let label = data.datasets[index].label || '';
+                        const d = offsets[label].date;
+                        d.setDate(d.getDate(index));
+                        label += ' au ' + d.toLocaleDateString();
+                        label += ' : ' + tooltip.yLabel;
+                        return label;
+                    },
+                },
+            },
+            hover: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Jours',
+                    },
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: settings.data,
+                    },
+                }],
+            },
+        },
+    };
+    for (let i = -maxDelta; i < maxAfterDelta, i++;) {
+        config.data.labels.push(i);
+    }
+    for (const course of courses) {
+        const delta = maxDelta - course.delta[settings.align];
+        console.log('delta', delta);
+        const color = colors.shift();
+        dataset = {
+            label: course.uid,
+            fill: false,
+            backgroundColor: color,
+            borderColor: color,
+            data: [],
+            pointRadius: 0.5,
+        };
+        let cumul = 0;
+        const max = Math.max(...Object.keys(course.stats));
+        for (let i = -maxDelta; i < maxAfterDelta, i++;) {
+            var a = 0;
+            const index = i + maxDelta - delta;
+            if (course.stats[index]) {
+                a = course.stats[index][settings.data];
+            }
+            if(i <= max) {
+                cumul += a;
+                dataset.data.push(cumul);
+            }
+        }
+        config.data.datasets.push(dataset);
+    }
+
+    const chart = new Chart('canvas_time', config);
+}
+addCourse('{{ course.uid }}');
+</script>
+
+{% endblock %}
+
