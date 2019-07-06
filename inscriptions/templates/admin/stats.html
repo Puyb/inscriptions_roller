@@ -52,7 +52,7 @@ const setHash = () => {
     location.hash = '#' + hash.toString();
 }
 
-courses = [];
+let courses = [];
 const addCourse = async uid => {
     if (!uid) return;
 
@@ -244,22 +244,31 @@ const draw = () => {
     const chart = new Chart('canvas_time', config);
 }
 const init = async () => {
-    await addCourse('{{ course.uid }}', false);
+    if (!courses.length) {
+        await addCourse('{{ course.uid }}', false);
+    }
+    const existingUids = courses.map(c => c.uid);
+    let wantedUids = [];
     if (location.hash) {
         const hash = new URLSearchParams(location.hash.slice(1));
         $('[name=align][value=' + hash.get('align') + ']').attr('checked', true);
         $('[name=data][value=' + hash.get('data') + ']').attr('checked', true);
-        const promises = [];
-        for (const uid of hash.getAll('course')) {
-            if (uid !== '{{ course.uid }}') {
-                promises.push(addCourse(uid, false).catch(console.error));
-            }
-        }
-        await Promise.all(promises);
+        wantedUids = hash.getAll('course');
     }
+    const promises = [];
+    for (const uid of wantedUids) {
+        if (!existingUids.includes(uid)) {
+            promises.push(addCourse(uid, false).catch(console.error));
+        }
+    }
+    await Promise.all(promises);
+    courses = courses.filter(c => wantedUids.includes(c.uid) || c.uid === '{{ course.uid }}');
     draw();
 }
 init().catch(console.error);
+$(window).on('hashchange', function() {
+    init().catch(console.error);
+});
 
 
 $('#add_course').change(async function() {
