@@ -23,6 +23,7 @@ from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
+from pytz import timezone
 import json
 import re
 from Levenshtein import distance
@@ -73,6 +74,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
             url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
             url(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
+            url(r'^stats/$', self.admin_view(self.stats), name='course_stats'),
+            url(r'^stats/(?P<course_uid>[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
         ] + super().get_urls()
         return urls
 
@@ -468,6 +471,49 @@ class CourseAdminSite(admin.sites.AdminSite):
         return TemplateResponse(request, "admin/test_categories.html", {
             "course": course,
         })
+
+    def stats(self, request):
+        courses = Course.objects.filter(accreditations__user=request.user)
+        courses_other = Course.objects.none()
+        if request.user.is_superuser:
+            courses_other = Course.objects.exclude(accreditations__user=request.user)
+        course = getCourse(request, Course.objects.all())
+        return TemplateResponse(request, "admin/stats.html", {
+            "course": course,
+            "courses": courses,
+            "courses_other": courses_other,
+        })
+
+    def get_stats_api(self, request, course_uid):
+        course = get_object_or_404(Course, uid=course_uid)
+        stats = course.stats()
+        def iso(d):
+            return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
+            
+        return HttpResponse(json.dumps({
+            'stats': {
+                k: {
+                    'equipes': v['equipes'],
+                    'equipiers': v['equipiers'],
+                    'prix': v['prix'],
+                } for k, v in stats['jours'].items()
+            },
+            'uid': course.uid,
+            'course': course.nom,
+            'date': {
+                'ouverture': iso(course.date_ouverture),
+                'fermeture': iso(course.date_fermeture - timedelta(days=1)),
+                'augmentation': iso(course.date_augmentation - timedelta(days=1)),
+                'course': iso(course.date),
+            },
+            'delta': {
+                'ouverture': 0,
+                'fermeture': (course.date_fermeture - course.date_ouverture).days - 1,
+                'augmentation': (course.date_augmentation - course.date_ouverture).days - 1,
+                'course': (course.date - course.date_ouverture).days,
+            },
+        }), content_type='application/json')
+
 
     index_template = 'admin/dashboard.html'
 
