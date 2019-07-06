@@ -423,6 +423,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                     paiement.send_equipes_mail()
                     if len(request.GET.getlist('equipe_id')) == 1:
                         return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
+                    if len(request.GET.getlist('equipe_id')) > 1:
+                        return redirect('/course/inscriptions/equipe/')
                     return redirect('/course/inscriptions/paiement/')
             except PaiementException as e:
                 messages.add_message(request, messages.ERROR, u'Répartition des montants incorrectes')
