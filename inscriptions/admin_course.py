@@ -658,7 +658,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         (None, { 'description': '<div id="autre"></div>', 'fields': () }),
 
     )
-    actions = ['send_mails', 'export']
+    actions = ['send_mails', 'export', 'do_paiement']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -868,6 +868,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             instance=instance,
             mail_error=instance.mail_set.filter(error__isnull=False).count(),
         ))
+
+    def do_paiement(self, request, queryset=None):
+        return HttpResponseRedirect('../paiement/add/?' + '&'.join([ 'equipe_id=%d' % equipe.id for equipe in queryset ]))
+    do_paiement.short_description = _(u'Paiement reçu')
 
 
 #main_site.disable_action('delete_selected')
