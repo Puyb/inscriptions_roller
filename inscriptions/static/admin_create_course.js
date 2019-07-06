@@ -1,8 +1,26 @@
 $(function() {
     COURSE_MODEL = {};
-    $.ajax('/static/course_models.json', {
+    $.ajax('../models/', {
+        dataType: 'json',
         success: function(r) {
             COURSE_MODEL = r;
+            const field = $('#id_course_model');
+            let i = 0;
+            for (const [k, v] of Object.entries(r)) {
+                field.append($('<li>')
+                    .append($('<label>').attr({ for: `id_course_model_${i}` })
+                        .append($('<input>').attr({
+                            type: 'radio',
+                            name: 'course_model',
+                            value: k,
+                            id: `id_course_model_${i++}`
+                        })).append($('<span>').text(' ' + v._name))
+                    )
+                );
+            }
+            $('[name=course_model]').click(function() {
+                generate_prices(this.value);
+            });
             generate_prices($('[name=course_model]:checked').val());
         }
     });
@@ -47,7 +65,4 @@ $(function() {
         }
         updateField();
     }
-    $('[name=course_model]').click(function() {
-        generate_prices(this.value);
-    });
 });

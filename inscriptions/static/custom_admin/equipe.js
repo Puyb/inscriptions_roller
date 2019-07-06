@@ -1,7 +1,7 @@
 $(function() {
     if(!$('#equipe_form').length) return;
 
-    $('.field-piece_jointe div.readonly, .field-autorisation div.readonly').each(function() {
+    $('.field-piece_jointe .field-piece_jointe div.readonly, .field-piece_jointe .field-autorisation div.readonly').each(function() {
         if(this.textContent == '')
             this.innerHTML = 'Aucun fichier joint';
         else

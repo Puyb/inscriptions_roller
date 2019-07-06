@@ -53,44 +53,19 @@
     </div>
     <div class="panel-body">
         {% if not instance.paiement_complet %}
-        {% if COURSE.paypal %}
+        {% if COURSE.paypal or COURSE.stripe_public %}
         <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
 
-        {% block payment_form %}
-        <p>
-            <form action="{{ PAYPAL_URL }}" method="post">
-                <input type="hidden" name="business"      value="{{ PAYPAL_BUSINESS }}" />
-                <input type="hidden" name="currency_code" value="EUR" />
-                <input type="hidden" name="return"        value="" id="paypal_return_url" />
-                <input type="hidden" name="cmd"           value="_cart" />
-                <input type="hidden" name="upload"        value="1" />
-                <input type="hidden" name="no_shipping"   value="1" />
-                <input type="hidden" name="item_name_1"   value="{{ COURSE.uid }} - {{ instance.categorie.code }}" />
-                <input type="hidden" name="invoice"       value="{{ instance.id }}{{ hour }}" />
-                <input type="hidden" name="amount_1"      value="{{ instance.prix_paypal|stringformat:".2f" }}" />
-                <input type="hidden" name="quantity_1"    value="1" />
-                {# LEAVE THE HANDLING CHARGE ALONE!  PAYPAL SHIPPING WILL INEVITABLY BE MESSED UP IF YOU USE THEIR SHIPPING METHODS #}
-                {# To work around their bizarre system, we are telling Paypal "no shipping" and adding all shipping charges as handling #}
-                <input type="hidden" name="handling_cart" value="0.00" />
-                <input type="hidden" name="tax_cart"      value="0.00" />
-                <input type="hidden" name="notify_url"    value="{{ paypal_ipn_url }}" />
+        {% if COURSE.paypal %}{% include "_paypal.html" %}{% endif %}
+        {% if COURSE.stripe_public %}{% include "_stripe.html" %}{% endif %}
 
-                <input type="submit" value="{% trans 'Paypal ou Carte bancaire' %}" class="btn btn-primary"><br />
-            </form>
-            <script> document.getElementById('paypal_return_url').value = location.href; </script>
-        </p>
-        {% endblock %}
-
-        {% if instance.frais_paypal > 0 %}
-        <p>{% blocktrans with frais=instance.frais_paypal|floatformat:2 %}Pour tout paiement par internet, {{ frais }} € de frais seront ajoutés.{% endblocktrans %}{% blocktrans %}Ces frais correspondent aux frais de transaction Paypal.{% endblocktrans %}</p>
-        {% endif %}
-        <p>{% blocktrans with prix=instance.prix ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
+        <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
         {% else %}
-        <p>{% blocktrans with prix=instance.prix ordre=COURSE.ordre %}Pour régler votre inscription vous pouvez envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
+        <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Pour régler votre inscription vous pouvez envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
         {% endif %}
-        <p>{% blocktrans with date=instance.date_annulation.date %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
+        <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
         {% else %}
-        <p>{% blocktrans with prix=instance.paiement %}Votre paiement de {{ prix }} € à bien été reçu.{% endblocktrans %}</p>
+        <p>{% blocktrans with prix=instance.montant_paiements %}Vos frais d'inscription ({{ prix }} €) ont bien été reçus.{% endblocktrans %}</p>
         {% endif %}
     </div>
 </div>
@@ -113,7 +88,7 @@
 
             {% if instance.certificat_manquantes %}
             <div class="clearfix">
-                {% blocktrans %}Il manque les certificats médicaux de (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/certificat_medical.pdf" target="_blank">modèle</a>):{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux de (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>):{% endblocktrans %}<ul>
                 {% for e in instance.certificat_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}
@@ -123,7 +98,7 @@
 
             {% if instance.autorisation_manquantes %}
             <div class="clearfix">
-                {% blocktrans %}Il manque les autorisations parentales (<a href="http://www.6hdeparis.fr/wp-content/uploads/2013/03/autorisation_parentale.pdf" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
                 {% for e in instance.autorisation_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}

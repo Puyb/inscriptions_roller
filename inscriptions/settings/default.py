@@ -98,6 +98,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "account.context_processors.account",
                 "pinax_theme_bootstrap.context_processors.theme",
+                'sekizai.context_processors.sekizai',
                 "inscriptions.context_processors.import_settings",
                 "inscriptions.context_processors.course",
             ],
@@ -113,32 +114,42 @@ MIDDLEWARE= [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "inscriptions.middleware.tracking_middleware",
 ]
 
 ROOT_URLCONF = "inscriptions.urls"
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = "inscriptions.wsgi.application"
+ASGI_APPLICATION = "inscriptions.routing.application"
 
 INSTALLED_APPS = [
-    #"bootstrap_admin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.messages",
     "django.contrib.sessions",
-    "django.contrib.sites",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-
-    # theme
     "bootstrapform",
+    "formadmin",
     "pinax_theme_bootstrap",
-
-    # external
     "account",
+    "pinax.stripe",
 
-    # project
+    'django.contrib.sites.apps.SitesConfig',
+    'django.contrib.humanize.apps.HumanizeConfig',
+    'django_nyt.apps.DjangoNytConfig',
+    'mptt',
+    'sekizai',
+    'sorl.thumbnail',
+    'wiki.apps.WikiConfig',
+    'wiki.plugins.attachments.apps.AttachmentsConfig',
+    'wiki.plugins.notifications.apps.NotificationsConfig',
+    'wiki.plugins.images.apps.ImagesConfig',
+    'wiki.plugins.macros.apps.MacrosConfig',
+    'channels',
+
     "inscriptions",
 ]
 
@@ -167,13 +178,8 @@ LOGGING = {
         }
     },
     "loggers": {
-        "inscriptions.models": {
+        "inscriptions": {
             "handlers": ["console", "mail_admins"],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "inscriptions.views": {
-            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": True,
         },
@@ -227,4 +233,15 @@ FACEBOOK_APPID = ''
 
 MAX_EQUIPIERS = 8
 
+WIKI_ACCOUNT_HANDLING = False
+WIKI_CHECK_SLUG_URL_AVAILABLE  = False
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [(os.environ.get('REDIS_HOST', 'localhost'), 6379)],
+        },
+    },
+}
+NYT_CHANNELS_DISABLE = True

@@ -1,0 +1,292 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+{% load l10n %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
+
+{% block content %}
+<form id="settings">
+    <select id="add_course">
+        <option>Ajouter une course</option>
+        <optgroup>
+        {% for c in courses %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        </optgroup>
+        {% if request.user.is_superuser %}
+        <optgroup label="Courses sans accreditations">
+        {% for c in courses_other %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        </optgroup>
+        {% endif %}
+    </select>
+    <span>Aligner les comparaison sur :</span>
+    <label><input type="radio" name="align" value="course" checked> Date de la course</label>
+    <label><input type="radio" name="align" value="augmentation"> Date d'augmentation</label>
+    <label><input type="radio" name="align" value="start"> Date de début</label>
+    <span>Comparer :</span>
+    <label><input type="radio" name="data" value="equipes"> Nombre d'équipes</label>
+    <label><input type="radio" name="data" value="equipiers"> Nombre de participants</label>
+    <label><input type="radio" name="data" value="prix" checked> Chiffre d'affaire</label>
+</form>
+
+
+<script>
+const JOUR = 86400 * 1000;
+const getSettings = () => {
+    const params = new URLSearchParams($('#settings').serialize());
+    const settings = {
+        align: params.get('align'),
+        data: params.get('data'),
+    };
+    return settings;
+};
+
+const setHash = () => {
+    const hash = new URLSearchParams();
+    for(const [k, v] of Object.entries(getSettings()))
+        hash.append(k, v);
+    for (const course of courses)
+        hash.append('course', course.uid);
+    location.hash = '#' + hash.toString();
+}
+
+let courses = [];
+const addCourse = async uid => {
+    if (!uid) return;
+
+    $('#add_course option[value=' + uid + ']').remove();
+    const response = await fetch(`${uid}/`);
+    const data = await response.json();
+    courses.push(data);
+};
+const draw = () => {
+    $('#canvas_time').remove();
+    $('#settings').append('<canvas id="canvas_time"></canvas>');
+    const settings = getSettings();
+
+    const colors = Object.values({
+        red: 'rgb(255, 99, 132)',
+        orange: 'rgb(255, 159, 64)',
+        yellow: 'rgb(255, 205, 86)',
+        green: 'rgb(75, 192, 192)',
+        blue: 'rgb(54, 162, 235)',
+        purple: 'rgb(153, 102, 255)',
+        grey: 'rgb(201, 203, 207)'
+    });
+
+    const maxDelta = Math.max(...courses.map(c => c.delta[settings.align]));
+    const maxAfterDelta = Math.max(...courses.map(c => c.delta.course - c.delta[settings.align]));
+    console.log(courses, maxDelta, maxAfterDelta);
+    const config = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [],
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Evolution des inscriptions',
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+                callbacks: {
+                    title: (data) => {
+                        const label = data[0].label;
+                        if (settings.align === 'course') 
+                            return label + ' jours avant la course';
+                        if (settings.align === 'augmentation') 
+                            if (label < 0) 
+                                return Math.abs(label) + ' jours avant l\'augmentation des tarifs';
+                            else
+                                return Math.abs(label) + ' jours après l\'augmentation des tarifs';
+                        if (settings.align === 'start') 
+                            return label + ' jours après l\'ouverture des inscriptions';
+                    },
+                    label: (tooltip, data) => {
+                        const index = tooltip.datasetIndex;
+                        const course = courses[index] || courses[0]; // projection
+                        let label = data.datasets[index].label || '';
+                        const d = new Date(course.date.ouverture);
+                        d.setDate(d.getDate() + parseFloat(tooltip.label) + course.delta[settings.align]);
+                        label += ' au ' + d.toLocaleDateString();
+                        label += ' : ' + Math.round(tooltip.yLabel);
+                        for (const [key, date] of Object.entries(course.date)) {
+                            if (d.getTime() === new Date(date).getTime()) {
+                                label += ' (' + key + ')';
+                            }
+                        }
+                        return label;
+                    },
+                },
+            },
+            hover: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                xAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Jours',
+                    },
+                }],
+                yAxes: [{
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: settings.data,
+                    },
+                }],
+            },
+            annotation: {
+                drawTime: 'beforeDatasetsDraw', // (default)
+                events: ['click'],
+                dblClickSpeed: 350, // ms (default)
+                annotations: []
+            }
+        }
+    };
+    for (let i = -maxDelta; i < maxAfterDelta; i++) {
+        config.data.labels.push(i);
+    }
+    let todayIndex;
+    for (const course of courses) {
+        const delta = maxDelta - course.delta[settings.align];
+        const color = colors.shift();
+        dataset = {
+            label: course.uid,
+            fill: false,
+            backgroundColor: color,
+            borderColor: color,
+            data: [],
+            pointRadius: 0.5,
+        };
+        let cumul = 0;
+        const max = Math.max(...Object.keys(course.stats));
+        course.cumulAfter = {};
+        for (let i = -maxDelta; i < maxAfterDelta; i++) {
+            var a = 0;
+            const index = i + maxDelta - delta;
+            if (course.stats[index]) {
+                a = course.stats[index][settings.data];
+            }
+            if(new Date(course.date.ouverture).getTime() + index * JOUR <= Date.now()) {
+                cumul += a;
+                dataset.data.push(cumul);
+            } else {
+                if (!todayIndex) todayIndex = i;
+            }
+            if (i >= todayIndex) {
+                if (!course.cumulBefore)
+                    course.cumulBefore = cumul;
+                course.cumulAfter[i] = cumul / course.cumulBefore;
+            }
+        }
+        config.data.datasets.push(dataset);
+        for (const [label, value] of Object.entries(course.delta)) {
+            config.options.annotation.annotations.push({
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'x-axis-0',
+                value: value - maxDelta + delta,
+                borderColor: color,
+                borderWidth: 2,
+            });
+        }
+    }
+    console.log(todayIndex, courses)
+    if (todayIndex) {
+        config.options.annotation.annotations.push({
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: todayIndex - 1,
+            borderColor: 'rgb(127, 127, 127)',
+            borderWidth: 2,
+        });
+        if (courses.length > 1) {
+            const color = 'rgba(255, 99, 132, 0.3)';
+            dataset1 = {
+                label: 'Projection (min)',
+                fill: '+1',
+                backgroundColor: color,
+                borderColor: color,
+                data: [],
+                pointRadius: 0.5,
+            };
+            dataset2 = {
+                label: 'Projection (max)',
+                fill: false,
+                backgroundColor: color,
+                borderColor: color,
+                data: [],
+                pointRadius: 0.5,
+            };
+            for (let index = -maxDelta; index < maxAfterDelta; index++) {
+                if (index < todayIndex) {
+                    dataset1.data.push(NaN);
+                    dataset2.data.push(NaN);
+                    continue;
+                }
+                dataset1.data.push(Math.min(...courses.slice(1).map(c => c.cumulAfter[index])) * courses[0].cumulBefore);
+                dataset2.data.push(Math.max(...courses.slice(1).map(c => c.cumulAfter[index])) * courses[0].cumulBefore);
+            }
+            config.data.datasets.push(dataset1, dataset2);
+        }
+    }
+
+    const chart = new Chart('canvas_time', config);
+}
+const init = async () => {
+    if (!courses.length) {
+        await addCourse('{{ course.uid }}', false);
+    }
+    const existingUids = courses.map(c => c.uid);
+    let wantedUids = [];
+    if (location.hash) {
+        const hash = new URLSearchParams(location.hash.slice(1));
+        $('[name=align][value=' + hash.get('align') + ']').attr('checked', true);
+        $('[name=data][value=' + hash.get('data') + ']').attr('checked', true);
+        wantedUids = hash.getAll('course');
+    }
+    const promises = [];
+    for (const uid of wantedUids) {
+        if (!existingUids.includes(uid)) {
+            promises.push(addCourse(uid, false).catch(console.error));
+        }
+    }
+    await Promise.all(promises);
+    courses = courses.filter(c => wantedUids.includes(c.uid) || c.uid === '{{ course.uid }}');
+    draw();
+}
+init().catch(console.error);
+$(window).on('hashchange', function() {
+    init().catch(console.error);
+});
+
+
+$('#add_course').change(async function() {
+    try {
+        const uid = $(this).val();
+        await addCourse(uid);
+        draw();
+        setHash();
+    } catch(err) {
+        console.error(err);
+    }
+});
+$('input').click(function() {
+    draw();
+    setHash();
+});
+
+</script>
+
+{% endblock %}
+

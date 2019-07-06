@@ -96,6 +96,10 @@
                                 <label class="inline">Numéro de licence:</label>
                                 <p>{{ equipier.num_licence }}</p>
                             </div>
+                            <div class="field-box field-num_licence">
+                                <label class="inline">Cerfa QS-SPORT:</label>
+                                <p>{{ equipier.cerfa_valide|yesno:"✅,🚫" }}</p>
+                            </div>
                         </div>
                     </fieldset>
                 </div>

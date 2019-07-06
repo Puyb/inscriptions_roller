@@ -12,6 +12,11 @@ ICON_KO = '🚫'
 
 site = admin.site
 
+def has_permission(request):
+    return request.user.is_superuser
+site.has_permission = has_permission
+
+
 from django.contrib.admin.models import LogEntry
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
@@ -170,4 +175,11 @@ class ChallengeAdmin(admin.ModelAdmin):
 
 
 site.register(Challenge, ChallengeAdmin)
+site.register(Equipe)
+site.register(Equipier)
+site.register(TemplateMail)
+site.register(Mail)
+class PaiementAdmin(admin.ModelAdmin):
+    list_display = ('date', 'type', 'montant', 'montant_frais', )
+site.register(Paiement, PaiementAdmin)
     

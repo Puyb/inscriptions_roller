@@ -1,0 +1,174 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static formadmin_filters %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+
+{% block content %}
+<form method="post">
+    <div>
+        {{ paiement_form|as_django_admin }}
+        <fieldset class="module">
+            <div class="form-row"{% if readonly %} style="display: none;"{% endif %}>
+                <div class="field-box">
+                    <label for="id_search">Ajouter une equipe</label>
+                    <input id="id_search" /><p>
+                </div>
+                <div class="field-box">
+                    <select name="course">
+                    {% for course in courses %}
+                        <option value="{{course.id}}">{{course.nom}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div id="repartition-div">
+                <h2>Répartition</h2>
+                <table id="repartition">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Numero</th>
+                            <th>Equipe</th>
+                            <th>Prix</th>
+                            <th>Déjà payé</th>
+                            <th>Reste à payer</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in repartitions %}
+                        <tr>
+                            <td><p>{{ r.equipe.course }}</p></td>
+                            <td><p>{{ r.equipe.numero }}</p></td>
+                            <td><p>{{ r.equipe.nom }}</p></td>
+                            <td><p>{{ r.equipe.prix }}</p></td>
+                            <td><p>{{ r.paiement }}</p></td>
+                            <td><p>{{ r.reste }}</p></td>
+                            <td>
+                                <input name="equipe_id" type="hidden" value="{{ r.equipe.id }}" />
+                                <input name="repartition" class="repartition-montant" value="{{ r.montant|default:"" }}" onchange="updateReste()" {% if readonly %}readonly {% endif %}/>
+                                <button type="button" onclick="removeRepartition()">X</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div id="reste"></div>
+            </div>
+            <div id="results-div" style="display: none">
+                <h2>Sélectionnez l'équipe pour ce paiement</h2>
+                <table id="search_results" style="display: none">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Numero</th>
+                            <th>Equipe</th>
+                            <th>Prix</th>
+                            <th>Déjà payé</th>
+                            <th>Reste à payer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <button type="button" onclick="$('#repartition-div').show();$('#results-div').hide()">Revenir au équipes déjà séléctionnée</button>
+            </div>
+        </fieldset>
+        {% csrf_token %}
+        <div class="submit-row">
+            {% if not readonly %}
+            <input value="Enregistrer" class="default" name="_save" type="submit">
+            {% endif %}
+        </div>
+    </div>
+</form>
+<script>
+    function round(value) {
+        return Math.round(value * 100) / 100;
+    }
+    function tr(equipe) {
+        return $('<tr class="form-row">')
+            .append($('<td>').append($('<p>').text(equipe.course)))
+            .append($('<td>').append($('<p>').text(equipe.numero)))
+            .append($('<td>').append($('<p>').text(equipe.nom)))
+            .append($('<td>').append($('<p>').text(equipe.prix)))
+            .append($('<td>').append($('<p>').text(equipe.paiement - equipe.montant)))
+            .append($('<td>').append($('<p>').text(round(equipe.prix - equipe.paiement + equipe.montant))));
+    }
+    var i = 0;
+
+    $('#id_search').on('keyup', function() {
+        if (!this.value) {
+            $('#repartition-div').show();
+            $('#results-div').hide();
+            return;
+        }
+        $.ajax('/course/inscriptions/paiement/search/equipe/', {
+            method: 'post',
+            data: {
+                search: this.value,
+                id: {{ paiement.id|default:"undefined" }}
+            },
+            success: function(r) {
+                var data = JSON.parse(r);
+                $('#repartition-div').hide();
+                $('#results-div').show();
+                $('#search_results td').remove();
+                data.equipes.forEach(function(equipe) {
+                    equipe.prix = parseFloat(equipe.prix);
+                    equipe.paiement = parseFloat(equipe.paiement);
+                    equipe.montant = parseFloat(equipe.montant);
+                    if (!$('[name=equipe_id][value=' + equipe.id + ']').length)
+                        $('#search_results tbody').append(
+                            tr(equipe).click(selectEquipe.bind(this, equipe))
+                        );
+                });
+                $('#search_results').show();
+            }
+        })
+    });
+    $('#id_montant').change(updateReste);
+    function selectEquipe(equipe) {
+        $('#repartition-div').show();
+        $('#results-div').hide();
+        var value = Math.min(updateReste(), equipe.prix - equipe.paiement);
+        $('#repartition').append(
+            tr(equipe).append(
+                $('<td>')
+                    .append($('<input name="equipe_id" type="hidden">').val(equipe.id))
+                    .append($('<input name="repartition" class="repartition-montant">').val(value).change(updateReste))
+                    .append($('<button type="button">').text('X').click(removeRepartition))
+            )
+        );
+        updateReste();
+        $('#id_search').val('').focus();
+        i++;
+    }
+    function removeRepartition() {
+        $(this).parents('tr').remove();
+        updateReste();
+    }
+    function updateReste() {
+        var sum = 0;
+        $('#repartition .repartition-montant').each(function() {
+            sum += parseFloat(this.value) || 0;
+        });
+        var reste = $('#id_montant').val() - $('#id_montant_frais').val() - sum;
+        var last;
+        $('#repartition .repartition-montant').each(function() {
+            if (!this.value) {
+                var value = Math.min(reste, parseFloat($(this).parents('td').prev().text()));
+                reste -= value;
+                if (value) {
+                    this.value = value;
+                }
+            }
+        });
+        $('#reste').text('Reste à répartir : ' + Math.round(reste * 100) / 100);
+        $('[type=submit]').attr('disabled', !!reste);
+        return reste;
+    }
+    $('#id_search').val('');
+    updateReste();
+</script>
+{% endblock %}
