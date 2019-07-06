@@ -3,10 +3,12 @@ import json
 import logging
 import re
 import time
+import uuid
 from decimal import Decimal
 from urllib.parse import urlparse, urlunparse
 from threading import Thread
 from django.contrib import messages
+from django.contrib.sites.models import Site
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -103,5 +105,7 @@ def send_mail(**kwargs):
         'type': 'send.mail',
     }
     message.update(kwargs)
+    if 'message_id' not in message:
+        message['message_id'] = '%s@%s' % (uuid.uuid4().hex, Site.objects.get_current())
     #message['to'] = json.dumps(message['to'])
     async_to_sync(channel_layer.send)("mail", message)

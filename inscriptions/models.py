@@ -876,7 +876,7 @@ class Mail(models.Model):
     read = models.DateTimeField(_('Lu le'), null=True, default=None)
 
     def send(self):
-        if not self.id:
+        if not self.uid:
             self.uid = '%s@%s' % (uuid.uuid4().hex, Site.objects.get_current())
             self.save()
         for dest in self.destinataires:
