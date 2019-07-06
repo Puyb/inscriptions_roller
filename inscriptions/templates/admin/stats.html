@@ -9,32 +9,62 @@
 {% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} change-form{% endblock %}
 
 {% block content %}
-<div id="settings">
+<form id="settings">
+    <select id="add_course">
+        <option>Ajouter une course</option>
+        <optgroup>
+        {% for c in courses %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        </optgroup>
+        {% if request.user.is_superuser %}
+        <optgroup label="Courses sans accreditations">
+        {% for c in courses_other %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        </optgroup>
+        {% endif %}
+    </select>
+    <span>Aligner les comparaison sur :</span>
     <label><input type="radio" name="align" value="course" checked> Date de la course</label>
     <label><input type="radio" name="align" value="augmentation"> Date d'augmentation</label>
     <label><input type="radio" name="align" value="start"> Date de début</label>
-    <label><input type="radio" name="data" value="equipes"> Equipes</label>
-    <label><input type="radio" name="data" value="equipiers"> Participants</label>
+    <span>Comparer :</span>
+    <label><input type="radio" name="data" value="equipes"> Nombre d'équipes</label>
+    <label><input type="radio" name="data" value="equipiers"> Nombre de participants</label>
     <label><input type="radio" name="data" value="prix" checked> Chiffre d'affaire</label>
-</div>
+</form>
 
 
 <script>
+const JOUR = 86400 * 1000;
+const getSettings = () => {
+    const params = new URLSearchParams($('#settings').serialize());
+    const settings = {
+        align: params.get('align'),
+        data: params.get('data'),
+    };
+    return settings;
+};
 
+const setHash = () => {
+    const hash = new URLSearchParams();
+    for(const [k, v] of Object.entries(getSettings()))
+        hash.append(k, v);
+    for (const course of courses)
+        hash.append('course', course.uid);
+    location.hash = '#' + hash.toString();
+}
 
 courses = [];
 const addCourse = async uid => {
+    if (!uid) return;
+
+    $('#add_course option[value=' + uid + ']').remove();
     const response = await fetch(`${uid}/`);
     const data = await response.json();
     courses.push(data);
-    draw();
 };
 const draw = () => {
     $('#canvas_time').remove();
     $('#settings').append('<canvas id="canvas_time"></canvas>');
-    //const settings = $('#settings').serialize(true);
-    const settings = { align: 'course', data: 'prix' };
-    console.log(settings);
+    const settings = getSettings();
 
     const colors = Object.values({
         red: 'rgb(255, 99, 132)',
@@ -48,8 +78,7 @@ const draw = () => {
 
     const maxDelta = Math.max(...courses.map(c => c.delta[settings.align]));
     const maxAfterDelta = Math.max(...courses.map(c => c.delta.course - c.delta[settings.align]));
-    console.log(maxDelta, maxAfterDelta);
-    console.log(courses.map(c => c.delta));
+    console.log(courses, maxDelta, maxAfterDelta);
     const config = {
         type: 'line',
         data: {
@@ -67,25 +96,30 @@ const draw = () => {
                 intersect: false,
                 callbacks: {
                     title: (data) => {
-                        const settings = $('#settings').serialize(true)
                         const label = data[0].label;
-                        if (align === 'course') 
+                        if (settings.align === 'course') 
                             return label + ' jours avant la course';
-                        if (align === 'augment') 
+                        if (settings.align === 'augmentation') 
                             if (label < 0) 
-                                return label + ' jours avant l\'augmentation des tarifs';
+                                return Math.abs(label) + ' jours avant l\'augmentation des tarifs';
                             else
-                                return label + ' jours après l\'augmentation des tarifs';
-                        if (align === 'start') 
+                                return Math.abs(label) + ' jours après l\'augmentation des tarifs';
+                        if (settings.align === 'start') 
                             return label + ' jours après l\'ouverture des inscriptions';
                     },
                     label: (tooltip, data) => {
                         const index = tooltip.datasetIndex;
+                        const course = courses[index] || courses[0]; // projection
                         let label = data.datasets[index].label || '';
-                        const d = offsets[label].date;
-                        d.setDate(d.getDate(index));
+                        const d = new Date(course.date.ouverture);
+                        d.setDate(d.getDate() + parseFloat(tooltip.label) + course.delta[settings.align]);
                         label += ' au ' + d.toLocaleDateString();
-                        label += ' : ' + tooltip.yLabel;
+                        label += ' : ' + Math.round(tooltip.yLabel);
+                        for (const [key, date] of Object.entries(course.date)) {
+                            if (d.getTime() === new Date(date).getTime()) {
+                                label += ' (' + key + ')';
+                            }
+                        }
                         return label;
                     },
                 },
@@ -110,14 +144,20 @@ const draw = () => {
                     },
                 }],
             },
-        },
+            annotation: {
+                drawTime: 'beforeDatasetsDraw', // (default)
+                events: ['click'],
+                dblClickSpeed: 350, // ms (default)
+                annotations: []
+            }
+        }
     };
-    for (let i = -maxDelta; i < maxAfterDelta, i++;) {
+    for (let i = -maxDelta; i < maxAfterDelta; i++) {
         config.data.labels.push(i);
     }
+    let todayIndex;
     for (const course of courses) {
         const delta = maxDelta - course.delta[settings.align];
-        console.log('delta', delta);
         const color = colors.shift();
         dataset = {
             label: course.uid,
@@ -129,23 +169,114 @@ const draw = () => {
         };
         let cumul = 0;
         const max = Math.max(...Object.keys(course.stats));
-        for (let i = -maxDelta; i < maxAfterDelta, i++;) {
+        course.cumulAfter = {};
+        for (let i = -maxDelta; i < maxAfterDelta; i++) {
             var a = 0;
             const index = i + maxDelta - delta;
             if (course.stats[index]) {
                 a = course.stats[index][settings.data];
             }
-            if(i <= max) {
+            if(new Date(course.date.ouverture).getTime() + index * JOUR <= Date.now()) {
                 cumul += a;
                 dataset.data.push(cumul);
+            } else {
+                if (!todayIndex) todayIndex = i;
+            }
+            if (i >= todayIndex) {
+                if (!course.cumulBefore)
+                    course.cumulBefore = cumul;
+                course.cumulAfter[i] = cumul / course.cumulBefore;
             }
         }
         config.data.datasets.push(dataset);
+        for (const [label, value] of Object.entries(course.delta)) {
+            config.options.annotation.annotations.push({
+                type: 'line',
+                mode: 'vertical',
+                scaleID: 'x-axis-0',
+                value: value - maxDelta + delta,
+                borderColor: color,
+                borderWidth: 2,
+            });
+        }
+    }
+    console.log(todayIndex, courses)
+    if (todayIndex) {
+        config.options.annotation.annotations.push({
+            type: 'line',
+            mode: 'vertical',
+            scaleID: 'x-axis-0',
+            value: todayIndex - 1,
+            borderColor: 'rgb(127, 127, 127)',
+            borderWidth: 2,
+        });
+        if (courses.length > 1) {
+            const color = 'rgba(255, 99, 132, 0.3)';
+            dataset1 = {
+                label: 'Projection (min)',
+                fill: '+1',
+                backgroundColor: color,
+                borderColor: color,
+                data: [],
+                pointRadius: 0.5,
+            };
+            dataset2 = {
+                label: 'Projection (max)',
+                fill: false,
+                backgroundColor: color,
+                borderColor: color,
+                data: [],
+                pointRadius: 0.5,
+            };
+            for (let index = -maxDelta; index < maxAfterDelta; index++) {
+                if (index < todayIndex) {
+                    dataset1.data.push(NaN);
+                    dataset2.data.push(NaN);
+                    continue;
+                }
+                dataset1.data.push(Math.min(...courses.slice(1).map(c => c.cumulAfter[index])) * courses[0].cumulBefore);
+                dataset2.data.push(Math.max(...courses.slice(1).map(c => c.cumulAfter[index])) * courses[0].cumulBefore);
+            }
+            config.data.datasets.push(dataset1, dataset2);
+        }
     }
 
     const chart = new Chart('canvas_time', config);
 }
-addCourse('{{ course.uid }}');
+const init = async () => {
+    await addCourse('{{ course.uid }}', false);
+    if (location.hash) {
+        const hash = new URLSearchParams(location.hash.slice(1));
+        $('[name=align][value=' + hash.get('align') + ']').attr('checked', true);
+        $('[name=data][value=' + hash.get('data') + ']').attr('checked', true);
+        const promises = [];
+        for (const uid of hash.getAll('course')) {
+            if (uid !== '{{ course.uid }}') {
+                promises.push(addCourse(uid, false).catch(console.error));
+            }
+        }
+        await Promise.all(promises);
+    }
+    draw();
+}
+init().catch(console.error);
+
+
+$('#add_course').change(async function() {
+    try {
+        const uid = $(this).val();
+        await addCourse(uid);
+        draw();
+        setHash();
+    } catch(err) {
+        console.error(err);
+    }
+});
+$('input').click(function() {
+    draw();
+    setHash();
+});
+
 </script>
 
 {% endblock %}

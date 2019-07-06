@@ -23,6 +23,7 @@ from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
+from pytz import timezone
 import json
 import re
 from Levenshtein import distance
@@ -472,14 +473,22 @@ class CourseAdminSite(admin.sites.AdminSite):
         })
 
     def stats(self, request):
+        courses = Course.objects.filter(accreditations__user=request.user)
+        courses_other = Course.objects.none()
+        if request.user.is_superuser:
+            courses_other = Course.objects.exclude(accreditations__user=request.user)
         course = getCourse(request, Course.objects.all())
         return TemplateResponse(request, "admin/stats.html", {
             "course": course,
+            "courses": courses,
+            "courses_other": courses_other,
         })
 
     def get_stats_api(self, request, course_uid):
         course = get_object_or_404(Course, uid=course_uid)
         stats = course.stats()
+        def iso(d):
+            return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
             
         return HttpResponse(json.dumps({
             'stats': {
@@ -492,15 +501,15 @@ class CourseAdminSite(admin.sites.AdminSite):
             'uid': course.uid,
             'course': course.nom,
             'date': {
-                'ouverture': course.date_ouverture.strftime('%c') + '000',
-                'fermeture': course.date_fermeture.strftime('%c') + '000',
-                'augmentation': course.date_augmentation.strftime('%c') + '000',
-                'course': course.date.strftime('%c') + '000',
+                'ouverture': iso(course.date_ouverture),
+                'fermeture': iso(course.date_fermeture - timedelta(days=1)),
+                'augmentation': iso(course.date_augmentation - timedelta(days=1)),
+                'course': iso(course.date),
             },
             'delta': {
                 'ouverture': 0,
-                'fermeture': (course.date_fermeture - course.date_ouverture).days,
-                'augmentation': (course.date_augmentation - course.date_ouverture).days,
+                'fermeture': (course.date_fermeture - course.date_ouverture).days - 1,
+                'augmentation': (course.date_augmentation - course.date_ouverture).days - 1,
                 'course': (course.date - course.date_ouverture).days,
             },
         }), content_type='application/json')
