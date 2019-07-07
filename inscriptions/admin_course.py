@@ -36,7 +36,8 @@ logger = logging.getLogger(__name__)
 ICON_OK = '✅'
 ICON_KO = '🚫'
 ICON_CHECK = '❔'
-ICON_MISSING = '✉'
+ICON_MISSING = '📨'
+ICON_LOCK = '🔒'
 
 def getCourse(request, qs=Course.objects.all()):
     uid = request.COOKIES['course_uid']
@@ -649,7 +650,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
     list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
-    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
+    list_filter = [PaiementCompletFilter, StatusFilter, 'verrou', CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
     inlines = [ EquipierInline ]
 
@@ -660,7 +661,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         (None, { 'description': '<div id="autre"></div>', 'fields': ('verrou', ) }),
 
     )
-    actions = ['send_mails', 'export', 'do_paiement']
+    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -682,14 +683,17 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     nombre2.short_description = u'☺'
 
     def dossier_complet_auto2(self, obj):
+        ret = ''
+        if obj.verrou:
+            ret = ICON_LOCK
         if obj.verifier():
-            return ICON_CHECK
+            return ICON_CHECK + ret
         auto = obj.dossier_complet_auto()
         if auto:
-            return ICON_OK
+            return ICON_OK + ret
         if auto == False:
-            return ICON_KO
-        return ICON_MISSING
+            return ICON_KO + ret
+        return ICON_MISSING + ret
     dossier_complet_auto2.allow_tags = True
     dossier_complet_auto2.short_description = mark_safe(ICON_OK)
 
@@ -874,6 +878,16 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def do_paiement(self, request, queryset=None):
         return HttpResponseRedirect('../paiement/add/?' + '&'.join([ 'equipe_id=%d' % equipe.id for equipe in queryset ]))
     do_paiement.short_description = _(u'Paiement reçu')
+
+    def lock(self, request, queryset=None):
+        queryset.update(verrou=True)
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    lock.short_description = _(u'Verrouiller')
+
+    def unlock(self, request, queryset=None):
+        queryset.update(verrou=False)
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    unlock.short_description = _(u'Déverrouiller')
 
 
 #main_site.disable_action('delete_selected')
