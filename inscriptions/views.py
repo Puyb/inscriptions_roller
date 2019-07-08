@@ -665,11 +665,57 @@ def live_push(request, course_uid):
 def countries(request):
     return HttpResponse(json.dumps([ [k, str(v)] for k, v in COUNTRIES.items()]), content_type='application/json')
 
-class StripeWebhook(Webhook):
-    def post(self, request, *args, **kwargs):
-        course = get_object_or_404(Course, uid=self.kwargs['course_uid'])
-        stripe.api_key = course.stripe_secret
-        return super().post(request, *args, **kwargs)
+@csrf_exempt
+def stripe_webhook(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    stripe.api_key = course.stripe_secret
+    endpoint_secret = 'whsec_jRg0JiFLH9OPeOan10iab6Sycs0tW6Zw'
+
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # invalid payload
+        return HttpResponse('Invalid payload', status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # invalid signature
+        return HttpResponse('Invalid payload', status=400)
+
+    event_dict = event.to_dict()
+    if event_dict['type'] == "payment_intent.succeeded":
+        intent = event_dict['data']['object']
+        paiement = Paiement.objects.get(
+            stripe_intent=intent['id'],
+            equipes__equipe__course=course,
+        )
+        if paiement:
+            paiement.montant = Decimal(intent['amount']) / 100
+            paiement.detail = '\nConfirmed on %s' % datetime.now()
+            paiement.save()
+            paiement.send_equipes_mail()
+            paiement.send_admin_mail()
+        else:
+            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+        # Fulfill the customer's purchase
+    elif event_dict['type'] == "payment_intent.payment_failed":
+        intent = event_dict['data']['object']
+        paiement = Paiement.object.get(
+            stripe_intent=intent['id'],
+            equipes__equipe__course=course,
+        )
+        error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
+        if paiement:
+            paiement.detail = '\nRejected on %s\n%s' % (datetime.now(), error_message)
+            paiement.save()
+        else:
+            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+
+    return HttpResponse('OK')
 
 def stripe_paiement(request, course_uid):
     success = False
@@ -677,8 +723,6 @@ def stripe_paiement(request, course_uid):
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
     if not equipes:
         raise Http404()
-
-    token = request.POST['token']
 
     montant = 0
     frais = Decimal(0)
@@ -689,20 +733,17 @@ def stripe_paiement(request, course_uid):
 
     stripe.api_key = course.stripe_secret
     try: 
-        charge = charges.create(
-            amount=montant + frais,
-            #customer=request.user.customer,
-            source=token,
+        intent = stripe.PaymentIntent.create(
+            amount=int((montant + frais) * 100),
             currency='EUR',
             description=', '.join('%s' % (equipe, ) for equipe in equipes),
-            capture=True,
         )
 
         paiement = Paiement(
             type='stripe',
-            stripe_charge=charge,
             montant=None, # will be updated when confirmation is received from stripe
             montant_frais=frais or None,
+            stripe_intent = intent.id,
         )
         paiement.save()
         frais_equipes = repartition_frais([
@@ -715,12 +756,18 @@ def stripe_paiement(request, course_uid):
                 montant_frais=frais_equipe,
             )
         success = True
-    except Exception as e:
-        logger.exception('error handling stripe webhook')
 
-    return HttpResponse(json.dumps({
-        'success': success,
-    }))
+        return HttpResponse(json.dumps({
+            'success': success,
+            'client_secret': intent.client_secret,
+        }))
+    except Exception as e:
+        logger.exception('error handling stripe intent creation')
+        return HttpResponse(json.dumps({
+            'success': False,
+        }), status=500)
+
+
 
 def equipe_payee(request, course_uid, numero):
     course = get_object_or_404(Course, uid=course_uid)

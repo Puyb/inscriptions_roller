@@ -1286,6 +1286,7 @@ class Paiement(models.Model):
     montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     detail = models.TextField(blank=True)
     stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
+    stripe_intent = models.CharField(max_length=200, blank=True, null=True)
 
     def send_equipes_mail(self):
         if self.montant:
