@@ -439,7 +439,7 @@ class Equipe(models.Model):
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
     extra              = JSONField(default={})
-    verrou             = models.BooleanField(_('Verrouillé'), default=False)
+    verrou             = models.BooleanField(_('Equipe verrouillée (modifiable uniquement par l\'organisateur)'), default=False)
 
     class Meta:
         unique_together = ( ('course', 'numero'), )
