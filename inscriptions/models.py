@@ -27,7 +27,6 @@ import logging
 import traceback
 import pytz
 import uuid
-from pinax.stripe.models import Charge
 from Levenshtein import distance
 
 logger = logging.getLogger(__name__)
@@ -99,6 +98,7 @@ class Course(models.Model):
     frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
     stripe_secret       = models.CharField(_('Stripe Secret Key'), max_length=200, blank=True, null=True)
     stripe_public       = models.CharField(_('Stripe Public Key'), max_length=200, blank=True, null=True)
+    stripe_endpoint_secret = models.CharField(_('Stripe End Point Secret'), max_length=200, blank=True, null=True)
     frais_stripe_inclus = models.BooleanField(_(u'Frais stripe inclus'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
@@ -1285,7 +1285,6 @@ class Paiement(models.Model):
     montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     detail = models.TextField(blank=True)
-    stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
     stripe_intent = models.CharField(max_length=200, blank=True, null=True)
 
     def send_equipes_mail(self):

@@ -42,7 +42,6 @@ urlpatterns += [
     path(r'<str:course_uid>/<int:numero>/', views.form, name='inscriptions_edit'),
     path(r'<str:course_uid>/', views.form, name='inscriptions_create'),
     path(r'<str:course_uid>/ipn/', views.ipn, name='inscriptions_ipn'),
-    path('<str:course_uid>/payments/', include("pinax.stripe.urls")),
     path(r'<str:course_uid>/check_name/', views.check_name, name='inscriptions_check_name'),
     path(r'<str:course_uid>/list/', views.equipe_list, name='inscriptions_list'),
     path(r'<str:course_uid>/resultats/', views.resultats, name='inscriptions_resultats'),

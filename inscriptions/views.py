@@ -26,8 +26,6 @@ from .forms import EquipeForm, EquipierFormset, ContactForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
-from pinax.stripe.actions import charges
-from pinax.stripe.views import Webhook
 import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
@@ -669,7 +667,7 @@ def countries(request):
 def stripe_webhook(request, course_uid):
     course = get_object_or_404(Course, uid=course_uid)
     stripe.api_key = course.stripe_secret
-    endpoint_secret = 'whsec_jRg0JiFLH9OPeOan10iab6Sycs0tW6Zw'
+    endpoint_secret = course.stripe_endpoint_secret
 
     payload = request.body
     sig_header = request.META['HTTP_STRIPE_SIGNATURE']

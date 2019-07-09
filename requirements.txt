@@ -18,7 +18,6 @@ html5lib==1.0.1
 idna==2.6
 jsonfield==2.0.2
 Markdown==2.6.11
-pinax-stripe==4.4.0
 pinax-theme-bootstrap==7.1.1
 python-dateutil==2.7.5
 python-Levenshtein==0.12.0
