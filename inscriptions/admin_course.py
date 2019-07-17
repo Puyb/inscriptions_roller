@@ -10,7 +10,7 @@ from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.db.models import Sum, Value, F, Q, Max, Prefetch, OuterRef, Subquery
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
@@ -69,6 +69,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
+            url(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
             url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
             url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
@@ -193,6 +194,20 @@ class CourseAdminSite(admin.sites.AdminSite):
                     doublons.append([e, e2])
         return TemplateResponse(request, 'admin/anomalies.html', dict(self.each_context(request),
             doublons=doublons,
+            course=course,
+        ))
+
+    def anniversaires(self, request):
+        request.current_app = self.name
+        course = getCourse(request)
+        anniversaires = Equipier.objects.filter(
+            equipe__course=course,
+            date_de_naissance__day=Extract('equipe__course__date', 'day'),
+            date_de_naissance__month=Extract('equipe__course__date', 'month'),
+        )
+
+        return TemplateResponse(request, 'admin/anniversaires.html', dict(self.each_context(request),
+            anniversaires=anniversaires,
             course=course,
         ))
 
