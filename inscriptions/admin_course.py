@@ -505,13 +505,13 @@ class CourseAdminSite(admin.sites.AdminSite):
             'date': {
                 'ouverture': iso(course.date_ouverture),
                 'fermeture': iso(course.date_fermeture - timedelta(days=1)),
-                'augmentation': iso(course.date_augmentation - timedelta(days=1)),
+                'augmentation': iso((course.date_augmentation or course.date_fermeture) - timedelta(days=1)),
                 'course': iso(course.date),
             },
             'delta': {
                 'ouverture': 0,
                 'fermeture': (course.date_fermeture - course.date_ouverture).days - 1,
-                'augmentation': (course.date_augmentation - course.date_ouverture).days - 1,
+                'augmentation': ((course.date_augmentation or course.date_fermeture) - course.date_ouverture).days - 1,
                 'course': (course.date - course.date_ouverture).days,
             },
         }), content_type='application/json')
