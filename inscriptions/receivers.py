@@ -4,7 +4,6 @@ from django.db.models.signals import pre_save, post_save
 
 from django.contrib.auth.models import User, Permission
 from .models import Paiement
-from pinax.stripe.models import Charge
 
 
 @receiver(pre_save, sender=User)
@@ -38,21 +37,3 @@ def handle_user_postsave(sender, instance, **kwargs):
         Permission.objects.get(codename='change_extraquestionchoice'),
         Permission.objects.get(codename='delete_extraquestionchoice'),
     )
-
-@receiver(post_save, sender=Charge)
-def handle_charge_postsave(sender, instance, **kwargs):
-    if not instance.paid:
-        return
-    try:
-        if not instance.refunded:
-            instance.paiement.montant = instance.amount
-            instance.paiement.detail = '\nConfirmed on %s' % datetime.now()
-            instance.paiement.save()
-            instance.paiement.send_equipes_mail()
-            instance.paiement.send_admin_mail()
-        else:
-            instance.paiement.montant = None
-            instance.paiement.detail += '\nRefunded on %s' % datetime.now()
-            instance.paiement.save()
-    except Paiement.DoesNotExist:
-        pass
