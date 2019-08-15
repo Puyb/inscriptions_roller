@@ -83,6 +83,7 @@ def form(request, course_uid, numero=None, code=None):
                     equipier_instance.save()
                 new_instance.prix = reduce(lambda a, b: a + b['prix'], new_instance.facture(), 0)
                 new_instance.save()
+                new_instance.equipier_set.filter(numero__gt=new_instance.nombre).delete()
                 if not instance:
                     try:
                         course.send_mail('inscription', [ new_instance ])
