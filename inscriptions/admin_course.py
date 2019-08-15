@@ -1115,9 +1115,40 @@ class PaiementAdmin(admin.ModelAdmin):
         return qs
     fields = ('montant', 'type', 'date', 'detail', )
     readonly_fields = ('date', )
-    list_display = ('equipes', 'montant', 'type', 'date', )
+    list_display = ('equipes', 'montant', 'montant_frais2', 'type', 'date', )
     list_filter = ('type', PaiementEquipeFilter, )
     inlines = [ PaiementRepartitionInline ]
+    class Media:
+        js = ('custom_admin/paiements.js', )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            url(r'^total/$', self.total, name='paiements_total'),
+        ]
+        return my_urls + urls
+
+    def total(self, request):
+        course = getCourse(request)
+        total = {
+            'montant': Decimal(0),
+            'monntant_frais': Decimal(0),
+        }
+        for obj in course.paiements.filter(**request.GET):
+            total['montant'] += obj.montant
+            total['montant_frais'] += self.montant_frais2(obj.montant_frais)
+        return HttpResponse(json.dumps(total), content_type='application/json')
+
+    def montant_frais2(self, obj):
+        if obj.montant_frais:
+            return obj.montant_frais
+        if not obj.montant:
+            return Decimal(0)
+        if obj.type == 'paypal':
+            return obj.montant * Decimal('0.034') + Decimal('0.25')
+        if obj.type == 'stripe':
+            return obj.montant * Decimal('0.014') + Decimal('0.25')
+        return Decimal(0)
 
     def equipes(self, obj):
         #TODO hide course if t's the current one

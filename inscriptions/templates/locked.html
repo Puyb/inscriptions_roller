@@ -7,9 +7,9 @@
             <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" />
         </div>
         <div class="media-body">
-            <h2>{% trans "Cette inscription est vérouillée. Vous ne pouvez pas la modifier." %}</h2>
+            <h2>{% trans "Cette inscription est verrouillée. Vous ne pouvez pas la modifier." %}</h2>
             {% url "contact" course_uid=COURSE.uid as url_contact %}
-            <p>{% blocktrans %}Si vous avez des modifications à faire, veuillez <a href="{{ url_contact }}">contacter l'oganisateur de la course</a>.{% endblocktrans %}</p>
+            <p>{% blocktrans %}Si vous avez des modifications à faire, veuillez <a href="{{ url_contact }}">contacter l'organisateur de la course</a>.{% endblocktrans %}</p>
         </div>
     </div>
 </div>
