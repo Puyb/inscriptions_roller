@@ -244,3 +244,5 @@ CHANNEL_LAYERS = {
     },
 }
 NYT_CHANNELS_DISABLE = True
+
+CONTACT_MAIL = 'contact@enduroller.fr'
