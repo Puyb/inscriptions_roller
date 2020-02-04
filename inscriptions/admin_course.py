@@ -968,8 +968,10 @@ class CourseAdmin(admin.ModelAdmin):
                     {
                         'code': cat.code,
                         'nom': cat.nom,
-                        'prix1': str(cat.prix1),
-                        'prix2': str(cat.prix2),
+                        'prix_base1': str(cat.prix_base1),
+                        'prix_base2': str(cat.prix_base2),
+                        'prix_equipier1': str(cat.prix_equipier1),
+                        'prix_equipier2': str(cat.prix_equipier2),
                     } for cat in course.categories.all()
                 ],
             }

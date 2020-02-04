@@ -123,11 +123,12 @@
     var AUGMENTATION_PASSED = new Date("{{ COURSE.date_augmentation|date:'c' }}") <= new Date({% if instance %}"{{ instance.date|date:'c' }}"{% endif %}) 
     var CATEGORIES = [
     {% for cat in COURSE.categories.all %}
-        {
+        {_base
             id:    "{{ cat.id }}",
             code:  "{{ cat.code|escapejs }}",
             label: "{{ cat.nom|escapejs }}",
-            prix:  AUGMENTATION_PASSED ? {{ cat.prix2|unlocalize }} : {{ cat.prix1|unlocalize }},
+            prix_base:  AUGMENTATION_PASSED ? {{ cat.prix_base2|unlocalize }} : {{ cat.prix_base1|unlocalize }},
+            prix_equipier:  AUGMENTATION_PASSED ? {{ cat.prix_equipier2|unlocalize }} : {{ cat.prix_equipier1|unlocalize }},
             min_equipiers: {{ cat.min_equipiers }},
             max_equipiers: {{ cat.max_equipiers }},
             min_age: {{ cat.min_age }},

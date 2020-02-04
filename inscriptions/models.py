@@ -327,8 +327,10 @@ class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
-    prix1           = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
-    prix2           = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2)
+    prix_base1      = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
+    prix_equipier1  = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, default=Decimal(0))
+    prix_base2      = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2)
+    prix_equipier2  = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, default=Decimal(0))
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
@@ -340,14 +342,16 @@ class Categorie(models.Model):
     def __str__(self):
         return self.code
 
-    def prix(self, d=None):
+    def prix(self, date=None, nombre=1):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        prix = self.prix1 or 0
+        prix = self.prix_base1 or 0
+        prix_equipier = self.prix_equipier1 or 0
         if self.course.date_augmentation and self.course.date_augmentation <= d:
-            prix = self.prix2 or 0
-        return prix
+            prix = self.prix_base2 or 0
+            prix_equipier = self.prix_equipier2 or 0
+        return prix + nombre * prix_equipier
 
 
 class Ville(models.Model):
@@ -508,8 +512,8 @@ class Equipe(models.Model):
             {
                 'quantite': 1,
                 'label': '%s - %s' % (self.categorie.code, self.categorie.nom),
-                'prix_unitaire': self.categorie.prix(self.date),
-                'prix': self.categorie.prix(self.date),
+                'prix_unitaire': self.categorie.prix(self.date, self.nombre),
+                'prix': self.categorie.prix(self.date, self.nombre),
             },
         ]
         extra_equipiers = self.equipier_set.values('extra')

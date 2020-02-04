@@ -179,6 +179,9 @@ function setup_categories(data) {
                 (c.sexe === ''))
             && c.valid(data);
     });
+    for (const c of actual_categories) {
+        c.prix = c.prix_base + data.nombre * c.prix_equipier;
+    }
     
     if(actual_categories.length === 0) {
         $('#button_prev')[0].click();

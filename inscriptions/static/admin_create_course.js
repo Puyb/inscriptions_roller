@@ -39,8 +39,10 @@ $(function() {
             .append($('<tr>')
                 .append($('<th>').html('Code'))
                 .append($('<td>').html('Nom'))
-                .append($('<td>').html('Prix standard'))
-                .append($('<td>').html('Prix augmenté'))
+                .append($('<td>').html('Prix de base standard'))
+                .append($('<td>').html('Prix par equipier standard'))
+                .append($('<td>').html('Prix de base augmenté'))
+                .append($('<td>').html('Prix par equipier augmenté'))
             );
         previous = JSON.parse($('[name=course_prix]').val() || '{}');
         $place.html($table);
@@ -49,8 +51,10 @@ $(function() {
                 $('<tr>')
                     .append($('<th>').html(c.code))
                     .append($('<td>').html(c.nom))
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix1').val(c.code in previous ? previous[c.code].prix1 : c.prix1)))    
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix2').val(c.code in previous ? previous[c.code].prix2 : c.prix2)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_base1').val(c.code in previous ? previous[c.code].prix_base1 : c.prix_base1)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_equipier1').val(c.code in previous ? previous[c.code].prix_equipier1 : c.prix_equipier1)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_base2').val(c.code in previous ? previous[c.code].prix_base2 : c.prix_base2)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_equipier2').val(c.code in previous ? previous[c.code].prix_equipier2 : c.prix_equipier2)))    
                     .appendTo($table);
             });
         $table.find('input').change(updateField);
