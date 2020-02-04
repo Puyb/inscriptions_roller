@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import os
+import os, json
+from pathlib import Path
 
 
 PACKAGE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -246,3 +247,5 @@ CHANNEL_LAYERS = {
 NYT_CHANNELS_DISABLE = True
 
 CONTACT_MAIL = 'contact@enduroller.fr'
+with (Path(PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+    MODELS_COURSES=json.load(f)

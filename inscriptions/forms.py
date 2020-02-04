@@ -147,7 +147,9 @@ class ChallengeForm(ModelForm):
 
     course_model = CharField(
         label=_("Model de course"),
-        widget=AdminRadioSelect(choices=[])
+        widget=AdminRadioSelect(choices=[
+            (k, v['_name']) for (k, v) in settings.MODELS_COURSES.items()
+        ])
     )
 
     def save(self, commit=True):
