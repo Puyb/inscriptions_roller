@@ -74,7 +74,7 @@ class CourseForm(ModelForm):
 
     course_model = CharField(
         label=_("Model de course"),
-        widget=AdminRadioSelect(choices=[('a', 'b')])
+        widget=AdminRadioSelect(choices=[])
     )
     course_prix = CharField(widget=HiddenInput)
 

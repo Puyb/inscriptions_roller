@@ -53,6 +53,9 @@
     </div>
     <div class="panel-body">
         {% if not instance.paiement_complet %}
+        {% if instance.montant_paiements > 0 %}{% blocktrans with montant_paiements=instance.montant_paiements reste_a_payer=instance.reste_a_payer %}
+        Nous avons reçu votre paiement de {{ montant_paiements }} €. Il vous reste a payer {{ reste_a_payer }} €.
+        {% endblocktrans %}{% endif %}
         {% if COURSE.paypal or COURSE.stripe_public %}
         <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
 
@@ -88,7 +91,7 @@
 
             {% if instance.certificat_manquantes %}
             <div class="clearfix">
-                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux de (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>):{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>) de :{% endblocktrans %}<ul>
                 {% for e in instance.certificat_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}
@@ -98,7 +101,7 @@
 
             {% if instance.autorisation_manquantes %}
             <div class="clearfix">
-                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) de :{% endblocktrans %}<ul>
                 {% for e in instance.autorisation_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}

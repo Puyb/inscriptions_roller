@@ -47,21 +47,23 @@ $(function() {
         previous = JSON.parse($('[name=course_prix]').val() || '{}');
         $place.html($table);
         if(model.categories)
+            model.categories.sort((a,b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
             model.categories.forEach(function(c) {
+                c2 = previous[c.code] || c;
                 $('<tr>')
                     .append($('<th>').html(c.code))
                     .append($('<td>').html(c.nom))
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_base1').val(c.code in previous ? previous[c.code].prix_base1 : c.prix_base1)))    
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_equipier1').val(c.code in previous ? previous[c.code].prix_equipier1 : c.prix_equipier1)))    
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_base2').val(c.code in previous ? previous[c.code].prix_base2 : c.prix_base2)))    
-                    .append($('<td>').append($('<input>').attr('name', c.code + '_prix_equipier2').val(c.code in previous ? previous[c.code].prix_equipier2 : c.prix_equipier2)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '__prix_base1').val(c2.prix_base1)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '__prix_equipier1').val(c2.prix_equipier1)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '__prix_base2').val(c2.prix_base2)))    
+                    .append($('<td>').append($('<input>').attr('name', c.code + '__prix_equipier2').val(c2.prix_equipier2)))    
                     .appendTo($table);
             });
         $table.find('input').change(updateField);
         function updateField() {
             d = {};
             $table.find('input').each(function() {
-                n = this.name.split('_');
+                n = this.name.split('__');
                 d[n[0]] = d[n[0]] || {}
                 d[n[0]][n[1]]= parseFloat(this.value) || 0;
             });

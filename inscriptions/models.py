@@ -338,11 +338,12 @@ class Categorie(models.Model):
     validation      = models.TextField(_(u'Validation function (javascript)'))
     numero_debut    = models.IntegerField(_(u'Numero de dossard (début)'), default=0)
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
+    ajouter_nombre  = models.BooleanField(_(u'Numero de dossard (ajouter le nombre d\'équipiers)'), default=False)
 
     def __str__(self):
         return self.code
 
-    def prix(self, date=None, nombre=1):
+    def prix(self, d=None, nombre=1):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
@@ -353,6 +354,10 @@ class Categorie(models.Model):
             prix_equipier = self.prix_equipier2 or 0
         return prix + nombre * prix_equipier
 
+    def get_prefix(self, nombre):
+        if not self.ajouter_nombre:
+            return 0
+        return int(str(nombre) + '0' * len(str(self.numero_fin)))
 
 class Ville(models.Model):
     lat      = models.DecimalField(max_digits=10, decimal_places=7)
@@ -550,7 +555,8 @@ class Equipe(models.Model):
         
     def save(self, *args, **kwargs):
         if self.id:
-            if not (self.categorie.numero_debut <= self.numero and self.numero <= self.categorie.numero_fin):
+            prefix = self.categorie.get_prefix(self.nombre)
+            if not (self.categorie.numero_debut + prefix <= self.numero <= self.categorie.numero_fin + prefix):
                 self.numero = self.getNumero()
                 try:
                     self.send_mail('changement_numero')
@@ -573,8 +579,9 @@ class Equipe(models.Model):
         self.course.send_mail(nom, [self])
 
     def getNumero(self):
-        start = self.categorie.numero_debut
-        end = self.categorie.numero_fin
+        prefix = self.categorie.get_prefix(self.nombre)
+        start = self.categorie.numero_debut + prefix
+        end = self.categorie.numero_fin + prefix
 
         res = Equipe.objects.raw("""SELECT e1.id as id, e1.numero as numero FROM inscriptions_equipe e1 
                 LEFT JOIN inscriptions_equipe e2 ON e1.numero=e2.numero-1 AND e1.course_id=e2.course_id
