@@ -245,5 +245,7 @@ CHANNEL_LAYERS = {
     },
 }
 NYT_CHANNELS_DISABLE = True
+
+CONTACT_MAIL = 'contact@enduroller.fr'
 with (Path(PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
     MODELS_COURSES=json.load(f)

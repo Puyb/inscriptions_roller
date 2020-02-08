@@ -108,7 +108,7 @@ def form(request, course_uid, numero=None, code=None):
                     subject='Error in form submit',
                     body=text,
                     to=settings.ADMINS,
-                    content_type='text',
+                    content_type='plain',
                 )
         except NoPlaceLeftException as e:
             message = _(u"Désolé, il n'y a plus de place dans cette catégorie")
@@ -469,7 +469,8 @@ Email: %s
 %s""" % (name, from_email, message),
             name=name,
             to=[course.email_contact],
-            reply_to=[from_email,]
+            reply_to=[from_email,],
+            content_type='plain',
         )
         return HttpResponseRedirect('thankyou/')
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
@@ -690,30 +691,30 @@ def stripe_webhook(request, course_uid):
     event_dict = event.to_dict()
     if event_dict['type'] == "payment_intent.succeeded":
         intent = event_dict['data']['object']
-        paiement = Paiement.objects.get(
-            stripe_intent=intent['id'],
-            equipes__equipe__course=course,
-        )
-        if paiement:
+        try:
+            paiement = Paiement.objects.get(
+                stripe_intent=intent['id'],
+                equipes__equipe__course=course,
+            )
             paiement.montant = Decimal(intent['amount']) / 100
             paiement.detail = '\nConfirmed on %s' % datetime.now()
             paiement.save()
             paiement.send_equipes_mail()
             paiement.send_admin_mail()
-        else:
+        except Paiement.DoesNotExist as e:
             logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
         # Fulfill the customer's purchase
     elif event_dict['type'] == "payment_intent.payment_failed":
         intent = event_dict['data']['object']
-        paiement = Paiement.object.get(
-            stripe_intent=intent['id'],
-            equipes__equipe__course=course,
-        )
-        error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
-        if paiement:
+        try:
+            paiement = Paiement.objects.get(
+                stripe_intent=intent['id'],
+                equipes__equipe__course=course,
+            )
+            error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
             paiement.detail = '\nRejected on %s\n%s' % (datetime.now(), error_message)
             paiement.save()
-        else:
+        except Paiement.DoesNotExist as e:
             logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
 
     return HttpResponse('OK')

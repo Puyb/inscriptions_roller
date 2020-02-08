@@ -125,8 +125,8 @@ class Course(models.Model):
                 subject='Nouvelle course %s' % self.nom,
                 body="""%s.
 """ % self.nom,
-                to=settings.ADMINS,
-                content_type='text',
+                to=(('', settings.CONTACT_MAIL), ),
+                content_type='plain',
             )
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             send_mail(
