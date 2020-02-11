@@ -1,7 +1,7 @@
 ## The following requirements were added by pip freeze:
 bleach==2.1.4
 certifi==2018.10.15
-Django==2.0
+Django==2.2.10
 django-appconf==1.0.2
 django-bootstrap-form==3.3
 django-classy-tags==0.8.0
