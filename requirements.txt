@@ -46,3 +46,4 @@ typing==3.6.2
 urllib3==1.22
 wiki==0.4.4
 zope.interface==4.6.0
+setuptools==45
