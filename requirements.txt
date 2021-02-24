@@ -40,7 +40,7 @@ requests==2.20.1
 sorl-thumbnail==12.5.0
 sqlparse==0.2.4
 stripe==2.12.1
-Twisted==18.9.0
+Twisted==20.3.0
 txaio==18.8.1
 typing==3.6.2
 urllib3==1.22
