@@ -1,0 +1,6 @@
+# Remove all dynamic contents created by the app
+**/*.pyc
+_static
+**/node_modules
+inscriptions/uploads
+env

@@ -1,0 +1,21 @@
+services:
+  django:
+    build: ./
+    volumes:
+      - ./:/app
+    environment:
+      ALLOWED_HOSTS: "localhost"
+      ADMIN_EMAILS: "puyb@puyb.net"
+      DEBUG: "True"
+      EMAIL_HOST: "mail.puyb.net"
+      EMAIL_HOST_USER: "puyb@puyb.net"
+      EMAIL_HOST_PASSWORD: "nahitoss"
+      DEFAULT_FROM_MAIL: "puyb@puyb.net"
+      MAPQUEST_API_KEY: "Fmjtd|luub2d6ynd%2C25%3Do5-9u22ha"
+      CONTACT_MAIL: "contact@enduroller.fr"
+      DB_NAME: "inscription_roller2"
+      DB_USER: "puyb"
+      DB_PASSWORD: "nahitoss"
+      DB_HOST: "172.17.0.1"
+    ports:
+      - 29000:29000
