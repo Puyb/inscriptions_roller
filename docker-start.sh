@@ -7,6 +7,7 @@ fi
 ./manage.py migrate
 uwsgi --socket 0.0.0.0:29000 \
                --protocol uwsgi \
+               --enable-threads \
                --processes 4 \
                --wsgi django.wsgi:application
 # /usr/local/bin/uwsgi --emperor docker/uwsgi --gid www-data --logto /var/log/uwsgi/emperor.log
