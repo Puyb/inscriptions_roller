@@ -6,6 +6,7 @@ from pathlib import Path
 PACKAGE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 PROJECT_ROOT = os.path.abspath(os.path.join(PACKAGE_ROOT, os.pardir))
 BASE_DIR = PACKAGE_ROOT
+FILE_UPLOAD_PERMISSIONS = 0o644
 
 DEBUG = False
 
