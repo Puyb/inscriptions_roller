@@ -293,6 +293,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                                             numeros.remove(numero)
 
                                         equipe.tours = g(row, 'tours_column', intOrNone)
+                                        if data.get('categorie_column'):
+                                            try:
+                                                equipe.categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                            except:
+                                                pass
                                         if data.get('time_column'):
                                             try:
                                                 if data['time_format'] == 'HMS':

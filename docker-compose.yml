@@ -4,18 +4,18 @@ services:
     volumes:
       - ./:/app
     environment:
-      ALLOWED_HOSTS: "localhost"
+      ALLOWED_HOSTS: "enduroller.fr,www.enduroller.fr"
       ADMIN_EMAILS: "puyb@puyb.net"
-      DEBUG: "True"
-      EMAIL_HOST: "mail.puyb.net"
-      EMAIL_HOST_USER: "puyb@puyb.net"
-      EMAIL_HOST_PASSWORD: "nahitoss"
-      DEFAULT_FROM_MAIL: "puyb@puyb.net"
+      DEBUG: "False"
+      EMAIL_HOST: "mail.enduroller.fr"
+      EMAIL_HOST_USER: "donotreply@enduroller.fr"
+      EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
+      DEFAULT_FROM_MAIL: "donotreply@enduroller.fr"
       MAPQUEST_API_KEY: "Fmjtd|luub2d6ynd%2C25%3Do5-9u22ha"
       CONTACT_MAIL: "contact@enduroller.fr"
-      DB_NAME: "inscription_roller2"
-      DB_USER: "puyb"
-      DB_PASSWORD: "nahitoss"
+      DB_NAME: "enduroller"
+      DB_USER: "enduroller"
+      DB_PASSWORD: "jirshIgViax0"
       DB_HOST: "172.17.0.1"
     ports:
       - 29000:29000

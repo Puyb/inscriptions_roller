@@ -6,7 +6,22 @@ const { BounceHandler } = require('bounce-handler');
 const Knex = require('knex');
 const inspect = require('util').inspect;
 
-const config = require('./config.json');
+//const config = require('./config.json');
+const config = {
+    imap: {
+        user: process.env.EMAIL_HOST_USER,
+        password: process.env.EMAIL_HOST_PASSWORD,
+        host: process.env.EMAIL_HOST,
+        port: 993,
+        tls: true
+    },
+    database: {
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+    }
+};
 const knex = Knex({
   client: 'pg',
   connection: config.database,
@@ -29,37 +44,41 @@ const getMessage = async msg => {
 const fetchNewMails = async imap => {
     const box = await imap.openBoxAsync('INBOX', false);
     const results = await Promise.fromCallback(cb => imap.seq.search([ 'UNSEEN' ], cb));
-    console.log(results)
+    console.log('results', results)
 
     const toDelete = [];
     const handleMessage = async (msg, seqno) => {
-        try {
-            const bh = new BounceHandler();
-            const buffer = await getMessage(msg);
-            const [bounce] = bh.parse_email(buffer);
-            if (!bounce) return;
+        const bh = new BounceHandler();
+        const buffer = await getMessage(msg);
+        const [bounce] = bh.parse_email(buffer);
+        if (!bounce) return;
 
-            console.log('found bounce', bounce);
-            const ids = await knex('inscriptions_mail')
+        console.log('found bounce', bounce);
+        await knex.transaction(async (trx) => {
+            const ids = await (trx('inscriptions_mail')
                 .where({
                     uid: bounce.messageid,
                     destinataires: [bounce.recipient],
                 }).update({
                     error: bounce.status,
-                }, ['id'])
+                }, ['id']))
             if (ids.length) {
                 toDelete.push(seqno);
             }
-        } catch (err) {
-            console.error(err);
-        }
+            trx.commit();
+        });
     };
 
     await new Promise((resolve, reject) => {
         var f = imap.seq.fetch(results, { bodies: '' });
         const promises = [];
-        f.on('message', (msg, seqno) => {
-            promises.push(handleMessage(msg, seqno));
+        f.on('message', async (msg, seqno) => {
+            try {
+                await promises[promises.length - 1];
+                promises.push(handleMessage(msg, seqno));
+            } catch (err) {
+                console.error('onMessage error', err);
+            }
         });
         f.once('error', reject);
         f.once('end', () => resolve(Promise.all(promises)));
@@ -81,16 +100,16 @@ const imapConnect = (messageHandler) => {
                 try {
                     await fetchNewMails(imap);
                 } catch (err) {
-                    console.error(err);
+                    console.error('onMail error', err);
                 }
             });
         } catch (err) {
-            console.error(err);
+            console.error('imapConnect error', err);
         }
     });
 
     imap.once('error', function(err) {
-        console.log(err);
+        console.log('imap error', err);
     });
 
     imap.once('end', function() {

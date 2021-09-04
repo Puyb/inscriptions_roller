@@ -546,16 +546,17 @@ class Equipe(models.Model):
         
     def save(self, *args, **kwargs):
         if self.id:
-            if not (self.categorie.numero_debut <= self.numero and self.numero <= self.categorie.numero_fin):
-                self.numero = self.getNumero()
-                try:
-                    self.send_mail('changement_numero')
-                except Exception as e:
-                    traceback.print_exc()
-                try:
-                    self.send_mail('changement_numero_admin')
-                except Exception as e:
-                    traceback.print_exc()
+            if not self.verrou and self.course.date >= date.today():
+                if not (self.categorie.numero_debut <= self.numero and self.numero <= self.categorie.numero_fin):
+                    self.numero = self.getNumero()
+                    try:
+                        self.send_mail('changement_numero')
+                    except Exception as e:
+                        traceback.print_exc()
+                    try:
+                        self.send_mail('changement_numero_admin')
+                    except Exception as e:
+                        traceback.print_exc()
         else:
             if not self.numero:
                 self.numero = self.getNumero()

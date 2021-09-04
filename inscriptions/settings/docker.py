@@ -1,30 +1,27 @@
 from .default import *
 import os
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 ADMINS = (
-    (environ.get('EMAIL_ADMIN', ''), environ.EMAIL_ADMIN),
+    ('', mail) for mail in os.environ.get('EMAIL_ADMIN', '').split(',') if mail
 )
 
-DEBUG = environ.get('DEBUG', '') == 'True'
+DEBUG = os.environ.get('DEBUG', '') == 'True'
 TEMPLATES[0]['OPTIONS']['debug'] = DEBUG
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = environ.get('EMAIL_HOST', '')
-EMAIL_PORT = environ.get('EMAIL_PORT', '')
-EMAIL_HOST_USER = environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_MAIL = environ.get('DEFAULT_FROM_MAIL', '')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '')
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', '')
 
-IMAP_HOST = environ.get('IMAP_HOST', '')
-IMAP_PORT = environ.get('IMAP_PORT', '')
-IMAP_USER = environ.get('IMAP_USER', '')
-IMAP_PASSWORD = environ.get('IMAP_PASSWORD', '')
+MAPQUEST_API_KEY = os.environ.get('MAPQUEST_API_KEY', '')
 
-MAPQUEST_API_KEY = environ.get('MAPQUEST_API_KEY', '')
-
-CONTACT_MAIL = environ.get('CONTACT_MAIL', '')
+CONTACT_MAIL = os.environ.get('CONTACT_MAIL', '')
 
 if DEBUG:
     INSTALLED_APPS.append('debug_toolbar')
@@ -35,9 +32,9 @@ if DEBUG:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": environ.get('DB_NAME', ''),
-        "USER": environ.get('DB_USER', ''),
-        "PASSWORD": environ.get('DB_PASSWORD', ''),
-        "HOST": environ.get('DB_HOST', ''),
+        "NAME": os.environ.get('DB_NAME', ''),
+        "USER": os.environ.get('DB_USER', ''),
+        "PASSWORD": os.environ.get('DB_PASSWORD', ''),
+        "HOST": os.environ.get('DB_HOST', ''),
     }
 }
