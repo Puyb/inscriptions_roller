@@ -104,6 +104,7 @@ class Course(models.Model):
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
+    texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
 
     @property
     def ouverte(self):
@@ -116,6 +117,10 @@ class Course(models.Model):
     @property
     def dernier_jour_inscription(self):
         return self.date_fermeture - timedelta(days=1)
+
+    @property
+    def dernier_jour_tarif_reduit(self):
+        return self.date_augmentation - timedelta(days=1)
 
     def save(self, *args, **kwargs):
         if not self.uid:
@@ -224,7 +229,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 if equipe.gerant_ville2.pays == 'FR':
                     keys['pays'] = equipe.gerant_ville2.region
 
-                    
+
             stats['equipes'] = 1
             stats['equipiers'] = equipe.equipiers_count
             stats['hommes'] = equipe.hommes_count
@@ -336,6 +341,7 @@ class Categorie(models.Model):
     validation      = models.TextField(_(u'Validation function (javascript)'))
     numero_debut    = models.IntegerField(_(u'Numero de dossard (début)'), default=0)
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
+    description     = models.TextField(_('Description'), blank=True, null=True)
 
     def __str__(self):
         return self.code
@@ -543,7 +549,7 @@ class Equipe(models.Model):
                             'prix': price * count,
                         })
         return lines
-        
+
     def save(self, *args, **kwargs):
         if self.id:
             if not self.verrou and self.course.date >= date.today():
@@ -649,7 +655,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     valide                 = models.BooleanField(_(u'Valide'), editable=False)
     erreur                 = models.BooleanField(_(u'Erreur'), editable=False)
     homme                  = models.BooleanField(_(u'Homme'), editable=False)
-    
+
     def age(self, today=None):
         if not today:
             today = self.equipe.course.date
@@ -785,7 +791,7 @@ class ExtraQuestionChoice(models.Model):
         if price:
             return '%s (%s€)' % (self.label, price)
         return self.label
-    
+
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
@@ -838,7 +844,7 @@ class TemplateMail(models.Model):
                 if isinstance(instance, Equipe):
                     for equipier in instance.equipier_set.filter(numero__lte=F('equipe__nombre')):
                         dests.add(equipier.email)
-            
+
             context = Context({
                 "instance": instance,
                 'ROOT_URL': 'https://%s' % Site.objects.get_current(),
@@ -1020,7 +1026,7 @@ class Challenge(models.Model):
             Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
             d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
         )
-        
+
         annotate = {}
         annotate.update({
             'equipiers__nom%s' % e.numero: CompareNames('equipiers__nom', Value(e.nom))
@@ -1197,7 +1203,7 @@ class ParticipationChallenge(models.Model):
 
     def __str__(self):
         return 'Participation %s %s' % (self.challenge, self.nom)
-        
+
 
 class EquipeChallenge(models.Model):
     equipe = models.ForeignKey(Equipe, related_name='challenges', on_delete=models.CASCADE)

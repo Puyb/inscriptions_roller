@@ -3,6 +3,9 @@
 {% load l10n %}
 {% load bootstrap %}
 {% block body %}
+{% with page="contact" %}
+{% include "_course_header.html" %}
+{% endwith %}
 <h1>{% trans "Contactez nous" %}</h1>
 <form class="form-horizontal" method="post">
     <div class="panel panel-default">
