@@ -612,7 +612,7 @@ class Equipe(models.Model):
 
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
-Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Si vous avez un certificat de moins de trois ans, vous pouvez remplire le questionnaire %(link_cerfa)s et si vous répondez non à toutes les questions, cocher la case ci dessous. Sinon, votre certificat doit avoir moins d'un an au moment de la course.""")
+Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Votre certificat doit avoir moins d'un an au moment de la course.""")
     LICENCE_HELP = _("""Si vous le pouvez, scannez la licence et ajoutez la en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier.""")
     AUTORISATION_HELP = _("""Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).
@@ -638,7 +638,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    cerfa_valide      = models.BooleanField(_('Cerfa QS-SPORT'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
 

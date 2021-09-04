@@ -314,14 +314,12 @@ $(function() {
         var $formGroup = $this.parents('.form-group');
         var id = this.id.split('-').slice(0, 2).join('-');
         $formGroup.hide() // num_licence
-            .next().hide() // piece_jointe
-            .next().hide(); // cerfa
+            .next().hide(); // piece_jointe
         $formGroup
             .next().find('.certificat, .licence').hide() // piece_jointe
         var handler = function() {
             $formGroup.hide() // num_licence
-                .next().hide() // piece_jointe
-                .next().hide(); // cerfa
+                .next().hide(); // piece_jointe
             $formGroup
                 .next().find('.certificat, .licence').hide() // piece_jointe
             if($('#' + id + '-justificatif_1')[0].checked) {

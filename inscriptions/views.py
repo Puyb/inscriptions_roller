@@ -129,18 +129,16 @@ def form(request, course_uid, numero=None, code=None):
         link = '<a href="%s" target="_blank">%s</a>'
         autorisation_link = link % (reverse('inscriptions_model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
         certificat_link   = link % (reverse('inscriptions_model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
-        cerfa_link        = link % ('https://www.formulaires.modernisation.gouv.fr/gf/cerfa_15699.do', _("QS-SPORT Cerfa N°15699*01"))
 
         for equipier_form in equipier_formset:
             equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
             equipier_form.fields['piece_jointe'].help_text = '<span class="certificat">%s</span><span class="licence">%s</span>' % (
-                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link, 'link_cerfa': cerfa_link },
+                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link },
                 _(Equipier.LICENCE_HELP),
             )
-            equipier_form.fields['cerfa_valide'].label = _('Je certifie que cette personne a renseigné le questionnaire de santé QS-SPORT Cerfa N°15699*01 et a répondu par la négative à l’ensemble des questions')
 
-    nombres_par_tranche = { e['range']: e['count'] 
+    nombres_par_tranche = { e['range']: e['count']
             for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
@@ -150,7 +148,7 @@ def form(request, course_uid, numero=None, code=None):
                 )).values('range').annotate(count=Count('numero'))
         }
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
-    
+
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
