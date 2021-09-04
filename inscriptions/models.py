@@ -23,6 +23,7 @@ from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
+from django_resized import ResizedImageField
 import logging
 import traceback
 import pytz
@@ -89,7 +90,7 @@ class Course(models.Model):
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
     email_contact       = models.EmailField(_(u'Email contact'))
-    logo                = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
+    logo                = ResizedImageField(_('Logo'), size=[200,200], upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
