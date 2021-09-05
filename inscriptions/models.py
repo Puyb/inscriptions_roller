@@ -68,6 +68,46 @@ DESTINATAIRE_CHOICES = (
     ('Tous', _(u'Tous')),
 )
 
+REGION_NORMALISATION = {
+    'Alsace': 'Grand-Est',
+    'Alsace-Champagne-Ardenne-Lorraine': 'Grand-Est',
+    'Champagne-Ardenne': 'Grand-Est',
+    'Lorraine': 'Grand-est',
+    'Grand Est': 'Grand-Est',
+    'Aquitaine': 'Nouvelle-Aquitaine',
+    'Aquitaine-Limousin-Poitou-Charentes': 'Nouvelle-Aquitaine',
+    'Limousin': 'Nouvelle-Aquitaine',
+    'Poitou': 'Nouvelle-Aquitaine',
+    'Charentes': 'Nouvelle-Aquitaine',
+    'New Aquitaine': 'Nouvelle-Aquitaine',
+    'Auvergne': 'Auvergne-Rhône-Alpes',
+    'Rhône-Alpes': 'Auvergne-Rhône-Alpes',
+    'Bourgogne': 'Bourgogne-Franche-Comté',
+    'Franche-Comté': 'Bourgogne-Franche-Comté',
+    'Burgundy': 'Bourgogne-Franche-Comté',
+    'Languedoc': 'Occitanie',
+    'Roussillon': 'Occitanie',
+    'Languedoc-Roussillon': 'Occitanie',
+    'Occitania': 'Occitanie',
+    'Pays-de-la-Loire': 'Centre-Val de Loire',
+    'Pays de la Loire': 'Centre-Val de Loire',
+    'Centre': 'Centre-Val de Loire',
+    'Centre-Loire Valley': 'Centre-Val de Loire',
+    'Brittany': 'Bretagne',
+    'Corsica': 'Corse',
+    'Ile-de-France': 'Île-de-France',
+    'Lower Normandy': 'Normandie',
+    'Upper Normandy': 'Normandie',
+    'Normandy': 'Normandie',
+    'Rouen': 'Normandie',
+    'Province apostolique de Normandie': 'Normandie',
+    "Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte-d'Azur",
+    'Picardy': 'Hauts-de-France',
+    'Picardie': 'Hauts-de-France',
+    'Nord-Pas-de-Calais': 'Hauts-de-France',
+    'Nord-Pas-de-Calais and Picardy': 'Hauts-de-France',
+}
+
 #class Chalenge(model.Model):
 #    nom = models.CharField(_('Nom'), max=200)
 
@@ -228,7 +268,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             if equipe.gerant_ville2:
                 keys['pays'] = equipe.gerant_ville2.pays
                 if equipe.gerant_ville2.pays == 'FR':
-                    keys['pays'] = equipe.gerant_ville2.region
+                    keys['pays'] = REGION_NORMALISATION.get(equipe.gerant_ville2.region, equipe.gerant_ville2.region)
 
 
             stats['equipes'] = 1
@@ -278,7 +318,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 'lat': float(ville.lat),
                 'lng': float(ville.lng),
                 'count': ville.count,
-            } for ville in Ville.objects.filter(equipier__equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
+            } for ville in Ville.objects.filter(equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
             if ville.count > 0 ]
         sorted(result['villes'], key=itemgetter('nom'))
         sorted(result['villes'], key=itemgetter('count'), reverse=True)

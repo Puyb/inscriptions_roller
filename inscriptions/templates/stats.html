@@ -399,7 +399,7 @@
         }
         //g.labels[d - 2] = (d - 1) * tranche;
         g.labels[d - 1] = i * tranche;
-        g.data('% / km', data.map(function(i) { return i / {{ stats.course.equipiers }} * 100; }));
+        g.data('Pourcentage de particpants en fonction de la distance', data.map(function(i) { return i / {{ stats.course.equipiers }} * 100; }));
         g.draw();
     </script>
     {% if user.is_staff %}

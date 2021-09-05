@@ -353,10 +353,10 @@ def _list(course_uid, equipes, request, template, sorts, show_stats=True):
                 equipes = equipes.filter(position_categorie__lte=top)
             else:
                 equipes = equipes.filter(position_generale__lte=top)
-        except ValueError as e:
+        except ValueError:
             pass
 
-    user_is_staff = (request.user and request.user.is_staff and 
+    user_is_staff = (request.user and request.user.is_staff and
         request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
     stats = None
     if show_stats:
