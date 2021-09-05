@@ -33,7 +33,7 @@
                         {% if categorie.min_equipiers == categorie.max_equipiers %}
                         {{ categorie.min_equipiers }} {% if categorie.min_equipiers < 2 %}{% trans "équipier" %}{% else %}{% trans "équipiers" %}{% endif %}
                         {% else %}
-                        {% blocktrans with min=categorie.min_equipiers max=categories.max_equipiers %}De {{ min } à {{ max }} équipiers{% endblocktrans %}
+                        {% blocktrans with min=categorie.min_equipiers max=categorie.max_equipiers %}De {{ min }} à {{ max }} équipiers{% endblocktrans %}
                         {% endif %}<br />
                         {% trans "Sexe :" %} {{ mixite_choices|get:categorie.sexe }}<br />
                         {% blocktrans with age=categorie.min_age %}A partir de {{ age }} ans{% endblocktrans %}<br />
