@@ -68,6 +68,7 @@ class CourseForm(ModelForm):
             'url': _("""Adresse internet pointant vers le site présentant la course"""),
             'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
             'email_contact': _("""Email utilisée pour envoyer les emails"""),
+            'texte_accueil': _("""Ce texte sera affiché sur la page d'inscription. Vous pouvez l'utiliser si vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas mettre de message."""),
         }
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_course.js', )

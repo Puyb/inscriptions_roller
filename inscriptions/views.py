@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -129,18 +129,16 @@ def form(request, course_uid, numero=None, code=None):
         link = '<a href="%s" target="_blank">%s</a>'
         autorisation_link = link % (reverse('inscriptions_model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
         certificat_link   = link % (reverse('inscriptions_model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
-        cerfa_link        = link % ('https://www.formulaires.modernisation.gouv.fr/gf/cerfa_15699.do', _("QS-SPORT Cerfa N°15699*01"))
 
         for equipier_form in equipier_formset:
             equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
             equipier_form.fields['piece_jointe'].help_text = '<span class="certificat">%s</span><span class="licence">%s</span>' % (
-                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link, 'link_cerfa': cerfa_link },
+                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link },
                 _(Equipier.LICENCE_HELP),
             )
-            equipier_form.fields['cerfa_valide'].label = _('Je certifie que cette personne a renseigné le questionnaire de santé QS-SPORT Cerfa N°15699*01 et a répondu par la négative à l’ensemble des questions')
 
-    nombres_par_tranche = { e['range']: e['count'] 
+    nombres_par_tranche = { e['range']: e['count']
             for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
@@ -150,7 +148,7 @@ def form(request, course_uid, numero=None, code=None):
                 )).values('range').annotate(count=Count('numero'))
         }
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
-    
+
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
@@ -355,10 +353,10 @@ def _list(course_uid, equipes, request, template, sorts, show_stats=True):
                 equipes = equipes.filter(position_categorie__lte=top)
             else:
                 equipes = equipes.filter(position_generale__lte=top)
-        except ValueError as e:
+        except ValueError:
             pass
 
-    user_is_staff = (request.user and request.user.is_staff and 
+    user_is_staff = (request.user and request.user.is_staff and
         request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
     stats = None
     if show_stats:
@@ -478,6 +476,15 @@ Email: %s
 def contact_done(request, course_uid):
     course = get_object_or_404(Course, uid=course_uid)
     return TemplateResponse(request, 'contact_done.html', {'course': course})
+
+def categories(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    categories = course.categories.annotate(nb=(F('min_equipiers') + F('max_equipiers')) / 2).order_by('nb', 'code');
+    return TemplateResponse(request, 'categories.html', {
+        'course': course,
+        'categories': categories,
+        'mixite_choices': dict(MIXITE_CHOICES),
+    })
 
 def facture(request, course_uid, numero):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)

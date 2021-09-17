@@ -23,6 +23,7 @@ from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
+from django_resized import ResizedImageField
 import logging
 import traceback
 import pytz
@@ -67,6 +68,46 @@ DESTINATAIRE_CHOICES = (
     ('Tous', _(u'Tous')),
 )
 
+REGION_NORMALISATION = {
+    'Alsace': 'Grand-Est',
+    'Alsace-Champagne-Ardenne-Lorraine': 'Grand-Est',
+    'Champagne-Ardenne': 'Grand-Est',
+    'Lorraine': 'Grand-est',
+    'Grand Est': 'Grand-Est',
+    'Aquitaine': 'Nouvelle-Aquitaine',
+    'Aquitaine-Limousin-Poitou-Charentes': 'Nouvelle-Aquitaine',
+    'Limousin': 'Nouvelle-Aquitaine',
+    'Poitou': 'Nouvelle-Aquitaine',
+    'Charentes': 'Nouvelle-Aquitaine',
+    'New Aquitaine': 'Nouvelle-Aquitaine',
+    'Auvergne': 'Auvergne-Rhône-Alpes',
+    'Rhône-Alpes': 'Auvergne-Rhône-Alpes',
+    'Bourgogne': 'Bourgogne-Franche-Comté',
+    'Franche-Comté': 'Bourgogne-Franche-Comté',
+    'Burgundy': 'Bourgogne-Franche-Comté',
+    'Languedoc': 'Occitanie',
+    'Roussillon': 'Occitanie',
+    'Languedoc-Roussillon': 'Occitanie',
+    'Occitania': 'Occitanie',
+    'Pays-de-la-Loire': 'Centre-Val de Loire',
+    'Pays de la Loire': 'Centre-Val de Loire',
+    'Centre': 'Centre-Val de Loire',
+    'Centre-Loire Valley': 'Centre-Val de Loire',
+    'Brittany': 'Bretagne',
+    'Corsica': 'Corse',
+    'Ile-de-France': 'Île-de-France',
+    'Lower Normandy': 'Normandie',
+    'Upper Normandy': 'Normandie',
+    'Normandy': 'Normandie',
+    'Rouen': 'Normandie',
+    'Province apostolique de Normandie': 'Normandie',
+    "Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte-d'Azur",
+    'Picardy': 'Hauts-de-France',
+    'Picardie': 'Hauts-de-France',
+    'Nord-Pas-de-Calais': 'Hauts-de-France',
+    'Nord-Pas-de-Calais and Picardy': 'Hauts-de-France',
+}
+
 #class Chalenge(model.Model):
 #    nom = models.CharField(_('Nom'), max=200)
 
@@ -89,7 +130,7 @@ class Course(models.Model):
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
     email_contact       = models.EmailField(_(u'Email contact'))
-    logo                = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
+    logo                = ResizedImageField(_('Logo'), size=[200,200], upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
@@ -104,6 +145,7 @@ class Course(models.Model):
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
+    texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
 
     @property
     def ouverte(self):
@@ -116,6 +158,10 @@ class Course(models.Model):
     @property
     def dernier_jour_inscription(self):
         return self.date_fermeture - timedelta(days=1)
+
+    @property
+    def dernier_jour_tarif_reduit(self):
+        return self.date_augmentation - timedelta(days=1)
 
     def save(self, *args, **kwargs):
         if not self.uid:
@@ -222,9 +268,9 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             if equipe.gerant_ville2:
                 keys['pays'] = equipe.gerant_ville2.pays
                 if equipe.gerant_ville2.pays == 'FR':
-                    keys['pays'] = equipe.gerant_ville2.region
+                    keys['pays'] = REGION_NORMALISATION.get(equipe.gerant_ville2.region, equipe.gerant_ville2.region)
 
-                    
+
             stats['equipes'] = 1
             stats['equipiers'] = equipe.equipiers_count
             stats['hommes'] = equipe.hommes_count
@@ -272,7 +318,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 'lat': float(ville.lat),
                 'lng': float(ville.lng),
                 'count': ville.count,
-            } for ville in Ville.objects.filter(equipier__equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
+            } for ville in Ville.objects.filter(equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
             if ville.count > 0 ]
         sorted(result['villes'], key=itemgetter('nom'))
         sorted(result['villes'], key=itemgetter('count'), reverse=True)
@@ -336,6 +382,7 @@ class Categorie(models.Model):
     validation      = models.TextField(_(u'Validation function (javascript)'))
     numero_debut    = models.IntegerField(_(u'Numero de dossard (début)'), default=0)
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
+    description     = models.TextField(_('Description'), blank=True, null=True)
 
     def __str__(self):
         return self.code
@@ -543,7 +590,7 @@ class Equipe(models.Model):
                             'prix': price * count,
                         })
         return lines
-        
+
     def save(self, *args, **kwargs):
         if self.id:
             if not self.verrou and self.course.date >= date.today():
@@ -612,7 +659,7 @@ class Equipe(models.Model):
 
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
-Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Si vous avez un certificat de moins de trois ans, vous pouvez remplire le questionnaire %(link_cerfa)s et si vous répondez non à toutes les questions, cocher la case ci dessous. Sinon, votre certificat doit avoir moins d'un an au moment de la course.""")
+Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Votre certificat doit avoir moins d'un an au moment de la course.""")
     LICENCE_HELP = _("""Si vous le pouvez, scannez la licence et ajoutez la en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier.""")
     AUTORISATION_HELP = _("""Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).
@@ -638,7 +685,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    cerfa_valide      = models.BooleanField(_('Cerfa QS-SPORT'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
 
@@ -650,7 +696,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     valide                 = models.BooleanField(_(u'Valide'), editable=False)
     erreur                 = models.BooleanField(_(u'Erreur'), editable=False)
     homme                  = models.BooleanField(_(u'Homme'), editable=False)
-    
+
     def age(self, today=None):
         if not today:
             today = self.equipe.course.date
@@ -786,7 +832,7 @@ class ExtraQuestionChoice(models.Model):
         if price:
             return '%s (%s€)' % (self.label, price)
         return self.label
-    
+
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
@@ -839,7 +885,7 @@ class TemplateMail(models.Model):
                 if isinstance(instance, Equipe):
                     for equipier in instance.equipier_set.filter(numero__lte=F('equipe__nombre')):
                         dests.add(equipier.email)
-            
+
             context = Context({
                 "instance": instance,
                 'ROOT_URL': 'https://%s' % Site.objects.get_current(),
@@ -1021,7 +1067,7 @@ class Challenge(models.Model):
             Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
             d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
         )
-        
+
         annotate = {}
         annotate.update({
             'equipiers__nom%s' % e.numero: CompareNames('equipiers__nom', Value(e.nom))
@@ -1198,7 +1244,7 @@ class ParticipationChallenge(models.Model):
 
     def __str__(self):
         return 'Participation %s %s' % (self.challenge, self.nom)
-        
+
 
 class EquipeChallenge(models.Model):
     equipe = models.ForeignKey(Equipe, related_name='challenges', on_delete=models.CASCADE)

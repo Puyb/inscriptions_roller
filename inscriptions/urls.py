@@ -52,6 +52,7 @@ urlpatterns += [
     path(r'<str:course_uid>/stats/<str:course_uid2>', views.stats_compare, name='inscriptions_stats_compare'),
     path(r'<str:course_uid>/contact/', views.contact, name='contact'),
     path(r'<str:course_uid>/contact/thankyou/', views.contact_done, name='contact_done'),
+    path(r'<str:course_uid>/categories/', views.categories, name='categories'),
     path(r'<str:course_uid>/challenges/categories/', views.find_challenges_categories, name='inscriptions_find_challenges_categories'),
     path(r'<str:course_uid>/model/certificat/', views.model_certificat, name='inscriptions_model_certificat'),
     path(r'<str:course_uid>/model/autorisation/', TemplateView.as_view(template_name='autorisation.html'), name='inscriptions_model_autorisation'),
