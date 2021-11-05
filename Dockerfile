@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app/
 
 RUN pip install setuptools==45
-RUN pip install psycopg2 uwsgi
+RUN pip install psycopg2==2.8.6 uwsgi
 
 RUN mkdir -p /var/log/uwsgi /shared/static /shared/media
 
