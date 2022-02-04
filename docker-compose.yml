@@ -3,10 +3,12 @@ services:
     build: ./
     volumes:
       - ./:/app
+    ports:
+      - 8000:29000
     environment:
-      ALLOWED_HOSTS: "enduroller.fr,www.enduroller.fr"
+      ALLOWED_HOSTS: "enduroller.fr,www.enduroller.fr,localhost"
       ADMIN_EMAILS: "puyb@puyb.net"
-      DEBUG: "False"
+      DEBUG: "True"
       EMAIL_HOST: "mail.enduroller.fr"
       EMAIL_HOST_USER: "donotreply@enduroller.fr"
       EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
@@ -16,6 +18,38 @@ services:
       DB_NAME: "enduroller"
       DB_USER: "enduroller"
       DB_PASSWORD: "jirshIgViax0"
-      DB_HOST: "172.17.0.1"
-    ports:
-      - 29000:29000
+      DB_HOST: "db"
+      REDIS_HOST: "redis"
+      DEV_SERVER: "True"
+      LOCAL_SETTINGS: ".docker"
+    depends_on:
+      - db
+      - redis
+
+  bounce:
+    image: node
+    command: /srv/app/start-bounce.sh
+    volumes:
+      - ./:/srv/app
+    environment:
+      EMAIL_HOST: "mail.enduroller.fr"
+      EMAIL_HOST_USER: "donotreply@enduroller.fr"
+      EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
+      DB_NAME: "enduroller"
+      DB_USER: "enduroller"
+      DB_PASSWORD: "jirshIgViax0"
+      DB_HOST: "db"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: "enduroller"
+      POSTGRES_USER: "enduroller"
+      POSTGRES_PASSWORD: "jirshIgViax0"
+
+  redis:
+    image: redis
+
