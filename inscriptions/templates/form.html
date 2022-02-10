@@ -152,9 +152,9 @@
     });
     {% endif %}
     var COURSE = {
-        YEAR: {{ YEAR }},
-        MONTH: {{ MONTH }},
-        DAY: {{ DAY }},
+        YEAR_AGE: {{ COURSE.date_age.year|default:course.date.year }},
+        MONTH_AGE: {{ COURSE.date_age.month|default:course.date.month }},
+        DAY_AGE: {{ COURSE.date_age.day|default:course.date.day }},
         CLOSE_DATE: new Date({{ CLOSE_YEAR }},{{ CLOSE_MONTH }}-1,{{ CLOSE_DAY }}),
         MIN_AGE: {{ MIN_AGE|default:0 }},
         EQUIPIERS_COUNT: {{ equipiers_count }}{% if instance %} - {{ instance.nombre }}{% endif %},

@@ -134,6 +134,7 @@ class Course(models.Model):
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
+    date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des sage. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
     paypal              = models.EmailField(_(u'Adresse paypal'), blank=True)
     frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
@@ -699,7 +700,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
 
     def age(self, today=None):
         if not today:
-            today = self.equipe.course.date
+            today = self.equipe.course.date_age or self.equipe.course.date
         try: 
             birthday = self.date_de_naissance.replace(year=today.year)
         except ValueError: # raised when birth date is February 29 and the current year is not a leap year
