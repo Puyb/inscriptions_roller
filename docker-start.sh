@@ -6,6 +6,7 @@ if [ "$DEBUG" = "True" ]; then
     pip install -r requirements_dev.txt
 fi
 ./manage.py migrate
+./manage.py collectstatic --no-input
 
 bash -c 'while true; do ./manage.py runworker mail; done' &
 #bash -c 'while true; do ./start-bounce.sh; done' &
