@@ -130,7 +130,7 @@ class Course(models.Model):
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
     email_contact       = models.EmailField(_(u'Email contact'))
-    logo                = ResizedImageField(_('Logo'), size=[200,200], upload_to='logo', null=True, blank=True)
+    logo                = ResizedImageField(_('Logo'), size=[600,600], upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
