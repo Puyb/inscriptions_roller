@@ -11,7 +11,7 @@
   "dependencies": {
     "babel-core": "^6.0.14",
     "babel-loader": "^6.0.0",
-    "bootstrap": "^3.3.5",
+    "bootstrap": "^3.4.1",
     "chart.js": "^2.8.0",
     "chartjs-plugin-annotation": "^0.5.7",
     "css-loader": "^0.21.0",
