@@ -20,6 +20,7 @@ else
           --protocol uwsgi \
           --enable-threads \
           --processes 4 \
+          -b 32768 \
           --wsgi inscriptions.wsgi:application
     # /usr/local/bin/uwsgi --emperor docker/uwsgi --gid www-data --logto /var/log/uwsgi/emperor.log
 fi
