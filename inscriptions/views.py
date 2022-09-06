@@ -473,7 +473,7 @@ Email: %s
         return HttpResponseRedirect('thankyou/')
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
-def contact_done(request, course_uid):
+def contact_done(request, course_uid, numero=None):
     course = get_object_or_404(Course, uid=course_uid)
     return TemplateResponse(request, 'contact_done.html', {'course': course})
 
@@ -486,9 +486,20 @@ def categories(request, course_uid):
         'mixite_choices': dict(MIXITE_CHOICES),
     })
 
-def facture(request, course_uid, numero):
+def facture(request, course_uid, numero, code=None):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
     if not equipe.paiement_complet():
+        raise Http404()
+    if not code:
+        if request.method == 'POST':
+            equipe.send_mail('paiement')
+            return HttpResponseRedirect('thankyou/')
+
+        return TemplateResponse(request, 'facture_new_url.html', {
+            "instance": equipe,
+        })
+
+    if equipe.password != code:
         raise Http404()
 
     if not equipe.date_facture:

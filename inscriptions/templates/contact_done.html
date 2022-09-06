@@ -4,6 +4,6 @@
 {% load bootstrap %}
 {% block body %}
 <h1>{% trans 'Votre message a été envoyé' %}</h1>
-<script>setTimeout(function() { location.href='../../'; }, 2000);</script>
+<script>setTimeout(function() { location.href=location.path.split('/', 2).join('/'); }, 2000);</script>
 {% endblock %}
 

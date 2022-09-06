@@ -551,6 +551,10 @@ class Equipe(models.Model):
         montant += self.paiements_en_attente
         return montant >= self.prix
 
+    @property
+    def ordered_paiements(self):
+        return self.paiements.select_related('paiement').order_by('paiement__date')
+
     def facture(self):
         lines = [
             {
