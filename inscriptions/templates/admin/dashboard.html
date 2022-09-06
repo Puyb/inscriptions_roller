@@ -134,7 +134,8 @@ location.href = "choose/";
                     Total
                 </th>
                 <td>
-                    {{ stats.course.prix|floatformat:2 }}€
+                    {{ stats.course.prix|floatformat:2 }}€ /
+                    {{ stats.course.equipiers }} personnes
                 </td>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
