@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-09-17 19:38+0200\n"
-"PO-Revision-Date: 2015-04-15 00:58+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"PO-Revision-Date: 2022-06-06 18:30+0200\n"
+"Last-Translator: Puyb <puyb@puyb.net>\n"
+"Language-Team: English\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: inscriptions/static/form.js:93
 msgid "Ce nom d'équipe est déjà utilisé !"
-msgstr "This team name is not avilable!"
+msgstr "This team name is not available!"
 
 #: inscriptions/static/form.js:121
 #, fuzzy
@@ -36,6 +36,8 @@ msgid ""
 "Désolé, la course est complete, vous ne pouvez pas inscrire une équipe avec "
 "autant d'équipiers."
 msgstr ""
+"Sorry, the race is complete, you may not register a team with "
+"that many teammates."
 
 #: inscriptions/static/form.js:158
 msgid "Veuillez corriger les champs en rouge."
@@ -62,7 +64,7 @@ msgstr "License"
 
 #: inscriptions/static/form.js:332
 msgid "Certificat médical"
-msgstr "Medical certificat"
+msgstr "Medical certificate"
 
 #: inscriptions/static/form.js:349
 msgid "E-mail (confirmation) :"
@@ -77,7 +79,7 @@ msgstr "You must choose a category"
 #: inscriptions/static/form.js:440
 #, fuzzy
 #| msgid "Vous devez accépter le règlement de la compétition"
-msgid "Vous devez accépter le règlement de la compétition. "
+msgid "Vous devez accepter le règlement de la compétition. "
 msgstr "You must accept the race rules"
 
 #~ msgid ""
