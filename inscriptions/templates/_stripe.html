@@ -84,7 +84,7 @@
 const stripe = Stripe(window.STRIPE_KEY);
 $('#stripe-btn').click(async () => {
     try {
-        const response = await fetch('{% url "inscriptions_stripe_paiement" course_uid=COURSE.uid %}?equipe={{ instance.numero }}');
+        const response = await fetch('{% url "inscriptions_intent_paiement" course_uid=COURSE.uid methode="stripe" %}?equipe={{ instance.numero }}');
         const { client_secret: clientSecret } = await response.json();
         $('#paymentModal').modal('show');
 

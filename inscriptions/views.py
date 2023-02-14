@@ -30,8 +30,11 @@ import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
 from pathlib import Path
+from uuid import uuid5
 
 logger = logging.getLogger(__name__)
+
+HELLOASSO_URL = 'https://api.helloasso.com'
 
 @open_closed
 @transaction.atomic
@@ -711,7 +714,7 @@ def stripe_webhook(request, course_uid):
         intent = event_dict['data']['object']
         try:
             paiement = Paiement.objects.get(
-                stripe_intent=intent['id'],
+                intent_id=intent['id'],
                 equipes__equipe__course=course,
             )
             paiement.montant = Decimal(intent['amount']) / 100
@@ -726,7 +729,7 @@ def stripe_webhook(request, course_uid):
         intent = event_dict['data']['object']
         try:
             paiement = Paiement.objects.get(
-                stripe_intent=intent['id'],
+                intent_id=intent['id'],
                 equipes__equipe__course=course,
             )
             error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
@@ -737,7 +740,37 @@ def stripe_webhook(request, course_uid):
 
     return HttpResponse('OK')
 
-def stripe_paiement(request, course_uid):
+@csrf_exempt
+def helloasso_webhook(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    data = json.loads(request.body)
+
+    if data['eventType'] == 'Order':
+        token = get_helloasso_token(course)
+        url = '%s/orders/%s' % (HELLOASSO_URL, data['id'])
+        order = json.loads(requests.get(url, headers={
+            "Authorization": "Bearer %" % (token, ),
+        }))
+        payment = data['order']['payments'][0]
+        try:
+            uuid = order['metadata']['uuid']
+            paiement = Paiement.objects.get(
+                intent_id=uuid,
+                equipes__equipe__course=course,
+            )
+            if payment['state'] == 'Authorized':
+                paiement.montant = Decimal(payment['amount'])
+            paiement.detail += '\n%s on %s\n%s' % (payment['state'], datetime.now(), payment['paymentReceiptUrl'])
+            paiement.save()
+            if payment['state'] == 'Authorized':
+                paiement.send_equipes_mail()
+                paiement.send_admin_mail()
+        except Paiement.DoesNotExist as e:
+            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+        # Fulfill the customer's purchase
+    return HttpResponse('OK')
+
+def intent_paiement(request, course_uid, methode='stripe'):
     success = False
     course = get_object_or_404(Course, uid=course_uid)
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
@@ -748,22 +781,14 @@ def stripe_paiement(request, course_uid):
     frais = Decimal(0)
     for equipe in equipes:
         montant += equipe.reste_a_payer
-    if not course.frais_stripe_inclus:
-        frais = stripe_templatetags.frais(montant)
-
-    stripe.api_key = course.stripe_secret
     try: 
-        intent = stripe.PaymentIntent.create(
-            amount=int((montant + frais) * 100),
-            currency='EUR',
-            description=', '.join('%s' % (equipe, ) for equipe in equipes),
-        )
+        (intent_id, frais, response) = get_intent(course, equipes, methode, montant)
 
         paiement = Paiement(
             type='stripe',
             montant=None, # will be updated when confirmation is received from stripe
             montant_frais=frais or None,
-            stripe_intent = intent.id,
+            intent_id = intent.id,
         )
         paiement.save()
         frais_equipes = repartition_frais([
@@ -777,17 +802,66 @@ def stripe_paiement(request, course_uid):
             )
         success = True
 
-        return HttpResponse(json.dumps({
-            'success': success,
-            'client_secret': intent.client_secret,
-        }))
+        return response
     except Exception as e:
         logger.exception('error handling stripe intent creation')
         return HttpResponse(json.dumps({
             'success': False,
         }), status=500)
 
+def get_intent(course, equipes, methode, montant):
+    if methode == 'stripe':
+        if not course.frais_stripe_inclus:
+            frais = stripe_templatetags.frais(montant)
 
+        stripe.api_key = course.stripe_secret
+        intent = stripe.PaymentIntent.create(
+            amount=int((montant + frais) * 100),
+            currency='EUR',
+            description=', '.join('%s' % (equipe, ) for equipe in equipes),
+        )
+        return (
+            intent.id,
+            frais,
+            HttpResponse(json.dumps({
+                'success': success,
+                'client_secret': intent.client_secret,
+            })),
+        )
+    if methode == 'helloasso':
+        token = get_helloasso_token(course)
+        uuid = uuid5()
+        body = {
+          "totalAmount": instance.prix,
+          "initialAmount": instance.prix,
+          "itemName": '%s - %s - %s' % (course.uid, instance.categorie.code, instance.numero),
+          "backUrl": "https://www.partnertest.com/cancel.php",
+          "errorUrl": "https://www.partnertest.com/error.php",
+          "returnUrl": "https://www.partnertest.com/return.php",
+          "containsDonation": false,
+          "payer": {
+            "firstName": instance.gerant_prenom,
+            "lastName": instance.gerant_nom,
+            "email": instance.gerant_email,
+            "address": '%s %s' % (instance.gerant_adresse1, instance.gerant_address2),
+            "city": instance.gerant_ville,
+            "zipCode": instance.gerant_code_postal,
+            "country": instance.gerant_pays,
+            "companyName": instance.club,
+          },
+          "metadata": { "uuid": uuid },
+        }
+        url = '%s/organizations/%s/checkout-intents' % (HELLOASSO_URL, client.helloasso_organisation)
+        intent = requests.post(url, json.dumps(body), headers={
+            "Content-type": "application/json",
+            "Authorization": "Bearer %" % (token, ),
+        })
+        return (
+            uuid,
+            0,
+            redirect(response.url),
+        )
+    raise Exception('Methode de paiement inconnue')
 
 def equipe_payee(request, course_uid, numero):
     course = get_object_or_404(Course, uid=course_uid)
@@ -799,3 +873,13 @@ def equipe_payee(request, course_uid, numero):
 def blank(request):
     with open(Path(settings.STATIC_ROOT) / 'blank.gif', 'rb') as f:
         return HttpResponse(f, content_type="image/gif")
+
+def get_helloasso_token(course):
+    params = urlencode({
+        'grant_type': 'client_credentials', 
+        'client_id': course.helloasso_id,
+        'client_secret': course.helloasso_secret,
+    })
+    url = '%s%s' % (HELLOASSO_URL, '/oauth2/token')
+    response = requests.post(url, params, headers={ "Content-type": "application/x-www-form-urlencoded" })
+    return response['access_token']

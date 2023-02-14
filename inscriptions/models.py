@@ -142,6 +142,9 @@ class Course(models.Model):
     stripe_public       = models.CharField(_('Stripe Public Key'), max_length=200, blank=True, null=True)
     stripe_endpoint_secret = models.CharField(_('Stripe End Point Secret'), max_length=200, blank=True, null=True)
     frais_stripe_inclus = models.BooleanField(_(u'Frais stripe inclus'))
+    helloasso_organisation = models.CharField(_('HelloAsso organization name'), max_length=200, blank=True, null=True)
+    helloasso_id        = models.CharField(_('HelloAsso clientId'), max_length=200, blank=True, null=True)
+    helloasso_secret    = models.CharField(_('HelloAsso clientSecret'), max_length=200, blank=True, null=True)
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
@@ -1324,6 +1327,7 @@ class Paiement(models.Model):
         ('chèque', _('chèque')),
         ('paypal', _('paypal')),
         ('stripe', _('stripe')),
+        ('helloasso', _('helloasso')),
         ('virement', _('virement')),
         ('autre', _('autre')),
     )
@@ -1338,7 +1342,7 @@ class Paiement(models.Model):
     montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     detail = models.TextField(blank=True)
-    stripe_intent = models.CharField(max_length=200, blank=True, null=True)
+    intent_id = models.CharField(max_length=200, blank=True, null=True)
 
     def send_equipes_mail(self):
         if self.montant:
