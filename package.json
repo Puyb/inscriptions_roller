@@ -10,12 +10,12 @@
   "license": "",
   "dependencies": {
     "babel-core": "^6.0.14",
-    "babel-loader": "^6.0.0",
+    "babel-loader": "^6.4.1",
     "bootstrap": "^3.3.5",
     "chart.js": "^2.8.0",
     "chartjs-plugin-annotation": "^0.5.7",
     "css-loader": "^0.21.0",
-    "extract-text-webpack-plugin": "^0.8.2",
+    "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^0.8.4",
     "font-awesome": "^4.5.0",
     "html-webpack-plugin": "^1.6.2",
@@ -24,6 +24,6 @@
     "less-loader": "^2.2.1",
     "papaparse": "^4.1.2",
     "style-loader": "^0.13.0",
-    "webpack": "^1.12.2"
+    "webpack": "^5.75.0"
   }
 }
