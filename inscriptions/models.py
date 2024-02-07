@@ -162,6 +162,8 @@ class Course(models.Model):
 
     @property
     def dernier_jour_tarif_reduit(self):
+        if not self.date_augmentation:
+            return None
         return self.date_augmentation - timedelta(days=1)
 
     def save(self, *args, **kwargs):
