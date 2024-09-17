@@ -23,11 +23,12 @@ from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
+from django_resized import ResizedImageField
 from pathlib import Path
 import logging
 import traceback
 import pytz
-from pinax.stripe.models import Charge
+import uuid
 from Levenshtein import distance
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,46 @@ DESTINATAIRE_CHOICES = (
     ('Tous', _(u'Tous')),
 )
 
+REGION_NORMALISATION = {
+    'Alsace': 'Grand-Est',
+    'Alsace-Champagne-Ardenne-Lorraine': 'Grand-Est',
+    'Champagne-Ardenne': 'Grand-Est',
+    'Lorraine': 'Grand-est',
+    'Grand Est': 'Grand-Est',
+    'Aquitaine': 'Nouvelle-Aquitaine',
+    'Aquitaine-Limousin-Poitou-Charentes': 'Nouvelle-Aquitaine',
+    'Limousin': 'Nouvelle-Aquitaine',
+    'Poitou': 'Nouvelle-Aquitaine',
+    'Charentes': 'Nouvelle-Aquitaine',
+    'New Aquitaine': 'Nouvelle-Aquitaine',
+    'Auvergne': 'Auvergne-Rhône-Alpes',
+    'Rhône-Alpes': 'Auvergne-Rhône-Alpes',
+    'Bourgogne': 'Bourgogne-Franche-Comté',
+    'Franche-Comté': 'Bourgogne-Franche-Comté',
+    'Burgundy': 'Bourgogne-Franche-Comté',
+    'Languedoc': 'Occitanie',
+    'Roussillon': 'Occitanie',
+    'Languedoc-Roussillon': 'Occitanie',
+    'Occitania': 'Occitanie',
+    'Pays-de-la-Loire': 'Centre-Val de Loire',
+    'Pays de la Loire': 'Centre-Val de Loire',
+    'Centre': 'Centre-Val de Loire',
+    'Centre-Loire Valley': 'Centre-Val de Loire',
+    'Brittany': 'Bretagne',
+    'Corsica': 'Corse',
+    'Ile-de-France': 'Île-de-France',
+    'Lower Normandy': 'Normandie',
+    'Upper Normandy': 'Normandie',
+    'Normandy': 'Normandie',
+    'Rouen': 'Normandie',
+    'Province apostolique de Normandie': 'Normandie',
+    "Provence-Alpes-Côte d'Azur": "Provence-Alpes-Côte-d'Azur",
+    'Picardy': 'Hauts-de-France',
+    'Picardie': 'Hauts-de-France',
+    'Nord-Pas-de-Calais': 'Hauts-de-France',
+    'Nord-Pas-de-Calais and Picardy': 'Hauts-de-France',
+}
+
 #class Chalenge(model.Model):
 #    nom = models.CharField(_('Nom'), max=200)
 
@@ -90,20 +131,23 @@ class Course(models.Model):
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
     email_contact       = models.EmailField(_(u'Email contact'))
-    logo                = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
+    logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
+    date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
     paypal              = models.EmailField(_(u'Adresse paypal'), blank=True)
     frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
     stripe_secret       = models.CharField(_('Stripe Secret Key'), max_length=200, blank=True, null=True)
     stripe_public       = models.CharField(_('Stripe Public Key'), max_length=200, blank=True, null=True)
+    stripe_endpoint_secret = models.CharField(_('Stripe End Point Secret'), max_length=200, blank=True, null=True)
     frais_stripe_inclus = models.BooleanField(_(u'Frais stripe inclus'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
+    texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
 
     @property
     def ouverte(self):
@@ -117,6 +161,12 @@ class Course(models.Model):
     def dernier_jour_inscription(self):
         return self.date_fermeture - timedelta(days=1)
 
+    @property
+    def dernier_jour_tarif_reduit(self):
+        if not self.date_augmentation:
+            return None
+        return self.date_augmentation - timedelta(days=1)
+
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
@@ -125,8 +175,8 @@ class Course(models.Model):
                 subject='Nouvelle course %s' % self.nom,
                 body="""%s.
 """ % self.nom,
-                to=settings.ADMINS,
-                content_type='text',
+                to=(('', settings.CONTACT_MAIL), ),
+                content_type='plain',
             )
         if self.active and self.id  and not Course.objects.get(id=self.id).active:
             send_mail(
@@ -222,9 +272,9 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             if equipe.gerant_ville2:
                 keys['pays'] = equipe.gerant_ville2.pays
                 if equipe.gerant_ville2.pays == 'FR':
-                    keys['pays'] = equipe.gerant_ville2.region
+                    keys['pays'] = REGION_NORMALISATION.get(equipe.gerant_ville2.region, equipe.gerant_ville2.region)
 
-                    
+
             stats['equipes'] = 1
             stats['equipiers'] = equipe.equipiers_count
             stats['hommes'] = equipe.hommes_count
@@ -272,7 +322,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 'lat': float(ville.lat),
                 'lng': float(ville.lng),
                 'count': ville.count,
-            } for ville in Ville.objects.filter(equipier__equipe__course=self).annotate(count=Count('equipier'))
+            } for ville in Ville.objects.filter(equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
             if ville.count > 0 ]
         sorted(result['villes'], key=itemgetter('nom'))
         sorted(result['villes'], key=itemgetter('count'), reverse=True)
@@ -336,6 +386,7 @@ class Categorie(models.Model):
     validation      = models.TextField(_(u'Validation function (javascript)'))
     numero_debut    = models.IntegerField(_(u'Numero de dossard (début)'), default=0)
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
+    description     = models.TextField(_('Description'), blank=True, null=True)
 
     def __str__(self):
         return self.code
@@ -345,7 +396,7 @@ class Categorie(models.Model):
             d = d.date()
         d = d or date.today()
         prix = self.prix1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation <= d:
             prix = self.prix2 or 0
         return prix
 
@@ -439,6 +490,7 @@ class Equipe(models.Model):
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
     extra              = JSONField(default={})
+    verrou             = models.BooleanField(_('Equipe verrouillée (modifiable uniquement par l\'organisateur)'), default=False)
 
     class Meta:
         unique_together = ( ('course', 'numero'), )
@@ -502,6 +554,10 @@ class Equipe(models.Model):
         montant += self.paiements_en_attente
         return montant >= self.prix
 
+    @property
+    def ordered_paiements(self):
+        return self.paiements.select_related('paiement').order_by('paiement__date')
+
     def facture(self):
         lines = [
             {
@@ -542,19 +598,20 @@ class Equipe(models.Model):
                             'prix': price * count,
                         })
         return lines
-        
+
     def save(self, *args, **kwargs):
         if self.id:
-            if not (self.categorie.numero_debut <= self.numero and self.numero <= self.categorie.numero_fin):
-                self.numero = self.getNumero()
-                try:
-                    self.send_mail('changement_numero')
-                except Exception as e:
-                    traceback.print_exc()
-                try:
-                    self.send_mail('changement_numero_admin')
-                except Exception as e:
-                    traceback.print_exc()
+            if not self.verrou and self.course.date >= date.today():
+                if not (self.categorie.numero_debut <= self.numero and self.numero <= self.categorie.numero_fin):
+                    self.numero = self.getNumero()
+                    try:
+                        self.send_mail('changement_numero')
+                    except Exception as e:
+                        traceback.print_exc()
+                    try:
+                        self.send_mail('changement_numero_admin')
+                    except Exception as e:
+                        traceback.print_exc()
         else:
             if not self.numero:
                 self.numero = self.getNumero()
@@ -621,7 +678,7 @@ def equipier_piece_jointe_filename(static_name=None):
 
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
-Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Si vous avez un certificat de moins de trois ans, vous pouvez remplire le questionnaire %(link_cerfa)s et si vous répondez non à toutes les questions, cocher la case ci dessous. Sinon, votre certificat doit avoir moins d'un an au moment de la course.""")
+Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Votre certificat doit avoir moins d'un an au moment de la course.""")
     LICENCE_HELP = _("""Si vous le pouvez, scannez la licence et ajoutez la en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier.""")
     AUTORISATION_HELP = _("""Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe (formats PDF ou JPEG).
@@ -647,7 +704,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename(), blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    cerfa_valide      = models.BooleanField(_('Cerfa QS-SPORT'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
 
@@ -659,10 +715,10 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     valide                 = models.BooleanField(_(u'Valide'), editable=False)
     erreur                 = models.BooleanField(_(u'Erreur'), editable=False)
     homme                  = models.BooleanField(_(u'Homme'), editable=False)
-    
+
     def age(self, today=None):
         if not today:
-            today = self.equipe.course.date
+            today = self.equipe.course.date_age or self.equipe.course.date
         try: 
             birthday = self.date_de_naissance.replace(year=today.year)
         except ValueError: # raised when birth date is February 29 and the current year is not a leap year
@@ -736,7 +792,7 @@ class ExtraQuestion(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation < d:
+        if self.course.date_augmentation and self.course.date_augmentation <= d:
             price = self.price2 or 0
         return price
 
@@ -786,7 +842,7 @@ class ExtraQuestionChoice(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.price1 or 0
-        if self.question.course.date_augmentation and self.question.course.date_augmentation < d:
+        if self.question.course.date_augmentation and self.question.course.date_augmentation <= d:
             price = self.price2 or 0
         return price
 
@@ -795,7 +851,7 @@ class ExtraQuestionChoice(models.Model):
         if price:
             return '%s (%s€)' % (self.label, price)
         return self.label
-    
+
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
@@ -848,10 +904,10 @@ class TemplateMail(models.Model):
                 if isinstance(instance, Equipe):
                     for equipier in instance.equipier_set.filter(numero__lte=F('equipe__nombre')):
                         dests.add(equipier.email)
-            
+
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             subject = Template(self.sujet).render(context)
             message = Template(self.message).render(context)
@@ -863,7 +919,7 @@ class TemplateMail(models.Model):
                 course=self.course,
                 template=self,
                 equipe=instance if isinstance(instance, Equipe) else None,
-                emeteur=self.course.email_contact,
+                emetteur=self.course.email_contact,
                 destinataires=list(dests),
                 bcc=bcc,
                 sujet=subject,
@@ -876,15 +932,19 @@ class Mail(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     template = models.ForeignKey(TemplateMail, null=True, on_delete=models.SET_NULL)
     equipe = models.ForeignKey(Equipe, null=True, on_delete=models.SET_NULL)
-    emeteur = models.EmailField()
+    emetteur = models.EmailField()
     destinataires = ArrayField(models.EmailField())
     bcc = ArrayField(models.EmailField(), blank=True)
     sujet = models.CharField(max_length=200)
     message = models.TextField()
     date = models.DateTimeField(auto_now=True)
+    uid = models.CharField(max_length=200)
+    error = models.TextField(_('Erreur d\'envoi'), max_length=200, null=True, blank=True)
+    read = models.DateTimeField(_('Lu le'), null=True, default=None)
 
     def send(self):
-        if not self.id:
+        if not self.uid:
+            self.uid = '%s@%s' % (uuid.uuid4().hex, Site.objects.get_current())
             self.save()
         for dest in self.destinataires:
             send_mail(
@@ -893,7 +953,8 @@ class Mail(models.Model):
                 name=self.course.nom,
                 to=[dest],
                 bcc=self.bcc,
-                reply_to=[self.emeteur,],
+                reply_to=[self.emetteur,],
+                message_id=self.uid,
             )
 
 CHALLENGE_LEVENSHTEIN_DISTANCE = 3
@@ -1025,7 +1086,7 @@ class Challenge(models.Model):
             Q(categorie__isnull=True) | Q(categorie__in=categorie.challenge_categories.filter(challenge=self)),
             d__lt=CHALLENGE_LEVENSHTEIN_DISTANCE,
         )
-        
+
         annotate = {}
         annotate.update({
             'equipiers__nom%s' % e.numero: CompareNames('equipiers__nom', Value(e.nom))
@@ -1202,7 +1263,7 @@ class ParticipationChallenge(models.Model):
 
     def __str__(self):
         return 'Participation %s %s' % (self.challenge, self.nom)
-        
+
 
 class EquipeChallenge(models.Model):
     equipe = models.ForeignKey(Equipe, related_name='challenges', on_delete=models.CASCADE)
@@ -1291,7 +1352,7 @@ class Paiement(models.Model):
     montant = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     montant_frais = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     detail = models.TextField(blank=True)
-    stripe_charge = models.OneToOneField(Charge, related_name='paiement', blank=True, null=True, on_delete=models.SET_NULL)
+    stripe_intent = models.CharField(max_length=200, blank=True, null=True)
 
     def send_equipes_mail(self):
         if self.montant:

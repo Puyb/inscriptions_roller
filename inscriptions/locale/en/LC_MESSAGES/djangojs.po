@@ -7,21 +7,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-27 12:27+0100\n"
-"PO-Revision-Date: 2015-04-15 00:58+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"POT-Creation-Date: 2021-09-17 19:38+0200\n"
+"PO-Revision-Date: 2022-06-06 18:30+0200\n"
+"Last-Translator: Puyb <puyb@puyb.net>\n"
+"Language-Team: English\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.7.5\n"
 
-#: inscriptions/static/form.js:74
+#: inscriptions/static/form.js:93
 msgid "Ce nom d'équipe est déjà utilisé !"
-msgstr "This team name is not avilable!"
+msgstr "This team name is not available!"
 
-#: inscriptions/static/form.js:103
+#: inscriptions/static/form.js:121
 #, fuzzy
 #| msgid ""
 #| "Désolé, il n'y a plus de place dans ces catégories. Changez le nombre de "
@@ -31,11 +31,19 @@ msgid ""
 "participants."
 msgstr "Sorry, no more seat in this category. Change the number of teammate."
 
-#: inscriptions/static/form.js:135
+#: inscriptions/static/form.js:125
+msgid ""
+"Désolé, la course est complete, vous ne pouvez pas inscrire une équipe avec "
+"autant d'équipiers."
+msgstr ""
+"Sorry, the race is complete, you may not register a team with "
+"that many teammates."
+
+#: inscriptions/static/form.js:158
 msgid "Veuillez corriger les champs en rouge."
 msgstr "Please correct the fields in red."
 
-#: inscriptions/static/form.js:155
+#: inscriptions/static/form.js:185
 msgid ""
 "Votre équipe n'est éligible dans aucune des catégories proposées pour cette "
 "compétition. Veuillez vous référer au réglement de la course disponible sur "
@@ -44,30 +52,34 @@ msgstr ""
 "Your team could not fit in any of the categories for this race. Please look "
 "at the rules of the race for the requirements of each category."
 
-#: inscriptions/static/form.js:182
+#: inscriptions/static/form.js:219
 msgid ""
 "Vos modifications impliquent un changement de catégorie. Veuillez "
 "sélectionner la nouvelle catégorie."
 msgstr "Your change need you to choose another category."
 
-#: inscriptions/static/form.js:246
+#: inscriptions/static/form.js:327
 msgid "Licence"
 msgstr "License"
 
-#: inscriptions/static/form.js:250
+#: inscriptions/static/form.js:332
 msgid "Certificat médical"
-msgstr "Medical certificat"
+msgstr "Medical certificate"
 
-#: inscriptions/static/form.js:265
+#: inscriptions/static/form.js:349
 msgid "E-mail (confirmation) :"
 msgstr "E-mail (confirm):"
 
-#: inscriptions/static/form.js:342
-msgid "Vous devez choisir une catégorie"
+#: inscriptions/static/form.js:436
+#, fuzzy
+#| msgid "Vous devez choisir une catégorie"
+msgid "Vous devez choisir une catégorie. "
 msgstr "You must choose a category"
 
-#: inscriptions/static/form.js:346
-msgid "Vous devez accépter le règlement de la compétition"
+#: inscriptions/static/form.js:440
+#, fuzzy
+#| msgid "Vous devez accépter le règlement de la compétition"
+msgid "Vous devez accepter le règlement de la compétition. "
 msgstr "You must accept the race rules"
 
 #~ msgid ""

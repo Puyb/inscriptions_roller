@@ -3,6 +3,133 @@
 {% load l10n %}
 {% load stats %}
 
+{% block scripts %}
+    {% include "stats/_scripts.html" %}
+    <script>
+        const urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                        .exec(window.location.search);
+            return (results !== null) ? results[1] || 0 : false;
+        };
+
+        const data = urlParam('data') || 'equipes';
+        const align = urlParam('align') || 'course';
+        const stats = [{% for d in data %}{{ d.json|safe }}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+        const min = Math.min({% for d in data %}{{ d.delta }}{% if not forloop.last %},{% endif %}{% endfor %});
+        const max = Math.max({% for d in data %}{{ d.stats.jours.keys|get_max }} + {{ d.delta }}{% if not forloop.last %},{% endif %}{% endfor %});
+        console.log(min, max);
+        const datasets = [];
+        let dataset, cumul, labels, color;
+        const colors = Object.values(window.chartColors);
+        {% for d in data %}
+        color = colors.shift();
+        dataset = {
+            label: '{{ d.course.uid }}',
+            fill: false,
+            backgroundColor: color,
+            borderColor: color,
+            data: [],
+            pointRadius: 0.5,
+        };
+        var dataPlot = [];
+        cumul = 0;
+        labels = [];
+        for(var i = min; i < max; i++) {
+            if (align === 'course') 
+                labels.push(i - {{ d.delta }})
+            if (align === 'augment') 
+                labels.push(i - {{ d.delta }})
+            if (align === 'start') 
+                labels.push(i - {{ d.delta }})
+            var a = 0;
+            if(i - {{ d.delta }} in stats[{{ d.index }}].jours)
+                a = stats[{{ d.index }}].jours[i - {{ d.delta }}][data];
+            if(i <= {{ d.stats.jours.keys|get_max }} + {{ d.delta }}) {
+                cumul += a;
+                dataset.data.push(cumul);
+            }
+        }
+        datasets.push(dataset);
+        {% endfor %}
+        console.log(datasets);
+        console.log(labels);
+        const offsets = {};
+        {% for d in data %}
+        offsets['{{ d.course.uid }}'] = {
+            date: new Date({{ d.course.date_ouverture.year }}, {{ d.course.date_ouverture.month }} - 1, {{ d.course.date_ouverture.day }} + min - {{ d.delta }}),
+        };
+        {% endfor %}
+
+        const chart = new Chart('canvas_time', {
+            type: 'line',
+            data: {
+                labels,
+                datasets,
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Evolution des inscriptions',
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: (data) => {
+                            const label = data[0].label;
+                            if (align === 'course') 
+                                return label + ' jours avant la course';
+                            if (align === 'augment') 
+                                if (label < 0) 
+                                    return label + ' jours avant l\'augmentation des tarifs';
+                                else
+                                    return label + ' jours après l\'augmentation des tarifs';
+                            if (align === 'start') 
+                                return label + ' jours après l\'ouverture des inscriptions';
+                        },
+                        label: (tooltip, data) => {
+                            const index = tooltip.datasetIndex;
+                            let label = data.datasets[index].label || '';
+                            const d = offsets[label].date;
+                            d.setDate(d.getDate(index));
+                            label += ' au ' + d.toLocaleDateString();
+                            label += ' : ' + tooltip.yLabel;
+                            return label;
+                        },
+                    },
+                },
+                hover: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Jours',
+                        },
+                    }],
+                    yAxes: [{
+                        display: true,
+                        scaleLabel: {
+                            display: true,
+                            labelString: data,
+                        },
+                    }],
+                },
+            },
+        });
+
+    </script>
+{% endblock %}
+
+{% block styles %}
+{% include "stats/_styles.html" %}
+{% endblock %}
+
 {% block body %}
 <form id="navbar">
 <nav class="navbar navbar-default">
@@ -32,8 +159,9 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Données" %} <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a data-name="equipiers" data-value="">{% if request.GET.equipiers == "" %}<strong>{% endif %}{% trans "Equipes" %}{% if request.GET.equipiers == "" %}</strong>{% endif %}</a></li>
-            <li><a data-name="equipiers" data-value="1">{% if request.GET.equipiers == "1" %}<strong>{% endif %}{% trans "Participants" %}{% if request.GET.equipiers == "1" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="equipes">{% if request.GET.data == "equipes" %}<strong>{% endif %}{% trans "Equipes" %}{% if request.GET.data == "equipes" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="equipiers">{% if request.GET.data == "equipiers" %}<strong>{% endif %}{% trans "Participants" %}{% if request.GET.data == "equipiers" %}</strong>{% endif %}</a></li>
+            <li><a data-name="data" data-value="prix">{% if request.GET.data == "prix" %}<strong>{% endif %}{% trans "Prix" %}{% if request.GET.data == "prix" %}</strong>{% endif %}</a></li>
           </ul>
         </li>
       </ul>
@@ -41,101 +169,8 @@
   </div><!-- /.container-fluid -->
 </nav>
 <input type="hidden" name="align" value="{{ request.GET.align }}" />
-<input type="hidden" name="equipiers" value="{{ request.GET.equipiers }}" />
+<input type="hidden" name="data" value="{{ request.GET.data }}" />
     <div class="clearfix grid_16" style="margin-bottom: 50px">
         <canvas id="canvas_time"></canvas>
     </div>
-    <div class="clearfix grid_16">
-        <canvas id="canvas_time2"></canvas>
-    </div>
-
-    <script src="{{ STATIC_URL }}/js-class.js"></script>
-    <script src="{{ STATIC_URL }}/bluff-src.js"></script>
-
-    <script>
-        var equipiers = /[?&]equipiers=1/.test(location.href);
-        var g = new Bluff.Line('canvas_time', 900);
-        g.theme_pastel();
-        g.title = '';
-        g.tooltips = true;
-        g.marker_font_size = 12;
-        g.y_axis_increment = equipiers ? 25 : 10;
-        g.hide_dots = true;
-        g.line_width = 2;
-        var g2 = new Bluff.Bar('canvas_time2', 900);
-        g2.theme_pastel();
-        g2.title = '';
-        g2.tooltips = true;
-        g2.marker_font_size = 12;
-        g2.y_axis_increment = equipiers ? 10 : 2;
-
-        var stats = [{% for d in data %}{{ d.json|safe }}{% if not forloop.last %},{% endif %}{% endfor %}];
-
-
-        var min = Math.min({% for d in data %}{{ d.delta }}{% if not forloop.last %},{% endif %}{% endfor %});
-        var max = Math.max({% for d in data %}{{ d.stats.jours.keys|get_max }} + {{ d.delta }}{% if not forloop.last %},{% endif %}{% endfor %});
-        var cumul1 = cumul2 = 0;
-        console.log(min, max);
-        {% for d in data %}
-        var dataPlot = [];
-        for(var i = min; i < max; i++) {
-            var a = 0;
-            if(i - {{ d.delta }} in stats[{{ d.index }}].jours)
-                a = stats[{{ d.index }}].jours[i - {{ d.delta }}][equipiers ? 'equipiers' : 'equipes'];
-            if(i <= {{ d.stats.jours.keys|get_max }} + {{ d.delta }}) 
-                dataPlot.push(a);
-        }
-        
-        var cumul = 0;
-        g.data("{{ d.course.uid }}", dataPlot.map(function(value) { return cumul += value; }));
-        g2.data("{{ d.course.uid }}", dataPlot);
-        {% endfor %}
-
-        g.labels = {};
-        for(var i = min; i < max; i += 7) {
-            g.labels[i - min] = max - i;
-            {% for d in data %}
-            var d1 = new Date({{ d.course.date_ouverture.year }}, {{ d.course.date_ouverture.month }} - 1, {{ d.course.date_ouverture.day }} + i - {{ d.delta }});
-            g.labels[i - min] += '<br /><span style="color: ' + g.colors[{{ d.index }}] + '">' + d1.getDate() + '/' + (d1.getMonth() + 1) + '</span>';
-            {% endfor %}
-        }
-        g2.labels = g.labels;
-
-        g.draw();
-        g._d.stroke = 'white';
-        g._d.stroke_width = 1;
-        for(var index in g.labels) {
-            var x = g._graph_left + (g.x_increment * index);
-            g._d.line(x, g._graph_bottom, x, g._graph_top);
-        }
-
-        {% for d in data %}
-        g._d.stroke = g._data[{{ d.index }}][2];
-        var x = g._graph_left + (g.x_increment * ({{ d.augment }} + {{ d.delta }} - min));
-        g._d.line(x, g._graph_bottom, x, g._graph_top);
-        {% endfor %}
-
-        var x = g._graph_left + (g.x_increment * ({{ today }} - min));
-        g._d.stroke = '#000';
-        g._d.line(x, g._graph_bottom, x, g._graph_top);
-
-        g2.draw();
-        g2._d.stroke = '#ccc';
-        g2._d.stroke_width = 1;
-        for(var index in g2.labels) {
-            var x = g2._graph_left + (g2.x_increment * index);
-            g2._d.line(x, g2._graph_bottom, x, g2._graph_top);
-        }
-
-        var x = g2._graph_left + (g2.x_increment * ({{ today }} - min));
-        g2._d.stroke = '#000';
-        g2._d.line(x, g2._graph_bottom, x, g2._graph_top);
-
-
-        // var e = document.getElementById('canvas_time').parentNode;
-        // var e2 = document.getElementById('canvas_time2').parentNode;
-        // e2.style.display = 'none';
-        // e.addEventListener('click', function() { e.style.display = 'none', e2.style.display = 'block'; });
-        // e2.addEventListener('click', function() { e2.style.display = 'none', e.style.display = 'block'; });
-    </script>
 {% endblock %}

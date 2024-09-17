@@ -10,7 +10,7 @@ from django.template import Template, Context
 from django.template.response import TemplateResponse
 from django.contrib import messages
 from django.db.models import Sum, Value, F, Q, Max, Prefetch, OuterRef, Subquery
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
@@ -23,6 +23,8 @@ from .utils import ChallengeUpdateThread, send_mail
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from pathlib import Path
+from pytz import timezone
 import json
 import re
 from Levenshtein import distance
@@ -36,7 +38,8 @@ logger = logging.getLogger(__name__)
 ICON_OK = '✅'
 ICON_KO = '🚫'
 ICON_CHECK = '❔'
-ICON_MISSING = '✉'
+ICON_MISSING = '📨'
+ICON_LOCK = '🔒'
 
 def getCourse(request, qs=Course.objects.all()):
     uid = request.COOKIES['course_uid']
@@ -69,11 +72,14 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
+            url(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
             url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
             url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
             url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
             url(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
+            url(r'^stats/$', self.admin_view(self.stats), name='course_stats'),
+            url(r'^stats/(?P<course_uid>[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
         ] + super().get_urls()
         return urls
 
@@ -198,6 +204,21 @@ class CourseAdminSite(admin.sites.AdminSite):
         ))
 
     @staff_member_required
+    def anniversaires(self, request):
+        request.current_app = self.name
+        course = getCourse(request)
+        anniversaires = Equipier.objects.filter(
+            equipe__course=course,
+            date_de_naissance__day=Extract('equipe__course__date', 'day'),
+            date_de_naissance__month=Extract('equipe__course__date', 'month'),
+        )
+
+        return TemplateResponse(request, 'admin/anniversaires.html', dict(self.each_context(request),
+            anniversaires=anniversaires,
+            course=course,
+        ))
+
+    @staff_member_required
     def resultats(self, request):
         request.current_app = self.name
         course = getCourse(request, Course.objects.prefetch_related('categories', 'challenges'))
@@ -242,7 +263,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         except:
                                             return None
 
-                                        line = 0
+                                    line = 0
                                     for row in csv_reader:
                                         line += 1
                                         try:
@@ -279,6 +300,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                                             numeros.remove(numero)
 
                                         equipe.tours = g(row, 'tours_column', intOrNone)
+                                        if data.get('categorie_column'):
+                                            try:
+                                                equipe.categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                            except:
+                                                pass
                                         if data.get('time_column'):
                                             try:
                                                 if data['time_format'] == 'HMS':
@@ -426,6 +452,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                     paiement.send_equipes_mail()
                     if len(request.GET.getlist('equipe_id')) == 1:
                         return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
+                    if len(request.GET.getlist('equipe_id')) > 1:
+                        return redirect('/course/inscriptions/equipe/')
                     return redirect('/course/inscriptions/paiement/')
             except PaiementException as e:
                 messages.add_message(request, messages.ERROR, u'Répartition des montants incorrectes')
@@ -477,6 +505,49 @@ class CourseAdminSite(admin.sites.AdminSite):
             "course": course,
         })
 
+    def stats(self, request):
+        courses = Course.objects.filter(accreditations__user=request.user)
+        courses_other = Course.objects.none()
+        if request.user.is_superuser:
+            courses_other = Course.objects.exclude(accreditations__user=request.user)
+        course = getCourse(request, Course.objects.all())
+        return TemplateResponse(request, "admin/stats.html", {
+            "course": course,
+            "courses": courses,
+            "courses_other": courses_other,
+        })
+
+    def get_stats_api(self, request, course_uid):
+        course = get_object_or_404(Course, uid=course_uid)
+        stats = course.stats()
+        def iso(d):
+            return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
+            
+        return HttpResponse(json.dumps({
+            'stats': {
+                k: {
+                    'equipes': v['equipes'],
+                    'equipiers': v['equipiers'],
+                    'prix': v['prix'],
+                } for k, v in stats['jours'].items()
+            },
+            'uid': course.uid,
+            'course': course.nom,
+            'date': {
+                'ouverture': iso(course.date_ouverture),
+                'fermeture': iso(course.date_fermeture - timedelta(days=1)),
+                'augmentation': iso((course.date_augmentation or course.date_fermeture) - timedelta(days=1)),
+                'course': iso(course.date),
+            },
+            'delta': {
+                'ouverture': 0,
+                'fermeture': (course.date_fermeture - course.date_ouverture).days - 1,
+                'augmentation': ((course.date_augmentation or course.date_fermeture) - course.date_ouverture).days - 1,
+                'course': (course.date - course.date_ouverture).days,
+            },
+        }), content_type='application/json')
+
+
     index_template = 'admin/dashboard.html'
 
 
@@ -496,11 +567,11 @@ class EquipierInline(admin.StackedInline):
     model = Equipier
     extra = 0
     max_num = 5
-    readonly_fields = [ 'nom', 'prenom', 'sexe', 'adresse1', 'adresse2', 'ville', 'code_postal', 'pays', 'email', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'cerfa_valide', 'age']
+    readonly_fields = [ 'nom', 'prenom', 'sexe', 'adresse1', 'adresse2', 'ville', 'code_postal', 'pays', 'email', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'age']
     fieldsets = (
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
         (u'Coordonnées', { 'classes': ('collapse', 'collapsed'), 'fields': ('adresse1', 'adresse2', ('ville', 'code_postal'), 'pays', 'email') }),
-        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe', 'cerfa_valide')) }),
+        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
     )
 
 class StatusFilter(SimpleListFilter):
@@ -609,7 +680,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
     list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
-    list_filter = [PaiementCompletFilter, StatusFilter, CategorieFilter, 'nombre', MineurFilter, 'date']
+    list_filter = [PaiementCompletFilter, StatusFilter, 'verrou', CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
     inlines = [ EquipierInline ]
 
@@ -617,10 +688,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     fieldsets = (
         (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('prix',), 'commentaires')}),
         (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
-        (None, { 'description': '<div id="autre"></div>', 'fields': () }),
+        (None, { 'description': '<div id="autre"></div>', 'fields': ('verrou', ) }),
 
     )
-    actions = ['send_mails', 'export', 'download']
+    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock', 'download']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -642,14 +713,17 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     nombre2.short_description = u'☺'
 
     def dossier_complet_auto2(self, obj):
+        ret = ''
+        if obj.verrou:
+            ret = ICON_LOCK
         if obj.verifier():
-            return ICON_CHECK
+            return ICON_CHECK + ret
         auto = obj.dossier_complet_auto()
         if auto:
-            return ICON_OK
+            return ICON_OK + ret
         if auto == False:
-            return ICON_KO
-        return ICON_MISSING
+            return ICON_KO + ret
+        return ICON_MISSING + ret
     dossier_complet_auto2.allow_tags = True
     dossier_complet_auto2.short_description = mark_safe(ICON_OK)
 
@@ -664,7 +738,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             wrapper.model_admin = self
             return update_wrapper(wrapper, view)
         my_urls = [
-            url(r'^version/$', self.version, name='equipe_version'),
             url(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
             url(r'^export/$', wrap(self.export), name='equipe_export'),
             url(r'^download/$', wrap(self.download), name='equipe_downloads'),
@@ -683,7 +756,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 course=instance.course,
                 template=None,
                 equipe=instance,
-                emeteur=request.POST['sender'],
+                emetteur=request.POST['sender'],
                 destinataires=[ request.POST['mail'], ],
                 bcc=[],
                 sujet=request.POST['subject'],
@@ -700,7 +773,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         try:
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             sujet   = Template(template.sujet).render(context)
             message = Template(template.message).render(context)
@@ -723,7 +796,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         try:
             context = Context({
                 "instance": instance,
-                'ROOT_URL': 'http://%s' % Site.objects.get_current(),
+                'ROOT_URL': 'https://%s' % Site.objects.get_current(),
             })
             sujet   = Template(mail.sujet).render(context)
             message = Template(mail.message).render(context)
@@ -735,10 +808,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             'subject': sujet,
             'message': message,
         }))
-
-    def version(self, request):
-        import django
-        return HttpResponse(django.__file__ + ' ' + json.dumps(list(django.VERSION)))
 
     def send_mails(self, request, queryset=None):
         request.current_app = self.admin_site.name
@@ -793,7 +862,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                 if len(ids):
                     objects = objects.filter(id__in=ids)
             else:
-                objects = Equipier.objects.filter(equipe__course=course)
+                objects = Equipier.objects.filter(equipe__course=course, numero__lte=F('equipe__nombre'))
                 if len(ids):
                     objects = objects.filter(equipe_id__in=ids)
             response = HttpResponse(content_type='text/csv', charset=encoding)
@@ -827,7 +896,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return TemplateResponse(request, 'admin/equipe/export.html', dict(self.admin_site.each_context(request),
             queryset=queryset,
             equipes=queryset.count() or course.equipe_set.count(),
-            equipiers=Equipier.objects.filter(equipe__in=queryset).count() or Equipier.objects.filter(equipe__course=course).count(),
+            equipiers=queryset.aggregate(Sum('nombre'))['nombre__sum'] or course.equipe_set.aggregate(Sum('nombre'))['nombre__sum'] or 0,
             course=course,
             fields=fields,
         ))
@@ -882,7 +951,22 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         return TemplateResponse(request, 'admin/equipe/autre.html', dict(self.admin_site.each_context(request),
             templates=instance.course.templatemail_set.all(),
             instance=instance,
+            mail_error=instance.mail_set.filter(error__isnull=False).count(),
         ))
+
+    def do_paiement(self, request, queryset=None):
+        return HttpResponseRedirect('../paiement/add/?' + '&'.join([ 'equipe_id=%d' % equipe.id for equipe in queryset ]))
+    do_paiement.short_description = _(u'Paiement reçu')
+
+    def lock(self, request, queryset=None):
+        queryset.update(verrou=True)
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    lock.short_description = _(u'Verrouiller')
+
+    def unlock(self, request, queryset=None):
+        queryset.update(verrou=False)
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+    unlock.short_description = _(u'Déverrouiller')
 
 
 #main_site.disable_action('delete_selected')
@@ -929,6 +1013,33 @@ class CourseAdmin(admin.ModelAdmin):
         response.set_cookie('course_id',  obj.id)
         response.set_cookie('course_nom', obj.nom)
         return response
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            url(r'^models/$', self.get_models, name='models'),
+        ]
+        return my_urls + urls
+
+    def get_models(self, request):
+        models = {}
+        with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+            models = json.load(f)
+        for course in Course.objects.filter(accreditations__user=request.user):
+            models[course.id] = {
+                '_name': str(course),
+                'categories': [
+                    {
+                        'code': cat.code,
+                        'nom': cat.nom,
+                        'prix1': str(cat.prix1),
+                        'prix2': str(cat.prix2),
+                    } for cat in course.categories.all()
+                ],
+            }
+            
+        return HttpResponse(json.dumps(models))
+
 site.register(Course, CourseAdmin)
 
 
@@ -998,12 +1109,20 @@ class MailAdmin(CourseFilteredObjectAdmin):
         qs = qs.select_related('equipe__categorie', 'equipe__course', 'template')
         return qs
 
-    list_display = ('date', 'equipe', 'sujet', 'template')
-    fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
-    readonly_fields = ('equipe', 'template', 'date', 'emeteur', 'destinataires', 'bcc', 'sujet', 'message')
+    list_display = ('date', 'equipe', 'sujet', 'template', 'status')
+    fields = ('equipe', 'template', 'date', 'emetteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
+    readonly_fields = ('equipe', 'template', 'date', 'emetteur', 'destinataires', 'bcc', 'sujet', 'read', 'error', 'message')
     list_filter = [EquipeFilter, TemplateMailFilter, 'date']
     class Media:
         js = ('custom_admin/mail.js', )
+    def status(self, obj):
+        if obj.read:
+            return ICON_OK
+        if obj.error:
+            return ICON_KO
+        return ''
+    status.allow_tags = True
+    status.short_description = mark_safe(ICON_OK)
 site.register(Mail, MailAdmin)
 
 class ExtraQuestionChoiceInline(admin.TabularInline):
@@ -1060,9 +1179,40 @@ class PaiementAdmin(admin.ModelAdmin):
         return qs
     fields = ('montant', 'type', 'date', 'detail', )
     readonly_fields = ('date', )
-    list_display = ('equipes', 'montant', 'type', 'date', )
+    list_display = ('equipes', 'montant', 'montant_frais2', 'type', 'date', )
     list_filter = ('type', PaiementEquipeFilter, )
     inlines = [ PaiementRepartitionInline ]
+    class Media:
+        js = ('custom_admin/paiements.js', )
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            url(r'^total/$', self.total, name='paiements_total'),
+        ]
+        return my_urls + urls
+
+    def total(self, request):
+        course = getCourse(request)
+        total = {
+            'montant': Decimal(0),
+            'monntant_frais': Decimal(0),
+        }
+        for obj in course.paiements.filter(**request.GET):
+            total['montant'] += obj.montant
+            total['montant_frais'] += self.montant_frais2(obj.montant_frais)
+        return HttpResponse(json.dumps(total), content_type='application/json')
+
+    def montant_frais2(self, obj):
+        if obj.montant_frais:
+            return obj.montant_frais
+        if not obj.montant:
+            return Decimal(0)
+        if obj.type == 'paypal':
+            return obj.montant * Decimal('0.034') + Decimal('0.25')
+        if obj.type == 'stripe':
+            return obj.montant * Decimal('0.014') + Decimal('0.25')
+        return Decimal(0)
 
     def equipes(self, obj):
         #TODO hide course if t's the current one

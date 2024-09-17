@@ -134,7 +134,8 @@ location.href = "choose/";
                     Total
                 </th>
                 <td>
-                    {{ stats.course.prix|floatformat:2 }}€
+                    {{ stats.course.prix|floatformat:2 }}€ /
+                    {{ stats.course.equipiers }} personnes
                 </td>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
@@ -166,6 +167,11 @@ location.href = "choose/";
                     </a>
                 </td>
             </tr>
+            <!--tr>
+                <th>Equipiers:</th>
+                <td>{{ stats.course.equipiers }} / {{ COURSE.limite_participants }}</td>
+                <td colspan=4></td>
+            </tr-->
         </table>
     </div>
     {% endwith %}
@@ -192,9 +198,17 @@ location.href = "choose/";
                         <i class="fa fa-line-chart"></i><br />
                         <label>{% blocktrans %}Statistiques{% endblocktrans %}</a>
                     </a>
+                    <a href="stats/">
+                        <i class="fa fa-line-chart"></i><br />
+                        <label>{% blocktrans %}Comparaisons{% endblocktrans %}</a>
+                    </a>
                     <a href="anomalies/">
                         <i class="fa fa-exclamation-triangle"></i><br />
                         <label>{% blocktrans %}Anomalies{% endblocktrans %}</a>
+                    </a>
+                    <a href="anniversaires/">
+                        <i class="fa fa-birthday-cake"></i><br />
+                        <label>{% blocktrans %}Anniversaires{% endblocktrans %}</a>
                     </a>
                     <a href="/wiki/" target="_blank">
                         <i class="fa fa-book"></i><br />

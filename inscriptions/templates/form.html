@@ -6,8 +6,11 @@
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
-{% if not update %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
-{% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
+{% if not update %}{% trans 'Inscription' as TITLE %}{% endif %}
+{% if update %}{% trans 'Modification de votre inscription' as TITLE %}{% endif %}
+{% with page="inscription" %}
+{% include "_course_header.html" %}
+{% endwith %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="if (!good) { $('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); } return good">
     {% if errors %}
     <div class="panel panel-danger">
@@ -36,12 +39,14 @@
     <div id="part0" class="parts">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="media">
-                    <div class="media-left">
-                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
-                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
+                {% if course.texte_accueil %}<div class="panel">
+                    <div class="panel-body">
+                        {{ course.texte_accueil }}
                     </div>
-                    <div class="media-body">
+                </div>
+                {% endif %}
+                <div class="panel">
+                    <div class="panel-body">
                         {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
                         <br />
                         {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
@@ -147,12 +152,12 @@
     });
     {% endif %}
     var COURSE = {
-        YEAR: {{ YEAR }},
-        MONTH: {{ MONTH }},
-        DAY: {{ DAY }},
+        YEAR_AGE: {{ COURSE.date_age.year|default:course.date.year }},
+        MONTH_AGE: {{ COURSE.date_age.month|default:course.date.month }},
+        DAY_AGE: {{ COURSE.date_age.day|default:course.date.day }},
         CLOSE_DATE: new Date({{ CLOSE_YEAR }},{{ CLOSE_MONTH }}-1,{{ CLOSE_DAY }}),
         MIN_AGE: {{ MIN_AGE|default:0 }},
-        EQUIPIERS_COUNT: {{ equipiers_count }},
+        EQUIPIERS_COUNT: {{ equipiers_count }}{% if instance %} - {{ instance.nombre }}{% endif %},
         MAX_EQUIPIERS: {{ COURSE.limite_participants }},
         URL: "{{ COURSE.url|escapejs }}"
     };

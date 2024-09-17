@@ -1,4 +1,4 @@
-import json
+import json, re
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
@@ -30,7 +30,7 @@ class ExtraModelForm(ModelForm):
 class EquipeForm(ExtraModelForm):
     class Meta:
         model = Equipe
-        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture', 'tours', 'temps', 'position_generale', 'position_categorie', 'extra', )
+        exclude = ('paiement', 'dossier_complet', 'password', 'date', 'commentaires', 'paiement_info', 'gerant_ville2', 'numero', 'course', 'date_facture', 'tours', 'temps', 'position_generale', 'position_categorie', 'extra', 'verrou', )
         widgets = {
             'categorie': HiddenInput(),
             'prix': HiddenInput(),
@@ -52,9 +52,6 @@ class EquipierForm(ExtraModelForm):
 EquipierFormset = formset_factory(EquipierForm, formset=BaseModelFormSet, extra=settings.MAX_EQUIPIERS)
 EquipierFormset.model = Equipier
 
-with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
-    COURSE_MODELS = json.load(f)
-
 class CourseForm(ModelForm):
     class Meta:
         model = Course
@@ -71,35 +68,56 @@ class CourseForm(ModelForm):
             'url': _("""Adresse internet pointant vers le site présentant la course"""),
             'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
             'email_contact': _("""Email utilisée pour envoyer les emails"""),
+            'texte_accueil': _("""Ce texte sera affiché sur la page d'inscription. Vous pouvez l'utiliser si vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas mettre de message."""),
         }
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_course.js', )
+
     course_model = CharField(
         label=_("Model de course"),
-        widget=AdminRadioSelect(
-            choices=[(k, v['_name']) for k, v in COURSE_MODELS.items()]
-        )
+        widget=AdminRadioSelect(choices=[('a', 'b')])
     )
     course_prix = CharField(widget=HiddenInput)
 
     def save(self, commit=True):
         model = self.cleaned_data['course_model']
         prix = json.loads(self.cleaned_data['course_prix'])
-        if 'categories' in COURSE_MODELS[model]:
-            for c in COURSE_MODELS[model]['categories']:
-                if c['code'] in prix:
-                    c['prix1'] = prix[c['code']]['prix1']
-                    c['prix2'] = prix[c['code']]['prix2']
+        if re.match('^[0-9]+$', model):
+            course = Course.objects.get(id=model)
+            original = course
+            instance = super().save(commit=False)
+            instance.is_active = False
+            instance.save()
 
-        instance = super().save(commit=False)
-        instance.is_active = False
-        instance.save()
+            for key in ['categories', 'templatemail_set', 'extra']:
+                for obj in getattr(course, key).all():
+                    obj.id = None
+                    obj.course = instance
+                    if key == 'categories':
+                        if obj.code in prix:
+                            obj.prix1 = prix[obj.code]['prix1']
+                            obj.prix2 = prix[obj.code]['prix2']
+                    obj.save()
 
-        for key, items in COURSE_MODELS[model].items():
-            if key.startswith('_'):
-                continue
-            for item in items:
-                getattr(instance, key).create(**item)
+        else:
+            with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+                models = json.load(f)
+
+                if 'categories' in models[model]:
+                    for c in models[model]['categories']:
+                        if c['code'] in prix:
+                            c['prix1'] = prix[c['code']]['prix1']
+                            c['prix2'] = prix[c['code']]['prix2']
+
+                instance = super().save(commit=False)
+                instance.is_active = False
+                instance.save()
+
+                for key, items in models[model].items():
+                    if key.startswith('_'):
+                        continue
+                    for item in items:
+                        getattr(instance, key).create(**item)
         return instance
 
 class ContactForm(Form):
@@ -127,11 +145,12 @@ class ChallengeForm(ModelForm):
         exclude = ('active', )
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_challenge.js', )
+
     course_model = CharField(
         label=_("Model de course"),
-        widget=AdminRadioSelect(
-            choices=[(k, v['_name']) for k, v in COURSE_MODELS.items()]
-        )
+        widget=AdminRadioSelect(choices=[
+            (k, v['_name']) for (k, v) in settings.MODELS_COURSES.items()
+        ])
     )
 
     def save(self, commit=True):
@@ -139,9 +158,11 @@ class ChallengeForm(ModelForm):
         instance = super().save(commit=False)
         instance.save()
 
-        fields = [ f.name for f in ChallengeCategorie._meta.get_fields() ]
-        for cat in COURSE_MODELS[model]['categories']:
-            instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
+        with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+            models = json.load(f)
+            fields = [ f.name for f in ChallengeCategorie._meta.get_fields() ]
+            for cat in models[model]['categories']:
+                instance.categories.create(**{ k: v for k, v in cat.items() if k in fields })
         return instance
 
 class AdminPaiementForm(ModelForm):

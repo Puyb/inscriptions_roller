@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
-import os
+import os, json
+from pathlib import Path
 
 
 PACKAGE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 PROJECT_ROOT = os.path.abspath(os.path.join(PACKAGE_ROOT, os.pardir))
 BASE_DIR = PACKAGE_ROOT
+FILE_UPLOAD_PERMISSIONS = 0o644
 
 DEBUG = False
 
@@ -114,6 +116,7 @@ MIDDLEWARE= [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "inscriptions.middleware.tracking_middleware",
 ]
 
 ROOT_URLCONF = "inscriptions.urls"
@@ -134,7 +137,6 @@ INSTALLED_APPS = [
     "formadmin",
     "pinax_theme_bootstrap",
     "account",
-    "pinax.stripe",
 
     'django.contrib.sites.apps.SitesConfig',
     'django.contrib.humanize.apps.HumanizeConfig',
@@ -243,4 +245,9 @@ CHANNEL_LAYERS = {
         },
     },
 }
+NYT_CHANNELS_DISABLE = True
+
+CONTACT_MAIL = 'contact@enduroller.fr'
+with (Path(PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+    MODELS_COURSES=json.load(f)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024

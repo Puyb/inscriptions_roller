@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pinax_stripe', '0014_auto_20180413_1959'),
         ('inscriptions', '0045_auto_20181124_1744'),
     ]
 
@@ -15,11 +14,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(
             model_name='equipe',
             name='paiement',
-        ),
-        migrations.AddField(
-            model_name='paiement',
-            name='stripe_charge',
-            field=models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='paiement', to='pinax_stripe.Charge'),
         ),
         migrations.AlterField(
             model_name='paiement',

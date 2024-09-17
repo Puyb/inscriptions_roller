@@ -9,6 +9,7 @@ module.exports = {
     entry: {
         site: "./js/main.js",
         admin: "./js/admin.js",
+        stats: "./js/stats.js",
     },
     output: {
         path: path.resolve(__dirname, "dist"),
@@ -85,6 +86,28 @@ module.exports = {
                 return script;
             },
             chunks: ['admin']
-        })
+        }),
+        new HtmlWebpackPlugin({
+            filename: projectTemplatesRoot + "stats/_styles.html",
+            templateContent: function(templateParams, compilation) {
+                var link = "";
+                for (var css in templateParams.htmlWebpackPlugin.files.css) {
+                    link += "<link href='" + templateParams.htmlWebpackPlugin.files.css[css]  + "' rel='stylesheet' />\n"
+                }
+                return link;
+            },
+            chunks: ['stats']
+        }),
+        new HtmlWebpackPlugin({
+            filename: projectTemplatesRoot + "stats/_scripts.html",
+            templateContent: function(templateParams, compilation) {
+                var script = "";
+                for (var js in templateParams.htmlWebpackPlugin.files.js) {
+                    script += "<script src='" + templateParams.htmlWebpackPlugin.files.js[js]  + "'></script>\n"
+                }
+                return script;
+            },
+            chunks: ['stats']
+        }),
     ]
 };

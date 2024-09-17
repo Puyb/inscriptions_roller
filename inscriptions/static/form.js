@@ -25,18 +25,18 @@ var challenge_categories = null;
 
 function age(a) {
     return function(eq) {
-        var b = COURSE.YEAR - parseFloat(eq.date_de_naissance_year);
+        var b = COURSE.YEAR_AGE - parseFloat(eq.date_de_naissance_year);
         if(b !== a) return b > a;
-        if(parseFloat(eq.date_de_naissance_month) !== COURSE.MONTH)
-            return parseFloat(eq.date_de_naissance_month) < COURSE.MONTH;
-        return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY;
+        if(parseFloat(eq.date_de_naissance_month) !== COURSE.MONTH_AGE)
+            return parseFloat(eq.date_de_naissance_month) < COURSE.MONTH_AGE;
+        return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY_AGE;
     };
 }
 function age2(eq) {
     var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));
-    var course = new Date(COURSE.YEAR, COURSE.MONTH -1, COURSE.DAY);
+    var course = new Date(COURSE.YEAR_AGE, COURSE.MONTH_AGE - 1, COURSE.DAY_AGE);
     var age = course.getFullYear() - birthday.getFullYear();
-    birthday.setFullYear(COURSE.YEAR);
+    birthday.setFullYear(COURSE.YEAR_AGE);
     if (!age) return null;
     if (birthday > course) return age - 1;
     return age;
@@ -73,7 +73,7 @@ function serialize() {
 
 function disable_form_if_needed() {
     if(STAFF) return;
-    if(new Date() >= COURSE.CLOSE_DATE || COURSE.EQUIPIERS_COUNT >= COURSE.MAX_EQUIPIERS) {
+    if(new Date() >= COURSE.CLOSE_DATE) {
         $('input, select').each(function() {
             if(this.type !== 'file' && this.type !== 'button' && this.type !== 'submit' && this.type !== 'radio' && !/num_licence$/.test(this.name))
                 this.disabled = true;
@@ -103,7 +103,7 @@ function check_step(data) {
     var prefix = '[name=';
     var test_data = data;
     var tests;
-    var message = '';
+    var message = [];
     if(!actual_part) {
         tests = {
             nom:                function(k) { check_nom(true); return /^.+$/i.test(this.nom) && $('#nom_erreur').html() === ''; },
@@ -118,7 +118,11 @@ function check_step(data) {
                 if(CATEGORIES.filter(function(categorie) {
                     return categorie.min_equipiers <= nombre && nombre <= categorie.max_equipiers;
                 }).length === 0) {
-                    message += gettext("Désolé, il n'y a plus de place dans cette catégorie. Changez le nombre de participants.") + '\n';
+                    message.push(gettext("Désolé, il n'y a plus de place dans cette catégorie. Changez le nombre de participants."));
+                    return false;
+                }
+                if (COURSE.EQUIPIERS_COUNT + parseInt(nombre) > COURSE.MAX_EQUIPIERS) {
+                    message.push(gettext("Désolé, la course est complete, vous ne pouvez pas inscrire une équipe avec autant d'équipiers."));
                     return false;
                 }
                 return true;
@@ -143,24 +147,23 @@ function check_step(data) {
         prefix = '[name=form-' + (actual_part - 1) + '-';
         test_data = data.equipiers[actual_part - 1];
     }
-    return apply_tests(tests, test_data, prefix);
+    return apply_tests(tests, test_data, prefix, message);
 }
 
-function apply_tests(tests, test_data, prefix, message) {
-    message = message || '';
+function apply_tests(tests, test_data, prefix, message = []) {
     for(var k in tests) {
         if(tests[k].test ? tests[k].test(test_data[k]) : tests[k].call(test_data, k)) {
             $(prefix + k + ']').parents('.form-group').removeClass('has-error');
         } else {
-            message += gettext('Veuillez corriger les champs en rouge.')
+            message.push(gettext('Veuillez corriger les champs en rouge.'))
             $(prefix + k + ']').parents('.form-group').addClass('has-error');
             $(prefix + k + '_day]').parents('.form-group').addClass('has-error');
         }
     }
-    if(message !== '') {
-        return alert(message);
+    if(message.length) {
+        return alert(message.join('\n'));
     }
-    return !message;
+    return !message.length;
 }
 
 function setup_categories(data) {
@@ -311,14 +314,12 @@ $(function() {
         var $formGroup = $this.parents('.form-group');
         var id = this.id.split('-').slice(0, 2).join('-');
         $formGroup.hide() // num_licence
-            .next().hide() // piece_jointe
-            .next().hide(); // cerfa
+            .next().hide(); // piece_jointe
         $formGroup
             .next().find('.certificat, .licence').hide() // piece_jointe
         var handler = function() {
             $formGroup.hide() // num_licence
-                .next().hide() // piece_jointe
-                .next().hide(); // cerfa
+                .next().hide(); // piece_jointe
             $formGroup
                 .next().find('.certificat, .licence').hide() // piece_jointe
             if($('#' + id + '-justificatif_1')[0].checked) {

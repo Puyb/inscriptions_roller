@@ -1,0 +1,55 @@
+services:
+  django:
+    build: ./
+    volumes:
+      - ./:/app
+    ports:
+      - 8000:29000
+    environment:
+      ALLOWED_HOSTS: "enduroller.fr,www.enduroller.fr,localhost"
+      ADMIN_EMAILS: "puyb@puyb.net"
+      DEBUG: "True"
+      EMAIL_HOST: "mail.enduroller.fr"
+      EMAIL_HOST_USER: "donotreply@enduroller.fr"
+      EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
+      DEFAULT_FROM_MAIL: "donotreply@enduroller.fr"
+      MAPQUEST_API_KEY: "Fmjtd|luub2d6ynd%2C25%3Do5-9u22ha"
+      CONTACT_MAIL: "contact@enduroller.fr"
+      DB_NAME: "enduroller"
+      DB_USER: "enduroller"
+      DB_PASSWORD: "jirshIgViax0"
+      DB_HOST: "db"
+      REDIS_HOST: "redis"
+      DEV_SERVER: "True"
+      LOCAL_SETTINGS: ".docker"
+    depends_on:
+      - db
+      - redis
+
+  bounce:
+    image: node
+    command: /srv/app/start-bounce.sh
+    volumes:
+      - ./:/srv/app
+    environment:
+      EMAIL_HOST: "mail.enduroller.fr"
+      EMAIL_HOST_USER: "donotreply@enduroller.fr"
+      EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
+      DB_NAME: "enduroller"
+      DB_USER: "enduroller"
+      DB_PASSWORD: "jirshIgViax0"
+      DB_HOST: "db"
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: "enduroller"
+      POSTGRES_USER: "enduroller"
+      POSTGRES_PASSWORD: "jirshIgViax0"
+
+  redis:
+    image: redis
+

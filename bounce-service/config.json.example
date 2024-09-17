@@ -1,0 +1,15 @@
+{
+    "imap": {
+        "user": "login",
+        "password": "password",
+        "host": "host",
+        "port": 993,
+        "tls": true
+    },
+    "database": {
+        "host": "localhost",
+        "user": "user",
+        "password": "password",
+        "database": "database"
+    }
+}

@@ -23,14 +23,13 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
-from pinax.stripe.actions import charges
-from pinax.stripe.views import Webhook
 import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +45,7 @@ def form(request, course_uid, numero=None, code=None):
     instance = None
     old_password = None
     update = False
-    equipiers_count = Equipier.objects.filter(equipe__course=course).count()
+    equipiers_count = course.equipe_set.aggregate(Sum('nombre'))['nombre__sum'] or 0
     message = ''
     if numero:
         instance = get_object_or_404(Equipe, course=course, numero=numero)
@@ -54,6 +53,8 @@ def form(request, course_uid, numero=None, code=None):
         old_password = instance.password
         if instance.password != code:
             raise Http404()
+        if instance.verrou and not request.user.is_staff:
+            return TemplateResponse(request, 'locked.html', {})
         update = True
     if request.method == 'POST':
         try:
@@ -80,6 +81,7 @@ def form(request, course_uid, numero=None, code=None):
                     equipier_instance.save()
                 new_instance.prix = reduce(lambda a, b: a + b['prix'], new_instance.facture(), 0)
                 new_instance.save()
+                new_instance.equipier_set.filter(numero__gt=new_instance.nombre).delete()
                 if not instance:
                     try:
                         course.send_mail('inscription', [ new_instance ])
@@ -106,7 +108,7 @@ def form(request, course_uid, numero=None, code=None):
                     subject='Error in form submit',
                     body=text,
                     to=settings.ADMINS,
-                    content_type='text',
+                    content_type='plain',
                 )
         except NoPlaceLeftException as e:
             message = _(u"Désolé, il n'y a plus de place dans cette catégorie")
@@ -127,18 +129,16 @@ def form(request, course_uid, numero=None, code=None):
         link = '<a href="%s" target="_blank">%s</a>'
         autorisation_link = link % (reverse('inscriptions_model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
         certificat_link   = link % (reverse('inscriptions_model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
-        cerfa_link        = link % ('https://www.formulaires.modernisation.gouv.fr/gf/cerfa_15699.do', _("QS-SPORT Cerfa N°15699*01"))
 
         for equipier_form in equipier_formset:
-            equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
+            equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date_age or course.date }
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
             equipier_form.fields['piece_jointe'].help_text = '<span class="certificat">%s</span><span class="licence">%s</span>' % (
-                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link, 'link_cerfa': cerfa_link },
+                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link },
                 _(Equipier.LICENCE_HELP),
             )
-            equipier_form.fields['cerfa_valide'].label = _('Je certifie que cette personne a renseigné le questionnaire de santé QS-SPORT Cerfa N°15699*01 et a répondu par la négative à l’ensemble des questions')
 
-    nombres_par_tranche = { e['range']: e['count'] 
+    nombres_par_tranche = { e['range']: e['count']
             for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
@@ -148,7 +148,7 @@ def form(request, course_uid, numero=None, code=None):
                 )).values('range').annotate(count=Count('numero'))
         }
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
-    
+
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
@@ -331,9 +331,9 @@ def equipe_list(request, course_uid):
 def resultats(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid, position_generale__isnull=False)
     (_('position_generale'), _('position_categorie'), _('numero'), _('nom'), _('categorie__code'))
-    return _list(course_uid, equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'])
+    return _list(course_uid, equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'], show_stats=False)
 
-def _list(course_uid, equipes, request, template, sorts):
+def _list(course_uid, equipes, request, template, sorts, show_stats=True):
     if request.GET.get('search'):
         equipes = equipes.filter(Q(nom__icontains=request.GET['search']) | Q(club__icontains=request.GET['search']))
     s = []
@@ -353,24 +353,26 @@ def _list(course_uid, equipes, request, template, sorts):
                 equipes = equipes.filter(position_categorie__lte=top)
             else:
                 equipes = equipes.filter(position_generale__lte=top)
-        except ValueError as e:
+        except ValueError:
             pass
 
-    user_is_staff = (request.user and request.user.is_staff and 
+    user_is_staff = (request.user and request.user.is_staff and
         request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
-    stats = equipes.aggregate(
-        count     = Count('id'),
-        club      = Count('club', distinct=True),
-        villes    = Count('gerant_ville2__nom', distinct=True),
-        pays      = Count('gerant_ville2__pays', distinct=True),
-    )
-    if user_is_staff:
-        stats.update(equipes.aggregate(
-            prix      = Sum('prix'), 
-            nbpaye    = Count('_montant_paiements'), 
-            paiement  = Sum('_montant_paiements'), 
-            equipiers = Sum('nombre'),
-        ))
+    stats = None
+    if show_stats:
+        stats = equipes.aggregate(
+            count     = Count('id'),
+            club      = Count('club', distinct=True),
+            villes    = Count('gerant_ville2__nom', distinct=True),
+            pays      = Count('gerant_ville2__pays', distinct=True),
+        )
+        if user_is_staff:
+            stats.update(equipes.aggregate(
+                prix      = Sum('prix'), 
+                nbpaye    = Count('_montant_paiements'), 
+                paiement  = Sum('_montant_paiements'), 
+                equipiers = Sum('nombre'),
+            ))
     return TemplateResponse(request, template, {
         'user_is_staff': user_is_staff,
         'stats': stats,
@@ -411,7 +413,7 @@ def stats_compare(request, course_uid, course_uid2):
     align = request.GET.get('align', '')
     course1 = get_object_or_404(Course, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
-    if align == "augment":
+    if align == "augment" and course1.date_augmentation:
         duree1 = (course1.date_augmentation - course1.date_ouverture).days
 
     res = []
@@ -433,7 +435,7 @@ def stats_compare(request, course_uid, course_uid2):
             'course': course,
             'json': json.dumps(stats),
             'delta': delta,
-            'augment': (course.date_augmentation - course.date_ouverture).days,
+            'augment': (course.date_augmentation - course.date_ouverture).days if course.date_augmentation else 0,
         });
         i += 1;
 
@@ -465,18 +467,39 @@ Email: %s
 %s""" % (name, from_email, message),
             name=name,
             to=[course.email_contact],
-            reply_to=[from_email,]
+            reply_to=[from_email,],
+            content_type='plain',
         )
         return HttpResponseRedirect('thankyou/')
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
-def contact_done(request, course_uid):
+def contact_done(request, course_uid, numero=None):
     course = get_object_or_404(Course, uid=course_uid)
     return TemplateResponse(request, 'contact_done.html', {'course': course})
 
-def facture(request, course_uid, numero):
+def categories(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    categories = course.categories.annotate(nb=(F('min_equipiers') + F('max_equipiers')) / 2).order_by('nb', 'code');
+    return TemplateResponse(request, 'categories.html', {
+        'course': course,
+        'categories': categories,
+        'mixite_choices': dict(MIXITE_CHOICES),
+    })
+
+def facture(request, course_uid, numero, code=None):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
     if not equipe.paiement_complet():
+        raise Http404()
+    if not code:
+        if request.method == 'POST':
+            equipe.send_mail('paiement')
+            return HttpResponseRedirect('thankyou/')
+
+        return TemplateResponse(request, 'facture_new_url.html', {
+            "instance": equipe,
+        })
+
+    if equipe.password != code:
         raise Http404()
 
     if not equipe.date_facture:
@@ -662,11 +685,57 @@ def live_push(request, course_uid):
 def countries(request):
     return HttpResponse(json.dumps([ [k, str(v)] for k, v in COUNTRIES.items()]), content_type='application/json')
 
-class StripeWebhook(Webhook):
-    def post(self, request, *args, **kwargs):
-        course = get_object_or_404(Course, uid=self.kwargs['course_uid'])
-        stripe.api_key = course.stripe_secret
-        return super().post(request, *args, **kwargs)
+@csrf_exempt
+def stripe_webhook(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    stripe.api_key = course.stripe_secret
+    endpoint_secret = course.stripe_endpoint_secret
+
+    payload = request.body
+    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+    event = None
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except ValueError as e:
+        # invalid payload
+        return HttpResponse('Invalid payload', status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # invalid signature
+        return HttpResponse('Invalid payload', status=400)
+
+    event_dict = event.to_dict()
+    if event_dict['type'] == "payment_intent.succeeded":
+        intent = event_dict['data']['object']
+        try:
+            paiement = Paiement.objects.get(
+                stripe_intent=intent['id'],
+                equipes__equipe__course=course,
+            )
+            paiement.montant = Decimal(intent['amount']) / 100
+            paiement.detail = '\nConfirmed on %s' % datetime.now()
+            paiement.save()
+            paiement.send_equipes_mail()
+            paiement.send_admin_mail()
+        except Paiement.DoesNotExist as e:
+            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+        # Fulfill the customer's purchase
+    elif event_dict['type'] == "payment_intent.payment_failed":
+        intent = event_dict['data']['object']
+        try:
+            paiement = Paiement.objects.get(
+                stripe_intent=intent['id'],
+                equipes__equipe__course=course,
+            )
+            error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
+            paiement.detail = '\nRejected on %s\n%s' % (datetime.now(), error_message)
+            paiement.save()
+        except Paiement.DoesNotExist as e:
+            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+
+    return HttpResponse('OK')
 
 def stripe_paiement(request, course_uid):
     success = False
@@ -674,8 +743,6 @@ def stripe_paiement(request, course_uid):
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
     if not equipes:
         raise Http404()
-
-    token = request.POST['token']
 
     montant = 0
     frais = Decimal(0)
@@ -686,20 +753,17 @@ def stripe_paiement(request, course_uid):
 
     stripe.api_key = course.stripe_secret
     try: 
-        charge = charges.create(
-            amount=montant + frais,
-            #customer=request.user.customer,
-            source=token,
+        intent = stripe.PaymentIntent.create(
+            amount=int((montant + frais) * 100),
             currency='EUR',
             description=', '.join('%s' % (equipe, ) for equipe in equipes),
-            capture=True,
         )
 
         paiement = Paiement(
             type='stripe',
-            stripe_charge=charge,
             montant=None, # will be updated when confirmation is received from stripe
             montant_frais=frais or None,
+            stripe_intent = intent.id,
         )
         paiement.save()
         frais_equipes = repartition_frais([
@@ -712,12 +776,18 @@ def stripe_paiement(request, course_uid):
                 montant_frais=frais_equipe,
             )
         success = True
-    except Exception as e:
-        logger.exception('error handling stripe webhook')
 
-    return HttpResponse(json.dumps({
-        'success': success,
-    }))
+        return HttpResponse(json.dumps({
+            'success': success,
+            'client_secret': intent.client_secret,
+        }))
+    except Exception as e:
+        logger.exception('error handling stripe intent creation')
+        return HttpResponse(json.dumps({
+            'success': False,
+        }), status=500)
+
+
 
 def equipe_payee(request, course_uid, numero):
     course = get_object_or_404(Course, uid=course_uid)
@@ -726,3 +796,6 @@ def equipe_payee(request, course_uid, numero):
         'success': equipe.paiement_complet(),
     }))
 
+def blank(request):
+    with open(Path(settings.STATIC_ROOT) / 'blank.gif', 'rb') as f:
+        return HttpResponse(f, content_type="image/gif")
