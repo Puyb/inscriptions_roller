@@ -665,16 +665,20 @@ class Equipe(models.Model):
     def distance(self):
         return self.tours * self.course.distance if self.tours else None
 
-def equipier_piece_jointe_filename(static_name=None):
-    def func(instance, filename):
-        name = static_name or instance.justificatif
-        pj = Path(filename)
-        dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
-        dest.mkdir(parents=True, exist_ok=True)
-        new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
-        print(new_pj)
-        return new_pj
-    return func
+def equipier_piece_jointe_filename(instance, filename):
+    name = instance.justificatif
+    pj = Path(filename)
+    dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
+    dest.mkdir(parents=True, exist_ok=True)
+    new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
+    return new_pj
+def equipier_autorisation_filename(instance, filename):
+    name = 'autorisation'
+    pj = Path(filename)
+    dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
+    dest.mkdir(parents=True, exist_ok=True)
+    new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
+    return new_pj
 
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
@@ -698,11 +702,11 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     pays              = models.CharField(_(u'Pays'), max_length=2, default='FR')
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
-    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_piece_jointe_filename('autorisation'), blank=True, help_text=AUTORISATION_HELP)
+    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_autorisation_filename , blank=True, help_text=AUTORISATION_HELP)
     autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
     justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
-    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename(), blank=True)
+    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
