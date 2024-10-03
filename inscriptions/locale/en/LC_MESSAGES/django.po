@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: sixhdp\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-17 19:38+0200\n"
+"POT-Creation-Date: 2024-10-03 21:01+0200\n"
 "PO-Revision-Date: 2022-06-06 18:30+0200\n"
 "Last-Translator: Puyb <puyb@puyb.net>\n"
 "Language-Team: English\n"
@@ -18,130 +18,135 @@ msgstr ""
 "X-Generator: Poedit 3.0\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: inscriptions/admin_course.py:268
+#: inscriptions/admin_course.py:275
 #, python-format
 msgid "Numéro d'équipe incorrect dans la colonne %d à la ligne %d (%s)"
 msgstr "Team number invalid at column %d at line %d (%s)"
 
-#: inscriptions/admin_course.py:316
+#: inscriptions/admin_course.py:323
 #, python-format
 msgid "Temps incorrect dans la colonne %d à la ligne %d (%s)"
 msgstr "Invalid time at column %d at line %d (%s)"
 
-#: inscriptions/admin_course.py:568
+#: inscriptions/admin_course.py:578
 msgid "Statut"
 msgstr "Status"
 
-#: inscriptions/admin_course.py:572
+#: inscriptions/admin_course.py:582
 #, python-format
 msgid "%s À vérifier"
 msgstr "%s To check"
 
-#: inscriptions/admin_course.py:573
+#: inscriptions/admin_course.py:583
 #, python-format
 msgid "%s Complet"
 msgstr "%s Complete"
 
-#: inscriptions/admin_course.py:574
+#: inscriptions/admin_course.py:584
 #, python-format
 msgid "%s Incomplet"
 msgstr "%s Not complete"
 
-#: inscriptions/admin_course.py:575
+#: inscriptions/admin_course.py:585
 #, python-format
 msgid "%s Erreur"
 msgstr "%s Error"
 
-#: inscriptions/admin_course.py:594
+#: inscriptions/admin_course.py:604
 msgid "Paiement"
 msgstr "Payment"
 
-#: inscriptions/admin_course.py:598
+#: inscriptions/admin_course.py:608
 #, python-format
 msgid "%s Paiement complet"
 msgstr "%s Payed in full"
 
-#: inscriptions/admin_course.py:599
+#: inscriptions/admin_course.py:609
 #, python-format
 msgid "%s Impayé ou partiel"
 msgstr "%s Unpayed or partialy payed"
 
-#: inscriptions/admin_course.py:600
+#: inscriptions/admin_course.py:610
 msgid "> Trop payé"
 msgstr "> Overpayed"
 
-#: inscriptions/admin_course.py:601
+#: inscriptions/admin_course.py:611
 msgid "= Paiement exact"
 msgstr "= Payed exactly"
 
-#: inscriptions/admin_course.py:602
+#: inscriptions/admin_course.py:612
 msgid "< Partiel"
 msgstr "< Not payed in full"
 
-#: inscriptions/admin_course.py:603
+#: inscriptions/admin_course.py:613
 msgid "0 Impayé"
 msgstr "0 Not payed"
 
-#: inscriptions/admin_course.py:624 inscriptions/templates/stats.html:171
+#: inscriptions/admin_course.py:634 inscriptions/templates/stats.html:171
 msgid "Catégories"
 msgstr "Categories"
 
-#: inscriptions/admin_course.py:637
+#: inscriptions/admin_course.py:647
 msgid "Mineurs"
 msgstr "Underaged"
 
-#: inscriptions/admin_course.py:641
+#: inscriptions/admin_course.py:651
 msgid "Avec mineurs"
 msgstr "With underaged"
 
-#: inscriptions/admin_course.py:642
+#: inscriptions/admin_course.py:652
 msgid "Sans mineur"
 msgstr "Without underaged"
 
-#: inscriptions/admin_course.py:812
+#: inscriptions/admin_course.py:828
 msgid "Envoyer un mail groupé"
 msgstr "Send a group mail"
 
-#: inscriptions/admin_course.py:819 inscriptions/admin_course.py:824
-#: inscriptions/admin_course.py:1099
+#: inscriptions/admin_course.py:835 inscriptions/admin_course.py:840
+#: inscriptions/admin_course.py:1157
 msgid "Equipe"
 msgstr "Team"
 
-#: inscriptions/admin_course.py:828 inscriptions/admin_course.py:833
-#: inscriptions/models.py:66 inscriptions/models.py:753
+#: inscriptions/admin_course.py:844 inscriptions/admin_course.py:849
+#: inscriptions/models.py:67 inscriptions/models.py:782
 msgid "Equipier"
 msgstr "Teamate"
 
-#: inscriptions/admin_course.py:887
+#: inscriptions/admin_course.py:903
 #: inscriptions/templates/admin/equipe/export.html:39
 msgid "Exporter"
 msgstr "Export"
 
-#: inscriptions/admin_course.py:900
+#: inscriptions/admin_course.py:946
+#: inscriptions/templates/admin/dashboard.html:315
+msgid "Télécharger les justificatifs"
+msgstr ""
+
+#: inscriptions/admin_course.py:959
 msgid "Paiement reçu"
 msgstr "Payment received"
 
-#: inscriptions/admin_course.py:905
+#: inscriptions/admin_course.py:964
 msgid "Verrouiller"
 msgstr "Lock"
 
-#: inscriptions/admin_course.py:910
+#: inscriptions/admin_course.py:969
 msgid "Déverrouiller"
 msgstr "Unlock"
 
-#: inscriptions/admin_course.py:1022
+#: inscriptions/admin_course.py:1080
 #: inscriptions/templates/_list_filter.html:13
-#: inscriptions/templates/admin/dashboard.html:295
+#: inscriptions/templates/admin/dashboard.html:296
 #: inscriptions/templates/stats_compare.html:145
 #: inscriptions/templates/stats_compare.html:162
 msgid "Equipes"
 msgstr "Teams"
 
-#: inscriptions/admin_course.py:1035
+#: inscriptions/admin_course.py:1093
 msgid "Modèle"
 msgstr "Template"
 
-#: inscriptions/admin_course.py:1038
+#: inscriptions/admin_course.py:1096
 msgid "Aucun"
 msgstr "None"
 
@@ -184,10 +189,9 @@ msgid ""
 "le code était 6hdp15. Ce code ne doit contenir que des lettres ou des "
 "chiffres."
 msgstr ""
-"Code used to identify the race. It will be visible in the web "
-"url of the registration page. Example: for the 6 hours of Paris 2015, "
-"the code was 6hdp15. This code should only contain alphanumeric "
-"characters."
+"Code used to identify the race. It will be visible in the web url of the "
+"registration page. Example: for the 6 hours of Paris 2015, the code was "
+"6hdp15. This code should only contain alphanumeric characters."
 
 #: inscriptions/forms.py:67
 msgid "Nom du club ou association organisateur"
@@ -211,362 +215,364 @@ msgid ""
 "vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas "
 "mettre de message."
 msgstr ""
-"This text will be presented on the registration page. You may use it "
-"to transmit a message at registration time. "
-"(This is not required)"
+"This text will be presented on the registration page. You may use it to "
+"transmit a message at registration time. (This is not required)"
 
-#: inscriptions/forms.py:77 inscriptions/forms.py:150
+#: inscriptions/forms.py:77 inscriptions/forms.py:148
 msgid "Model de course"
 msgstr "Race template"
 
-#: inscriptions/forms.py:130
+#: inscriptions/forms.py:128
 msgid "Fichier CSV"
 msgstr "CSV File"
 
-#: inscriptions/forms.py:131
+#: inscriptions/forms.py:129
 msgid "Délimiteur"
 msgstr "Separator"
 
-#: inscriptions/forms.py:132
+#: inscriptions/forms.py:130
 msgid "Sauter la première ligne"
 msgstr "Ignore first line"
 
-#: inscriptions/forms.py:133
+#: inscriptions/forms.py:131
 msgid "Dossard"
 msgstr "Bib"
 
-#: inscriptions/forms.py:134
+#: inscriptions/forms.py:132
 #: inscriptions/templates/participation_challenge.html:50
 #: inscriptions/templates/resultats_challenge.html:54
 #: inscriptions/templates/selection_participation.html:40
 msgid "Temps"
 msgstr "Time"
 
-#: inscriptions/forms.py:135
+#: inscriptions/forms.py:133
 msgid "Format du temps"
 msgstr "Time format"
 
-#: inscriptions/forms.py:135
+#: inscriptions/forms.py:133
 msgid "Nombre de secondes"
 msgstr "Number of seconds"
 
-#: inscriptions/forms.py:135
+#: inscriptions/forms.py:133
 msgid "HH:MM:SS.xxx"
 msgstr ""
 
-#: inscriptions/forms.py:136
+#: inscriptions/forms.py:134
 #: inscriptions/templates/participation_challenge.html:49
 #: inscriptions/templates/resultats_challenge.html:53
 #: inscriptions/templates/selection_participation.html:39
 msgid "Tours"
 msgstr "Lap"
 
-#: inscriptions/forms.py:137 inscriptions/models.py:486
+#: inscriptions/forms.py:135 inscriptions/models.py:495
 msgid "Position générale"
 msgstr "General position"
 
-#: inscriptions/forms.py:138 inscriptions/models.py:487
+#: inscriptions/forms.py:136 inscriptions/models.py:496
 msgid "Position catégorie"
 msgstr "Position by categories"
 
-#: inscriptions/forms.py:139
+#: inscriptions/forms.py:137
 msgid "Nom de l'équipe"
 msgstr "Team name"
 
-#: inscriptions/forms.py:140
+#: inscriptions/forms.py:138
 msgid "Code catégorie"
 msgstr "Category code"
 
-#: inscriptions/forms.py:176
+#: inscriptions/forms.py:174
 msgid "Type de paiement"
 msgstr "Payement kind"
 
-#: inscriptions/models.py:39 inscriptions/models.py:44
-#: inscriptions/models.py:698
+#: inscriptions/models.py:40 inscriptions/models.py:45
+#: inscriptions/models.py:727
 msgid "Homme"
 msgstr "Man"
 
-#: inscriptions/models.py:40 inscriptions/models.py:45
+#: inscriptions/models.py:41 inscriptions/models.py:46
 msgid "Femme"
 msgstr "Woman"
 
-#: inscriptions/models.py:46
+#: inscriptions/models.py:47
 msgid "Homme ou Mixte"
 msgstr "Men or Mixed"
 
-#: inscriptions/models.py:47
+#: inscriptions/models.py:48
 msgid "Femme ou Mixte"
 msgstr "Women or Mixed"
 
-#: inscriptions/models.py:48
+#: inscriptions/models.py:49
 msgid "Mixte"
 msgstr "Mixed"
 
-#: inscriptions/models.py:49
+#: inscriptions/models.py:50
 msgid "Sans critères"
 msgstr "Without rule"
 
-#: inscriptions/models.py:53
+#: inscriptions/models.py:54
 msgid "Licence FFRS"
 msgstr "License FFRS"
 
-#: inscriptions/models.py:54
+#: inscriptions/models.py:55
 msgid "Certificat médical"
 msgstr "Medical certificate"
 
-#: inscriptions/models.py:58
+#: inscriptions/models.py:59
 msgid "Accès interdit"
 msgstr "Acces forbidden"
 
-#: inscriptions/models.py:59
+#: inscriptions/models.py:60
 msgid "Administrateur"
 msgstr "Administrator"
 
-#: inscriptions/models.py:60 inscriptions/models.py:67
-#: inscriptions/models.py:127
+#: inscriptions/models.py:61 inscriptions/models.py:68
+#: inscriptions/models.py:128
 msgid "Organisateur"
 msgstr "Organisator"
 
-#: inscriptions/models.py:61
+#: inscriptions/models.py:62
 msgid "Validateur"
 msgstr "Validator"
 
-#: inscriptions/models.py:65 inscriptions/models.py:752
+#: inscriptions/models.py:66 inscriptions/models.py:781
 msgid "Gerant d'équipe"
 msgstr "Team leader"
 
-#: inscriptions/models.py:68 inscriptions/templates/_list_filter.html:32
+#: inscriptions/models.py:69 inscriptions/templates/_list_filter.html:32
 msgid "Tous"
 msgstr "All"
 
-#: inscriptions/models.py:125 inscriptions/models.py:374
-#: inscriptions/models.py:464 inscriptions/models.py:672
-#: inscriptions/models.py:859 inscriptions/models.py:1127
-#: inscriptions/models.py:1262
+#: inscriptions/models.py:126 inscriptions/models.py:380
+#: inscriptions/models.py:473 inscriptions/models.py:701
+#: inscriptions/models.py:888 inscriptions/models.py:1156
+#: inscriptions/models.py:1291
 msgid "Nom"
 msgstr "Last name"
 
-#: inscriptions/models.py:126 inscriptions/models.py:951
+#: inscriptions/models.py:127 inscriptions/models.py:980
 msgid "uid"
 msgstr "uid"
 
-#: inscriptions/models.py:126 inscriptions/models.py:951
+#: inscriptions/models.py:127 inscriptions/models.py:980
 msgid "Ne doit contenir que des lettres ou des chiffres"
 msgstr "Should only contain letters and/or digits"
 
-#: inscriptions/models.py:128 inscriptions/models.py:468
+#: inscriptions/models.py:129 inscriptions/models.py:477
 msgid "Ville"
 msgstr "City"
 
-#: inscriptions/models.py:129
+#: inscriptions/models.py:130
 msgid "Date"
 msgstr "Date"
 
-#: inscriptions/models.py:130
+#: inscriptions/models.py:131
 msgid "URL"
 msgstr ""
 
-#: inscriptions/models.py:131
+#: inscriptions/models.py:132
 msgid "URL Réglement"
 msgstr "URL regulation"
 
-#: inscriptions/models.py:132
+#: inscriptions/models.py:133
 msgid "Email contact"
 msgstr "Contact email"
 
-#: inscriptions/models.py:133 inscriptions/models.py:952
+#: inscriptions/models.py:134 inscriptions/models.py:981
 msgid "Logo"
 msgstr ""
 
-#: inscriptions/models.py:134
+#: inscriptions/models.py:135
 msgid "Date d'ouverture des inscriptionss"
 msgstr "Registration opening date"
 
-#: inscriptions/models.py:135
+#: inscriptions/models.py:136
 msgid "Date d'augmentation des tarifs"
 msgstr "Price raise date"
 
-#: inscriptions/models.py:136
+#: inscriptions/models.py:137
 msgid "Date de fermeture des inscriptions"
 msgstr "Registration closing date"
 
-#: inscriptions/models.py:137
+#: inscriptions/models.py:138
+#, fuzzy
+#| msgid "Date facture"
+msgid "Date calcul ages"
+msgstr "Invoice date"
+
+#: inscriptions/models.py:138
+msgid ""
+"Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date "
+"de la course"
+msgstr ""
+
+#: inscriptions/models.py:139
 msgid "Limite du nombre de participants"
 msgstr "Participants maximum limit"
 
-#: inscriptions/models.py:138
+#: inscriptions/models.py:140
 msgid "Adresse paypal"
 msgstr "Paypal address"
 
-#: inscriptions/models.py:139
+#: inscriptions/models.py:141
 msgid "Frais paypal inclus"
 msgstr "Paypal fees included"
 
-#: inscriptions/models.py:140
+#: inscriptions/models.py:142
 msgid "Stripe Secret Key"
 msgstr ""
 
-#: inscriptions/models.py:141
+#: inscriptions/models.py:143
 msgid "Stripe Public Key"
 msgstr ""
 
-#: inscriptions/models.py:142
+#: inscriptions/models.py:144
 msgid "Stripe End Point Secret"
 msgstr ""
 
-#: inscriptions/models.py:143
+#: inscriptions/models.py:145
 msgid "Frais stripe inclus"
 msgstr "Stripe fees included"
 
-#: inscriptions/models.py:144
+#: inscriptions/models.py:146
 msgid "Ordre des chèques"
 msgstr ""
 
-#: inscriptions/models.py:145 inscriptions/models.py:466
-#: inscriptions/models.py:675 inscriptions/models.py:676
+#: inscriptions/models.py:147 inscriptions/models.py:475
+#: inscriptions/models.py:704 inscriptions/models.py:705
 msgid "Adresse"
 msgstr "Address"
 
-#: inscriptions/models.py:146 inscriptions/models.py:954
+#: inscriptions/models.py:148 inscriptions/models.py:983
 msgid "Activée"
 msgstr "Activated"
 
-#: inscriptions/models.py:147
+#: inscriptions/models.py:149
 msgid "Distance d'un tour (en km)"
 msgstr "Track length (km)"
 
-#: inscriptions/models.py:148
+#: inscriptions/models.py:150
 msgid "Texte d'accueil"
 msgstr "Welcome text"
 
-#: inscriptions/models.py:375 inscriptions/models.py:1128
+#: inscriptions/models.py:381 inscriptions/models.py:1157
 #: inscriptions/templates/stats.html:175
 msgid "Code"
 msgstr ""
 
-#: inscriptions/models.py:376 inscriptions/models.py:767
-#: inscriptions/models.py:814
-msgid "Prix normal"
-msgstr "Standard price"
-
-#: inscriptions/models.py:377 inscriptions/models.py:768
-#: inscriptions/models.py:815
-msgid "Prix augmenté"
-msgstr "Raised price"
-
-#: inscriptions/models.py:378 inscriptions/models.py:1129
-msgid "Nombre minimum d'équipiers"
-msgstr "Minimum number of teammate"
-
-#: inscriptions/models.py:379 inscriptions/models.py:1130
-msgid "Nombre maximum d'équipiers"
-msgstr "Maximum number of teammate"
-
-#: inscriptions/models.py:380 inscriptions/models.py:1131
-msgid "Age minimum"
-msgstr "Minimal age"
-
-#: inscriptions/models.py:381 inscriptions/models.py:674
-#: inscriptions/models.py:1132 inscriptions/models.py:1264
-msgid "Sexe"
-msgstr "Sex"
-
-#: inscriptions/models.py:382 inscriptions/models.py:1133
-msgid "Validation function (javascript)"
-msgstr ""
-
-#: inscriptions/models.py:383
-msgid "Numero de dossard (début)"
-msgstr "Bib number (range start)"
-
-#: inscriptions/models.py:384
-msgid "Numero de dossard (fin)"
-msgstr "Bib number (range end)"
-
-#: inscriptions/models.py:385
-msgid "Description"
-msgstr "Description"
-
-#: inscriptions/models.py:462 inscriptions/models.py:1175
-msgid "Nom d'équipe"
-msgstr "Team name"
-
-#: inscriptions/models.py:463
-msgid "Club"
-msgstr "Club"
-
-#: inscriptions/models.py:465 inscriptions/models.py:673
-#: inscriptions/models.py:1263
-msgid "Prénom"
-msgstr "First name"
-
-#: inscriptions/models.py:467
-msgid "Adresse 2"
-msgstr "Address 2"
-
-#: inscriptions/models.py:469
-msgid "Code postal"
-msgstr "Postal code"
-
-#: inscriptions/models.py:470 inscriptions/models.py:679
-msgid "Pays"
-msgstr "Country"
-
-#: inscriptions/models.py:471 inscriptions/models.py:680
-msgid "e-mail"
-msgstr "e-mail"
-
-#: inscriptions/models.py:472
-msgid "Mot de passe"
-msgstr "Password"
-
-#: inscriptions/models.py:473
-msgid "Téléphone"
-msgstr "Phone"
-
-#: inscriptions/models.py:476
-msgid "Nombre d'équipiers"
-msgstr "Number of teammate"
-
-#: inscriptions/models.py:477 inscriptions/templates/done.html:27
+#: inscriptions/models.py:382 inscriptions/models.py:486
+#: inscriptions/models.py:796 inscriptions/templates/done.html:27
 #: inscriptions/templates/facture.html:57
 #: inscriptions/templates/stats_compare.html:164
 msgid "Prix"
 msgstr "Price"
 
+#: inscriptions/models.py:383 inscriptions/models.py:1158
+msgid "Nombre minimum d'équipiers"
+msgstr "Minimum number of teammate"
+
+#: inscriptions/models.py:384 inscriptions/models.py:1159
+msgid "Nombre maximum d'équipiers"
+msgstr "Maximum number of teammate"
+
+#: inscriptions/models.py:385 inscriptions/models.py:1160
+msgid "Age minimum"
+msgstr "Minimal age"
+
+#: inscriptions/models.py:386 inscriptions/models.py:703
+#: inscriptions/models.py:1161 inscriptions/models.py:1293
+msgid "Sexe"
+msgstr "Sex"
+
+#: inscriptions/models.py:387 inscriptions/models.py:1162
+msgid "Validation function (javascript)"
+msgstr ""
+
+#: inscriptions/models.py:388
+msgid "Numero de dossard (début)"
+msgstr "Bib number (range start)"
+
+#: inscriptions/models.py:389
+msgid "Numero de dossard (fin)"
+msgstr "Bib number (range end)"
+
+#: inscriptions/models.py:390
+msgid "Description"
+msgstr "Description"
+
+#: inscriptions/models.py:471 inscriptions/models.py:1204
+msgid "Nom d'équipe"
+msgstr "Team name"
+
+#: inscriptions/models.py:472
+msgid "Club"
+msgstr "Club"
+
+#: inscriptions/models.py:474 inscriptions/models.py:702
+#: inscriptions/models.py:1292
+msgid "Prénom"
+msgstr "First name"
+
+#: inscriptions/models.py:476
+msgid "Adresse 2"
+msgstr "Address 2"
+
 #: inscriptions/models.py:478
+msgid "Code postal"
+msgstr "Postal code"
+
+#: inscriptions/models.py:479 inscriptions/models.py:708
+msgid "Pays"
+msgstr "Country"
+
+#: inscriptions/models.py:480 inscriptions/models.py:709
+msgid "e-mail"
+msgstr "e-mail"
+
+#: inscriptions/models.py:481
+msgid "Mot de passe"
+msgstr "Password"
+
+#: inscriptions/models.py:482
+msgid "Téléphone"
+msgstr "Phone"
+
+#: inscriptions/models.py:485
+msgid "Nombre d'équipiers"
+msgstr "Number of teammate"
+
+#: inscriptions/models.py:487
 msgid "Dossier complet"
 msgstr "File completed"
 
-#: inscriptions/models.py:479
+#: inscriptions/models.py:488
 msgid "Date d'insciption"
 msgstr "Registration date"
 
-#: inscriptions/models.py:480
+#: inscriptions/models.py:489
 msgid "Commentaires"
 msgstr "Comments"
 
-#: inscriptions/models.py:482 inscriptions/models.py:670
+#: inscriptions/models.py:491 inscriptions/models.py:699
 msgid "Numéro"
 msgstr "Number"
 
-#: inscriptions/models.py:483
+#: inscriptions/models.py:492
 msgid "Date facture"
 msgstr "Invoice date"
 
-#: inscriptions/models.py:484
+#: inscriptions/models.py:493
 msgid "Nombre de tours"
 msgstr "Number of laps"
 
-#: inscriptions/models.py:485
+#: inscriptions/models.py:494
 msgid "Temps (en secondes)"
 msgstr "Time (in seconds)"
 
-#: inscriptions/models.py:489
+#: inscriptions/models.py:498
 msgid "Equipe verrouillée (modifiable uniquement par l'organisateur)"
 msgstr "Team locked (edit only by organiser only)"
 
-#: inscriptions/models.py:661
+#: inscriptions/models.py:690
 #, python-format
 msgid ""
 "Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe "
@@ -578,7 +584,7 @@ msgstr ""
 "You may also uplaod it later on or send it by mail (%(link)s). Your "
 "certificate must have been issued less than a year before the race date."
 
-#: inscriptions/models.py:663
+#: inscriptions/models.py:692
 msgid ""
 "Si vous le pouvez, scannez la licence et ajoutez la en pièce jointe (formats "
 "PDF ou JPEG).\n"
@@ -587,7 +593,7 @@ msgstr ""
 "If you can, scan your FFRS licence and add it (formats PDF or JPEG).\n"
 "You may also upload it later on or send it by mail."
 
-#: inscriptions/models.py:665
+#: inscriptions/models.py:694
 #, python-format
 msgid ""
 "Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
@@ -598,12 +604,12 @@ msgstr ""
 "If you can, scan the authorization and add it (formats PDF or JPEG).\n"
 " You may also upload it later on or send it by mail (%(link)s)."
 
-#: inscriptions/models.py:667
+#: inscriptions/models.py:696
 #, python-format
 msgid "Chaque équipier doit avoir plus de %(min_age)s ans au %(date)s."
 msgstr "Each teammate must be %(min_age)s at %(date)s."
 
-#: inscriptions/models.py:668
+#: inscriptions/models.py:697
 msgid ""
 "Chaque équipier doit avoir un certificat médical de moins d'un an ou une "
 "licence FFRS en cours de validité pour participer."
@@ -611,148 +617,152 @@ msgstr ""
 "Each teammate must have a medical certificate or a valid FFRS license to "
 "participate."
 
-#: inscriptions/models.py:681
+#: inscriptions/models.py:710
 msgid "Date de naissance"
 msgstr "Birthdate"
 
-#: inscriptions/models.py:682
+#: inscriptions/models.py:711
 msgid "Autorisation parentale"
 msgstr "Parental authorization"
 
-#: inscriptions/models.py:683
+#: inscriptions/models.py:712
 msgid "Autorisation parentale valide"
 msgstr "Valid parental authorization"
 
-#: inscriptions/models.py:684
+#: inscriptions/models.py:713
 msgid "Justificatif"
 msgstr "Justificative"
 
-#: inscriptions/models.py:685 inscriptions/models.py:1265
+#: inscriptions/models.py:714 inscriptions/models.py:1294
 msgid "Numéro de licence"
 msgstr "License Number"
 
-#: inscriptions/models.py:686
+#: inscriptions/models.py:715
 msgid "Certificat ou licence"
 msgstr "Certificat or license"
 
-#: inscriptions/models.py:687
+#: inscriptions/models.py:716
 msgid "Certificat ou licence valide"
 msgstr "Valid certificate or license"
 
-#: inscriptions/models.py:692
+#: inscriptions/models.py:721
 msgid "Verifier"
 msgstr "Check"
 
-#: inscriptions/models.py:693
+#: inscriptions/models.py:722
 msgid "Licence manquante"
 msgstr "Missing license"
 
-#: inscriptions/models.py:694
+#: inscriptions/models.py:723
 msgid "Certificat manquant"
 msgstr "Missing medical certificate"
 
-#: inscriptions/models.py:695
+#: inscriptions/models.py:724
 msgid "Autorisation manquante"
 msgstr "Missing parental authorization"
 
-#: inscriptions/models.py:696
+#: inscriptions/models.py:725
 msgid "Valide"
 msgstr "Valid"
 
-#: inscriptions/models.py:697
+#: inscriptions/models.py:726
 msgid "Erreur"
 msgstr "Error"
 
-#: inscriptions/models.py:754
+#: inscriptions/models.py:783
 msgid "Page finale"
 msgstr "Last page"
 
-#: inscriptions/models.py:757
+#: inscriptions/models.py:786
 msgid "Texte"
 msgstr "Text"
 
-#: inscriptions/models.py:758
+#: inscriptions/models.py:787
 msgid "Liste"
 msgstr "List"
 
-#: inscriptions/models.py:759
+#: inscriptions/models.py:788
 msgid "Liste déroulante"
 msgstr "Drop-down list"
 
-#: inscriptions/models.py:760
+#: inscriptions/models.py:789
 msgid "Case à cocher"
 msgstr "Checkbox"
 
-#: inscriptions/models.py:763
+#: inscriptions/models.py:792
 msgid "Rattaché à"
 msgstr "Linked to"
 
-#: inscriptions/models.py:766
+#: inscriptions/models.py:795
 msgid "Texte d'aide"
 msgstr "Help text"
 
-#: inscriptions/models.py:813 inscriptions/templates/done.html:25
+#: inscriptions/models.py:842 inscriptions/templates/done.html:25
 #: inscriptions/templates/facture.html:55
 msgid "Label"
 msgstr "Label"
 
-#: inscriptions/models.py:840
+#: inscriptions/models.py:843
+msgid "Prix augmenté"
+msgstr "Raised price"
+
+#: inscriptions/models.py:869
 msgid "Role"
 msgstr "Role"
 
-#: inscriptions/models.py:860
+#: inscriptions/models.py:889
 msgid "Destinataire"
 msgstr "Recipient"
 
-#: inscriptions/models.py:861
+#: inscriptions/models.py:890
 msgid "Copie cachée à"
 msgstr "Cci to"
 
-#: inscriptions/models.py:862
+#: inscriptions/models.py:891
 msgid "Sujet"
 msgstr "Subject"
 
-#: inscriptions/models.py:863
+#: inscriptions/models.py:892
 msgid "Message"
 msgstr ""
 
-#: inscriptions/models.py:923
+#: inscriptions/models.py:952
 msgid "Erreur d'envoi"
 msgstr "Sending error"
 
-#: inscriptions/models.py:924
+#: inscriptions/models.py:953
 msgid "Lu le"
 msgstr "Read on"
 
-#: inscriptions/models.py:946
+#: inscriptions/models.py:975
 msgid "Points / Participations (égalités possibles)"
 msgstr ""
 
-#: inscriptions/models.py:947
+#: inscriptions/models.py:976
 msgid "Points / Participations / Distance"
 msgstr ""
 
-#: inscriptions/models.py:1318 inscriptions/models.py:1326
+#: inscriptions/models.py:1347 inscriptions/models.py:1355
 msgid "espèce"
 msgstr ""
 
-#: inscriptions/models.py:1319 inscriptions/models.py:1327
+#: inscriptions/models.py:1348 inscriptions/models.py:1356
 msgid "chèque"
 msgstr ""
 
-#: inscriptions/models.py:1320
+#: inscriptions/models.py:1349
 msgid "paypal"
 msgstr "paypal"
 
-#: inscriptions/models.py:1321
+#: inscriptions/models.py:1350
 msgid "stripe"
 msgstr ""
 
-#: inscriptions/models.py:1322 inscriptions/models.py:1328
+#: inscriptions/models.py:1351 inscriptions/models.py:1357
 msgid "virement"
 msgstr ""
 
-#: inscriptions/models.py:1323 inscriptions/models.py:1329
+#: inscriptions/models.py:1352 inscriptions/models.py:1358
 msgid "autre"
 msgstr "other"
 
@@ -801,7 +811,7 @@ msgstr "Organised by %(organisateur)s."
 
 #: inscriptions/templates/_course_header.html:16
 #: inscriptions/templates/_participation.html:48
-#: inscriptions/templates/form.html:9 inscriptions/templates/index.html:27
+#: inscriptions/templates/form.html:10 inscriptions/templates/index.html:27
 msgid "Inscription"
 msgstr "Registration"
 
@@ -824,13 +834,13 @@ msgid "Liste des inscrits"
 msgstr "Team list"
 
 #: inscriptions/templates/_course_header.html:22
-#: inscriptions/templates/admin/dashboard.html:198
+#: inscriptions/templates/admin/dashboard.html:199
 #: inscriptions/templates/index.html:33 inscriptions/templates/index.html:60
 msgid "Statistiques"
 msgstr "Statistics"
 
 #: inscriptions/templates/_course_header.html:24
-#: inscriptions/templates/admin/dashboard.html:325
+#: inscriptions/templates/admin/dashboard.html:330
 #: inscriptions/templates/index.html:61
 msgid "Résultats"
 msgstr "Results"
@@ -841,7 +851,7 @@ msgid "Contact"
 msgstr "Contact"
 
 #: inscriptions/templates/_list_filter.html:20
-#: inscriptions/templates/admin/dashboard.html:233
+#: inscriptions/templates/admin/dashboard.html:234
 msgid "Categories"
 msgstr "Categories"
 
@@ -948,15 +958,21 @@ msgid ""
 msgstr "Those fees are the one charged by the payement processor Stripe."
 
 #: inscriptions/templates/_stripe.html:44
-#, python-format
+#, fuzzy, python-format
+#| msgid ""
+#| "Les informations de paiements sont transférées au prestataire de paiement "
+#| "<a href=\"https://stripe.com\" target=\"_blank\" rel=\"noopener "
+#| "noreferrer\">Stripe</a> via une connexion sécurisée. Ni %(organisateur)s, "
+#| "ni enduroller n'ont accès à ces informations."
 msgid ""
 "Les informations de paiements sont transférées au prestataire de paiement <a "
-"href=\"https://stripe.com\" target=\"_blank\" rel=\"noopener noreferrer\">Stripe</a> via une connexion "
+"href=\"https://stripe.com\" target=\"_blank\">Stripe</a> via une connexion "
 "sécurisée. Ni %(organisateur)s, ni enduroller n'ont accès à ces informations."
 msgstr ""
-"Your payment is processed by <a href=\"https://stripe.com\" target=\"_blank"
-"\" rel=\"noopener noreferrer\">Stripe</a> through a secured connexion. Neither %(organisateur)s nor "
-"enduroller have access to your card details."
+"Your payment is processed by <a href=\"https://stripe.com\" "
+"target=\"_blank\" rel=\"noopener noreferrer\">Stripe</a> through a secured "
+"connexion. Neither %(organisateur)s nor enduroller have access to your card "
+"details."
 
 #: inscriptions/templates/account/logout.html:6
 msgid "Vous êtes déconnecté"
@@ -1031,95 +1047,95 @@ msgstr "Race created. You'll receive an email when it will be validated."
 msgid "Résumé"
 msgstr "Summary"
 
-#: inscriptions/templates/admin/dashboard.html:180
+#: inscriptions/templates/admin/dashboard.html:181
 msgid "Dossiers"
 msgstr "Folders"
 
-#: inscriptions/templates/admin/dashboard.html:186
+#: inscriptions/templates/admin/dashboard.html:187
 msgid "Equipes inscrites"
 msgstr "Registred teams"
 
-#: inscriptions/templates/admin/dashboard.html:190
+#: inscriptions/templates/admin/dashboard.html:191
 msgid "Documents à vérifier"
 msgstr "Files to check"
 
-#: inscriptions/templates/admin/dashboard.html:194
+#: inscriptions/templates/admin/dashboard.html:195
 msgid "Paiements"
 msgstr "Payments"
 
-#: inscriptions/templates/admin/dashboard.html:202
+#: inscriptions/templates/admin/dashboard.html:203
 msgid "Comparaisons"
 msgstr "Comparisons"
 
-#: inscriptions/templates/admin/dashboard.html:206
+#: inscriptions/templates/admin/dashboard.html:207
 msgid "Anomalies"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:210
+#: inscriptions/templates/admin/dashboard.html:211
 msgid "Anniversaires"
 msgstr "Birthdays"
 
-#: inscriptions/templates/admin/dashboard.html:214
+#: inscriptions/templates/admin/dashboard.html:215
 msgid "Wiki"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:223
+#: inscriptions/templates/admin/dashboard.html:224
 msgid "Réglage de la course"
 msgstr "Race settings"
 
-#: inscriptions/templates/admin/dashboard.html:229
+#: inscriptions/templates/admin/dashboard.html:230
 msgid "Reglages de la course"
 msgstr "Race settings"
 
-#: inscriptions/templates/admin/dashboard.html:237
+#: inscriptions/templates/admin/dashboard.html:238
 msgid "Test des categories"
 msgstr "Test categories"
 
-#: inscriptions/templates/admin/dashboard.html:241
+#: inscriptions/templates/admin/dashboard.html:242
 msgid "Accreditations"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:245
+#: inscriptions/templates/admin/dashboard.html:246
 msgid "Modèles de mail"
 msgstr "Email template"
 
-#: inscriptions/templates/admin/dashboard.html:249
+#: inscriptions/templates/admin/dashboard.html:250
 msgid "Questions supplémentaires"
 msgstr "Extra question"
 
-#: inscriptions/templates/admin/dashboard.html:258
+#: inscriptions/templates/admin/dashboard.html:259
 msgid "Exports"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:267
+#: inscriptions/templates/admin/dashboard.html:268
 msgid "Par numéro"
 msgstr "By number"
 
-#: inscriptions/templates/admin/dashboard.html:271
+#: inscriptions/templates/admin/dashboard.html:272
 msgid "Par nom d'équipe"
 msgstr "By team name"
 
-#: inscriptions/templates/admin/dashboard.html:276
+#: inscriptions/templates/admin/dashboard.html:277
 msgid "Par nom du gérant"
 msgstr "By manager name"
 
-#: inscriptions/templates/admin/dashboard.html:280
+#: inscriptions/templates/admin/dashboard.html:281
 msgid "Retrait dossards"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:291
+#: inscriptions/templates/admin/dashboard.html:292
 msgid "Equipes et équipiers"
 msgstr ""
 
-#: inscriptions/templates/admin/dashboard.html:299
+#: inscriptions/templates/admin/dashboard.html:300
 msgid "Equipiers"
 msgstr "Teamates"
 
-#: inscriptions/templates/admin/dashboard.html:310
+#: inscriptions/templates/admin/dashboard.html:311
 msgid "Générer un export"
 msgstr "Generate extract"
 
-#: inscriptions/templates/admin/dashboard.html:319
+#: inscriptions/templates/admin/dashboard.html:324
 msgid "Imports"
 msgstr ""
 
@@ -1196,47 +1212,51 @@ msgstr "Delete"
 msgid "Courses d'endurance de roller"
 msgstr "Roller endurance racing"
 
-#: inscriptions/templates/categories.html:15
+#: inscriptions/templates/categories.html:16
 msgid "Tarif réduit"
 msgstr "Reduced price"
 
-#: inscriptions/templates/categories.html:16
+#: inscriptions/templates/categories.html:17
 #, python-format
 msgid "(jusqu'au %(date)s inclus)"
 msgstr "(until %(date)s included)"
 
-#: inscriptions/templates/categories.html:19
+#: inscriptions/templates/categories.html:20
 msgid "Plein tarif"
 msgstr "Full price"
 
-#: inscriptions/templates/categories.html:20
+#: inscriptions/templates/categories.html:21
 #, python-format
 msgid "(inscriptions jusqu'au %(date)s inclus)"
 msgstr "(registrations until %(date)s included)"
 
-#: inscriptions/templates/categories.html:34
+#: inscriptions/templates/categories.html:25
+msgid "Tarif"
+msgstr ""
+
+#: inscriptions/templates/categories.html:42
 msgid "équipier"
 msgstr "teamate"
 
-#: inscriptions/templates/categories.html:34
+#: inscriptions/templates/categories.html:42
 msgid "équipiers"
 msgstr "teamates"
 
-#: inscriptions/templates/categories.html:36
+#: inscriptions/templates/categories.html:44
 #, python-format
 msgid "De %(min)s à %(max)s équipiers"
 msgstr "From %(min)s to %(max)s teammates"
 
-#: inscriptions/templates/categories.html:38
+#: inscriptions/templates/categories.html:46
 msgid "Sexe :"
 msgstr "Sex:"
 
-#: inscriptions/templates/categories.html:39
+#: inscriptions/templates/categories.html:47
 #, python-format
 msgid "A partir de %(age)s ans"
 msgstr "From %(age)s years old"
 
-#: inscriptions/templates/categories.html:48
+#: inscriptions/templates/categories.html:56
 msgid "Cliquez sur une catégorie pour avoir des détails, ou consultez le"
 msgstr "Click on a category to have detailes informations or check the"
 
@@ -1448,40 +1468,56 @@ msgstr "You can send payment and justificatives to"
 #: inscriptions/templates/done.html:122
 #, python-format
 msgid ""
-"En précisant le nom de votre équipe et le numéro d'inscription <b>"
-"%(numero)s</b>."
+"En précisant le nom de votre équipe et le numéro d'inscription "
+"<b>%(numero)s</b>."
 msgstr ""
 "Specifying the name of your team and the registration number <b>%(numero)s</"
 "b>."
 
-#: inscriptions/templates/form.html:10
+#: inscriptions/templates/facture_new_url.html:7
+#, fuzzy
+#| msgid "Date facture"
+msgid "Facture"
+msgstr "Invoice date"
+
+#: inscriptions/templates/facture_new_url.html:11
+msgid ""
+"Le lien pour télécharger votre facture à changé. cliquez sur le bouton pour "
+"recevoir le nouveau lien par email"
+msgstr ""
+
+#: inscriptions/templates/facture_new_url.html:15
+msgid "Recevoir le lien vers la facture"
+msgstr ""
+
+#: inscriptions/templates/form.html:11
 msgid "Modification de votre inscription"
 msgstr "Modify your registration"
 
-#: inscriptions/templates/form.html:18
+#: inscriptions/templates/form.html:19
 msgid "Votre inscription comporte des erreurs :"
 msgstr "There are some errors in your registration:"
 
-#: inscriptions/templates/form.html:20
+#: inscriptions/templates/form.html:21
 msgid "Veuillez les corriger et valider à nouveau votre inscription."
 msgstr "Please correct them and submit your registration again."
 
-#: inscriptions/templates/form.html:21
+#: inscriptions/templates/form.html:22
 msgid "Informations générales"
 msgstr "General informations"
 
-#: inscriptions/templates/form.html:30
+#: inscriptions/templates/form.html:31
 #, python-format
 msgid "Équipier %(n)s"
 msgstr "Teammate %(n)s"
 
-#: inscriptions/templates/form.html:50
+#: inscriptions/templates/form.html:51
 msgid ""
 "Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez "
 "vous guider."
 msgstr "Register your team, duo or solo in a few steps."
 
-#: inscriptions/templates/form.html:52
+#: inscriptions/templates/form.html:53
 msgid ""
 "Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour "
 "vous communiquer les informations sur la course et pour vous permettre de "
@@ -1491,29 +1527,28 @@ msgstr ""
 "infos with you about the race or it'll allow you to modify your registration "
 "if needed."
 
-#: inscriptions/templates/form.html:54
+#: inscriptions/templates/form.html:55
 msgid "Vous pouvez envoyer vos justificatifs par internet ou par courrier."
 msgstr "You may send your documents by mail or letter."
 
-#: inscriptions/templates/form.html:56
+#: inscriptions/templates/form.html:57
 msgid "Vous pouvez payer votre inscription par internet ou par chèque."
 msgstr "You may pay your registration online or via cheque."
 
-#: inscriptions/templates/form.html:58
+#: inscriptions/templates/form.html:59
 msgid "Vous pouvez payer votre inscription par chèque."
 msgstr "You may pay your registration via cheque."
 
-#: inscriptions/templates/form.html:60
+#: inscriptions/templates/form.html:61
 msgid "Vous pouvez payer votre inscription par internet."
 msgstr "You can pay your registration online."
 
-#: inscriptions/templates/form.html:63
+#: inscriptions/templates/form.html:64
 msgid ""
 "Une fois votre inscription terminée, vous recevrez un email de confirmation."
-msgstr ""
-"Once your registration done, you'll receive a confirmation by mail."
+msgstr "Once your registration done, you'll receive a confirmation by mail."
 
-#: inscriptions/templates/form.html:64
+#: inscriptions/templates/form.html:65
 #, python-format
 msgid ""
 "Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, "
@@ -1522,52 +1557,53 @@ msgstr ""
 "You can modify your registration, add or remove teammates, send your "
 "certificates, change category up to %(date)s included."
 
-#: inscriptions/templates/form.html:66
-#, python-format
-msgid ""
-"Vous pouvez consulter le règlement de la course en <a href="
-"\"%(url_reglement)s\">cliquant ici</a>."
-msgstr ""
-"You may read the race regulation <a href="
-"\"%(url_reglement)s\">here</a>."
-
 #: inscriptions/templates/form.html:67
 #, python-format
 msgid ""
-"Si vous rencontrez des problèmes lors de votre inscription, <a href="
-"\"%(url_contact)s\">contactez nous</a>"
+"Vous pouvez consulter le règlement de la course en <a "
+"href=\"%(url_reglement)s\">cliquant ici</a>."
+msgstr ""
+"You may read the race regulation <a href=\"%(url_reglement)s\">here</a>."
+
+#: inscriptions/templates/form.html:68
+#, python-format
+msgid ""
+"Si vous rencontrez des problèmes lors de votre inscription, <a "
+"href=\"%(url_contact)s\">contactez nous</a>"
 msgstr ""
 "If you have troubles to register, <a href=\"%(url_contact)s\">contact us</a>"
 
-#: inscriptions/templates/form.html:73
+#: inscriptions/templates/form.html:74
 msgid "Information générales"
 msgstr "General informations"
 
-#: inscriptions/templates/form.html:81
+#: inscriptions/templates/form.html:82
 #, python-format
 msgid "Equipier %(count)s"
 msgstr "Teammate %(count)s"
 
-#: inscriptions/templates/form.html:91
+#: inscriptions/templates/form.html:92
 msgid "Choix de la catégorie"
 msgstr "Category selection"
 
-#: inscriptions/templates/form.html:101
+#: inscriptions/templates/form.html:102
 #, python-format
 msgid ""
-"Je certifie que les données transmises sont exactes et j'accepte le <a href="
-"\"%(url)s\" target=\"_blank\">règlement de la course</a>"
-msgstr "I accept the <a href=\"%(url)s\" target=\"_blank\">race rules and regulation</a>"
+"Je certifie que les données transmises sont exactes et j'accepte le <a "
+"href=\"%(url)s\" target=\"_blank\">règlement de la course</a>"
+msgstr ""
+"I accept the <a href=\"%(url)s\" target=\"_blank\">race rules and "
+"regulation</a>"
 
-#: inscriptions/templates/form.html:114
+#: inscriptions/templates/form.html:115
 msgid "Précédent"
 msgstr "Previous"
 
-#: inscriptions/templates/form.html:115
+#: inscriptions/templates/form.html:116
 msgid "Suivant"
 msgstr "Next"
 
-#: inscriptions/templates/form.html:116
+#: inscriptions/templates/form.html:117
 msgid "Valider"
 msgstr "Submit"
 
@@ -1586,11 +1622,11 @@ msgstr "This file is locked. You're not allowed to modify it."
 #: inscriptions/templates/locked.html:12
 #, python-format
 msgid ""
-"Si vous avez des modifications à faire, veuillez <a href=\"%(url_contact)s"
-"\">contacter l'organisateur de la course</a>."
+"Si vous avez des modifications à faire, veuillez <a "
+"href=\"%(url_contact)s\">contacter l'organisateur de la course</a>."
 msgstr ""
-"If you need to modify your registration, please <a href=\"%(url_contact)s"
-"\">contact us</a>."
+"If you need to modify your registration, please <a "
+"href=\"%(url_contact)s\">contact us</a>."
 
 #: inscriptions/templates/not_opened_yet.html:11
 #, python-format
@@ -1745,7 +1781,7 @@ msgid "numero"
 msgstr "Bib number"
 
 #: inscriptions/views.py:328 inscriptions/views.py:333
-#: inscriptions/views.py:518
+#: inscriptions/views.py:530
 msgid "nom"
 msgstr "Name"
 
@@ -1754,7 +1790,7 @@ msgid "club"
 msgstr "Club"
 
 #: inscriptions/views.py:328 inscriptions/views.py:333
-#: inscriptions/views.py:518
+#: inscriptions/views.py:530
 msgid "categorie__code"
 msgstr "Categories"
 
@@ -1766,17 +1802,20 @@ msgstr "General position"
 msgid "position_categorie"
 msgstr "Position by categories"
 
-#: inscriptions/views.py:518
+#: inscriptions/views.py:530
 msgid "position2"
 msgstr "Position"
 
-#: inscriptions/views.py:518
+#: inscriptions/views.py:530
 msgid "count"
 msgstr "Number of participations"
 
-#: inscriptions/views.py:518
+#: inscriptions/views.py:530
 msgid "distance"
 msgstr ""
+
+#~ msgid "Prix normal"
+#~ msgstr "Standard price"
 
 #~ msgid "Payé"
 #~ msgstr "Payed"
@@ -2091,12 +2130,12 @@ msgstr ""
 
 #~ msgid ""
 #~ "J'accepte le <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
-#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" target=\"_blank"
-#~ "\">règlement de la course</a>"
+#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" "
+#~ "target=\"_blank\">règlement de la course</a>"
 #~ msgstr ""
 #~ "I accept the <a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
-#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" target=\"_blank"
-#~ "\">race rules</a>"
+#~ "Reglement%%206%%20Heures%%20Roller%%20Paris%%202013.pdf\" "
+#~ "target=\"_blank\">race rules</a>"
 
 #~ msgid "Merci de vous être inscrit aux"
 #~ msgstr "Thank for registering at"
@@ -2118,8 +2157,8 @@ msgstr ""
 
 #~ msgid ""
 #~ "Si vous souhaitez modifier une information ou joindre une licence ou un "
-#~ "certificat médicale manquant, vous pouver le faire en cliquant <a href="
-#~ "\"%(url)s\">ici</a>."
+#~ "certificat médicale manquant, vous pouver le faire en cliquant <a "
+#~ "href=\"%(url)s\">ici</a>."
 #~ msgstr ""
 #~ "If you wan't to modify an information or add a missing justificative, you "
 #~ "can do it by clicking <a href=\"%(url)s\">here</a>."
@@ -2130,8 +2169,8 @@ msgstr ""
 #~ "<strong>%(equipe)s</strong>."
 #~ msgstr ""
 #~ "Hi,%(gerant_prenom)s %(gerant_nom)s<br />\n"
-#~ "We hace received your paiment of € %(paiement)s € for the team <strong>"
-#~ "%(equipe)s</strong>."
+#~ "We hace received your paiment of € %(paiement)s € for the team "
+#~ "<strong>%(equipe)s</strong>."
 
 #~ msgid "Il manque les certificats médicaux de :"
 #~ msgstr "Missing medical certificate:"
