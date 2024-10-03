@@ -413,8 +413,9 @@ def stats_compare(request, course_uid, course_uid2):
     align = request.GET.get('align', '')
     course1 = get_object_or_404(Course, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
-    if align == "augment" and course1.date_augmentation:
-        duree1 = (course1.date_augmentation - course1.date_ouverture).days
+    # FIXME support multiple date of augmentation
+    if align == "augment" and course1.dates_augmentation[0]:
+        duree1 = (course1.dates_augmentation[0] - course1.date_ouverture).days
 
     res = []
     i = 0;
@@ -424,7 +425,7 @@ def stats_compare(request, course_uid, course_uid2):
         
         duree = (course.date - course.date_ouverture).days
         if align == "augment":
-            duree = (course.date_augmentation - course.date_ouverture).days
+            duree = (course.dates_augmentation[0] - course.date_ouverture).days
 
         delta = duree1 - duree
         if align == 'start':
@@ -435,7 +436,7 @@ def stats_compare(request, course_uid, course_uid2):
             'course': course,
             'json': json.dumps(stats),
             'delta': delta,
-            'augment': (course.date_augmentation - course.date_ouverture).days if course.date_augmentation else 0,
+            'augment': (course.dates_augmentation[0] - course.date_ouverture).days if course.dates_augmentation[0] else 0,
         });
         i += 1;
 

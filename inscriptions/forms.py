@@ -95,8 +95,7 @@ class CourseForm(ModelForm):
                     obj.course = instance
                     if key == 'categories':
                         if obj.code in prix:
-                            obj.prix1 = prix[obj.code]['prix1']
-                            obj.prix2 = prix[obj.code]['prix2']
+                            obj.prices = prix[obj.code]['prices']
                     obj.save()
 
         else:
@@ -106,8 +105,7 @@ class CourseForm(ModelForm):
                 if 'categories' in models[model]:
                     for c in models[model]['categories']:
                         if c['code'] in prix:
-                            c['prix1'] = prix[c['code']]['prix1']
-                            c['prix2'] = prix[c['code']]['prix2']
+                            c['prices'] = prix[c['code']]['prices']
 
                 instance = super().save(commit=False)
                 instance.is_active = False

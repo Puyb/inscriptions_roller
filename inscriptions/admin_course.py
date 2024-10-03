@@ -1032,8 +1032,7 @@ class CourseAdmin(admin.ModelAdmin):
                     {
                         'code': cat.code,
                         'nom': cat.nom,
-                        'prix1': str(cat.prix1),
-                        'prix2': str(cat.prix2),
+                        'prices': list(map(str, cat.prices)),
                     } for cat in course.categories.all()
                 ],
             }
@@ -1129,12 +1128,12 @@ class ExtraQuestionChoiceInline(admin.TabularInline):
     model = ExtraQuestionChoice
     extra = 0
     max_num = 20
-    fields = ('label', 'price1', 'price2', )
+    fields = ('label', 'prices', )
 
 class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/extraquestion.js', )
-    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'price1', 'price2', )
+    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'prices', )
     list_display = ('label', 'page', 'type', )
     inlines = [ ExtraQuestionChoiceInline ]
 site.register(ExtraQuestion, ExtraQuestionAdmin)

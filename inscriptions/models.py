@@ -133,7 +133,7 @@ class Course(models.Model):
     email_contact       = models.EmailField(_(u'Email contact'))
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
-    date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
+    dates_augmentation  = ArrayField(models.DateField(_(u"Date d'augmentation des tarifs")), default=[])
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
     date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
@@ -163,9 +163,11 @@ class Course(models.Model):
 
     @property
     def dernier_jour_tarif_reduit(self):
-        if not self.date_augmentation:
-            return None
-        return self.date_augmentation - timedelta(days=1)
+        d = date.today()
+        for date_augmentation in self.dates_augmentation:
+            if date_augmentation > d:
+                return date_augmentation - timedelta(days=1)
+        return None
 
     def save(self, *args, **kwargs):
         if not self.uid:
@@ -377,8 +379,7 @@ class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
-    prix1           = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
-    prix2           = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2)
+    prices          = ArrayField(models.DecimalField(_(u"Prix"), max_digits=7, decimal_places=2), default=[])
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
@@ -395,10 +396,14 @@ class Categorie(models.Model):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        prix = self.prix1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation <= d:
-            prix = self.prix2 or 0
+        prix = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                prix = self.prices[i + 1]
         return prix
+
+    def price(self, d=None):
+        return self.prix(d)
 
 
 class Ville(models.Model):
@@ -672,6 +677,7 @@ def equipier_piece_jointe_filename(instance, filename):
     dest.mkdir(parents=True, exist_ok=True)
     new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
     return new_pj
+
 def equipier_autorisation_filename(instance, filename):
     name = 'autorisation'
     pj = Path(filename)
@@ -787,17 +793,17 @@ class ExtraQuestion(models.Model):
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
     help_text = models.TextField(_('Texte d\'aide'), blank=True, default='')
-    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
-    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
+    prices = ArrayField(models.DecimalField(_(u"Prix"), max_digits=7, decimal_places=2), default=[])
     required = models.BooleanField()
 
     def price(self, d=None):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        price = self.price1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation <= d:
-            price = self.price2 or 0
+        price = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                price = self.prices[i + 1]
         return price
 
     def getPriceByValue(self, d, value):
@@ -834,8 +840,7 @@ class ExtraQuestion(models.Model):
 class ExtraQuestionChoice(models.Model):
     question = models.ForeignKey(ExtraQuestion, related_name='choices', on_delete=models.CASCADE)
     label = models.CharField(_('Label'), max_length=200)
-    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
-    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
+    prices = ArrayField(models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2), default=[])
     order = models.IntegerField(default=0)
 
     def __str__(self):
@@ -845,9 +850,10 @@ class ExtraQuestionChoice(models.Model):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        price = self.price1 or 0
-        if self.question.course.date_augmentation and self.question.course.date_augmentation <= d:
-            price = self.price2 or 0
+        price = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.question.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                price = self.prices[i + 1]
         return price
 
     def text(self):

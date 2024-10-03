@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load json %}
+{% load price %}
 {% load bootstrap %}
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
@@ -125,14 +126,13 @@
 {% block extra_body %}
 <script type="text/javascript" src="{% url "javascript_catalog" %}"></script>
 <script>
-    var AUGMENTATION_PASSED = new Date("{{ COURSE.date_augmentation|date:'c' }}") <= new Date({% if instance %}"{{ instance.date|date:'c' }}"{% endif %}) 
     var CATEGORIES = [
     {% for cat in COURSE.categories.all %}
         {
             id:    "{{ cat.id }}",
             code:  "{{ cat.code|escapejs }}",
             label: "{{ cat.nom|escapejs }}",
-            prix:  AUGMENTATION_PASSED ? {{ cat.prix2|unlocalize }} : {{ cat.prix1|unlocalize }},
+            prix: {{ cat|price:instance|unlocalize }},
             min_equipiers: {{ cat.min_equipiers }},
             max_equipiers: {{ cat.max_equipiers }},
             min_age: {{ cat.min_age }},
@@ -198,11 +198,11 @@
     {% for extra in course.extra_equipe %}
         {% if extra.type == 'list' or extra.type == 'radio' %}
         {% for choice in extra.choices.all %}
-        if (data.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        if (data.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += {{choice|price:instance|default:0|unlocalize}};
         {% endfor %}
         {% else %}
         {% if extra.type == 'checkbox' %}
-        if (data.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        if (data.extra{{extra.id}}) prix += {{extra|price:instance|default:0|unlocalize}};
         {% endif %}
         {% endif %}
     {% endfor %}
@@ -210,11 +210,11 @@
         data.equipiers.forEach(function(equipier) {
         {% if extra.type == 'list' or extra.type == 'radio' %}
         {% for choice in extra.choices.all %}
-        if (equipier.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        if (equipier.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += {{choice|price:instance|default:0|unlocalize}};
         {% endfor %}
         {% else %}
         {% if extra.type == 'checkbox' %}
-        if (equipier.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        if (equipier.extra{{extra.id}}) prix += {{extra|price:instance|default:0|unlocalize}};
         {% endif %}
         {% endif %}
         });
