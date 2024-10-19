@@ -14,7 +14,6 @@ from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
-from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -120,7 +119,6 @@ class CourseAdminSite(admin.sites.AdminSite):
         )
         return TemplateResponse(request, 'admin/course_ask_accreditation.html', context)
 
-    @staff_member_required
     def document_review(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -153,7 +151,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             skip=','.join(skip)
         ))
 
-    @staff_member_required
     def listing_dossards(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -178,7 +175,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             ))
         return TemplateResponse(request, 'admin/listing_dossards_form.html', dict(self.each_context(request), course=course))
 
-    @staff_member_required
     def anomalies(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -203,7 +199,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             course=course,
         ))
 
-    @staff_member_required
     def anniversaires(self, request):
         request.current_app = self.name
         course = getCourse(request)
@@ -218,7 +213,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             course=course,
         ))
 
-    @staff_member_required
     def resultats(self, request):
         request.current_app = self.name
         course = getCourse(request, Course.objects.prefetch_related('categories', 'challenges'))
@@ -383,7 +377,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
-    @staff_member_required
     def paiement_change(self, request, id=None):
         paiement = None
         course = getCourse(request, Course.objects.all())
@@ -467,7 +460,6 @@ class CourseAdminSite(admin.sites.AdminSite):
         ))
 
     @csrf_exempt
-    @staff_member_required
     def paiement_search_equipe(self, request):
         search = request.POST['search']
 
@@ -498,7 +490,6 @@ class CourseAdminSite(admin.sites.AdminSite):
             } for e in equipes],
         }))
 
-    @staff_member_required
     def test_categories(self, request):
         course = getCourse(request, Course.objects.all())
         return TemplateResponse(request, "admin/test_categories.html", {
@@ -941,7 +932,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                     z.write(path, dest)
 
         response = StreamingHttpResponse(z, content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="{} - Justificatifs de {} equipes.sip"'.format(course.nom, queryset.count())
+        response['Content-Disposition'] = 'attachment; filename="{} - Justificatifs de {} equipes.zip"'.format(course.nom, queryset.count())
         return response
     download.short_description = _(u'Télécharger les justificatifs')
 
