@@ -258,7 +258,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         montants_equipes = {
             equipe.id: equipe._montant_paiements
             for equipe in Equipe.objects.filter(course=self).annotate(
-                _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+                _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2))),
+                _offert=Sum(Case(When(paiements__paiement__type='offert', then=Value(1)), default=Value(0), output_field=models.IntegerField()))
             )
         }
         tz = pytz.timezone('Europe/Paris')
@@ -300,7 +301,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             stats[token] = 1
 
             stats['paiement'] = float(equipe.montant_paiements)
-            stats['prix'] = float(equipe.prix)
+            stats['prix'] = float(equipe.prix_reel)
             stats['reste_a_payer'] = float(equipe.reste_a_payer)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
             stats[equipe.categorie.code] += 1;
@@ -531,6 +532,18 @@ class Equipe(models.Model):
         return True
 
     @property
+    def prix_reel(self):
+        if self.offert:
+            return Decimal(0)
+        return self.prix
+
+    @property
+    def offert(self):
+        if hasattr(self, '_offert'):
+            return self._offert
+        return self.paiements.filter(paiement__type='offert').count() > 0
+
+    @property
     def montant_paiements(self):
         if hasattr(self, '_montant_paiements'):
             return self._montant_paiements or Decimal(0)
@@ -544,10 +557,10 @@ class Equipe(models.Model):
 
     @property
     def reste_a_payer(self):
-        return self.prix - self.montant_paiements
+        return self.prix_reel - self.montant_paiements
 
     def paiement_complet(self):
-        return self.montant_paiements >= self.prix
+        return self.montant_paiements >= self.prix_reel
 
     @property
     def paiements_en_attente(self):
@@ -557,7 +570,7 @@ class Equipe(models.Model):
     def paiement_complet_en_attente(self):
         montant = self.montant_paiements
         montant += self.paiements_en_attente
-        return montant >= self.prix
+        return montant >= self.prix_reel
 
     @property
     def ordered_paiements(self):
@@ -1349,12 +1362,14 @@ class Paiement(models.Model):
         ('paypal', _('paypal')),
         ('stripe', _('stripe')),
         ('virement', _('virement')),
+        ('offert', _('offert')),
         ('autre', _('autre')),
     )
     MANUAL_TYPE_CHOICES = (
         ('espèce', _('espèce')),
         ('chèque', _('chèque')),
         ('virement', _('virement')),
+        ('offert', _('offert')),
         ('autre', _('autre')),
     )
     date = models.DateTimeField(auto_now_add=True)
@@ -1401,4 +1416,4 @@ class PaiementRepartition(models.Model):
         return paiements.aggregate(m=Sum('montant'))['m'] or Decimal('0.00')
 
     def reste(self):
-        return self.equipe.prix - self.paye()
+        return self.equipe.prix_reel - self.paye()

@@ -39,6 +39,7 @@ ICON_KO = '🚫'
 ICON_CHECK = '❔'
 ICON_MISSING = '📨'
 ICON_LOCK = '🔒'
+ICON_GIFT = '🎁'
 
 def getCourse(request, qs=Course.objects.all()):
     uid = request.COOKIES['course_uid']
@@ -394,7 +395,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'equipe': r.equipe,
                 'montant': r.montant,
                 'paiement': r.equipe.montant_paiements - r.montant,
-                'reste': r.equipe.prix - r.equipe.montant_paiements + r.montant,
+                'reste': r.equipe.prix_reel - r.equipe.montant_paiements + r.montant,
             } for r in paiement.equipes.all()]
         elif request.GET.get('equipe_id'):
             repartitions = []
@@ -404,9 +405,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                     'equipe': equipe,
                     'montant': None,
                     'paiement': equipe.montant_paiements,
-                    'reste': equipe.prix - equipe.montant_paiements,
+                    'reste': equipe.prix_reel - equipe.montant_paiements,
                 });
-                initials['montant'] += equipe.prix - equipe.montant_paiements
+                initials['montant'] += equipe.prix_reel - equipe.montant_paiements
 
         paiement_form = AdminPaiementForm(instance=paiement, initial=initials)
 
@@ -434,12 +435,12 @@ class CourseAdminSite(admin.sites.AdminSite):
                             'equipe': repartition.equipe,
                             'montant': repartition.montant,
                             'paiement': repartition.equipe.montant_paiements,
-                            'reste': repartition.equipe.prix - repartition.equipe.montant_paiements,
+                            'reste': repartition.equipe.prix_reel - repartition.equipe.montant_paiements,
                         })
 
                         montant += repartition.montant
                         print(montant, equipe_id, repartition_montant, montant, paiement.montant)
-                    if montant != paiement.montant:
+                    if montant != paiement.montant and paiement.type != 'offert':
                         raise PaiementException('montant incorrect')
                     print('len equipe_id', len(request.GET.getlist('equipe_id')))
                     paiement.send_equipes_mail()
@@ -484,7 +485,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'course': e.course.nom,
                 'numero': e.numero,
                 'nom': e.nom,
-                'prix': str(e.prix),
+                'prix': str(e.prix_reel),
                 'paiement': str(e.montant_paiements or '0'),
                 'montant': str(repartitions.get(e.id, '0')),
             } for e in equipes],
@@ -602,23 +603,28 @@ class PaiementCompletFilter(SimpleListFilter):
             ('exact', _('= Paiement exact')),
             ('partiel', _('< Partiel')),
             ('impaye', _('0 Impayé')),
+            ('offert', _('%s offert' % ICON_GIFT)),
         )
     def queryset(self, request, queryset):
         qs = Equipe.objects.filter(course=getCourse(request)).annotate(
-            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2))),
+            _offert=Sum(Case(When(Q(paiements__paiement__type__exact='offert'), then=Value(1)), default=Value(0), output_field=models.IntegerField()))
         )
         if self.value() == 'complet':
-            qs = qs.filter(_montant_paiements__gte=F('prix'))
+            qs = qs.filter(_montant_paiements__gte=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'incomplet':
-            qs = qs.filter(Q(_montant_paiements__lt=F('prix')) | Q(_montant_paiements__isnull=True))
+            qs = qs.filter(Q(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2))) | Q(_montant_paiements__isnull=True))
         if self.value() == 'trop':
-            qs = qs.filter(_montant_paiements__gt=F('prix'))
+            qs = qs.filter(_montant_paiements__gt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'exact':
-            qs = qs.filter(_montant_paiements=F('prix'))
+            qs = qs.filter(_montant_paiements=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'partiel':
-            qs = qs.filter(_montant_paiements__lt=F('prix'), _montant_paiements__gt=0, _montant_paiements__isnull=False)
+            qs = qs.filter(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)), _montant_paiements__gt=0, _montant_paiements__isnull=False)
         if self.value() == 'impaye':
-            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(prix=0)
+            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(Q(prix=0) | Q(_offert__gt=0))
+        if self.value() == 'offert':
+            qs = qs.filter(_offert__gt=0)
+        logger.info(qs.query)
         return queryset.filter(id__in=qs);
 
 class CategorieFilter(SimpleListFilter):
@@ -693,7 +699,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def paiement_complet2(self, obj):
         span = '<span title="%(title)s">%(text)s</span>';
         return mark_safe(span % {
-            'text': obj.paiement_complet() and ICON_OK or ICON_KO,
+            'text': obj.offert and ICON_GIFT or (obj.paiement_complet() and ICON_OK or ICON_KO),
             'title': '%s / %s €' % (obj.montant_paiements, obj.prix),
         })
     paiement_complet2.allow_tags = True

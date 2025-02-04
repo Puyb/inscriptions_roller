@@ -97,6 +97,16 @@
     }
     var i = 0;
 
+    $('input[name=type]').on('change', function() {
+        const offert = $(this).val() == 'offert';
+        $('#id_montant').attr('readonly', offert);
+        if (offert) $('#id_montant').val('');
+        $('#repartition .repartition-montant').each(function() {
+            if (offert) $(this).val('0');
+            $(this).attr('readonly', offert)
+        });
+        updateReste()
+    });
     $('#id_search').on('keyup', function() {
         if (!this.value) {
             $('#repartition-div').show();
