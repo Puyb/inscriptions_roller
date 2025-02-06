@@ -24,6 +24,7 @@ from django import forms
 from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
 from django_resized import ResizedImageField
+from pathlib import Path
 import logging
 import traceback
 import pytz
@@ -132,7 +133,7 @@ class Course(models.Model):
     email_contact       = models.EmailField(_(u'Email contact'))
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
-    date_augmentation   = models.DateField(_(u"Date d'augmentation des tarifs"), null=True, blank=True)
+    dates_augmentation  = ArrayField(models.DateField(), default=[], verbose_name=_("Date d'augmentation des tarifs"))
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
     date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
@@ -165,7 +166,11 @@ class Course(models.Model):
 
     @property
     def dernier_jour_tarif_reduit(self):
-        return self.date_augmentation - timedelta(days=1)
+        d = date.today()
+        for date_augmentation in self.dates_augmentation:
+            if date_augmentation > d:
+                return date_augmentation - timedelta(days=1)
+        return None
 
     def save(self, *args, **kwargs):
         if not self.uid:
@@ -256,7 +261,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         montants_equipes = {
             equipe.id: equipe._montant_paiements
             for equipe in Equipe.objects.filter(course=self).annotate(
-                _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+                _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2))),
+                _offert=Sum(Case(When(paiements__paiement__type='offert', then=Value(1)), default=Value(0), output_field=models.IntegerField()))
             )
         }
         tz = pytz.timezone('Europe/Paris')
@@ -298,7 +304,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             stats[token] = 1
 
             stats['paiement'] = float(equipe.montant_paiements)
-            stats['prix'] = float(equipe.prix)
+            stats['prix'] = float(equipe.prix_reel)
             stats['reste_a_payer'] = float(equipe.reste_a_payer)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
             stats[equipe.categorie.code] += 1;
@@ -377,8 +383,7 @@ class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
-    prix1           = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2)
-    prix2           = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2)
+    prices          = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix") )
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
@@ -395,10 +400,14 @@ class Categorie(models.Model):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        prix = self.prix1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation <= d:
-            prix = self.prix2 or 0
+        prix = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                prix = self.prices[i + 1]
         return prix
+
+    def price(self, d=None):
+        return self.prix(d)
 
 
 class Ville(models.Model):
@@ -526,6 +535,18 @@ class Equipe(models.Model):
         return True
 
     @property
+    def prix_reel(self):
+        if self.offert:
+            return Decimal(0)
+        return self.prix
+
+    @property
+    def offert(self):
+        if hasattr(self, '_offert'):
+            return self._offert
+        return self.paiements.filter(paiement__type='offert').count() > 0
+
+    @property
     def montant_paiements(self):
         if hasattr(self, '_montant_paiements'):
             return self._montant_paiements or Decimal(0)
@@ -539,10 +560,10 @@ class Equipe(models.Model):
 
     @property
     def reste_a_payer(self):
-        return self.prix - self.montant_paiements
+        return self.prix_reel - self.montant_paiements
 
     def paiement_complet(self):
-        return self.montant_paiements >= self.prix
+        return self.montant_paiements >= self.prix_reel
 
     @property
     def paiements_en_attente(self):
@@ -552,7 +573,7 @@ class Equipe(models.Model):
     def paiement_complet_en_attente(self):
         montant = self.montant_paiements
         montant += self.paiements_en_attente
-        return montant >= self.prix
+        return montant >= self.prix_reel
 
     @property
     def ordered_paiements(self):
@@ -665,6 +686,22 @@ class Equipe(models.Model):
     def distance(self):
         return self.tours * self.course.distance if self.tours else None
 
+def equipier_piece_jointe_filename(instance, filename):
+    name = instance.justificatif
+    pj = Path(filename)
+    dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
+    dest.mkdir(parents=True, exist_ok=True)
+    new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
+    return new_pj
+
+def equipier_autorisation_filename(instance, filename):
+    name = 'autorisation'
+    pj = Path(filename)
+    dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
+    dest.mkdir(parents=True, exist_ok=True)
+    new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
+    return new_pj
+
 class Equipier(models.Model):
     CERTIFICAT_HELP = _("""Si vous le pouvez, scannez le certificat et ajoutez le en pièce jointe (formats PDF ou JPEG).
 Vous pourrez aussi le télécharger plus tard, ou l'envoyer par courrier (%(link)s). Votre certificat doit avoir moins d'un an au moment de la course.""")
@@ -687,11 +724,11 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     pays              = models.CharField(_(u'Pays'), max_length=2, default='FR')
     email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
-    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to='certificats', blank=True, help_text=AUTORISATION_HELP)
+    autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_autorisation_filename , blank=True, help_text=AUTORISATION_HELP)
     autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
     justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
-    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to='certificats', blank=True)
+    piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
     ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
@@ -772,17 +809,17 @@ class ExtraQuestion(models.Model):
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
     help_text = models.TextField(_('Texte d\'aide'), blank=True, default='')
-    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
-    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
+    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix"))
     required = models.BooleanField()
 
     def price(self, d=None):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        price = self.price1 or 0
-        if self.course.date_augmentation and self.course.date_augmentation <= d:
-            price = self.price2 or 0
+        price = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                price = self.prices[i + 1]
         return price
 
     def getPriceByValue(self, d, value):
@@ -819,8 +856,7 @@ class ExtraQuestion(models.Model):
 class ExtraQuestionChoice(models.Model):
     question = models.ForeignKey(ExtraQuestion, related_name='choices', on_delete=models.CASCADE)
     label = models.CharField(_('Label'), max_length=200)
-    price1 = models.DecimalField(_(u"Prix normal"), max_digits=7, decimal_places=2, blank=True, null=True)
-    price2 = models.DecimalField(_(u"Prix augmenté"), max_digits=7, decimal_places=2, blank=True, null=True)
+    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix augmenté"))
     order = models.IntegerField(default=0)
 
     def __str__(self):
@@ -830,9 +866,10 @@ class ExtraQuestionChoice(models.Model):
         if isinstance(d, datetime):
             d = d.date()
         d = d or date.today()
-        price = self.price1 or 0
-        if self.question.course.date_augmentation and self.question.course.date_augmentation <= d:
-            price = self.price2 or 0
+        price = self.prices[0] if len(self.prices) else 0
+        for (i, date_augmentation) in enumerate(self.question.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices) > i + 1:
+                price = self.prices[i + 1]
         return price
 
     def text(self):
@@ -1329,12 +1366,14 @@ class Paiement(models.Model):
         ('stripe', _('stripe')),
         ('helloasso', _('helloasso')),
         ('virement', _('virement')),
+        ('offert', _('offert')),
         ('autre', _('autre')),
     )
     MANUAL_TYPE_CHOICES = (
         ('espèce', _('espèce')),
         ('chèque', _('chèque')),
         ('virement', _('virement')),
+        ('offert', _('offert')),
         ('autre', _('autre')),
     )
     date = models.DateTimeField(auto_now_add=True)
@@ -1381,4 +1420,4 @@ class PaiementRepartition(models.Model):
         return paiements.aggregate(m=Sum('montant'))['m'] or Decimal('0.00')
 
     def reste(self):
-        return self.equipe.prix - self.paye()
+        return self.equipe.prix_reel - self.paye()

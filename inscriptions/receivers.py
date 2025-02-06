@@ -36,4 +36,10 @@ def handle_user_postsave(sender, instance, **kwargs):
         Permission.objects.get(codename='add_extraquestionchoice'),
         Permission.objects.get(codename='change_extraquestionchoice'),
         Permission.objects.get(codename='delete_extraquestionchoice'),
+        Permission.objects.get(codename='add_paiement'),
+        Permission.objects.get(codename='change_paiement'),
+        Permission.objects.get(codename='delete_paiement'),
+        Permission.objects.get(codename='add_paiementrepartition'),
+        Permission.objects.get(codename='change_paiementrepartition'),
+        Permission.objects.get(codename='delete_paiementrepartition'),
     )

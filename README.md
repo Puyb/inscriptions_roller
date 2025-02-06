@@ -7,6 +7,8 @@ Registration site for 6h roller races by team
 Install docker and docker-compose
 
 ```
+npm install
+npm run build
 docker-compose up
 docker-compose exec django ./manage.py loaddata sites
 docker-compose exec django ./manage.py createsuperuser

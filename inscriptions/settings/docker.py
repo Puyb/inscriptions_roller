@@ -3,7 +3,7 @@ import os
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 ADMINS = (
-    ('', mail) for mail in os.environ.get('EMAIL_ADMIN', '').split(',') if mail
+    ('', mail) for mail in os.environ.get('ADMIN_EMAILS', '').split(',') if mail
 )
 
 DEBUG = os.environ.get('DEBUG', '') == 'True'

@@ -7,10 +7,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-17 19:38+0200\n"
-"PO-Revision-Date: 2015-04-15 00:58+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"POT-Creation-Date: 2024-10-03 21:01+0200\n"
+"PO-Revision-Date: 2022-06-06 18:30+0200\n"
+"Last-Translator: Puyb <puyb@puyb.net>\n"
+"Language-Team: English\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: inscriptions/static/form.js:93
 msgid "Ce nom d'équipe est déjà utilisé !"
-msgstr "This team name is not avilable!"
+msgstr "This team name is not available!"
 
 #: inscriptions/static/form.js:121
 #, fuzzy
@@ -36,6 +36,8 @@ msgid ""
 "Désolé, la course est complete, vous ne pouvez pas inscrire une équipe avec "
 "autant d'équipiers."
 msgstr ""
+"Sorry, the race is complete, you may not register a team with that many "
+"teammates."
 
 #: inscriptions/static/form.js:158
 msgid "Veuillez corriger les champs en rouge."
@@ -62,7 +64,7 @@ msgstr "License"
 
 #: inscriptions/static/form.js:332
 msgid "Certificat médical"
-msgstr "Medical certificat"
+msgstr "Medical certificate"
 
 #: inscriptions/static/form.js:349
 msgid "E-mail (confirmation) :"
@@ -80,6 +82,10 @@ msgstr "You must choose a category"
 msgid "Vous devez accépter le règlement de la compétition. "
 msgstr "You must accept the race rules"
 
+#: static/dist/js/site.js:15
+msgid "["
+msgstr ""
+
 #~ msgid ""
 #~ "Si vous le pouvez, scannez l'autorisation et ajoutez la en pièce jointe "
 #~ "(formats PDF ou JPEG)."
@@ -92,6 +98,6 @@ msgstr "You must accept the race rules"
 #~ "(<a href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
 #~ "autorisation_parentale.pdf\" target=\"_blank\">modèle</a>)."
 #~ msgstr ""
-#~ "You'll be able to upload it later, or to send it by mail (<a href="
-#~ "\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
+#~ "You'll be able to upload it later, or to send it by mail (<a "
+#~ "href=\"http://www.6hdeparis.fr/wp-content/uploads/2013/03/"
 #~ "autorisation_parentale.pdf\" target=\"_blank\">model</a>)."

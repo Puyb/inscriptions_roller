@@ -17,3 +17,48 @@
 </div>
 {% else %}{{ block.super }}{% endif %}
 {% endblock %}
+
+{% block content %}
+{{ block.super }}
+{% if original %}
+<script>
+(function($) {
+    'use strict';
+    $(document).ready(function() {
+        $('form#course_form input[name=dates_augmentation]').each(function() {
+            const input = $(this);
+            input.attr('hidden', true);
+            input.before('<table id="dates_augmentation_table"></table><a href="#">Ajouter une date d\'augmentation</a>')
+            const values = input.val().split(',');
+            function update() {
+                const res = [];
+                $('#dates_augmentation_table input').each(function() {
+                    let v = $(this).val();
+                    if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) v = v.split('/').reverse().join('-');
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) res.push(v);
+                });
+                res.sort();
+                input.val(res.join(','));
+            }
+            function addDate(d = '') {
+                $('#dates_augmentation_table').append('<tr><td><input value="' + d + '"></td><td><button type="button">X</button></td></tr>')
+                $('#dates_augmentation_table tr:last input').each(function() {
+                    DateTimeShortcuts.addCalendar(this);
+                    $(this).blur(update);
+                    $(this).change(update);
+                });
+                $('#dates_augmentation_table tr:last button').click(function() {
+                    $(this).parents('tr').remove();
+                    update();
+                });
+            }
+            values.map(addDate);
+            $('#dates_augmentation_table+a').click(function() {
+                addDate();
+            });
+        });
+    });
+})(django.jQuery);
+</script>
+{% endif %}
+{% endblock %}

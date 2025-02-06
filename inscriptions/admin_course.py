@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import operator
-from functools import reduce
+from functools import reduce, update_wrapper
 from inscriptions.models import *
 from django.conf.urls import url
 from django.contrib import admin
@@ -14,7 +14,7 @@ from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
@@ -29,6 +29,7 @@ import re
 from Levenshtein import distance
 import csv, io
 import inspect
+import zipstream
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ ICON_KO = '🚫'
 ICON_CHECK = '❔'
 ICON_MISSING = '📨'
 ICON_LOCK = '🔒'
+ICON_GIFT = '🎁'
 
 def getCourse(request, qs=Course.objects.all()):
     uid = request.COOKIES['course_uid']
@@ -393,7 +395,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'equipe': r.equipe,
                 'montant': r.montant,
                 'paiement': r.equipe.montant_paiements - r.montant,
-                'reste': r.equipe.prix - r.equipe.montant_paiements + r.montant,
+                'reste': r.equipe.prix_reel - r.equipe.montant_paiements + r.montant,
             } for r in paiement.equipes.all()]
         elif request.GET.get('equipe_id'):
             repartitions = []
@@ -403,9 +405,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                     'equipe': equipe,
                     'montant': None,
                     'paiement': equipe.montant_paiements,
-                    'reste': equipe.prix - equipe.montant_paiements,
+                    'reste': equipe.prix_reel - equipe.montant_paiements,
                 });
-                initials['montant'] += equipe.prix - equipe.montant_paiements
+                initials['montant'] += equipe.prix_reel - equipe.montant_paiements
 
         paiement_form = AdminPaiementForm(instance=paiement, initial=initials)
 
@@ -433,12 +435,12 @@ class CourseAdminSite(admin.sites.AdminSite):
                             'equipe': repartition.equipe,
                             'montant': repartition.montant,
                             'paiement': repartition.equipe.montant_paiements,
-                            'reste': repartition.equipe.prix - repartition.equipe.montant_paiements,
+                            'reste': repartition.equipe.prix_reel - repartition.equipe.montant_paiements,
                         })
 
                         montant += repartition.montant
                         print(montant, equipe_id, repartition_montant, montant, paiement.montant)
-                    if montant != paiement.montant:
+                    if montant != paiement.montant and paiement.type != 'offert':
                         raise PaiementException('montant incorrect')
                     print('len equipe_id', len(request.GET.getlist('equipe_id')))
                     paiement.send_equipes_mail()
@@ -483,7 +485,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'course': e.course.nom,
                 'numero': e.numero,
                 'nom': e.nom,
-                'prix': str(e.prix),
+                'prix': str(e.prix_reel),
                 'paiement': str(e.montant_paiements or '0'),
                 'montant': str(repartitions.get(e.id, '0')),
             } for e in equipes],
@@ -601,23 +603,28 @@ class PaiementCompletFilter(SimpleListFilter):
             ('exact', _('= Paiement exact')),
             ('partiel', _('< Partiel')),
             ('impaye', _('0 Impayé')),
+            ('offert', _('%s offert' % ICON_GIFT)),
         )
     def queryset(self, request, queryset):
         qs = Equipe.objects.filter(course=getCourse(request)).annotate(
-            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2))),
+            _offert=Sum(Case(When(Q(paiements__paiement__type__exact='offert'), then=Value(1)), default=Value(0), output_field=models.IntegerField()))
         )
         if self.value() == 'complet':
-            qs = qs.filter(_montant_paiements__gte=F('prix'))
+            qs = qs.filter(_montant_paiements__gte=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'incomplet':
-            qs = qs.filter(Q(_montant_paiements__lt=F('prix')) | Q(_montant_paiements__isnull=True))
+            qs = qs.filter(Q(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2))) | Q(_montant_paiements__isnull=True))
         if self.value() == 'trop':
-            qs = qs.filter(_montant_paiements__gt=F('prix'))
+            qs = qs.filter(_montant_paiements__gt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'exact':
-            qs = qs.filter(_montant_paiements=F('prix'))
+            qs = qs.filter(_montant_paiements=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'partiel':
-            qs = qs.filter(_montant_paiements__lt=F('prix'), _montant_paiements__gt=0, _montant_paiements__isnull=False)
+            qs = qs.filter(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)), _montant_paiements__gt=0, _montant_paiements__isnull=False)
         if self.value() == 'impaye':
-            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(prix=0)
+            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(Q(prix=0) | Q(_offert__gt=0))
+        if self.value() == 'offert':
+            qs = qs.filter(_offert__gt=0)
+        logger.info(qs.query)
         return queryset.filter(id__in=qs);
 
 class CategorieFilter(SimpleListFilter):
@@ -681,7 +688,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         (None, { 'description': '<div id="autre"></div>', 'fields': ('verrou', ) }),
 
     )
-    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock']
+    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock', 'download']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -692,7 +699,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def paiement_complet2(self, obj):
         span = '<span title="%(title)s">%(text)s</span>';
         return mark_safe(span % {
-            'text': obj.paiement_complet() and ICON_OK or ICON_KO,
+            'text': obj.offert and ICON_GIFT or (obj.paiement_complet() and ICON_OK or ICON_KO),
             'title': '%s / %s €' % (obj.montant_paiements, obj.prix),
         })
     paiement_complet2.allow_tags = True
@@ -722,12 +729,18 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
         my_urls = [
-            url(r'^send/$', self.send_mails, name='equipe_send_mails'),
-            url(r'^export/$', self.export, name='equipe_send_mails'),
-            url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
-            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
-            url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
+            url(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
+            url(r'^export/$', wrap(self.export), name='equipe_export'),
+            url(r'^download/$', wrap(self.download), name='equipe_downloads'),
+            url(r'^send/preview/$', wrap(self.preview_mail), name='equipe_preview_mail'),
+            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', wrap(self.send_mail), name='equipe_send_mail'),
+            url(r'^(?P<id>\d+)/autre/$', wrap(self.autre), name='equipe_autre'),
         ]
         return my_urls + urls
 
@@ -886,6 +899,49 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ))
     export.short_description = _(u'Exporter')
 
+    def download(self, request, queryset=None):
+        request.current_app = self.admin_site.name
+        course = getCourse(request)
+
+        queryset = queryset or Equipe.objects.all()
+        queryset = queryset.filter(course=course)
+        equipiers = Equipier.objects.filter(equipe__course=course, equipe__in=queryset)
+
+        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+        for equipier in equipiers:
+            if equipier.piece_jointe:
+                path = Path(settings.MEDIA_ROOT) / equipier.piece_jointe.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - %s%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        equipier.justificatif,
+                        path.suffix
+                    )
+                    z.write(path, dest)
+            if equipier.autorisation:
+                path = Path(settings.MEDIA_ROOT) / equipier.autorisation.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - autorisation parentale%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        path.suffix
+                    )
+                    z.write(path, dest)
+
+        response = StreamingHttpResponse(z, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{} - Justificatifs de {} equipes.zip"'.format(course.nom, queryset.count())
+        return response
+    download.short_description = _(u'Télécharger les justificatifs')
+
     def autre(self, request, id):
         request.current_app = self.admin_site.name
         instance = get_object_or_404(Equipe, id=id)
@@ -973,8 +1029,7 @@ class CourseAdmin(admin.ModelAdmin):
                     {
                         'code': cat.code,
                         'nom': cat.nom,
-                        'prix1': str(cat.prix1),
-                        'prix2': str(cat.prix2),
+                        'prices': list(map(str, cat.prices)),
                     } for cat in course.categories.all()
                 ],
             }
@@ -1070,12 +1125,12 @@ class ExtraQuestionChoiceInline(admin.TabularInline):
     model = ExtraQuestionChoice
     extra = 0
     max_num = 20
-    fields = ('label', 'price1', 'price2', )
+    fields = ('label', 'prices', )
 
 class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/extraquestion.js', )
-    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'price1', 'price2', )
+    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'prices', )
     list_display = ('label', 'page', 'type', )
     inlines = [ ExtraQuestionChoiceInline ]
 site.register(ExtraQuestion, ExtraQuestionAdmin)
