@@ -53,11 +53,11 @@
                         {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
                         <br />
                         {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier.{% endblocktrans %}
-                        {% if course.ordre and course.paypal %}
+                        {% if course.ordre and course.paiement_internet %}
                         {% blocktrans %}Vous pouvez payer votre inscription par internet ou par chèque.{% endblocktrans %}
                         {% else %}{% if course.ordre %}
                         {% blocktrans %}Vous pouvez payer votre inscription par chèque.{% endblocktrans %}
-                        {% else %}{% if course.paypal %}
+                        {% else %}{% if course.paiement_internet %}
                         {% blocktrans %}Vous pouvez payer votre inscription par internet.{% endblocktrans %}
                         {% else %}
                         {% endif %}{% endif %}{% endif %}

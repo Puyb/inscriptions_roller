@@ -53,11 +53,12 @@
     </div>
     <div class="panel-body">
         {% if not instance.paiement_complet %}
-        {% if COURSE.paypal or COURSE.stripe_public %}
+        {% if COURSE.paiement_internet %}
         <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
 
         {% if COURSE.paypal %}{% include "_paypal.html" %}{% endif %}
         {% if COURSE.stripe_public %}{% include "_stripe.html" %}{% endif %}
+        {% if COURSE.helloasso_organisation %}{% include "_helloasso.html" %}{% endif %}
 
         <p>{% blocktrans with prix=instance.reste_a_payer ordre=COURSE.ordre %}Ou envoyer un chèque de {{ prix }} € à l'ordre de "{{ ordre }}".{% endblocktrans %}</p>
         {% else %}

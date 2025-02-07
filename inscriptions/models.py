@@ -146,11 +146,16 @@ class Course(models.Model):
     helloasso_organisation = models.CharField(_('HelloAsso organization name'), max_length=200, blank=True, null=True)
     helloasso_id        = models.CharField(_('HelloAsso clientId'), max_length=200, blank=True, null=True)
     helloasso_secret    = models.CharField(_('HelloAsso clientSecret'), max_length=200, blank=True, null=True)
+    helloasso_sandbox   = models.BooleanField(_('HelloAsso sandbox'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
     texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
+
+    @property
+    def paiement_internet(self):
+        return self.paypal or self.stripe_secret or self.helloasso_organisation
 
     @property
     def ouverte(self):
@@ -477,7 +482,7 @@ class Equipe(models.Model):
     gerant_nom         = models.CharField(_(u'Nom'), max_length=200)
     gerant_prenom      = models.CharField(_(u'Prénom'), max_length=200)
     gerant_adresse1    = models.CharField(_(u'Adresse'), max_length=200, blank=True)
-    gerant_adress2     = models.CharField(_(u'Adresse 2'), max_length=200, blank=True)
+    gerant_adresse2    = models.CharField(_(u'Adresse 2'), max_length=200, blank=True)
     gerant_ville       = models.CharField(_(u'Ville'), max_length=200)
     gerant_code_postal = models.CharField(_(u'Code postal'), max_length=200)
     gerant_pays        = models.CharField(_(u'Pays'), max_length=2, default='FR')
