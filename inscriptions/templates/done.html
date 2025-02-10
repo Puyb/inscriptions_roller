@@ -52,7 +52,10 @@
         <h3 class="panel-title">{% trans "Paiement :" %}</h3>
     </div>
     <div class="panel-body">
-        {% if not instance.paiement_complet %}
+        {% if request.GET.code == 'succeeded' %}
+        <p>{% blocktrans with prix=instance.montant_paiements %}Votre réglement des frais d'inscription ({{ prix }} €) est en attente de validation. Vous recevrez un email de confirmation rapidement{% endblocktrans %}</p>
+        <script> setTimeout(() => location.href = location.href.split('?')[0], 5000)</script>
+        {% else %}{% if not instance.paiement_complet %}
         {% if COURSE.paiement_internet %}
         <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
 
@@ -67,6 +70,7 @@
         <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
         {% else %}
         <p>{% blocktrans with prix=instance.montant_paiements %}Vos frais d'inscription ({{ prix }} €) ont bien été reçus.{% endblocktrans %}</p>
+        {% endif %}
         {% endif %}
     </div>
 </div>

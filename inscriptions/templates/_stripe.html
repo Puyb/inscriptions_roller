@@ -4,7 +4,8 @@
 <script>window.STRIPE_KEY="{{ COURSE.stripe_public|escapejs }}"</script>
 <script src="https://js.stripe.com/v3/"></script>
 
-<button type="button" class="btn btn-primary" id="stripe-btn">
+<button type="button" class="btn btn-primary btn-lg" id="stripe-btn">
+    <span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span>
     Payer par carte{% if instance.reste_a_payer %} {% if not COURSE.frais_stripe_inclus %}{{ instance.reste_a_payer|prix_stripe|floatformat:2 }}{% else %}{{ instance.reste_a_payer }}{% endif %}€{% endif %}
 </button>
 

@@ -822,7 +822,7 @@ def get_intent(request, course, equipes, methode, montant):
             intent.id,
             frais,
             HttpResponse(json.dumps({
-                'success': success,
+                'success': True,
                 'client_secret': intent.client_secret,
             })),
         )
