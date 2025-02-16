@@ -31,6 +31,7 @@ from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
 from pathlib import Path
 from uuid import uuid4
+import urllib.parse
 
 logger = logging.getLogger(__name__)
 
@@ -153,10 +154,13 @@ def form(request, course_uid, numero=None, code=None):
         }
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
 
+    error_messages = request.GET.getlist('message')
+    errors = error_messages or equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
-        "errors": equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
+        "errors": errors,
+        "error_messages": error_messages,
         "instance": instance,
         "update": update,
         "nombres_par_tranche": nombres_par_tranche,
@@ -860,6 +864,14 @@ def get_intent(request, course, equipes, methode, montant):
         })
         responseData = response.json()
         logger.info(responseData)
+        if 'errors' in responseData:
+            url = reverse('inscriptions_edit', kwargs={ 'course_uid': course.uid, 'numero': instance.numero, 'code': instance.password })
+            url += '?' + '&'.join(['message=%s' % (urllib.parse.quote_plus(e['message']), ) for e in responseData['errors']])
+            return (
+                uuid,
+                0,
+                redirect(url),
+            )
         return (
             uuid,
             0,

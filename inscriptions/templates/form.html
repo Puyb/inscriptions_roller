@@ -15,23 +15,32 @@
 <form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="if (!good) { $('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); } return good">
     {% if errors %}
     <div class="panel panel-danger">
-        {% if equipe_form.errors %}
         <div class="panel-heading">{% blocktrans %}Votre inscription comporte des erreurs :{% endblocktrans %}</div>
         <div class="panel-body">
             {% blocktrans %}Veuillez les corriger et valider à nouveau votre inscription.{% endblocktrans %}
-            <h3>{% trans 'Informations générales' %}</h3>
+            {% if equipe_form.errors or error_messages %}
+                <h3>{% trans 'Informations générales' %}</h3>
+                <ul>
+                {% for v in error_messages %}
+                    <li>{{ v }}</li>
+                {% endfor %}
                 {% for k,v in equipe_form.errors.items %}
+                    <li>
                     {% if k != "prix" %}
                     {{ k }} : {{ v }}
                     {% endif %}
+                    </li>
                 {% endfor %}
+                </ul>
             {% endif %}
             {% for equipier_form in equipier_formset %}
                 {% if equipier_form.errors %}
-                <h3>{% blocktrans with n=forloop.counter %}Équipier {{ n }}{% endblocktrans %}</h3>
+                    <h3>{% blocktrans with n=forloop.counter %}Équipier {{ n }}{% endblocktrans %}</h3>
+                    <ul>
                     {% for k,v in equipier_form.errors.items %}
-                        {{ k }} : {{ v }}
+                        <li>{{ k }} : {{ v }}</li>
                     {% endfor %}
+                    </ul>
                 {% endif %}
             {% endfor %}
         </div>
