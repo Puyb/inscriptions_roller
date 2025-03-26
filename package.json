@@ -10,20 +10,20 @@
   "license": "",
   "dependencies": {
     "babel-core": "^6.0.14",
-    "babel-loader": "^6.0.0",
+    "babel-loader": "^9.1.0",
     "bootstrap": "^3.3.5",
     "chart.js": "^2.8.0",
     "chartjs-plugin-annotation": "^0.5.7",
-    "css-loader": "^0.21.0",
-    "extract-text-webpack-plugin": "^0.8.2",
-    "file-loader": "^0.8.4",
+    "css-loader": "^6.7.1",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^6.2.0",
     "font-awesome": "^4.5.0",
     "html-webpack-plugin": "^1.6.2",
     "jquery": "^2.1.4",
     "less": "^2.5.3",
-    "less-loader": "^2.2.1",
+    "less-loader": "^11.1.0",
     "papaparse": "^4.1.2",
-    "style-loader": "^0.13.0",
-    "webpack": "^1.12.2"
+    "style-loader": "^0.13.2",
+    "webpack": "^1.12.9"
   }
 }
