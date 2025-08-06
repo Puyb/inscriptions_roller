@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tours, MIXITE_CHOICES
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -345,8 +345,8 @@ def resultats(request, course_uid):
 def resultats_equipe(request, course_uid, numero):
     equipe = get_object_or_404(Equipe.objects.select_related('course', 'categorie'), course__uid=course_uid, numero=numero)
     course = equipe.course
-    equipiers = equipe.equipier_set.prefetch_related(Prefetch('tours', Tours.objects.order_by('timestamp'))).order_by('numero')
-    tours = Tours.objects.filter(equipier__in=equipiers).order_by('timestamp')
+    equipiers = equipe.equipier_set.prefetch_related(Prefetch('tours', Tour.objects.order_by('timestamp'))).order_by('numero')
+    tours = Tour.objects.filter(equipier__in=equipiers).order_by('timestamp')
     return TemplateResponse(request, 'resultats_equipe.html', {
         'course': course,
         'equipe': equipe,

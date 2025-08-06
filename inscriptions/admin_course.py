@@ -18,7 +18,7 @@ from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
-from .utils import ChallengeUpdateThread, send_mail
+from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -223,6 +223,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             form = ImportResultatForm(request.POST, request.FILES)
             if form.is_valid():
                 csv_file = request.FILES['csv']
+                tours_csv_file = request.FILES['tours_csv']
                 data = form.cleaned_data
 
                 class AbortException(Exception):
@@ -235,6 +236,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                             position_generale  = None,
                             position_categorie = None,
                         )
+                        Tour.objects.filter(equipier__equipe__course=course).delete()
 
                         for enc in ('utf-8', 'iso8859-1'):
                             try:
@@ -294,7 +296,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         else:
                                             numeros.remove(numero)
 
-                                        equipe.tours = g(row, 'tours_column', intOrNone)
+                                        equipe.tours = g(row, 'nbtours_column', intOrNone)
                                         if data.get('categorie_column'):
                                             try:
                                                 equipe.categorie = course.categories.get(code=g(row, 'categorie_column'))
@@ -302,16 +304,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                                                 pass
                                         if data.get('time_column'):
                                             try:
-                                                if data['time_format'] == 'HMS':
-                                                    s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
-                                                    time = Decimal(0)
-                                                    n = Decimal(1)
-                                                    while len(s):
-                                                        time += n * Decimal(s.pop().replace(',', '.'))
-                                                        n *= Decimal(60)
-                                                else:
-                                                    time = Decimal(g(row, 'time_column'))
-                                            except:
+                                                time = parse_csv_time(g(row, 'time_column'), data['time_format'])
+                                            except Exception as e:
+                                                logger.error(e)
                                                 messages.add_message(
                                                     request,
                                                     messages.ERROR,
@@ -324,6 +319,76 @@ class CourseAdminSite(admin.sites.AdminSite):
 
 
                                         #super(Equipe, equipe).save()
+                                break
+                            except UnicodeDecodeError as exc:
+                                if enc == 'iso8859-1':
+                                    raise exc
+                        # Tours
+                        for enc in ('utf-8', 'iso8859-1'):
+                            try:
+                                tours_csv_file.seek(0)
+                                with io.StringIO(tours_csv_file.read().decode(enc)) as io_file:
+                                    csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                                    if data.get('skip_first'):
+                                        next(csv_reader)
+
+                                    def g(row, n, f=lambda x: x):
+                                        if not data.get(n):
+                                            return None
+                                        return f(row[data[n] - 1])
+                                    equipiers = list(Equipier.objects.filter(equipe__course=course))
+                                    dossards = [ e.dossard() for e in equipiers]
+                                    equipiers_by_numero = { e.dossard(): e for e in equipiers }
+
+                                    def intOrNone(x):
+                                        try:
+                                            return int(x)
+                                        except:
+                                            return None
+
+                                    line = 0
+                                    for row in csv_reader:
+                                        line += 1
+                                        try:
+                                            dossard = int(g(row, 'tours_dossard_column'))
+                                        except ValueError as e:
+                                            messages.add_message(
+                                                request,
+                                                messages.ERROR,
+                                                _(u'Dossard Equipier incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_dossard_column'], line, g(row, 'tours_dossard_column'))
+                                            )
+                                            raise AbortException()
+                                        equipier = equipiers_by_numero.get(dossard)
+                                        if not equipier:
+                                            raise Exception('Dossard inconu')
+                                        # else:
+                                        #     dossards.remove(dossard)
+
+                                        if data.get('tours_duree_column'):
+                                            try:
+                                                duree = parse_csv_time(g(row, 'tours_duree_column'), data['tours_duree_format'])
+                                            except Exception as e:
+                                                logger.error(e)
+                                                messages.add_message(
+                                                    request,
+                                                    messages.ERROR,
+                                                    _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_duree_column'], line, g(row, 'tours_duree_column'))
+                                                )
+                                                raise AbortException()
+                                        if data.get('tours_timestamp_column'):
+                                            try:
+                                                timestamp = parse_csv_time(g(row, 'tours_timestamp_column'), data['tours_timestamp_format'])
+                                            except Exception as e:
+                                                logger.error(e)
+                                                messages.add_message(
+                                                    request,
+                                                    messages.ERROR,
+                                                    _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_timestamp_column'], line, g(row, 'tours_timestamp_column'))
+                                                )
+                                                raise AbortException()
+
+                                        t = Tour(equipier=equipier, timestamp=timestamp, duree=duree)
+                                        t.save()
                                 break
                             except UnicodeDecodeError as exc:
                                 if enc == 'iso8859-1':

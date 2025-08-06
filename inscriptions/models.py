@@ -15,7 +15,7 @@ from decimal import Decimal
 from django.utils.safestring import mark_safe
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
-from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func, Min
+from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func, Min, Avg
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
@@ -810,9 +810,9 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
         self.course.send_mail(nom, [self])
 
     def tours_info(self):
-        if not hasattr(self, '__tour_info'):
-            self.__tours_info = self.tours.aggregate({ count: Count(), duree: Sum('duree'), duree_moyenne: Avg('duree'), best: Min('duree') })
-        return self.__tour_info
+        if not hasattr(self, '_tours_info'):
+            self._tours_info = self.tours.aggregate(count=Count('duree'), duree=Sum('duree'), duree_moyenne=Avg('duree'), best=Min('duree'))
+        return self._tours_info
 
     def distance(self):
         return self.tours_info()['count'] * self.equipe.course.distance if self.tours and self.equipe.course.distance else None
@@ -1451,7 +1451,7 @@ class PaiementRepartition(models.Model):
         return self.equipe.prix_reel - self.paye()
 
 
-class Tours(models.Model):
+class Tour(models.Model):
     equipier = models.ForeignKey(Equipier, related_name='tours', on_delete=models.CASCADE)
     timestamp = models.IntegerField()
     duree = models.IntegerField()

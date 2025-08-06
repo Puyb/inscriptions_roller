@@ -109,3 +109,18 @@ def send_mail(**kwargs):
         message['message_id'] = '%s@%s' % (uuid.uuid4().hex, Site.objects.get_current())
     #message['to'] = json.dumps(message['to'])
     async_to_sync(channel_layer.send)("mail", message)
+
+def parse_csv_time(value, fmt):
+    if not value:
+        return Decimal(0)
+
+    if fmt == 'HMS':
+        s = re.split('[^0-9.,]+', value.strip())
+        time = Decimal(0)
+        n = Decimal(1)
+        while len(s):
+            time += n * Decimal(s.pop().replace(',', '.'))
+            n *= Decimal(60)
+    else:
+        time = Decimal(value)
+    return time

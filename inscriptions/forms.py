@@ -125,17 +125,23 @@ class ContactForm(Form):
     message = CharField(widget=Textarea())
 
 class ImportResultatForm(Form):
-    csv = FileField(label=_('Fichier CSV'))
     delimiter = CharField(label=_('Délimiteur'), max_length=1)
     skip_first = BooleanField(label=_('Sauter la première ligne'), required=False)
-    dossard_column = IntegerField(label=_('Dossard'))
+    csv = FileField(label=_('Equipes - Fichier CSV'))
+    dossard_column = IntegerField(label=_('Numéro équipe'))
     time_column = IntegerField(label=_('Temps'), required=False)
     time_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
-    tours_column = IntegerField(label=_('Tours'), required=False)
+    nbtours_column = IntegerField(label=_('Tours'), required=False)
     position_generale_column = IntegerField(label=_('Position générale'), required=False)
     position_categorie_column = IntegerField(label=_('Position catégorie'), required=False)
     nom_column = IntegerField(label=_('Nom de l\'équipe'), required=False)
     categorie_column = IntegerField(label=_('Code catégorie'), required=False)
+    tours_csv = FileField(label=_('Tours - Fichier CSV'), required=False)
+    tours_dossard_column = IntegerField(label=_('Dossard (tour)'), required=False)
+    tours_duree_column = IntegerField(label=_('Durée (tour)'), required=False)
+    tours_duree_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
+    tours_timestamp_column = IntegerField(label=_('Heure passage (tour)'), required=False)
+    tours_timestamp_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
 
 class ChallengeForm(ModelForm):
     class Meta:

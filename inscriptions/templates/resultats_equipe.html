@@ -9,47 +9,55 @@
     <div class="panel panel-default">
         <div class="panel-heading">Resultats</div>
         <div class="panel-body">
-            <table>
-                <tr>
-                    <th>Numéro :</th><td>{{ equipe.numero }}</td>
-                <tr>
-                </tr>
-                    <th>Nom :</th><td>{{ equipe.nom }}</td>
-                <tr>
-                    {% if equipe.club %}
-                </tr>
-                    <th>Club :</th><td>{{ equipe.club }}</td>
-                <tr>
-                    {% endif %}
-                </tr>
-                    <th>Position générale :</th><td>{{ equipe.position_generale }}</td>
-                <tr>
-                </tr>
-                    <th>Catégorie :</th><td>{{ equipe.categorie.nom }} ({{ equipe.categorie.code }})</td>
-                <tr>
-                </tr>
-                    <th>Position catégorie :</th><td>{{ equipe.position_categorie }}</td>
-                <tr>
-                </tr>
-                    <th>Nombre de tours :</th><td>{{ equipe.tours }}</td>
-                <tr>
-                </tr>
-                    <th>Temps total:</th><td>{{ equipe.temps|duree }}</td>
-                <tr>
-                </tr>
-                    <th>Distance parcourue :</th><td>{{ equipe.distance|floatformat }} km</td>
-                <tr>
-                </tr>
-                    <th>Vitesse moyenne :</th><td>{{ equipe.vitesse|floatformat }} km/h</td>
-                </tr>
-            </table>
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table">
+                        <tr>
+                            <th>Numéro :</th><td>{{ equipe.numero }}</td>
+                        <tr>
+                        </tr>
+                            <th>Nom :</th><td>{{ equipe.nom }}</td>
+                        <tr>
+                            {% if equipe.club %}
+                        </tr>
+                            <th>Club :</th><td>{{ equipe.club }}</td>
+                        <tr>
+                            {% endif %}
+                        </tr>
+                            <th>Catégorie :</th><td>{{ equipe.categorie.nom }} ({{ equipe.categorie.code }})</td>
+                        <tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table class="table">
+                        </tr>
+                            <th>Position générale :</th><td>{{ equipe.position_generale }}</td>
+                        <tr>
+                        </tr>
+                            <th>Position catégorie :</th><td>{{ equipe.position_categorie }}</td>
+                        <tr>
+                        </tr>
+                            <th>Nombre de tours :</th><td>{{ equipe.tours }}</td>
+                        <tr>
+                        </tr>
+                            <th>Temps total:</th><td>{{ equipe.temps|duree }}</td>
+                        <tr>
+                        </tr>
+                            <th>Distance parcourue :</th><td>{{ equipe.distance|floatformat }} km</td>
+                        <tr>
+                        </tr>
+                            <th>Vitesse moyenne :</th><td>{{ equipe.vitesse|floatformat }} km/h</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     {% if tours.count %}
     <div class="panel panel-default">
         <div class="panel-heading">Équipiers</div>
         <div class="panel-body">
-            <table>
+            <table class="table">
                 <tr>
                     <th>Dossard</th>
                     <th>Nom</th>
@@ -60,14 +68,14 @@
                     <th>Meilleur temps</th>
                 </tr>
                 {% for equipier in equipiers %}
-                <tr class="equipier{{ equipier.numero }}">
+                <tr class="equipier{{ equipier.numero }} {{ equipier.numero|choose:"danger,success,warning,info,primary" }}">
                     <td>{{ equipier.dossard }}</td>
                     <td>{{ equipier.prenom }} {{ equipier.nom }}</td>
-                    <td>{{ equipier.tours }}</td>
-                    <td>{{ equipier.distance|floatformat }}</td>
-                    <td>{{ equipier.vitesse|floatformat }}</td>
-                    <td>{{ equipier.duree|duree }}</td>
-                    <td>{{ equipier.best|duree }}</td>
+                    <td>{{ equipier.tours_info.count }}</td>
+                    <td>{{ equipier.distance|floatformat }} km</td>
+                    <td>{{ equipier.vitesse|floatformat }} km/h</td>
+                    <td>{{ equipier.tours_info.duree|duree }}</td>
+                    <td>{{ equipier.tours_info.best|duree }}</td>
                 </tr>
                 {% endfor %}
             </table>
@@ -76,14 +84,25 @@
     <div class="panel panel-default">
         <div class="panel-heading">Tours</div>
         <div class="panel-body">
-            <table>
-                {% for tour in tours %}
-                <tr class="equipier{{ tour.equipier.numero }}">
-                    <th>{{ forloop.counter }}</th>
-                    <td>{{ tour.duree|duree }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+            <div class="row">
+                <div class="col-md-3">
+                    <table class="table">
+                        {% for tour in tours %}
+                        <tr class="equipier{{ tour.equipier.numero }} {{ tour.equipier.numero|choose:"danger,success,warning,info,primary" }}">
+
+                            <th>{{ forloop.counter }}</th>
+                            <td>{{ tour.duree|duree }}</td>
+                        </tr>
+                        {% with forloop.counter0|mod3:tours.count as break %}{% if break %}
+                    </table>
+                </div>
+                <div class="col-md-3">
+                    <table class="table">
+                        {% endif %}{% endwith %}
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
