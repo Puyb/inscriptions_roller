@@ -11,31 +11,26 @@
         <table class="list_inscrits">
             <tr>
                 <th></th>
-                {% if course.date_augmentation %}
+                {% for d in course.dernier_jours_tarif_reduit %}
                 <th>
                     {% trans "Tarif réduit" %}<br />
-                    {% blocktrans with date=course.dernier_jour_tarif_reduit %}(jusqu'au {{ date }} inclus){% endblocktrans %}
+                    {% blocktrans with date=d %}(jusqu'au {{ date }} inclus){% endblocktrans %}
                 </th>
+                {% endfor %}
                 <th>
                     {% trans "Plein tarif" %}<br />
                     {% blocktrans with date=course.dernier_jour_inscription %}(inscriptions jusqu'au {{ date }} inclus){% endblocktrans %}
                 </th>
-                {% else %}
-                <th>
-                    {% trans "Tarif" %}<br />
-                </th>
-                {% endif %}
             </tr>
             {% for categorie in categories %}
             <tr data-toggle="collapse" data-target="#details{{ categorie.id }}" class="accordion-toggle">
                 <td>{{ categorie.nom }} ({{ categorie.code }})</td>
-                <td>{{ categorie.prix1 }} €</td>
-                {% if course.date_augmentation %}
-                <td>{{ categorie.prix2 }} €</td>
-                {% endif %}
+                {% for price in categorie.prices %}
+                <td>{{ price }} €</td>
+                {% endfor %}
             </tr>
             <tr >
-                <td colspan="3" class="hiddenRow">
+                <td colspan="{{ course.dates_augmentation|length|add:2 }}" class="hiddenRow">
                     <div class="accordian-body collapse" id="details{{ categorie.id }}">
                         <div class="panel panel-default"><div class="panel-body">
                         {% if categorie.min_equipiers == categorie.max_equipiers %}

@@ -177,6 +177,15 @@ class Course(models.Model):
                 return date_augmentation - timedelta(days=1)
         return None
 
+    @property
+    def dernier_jours_tarif_reduit(self):
+        return [ date_augmentation - timedelta(days=1)
+            for date_augmentation in self.dates_augmentation]
+
+    @property
+    def date_augmentation(self):
+        return self.dates_augmentation[0] if len(self.dates_augmentation) else None
+
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
@@ -689,7 +698,10 @@ class Equipe(models.Model):
         return 'code_%s' % self.id
 
     def distance(self):
-        return self.tours * self.course.distance if self.tours else None
+        return self.tours * self.course.distance if self.tours and self.course.distance else None
+
+    def vitesse(self):
+        return self.tours * self.course.distance / self.temps * 3600 if self.temps and self.course.distance else 0
 
 def equipier_piece_jointe_filename(instance, filename):
     name = instance.justificatif
@@ -796,6 +808,17 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
+
+    def tours_info(self):
+        if not hasattr(self, '__tour_info'):
+            self.__tours_info = self.tours.aggregate({ count: Count(), duree: Sum('duree'), duree_moyenne: Avg('duree'), best: Min('duree') })
+        return self.__tour_info
+
+    def distance(self):
+        return self.tours_info()['count'] * self.equipe.course.distance if self.tours and self.equipe.course.distance else None
+
+    def vitesse(self):
+        return self.tours_info()['count'] * self.equipe.course.distance / self.tours_info()['duree'] * 3600 if self.tours_info()['duree'] and self.equipe.course.distance else 0
 
 class ExtraQuestion(models.Model):
     PAGE_CHOICES = (
@@ -1426,3 +1449,10 @@ class PaiementRepartition(models.Model):
 
     def reste(self):
         return self.equipe.prix_reel - self.paye()
+
+
+class Tours(models.Model):
+    equipier = models.ForeignKey(Equipier, related_name='tours', on_delete=models.CASCADE)
+    timestamp = models.IntegerField()
+    duree = models.IntegerField()
+

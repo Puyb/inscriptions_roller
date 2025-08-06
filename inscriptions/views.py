@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, MIXITE_CHOICES
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tours, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -155,7 +155,8 @@ def form(request, course_uid, numero=None, code=None):
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
 
     error_messages = request.GET.getlist('message')
-    errors = error_messages or equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
+    errors = len(error_messages) > 0 or len(equipe_form.errors) > 0 or reduce(lambda a,b: a or b, [len(e.errors) > 0 for e in equipier_formset])
+    logger.info('error_messages', error_messages, errors)
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
@@ -340,6 +341,18 @@ def resultats(request, course_uid):
     equipes = Equipe.objects.filter(course__uid=course_uid, position_generale__isnull=False)
     (_('position_generale'), _('position_categorie'), _('numero'), _('nom'), _('categorie__code'))
     return _list(course_uid, equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'], show_stats=False)
+
+def resultats_equipe(request, course_uid, numero):
+    equipe = get_object_or_404(Equipe.objects.select_related('course', 'categorie'), course__uid=course_uid, numero=numero)
+    course = equipe.course
+    equipiers = equipe.equipier_set.prefetch_related(Prefetch('tours', Tours.objects.order_by('timestamp'))).order_by('numero')
+    tours = Tours.objects.filter(equipier__in=equipiers).order_by('timestamp')
+    return TemplateResponse(request, 'resultats_equipe.html', {
+        'course': course,
+        'equipe': equipe,
+        'equipiers': equipiers,
+        'tours': tours,
+    })
 
 def _list(course_uid, equipes, request, template, sorts, show_stats=True):
     if request.GET.get('search'):
@@ -754,6 +767,8 @@ def helloasso_webhook(request, course_uid):
 
     if data['eventType'] == 'Order':
         try:
+            if 'metadata' not in data: return HttpResponse('OK')
+            if 'uuid' not in data['metadata']: return HttpResponse('OK')
             payment = data['data']['payments'][0]
             uuid = data['metadata']['uuid']
             paiement = Paiement.objects.get(
@@ -768,7 +783,7 @@ def helloasso_webhook(request, course_uid):
                 paiement.send_equipes_mail()
                 paiement.send_admin_mail()
         except Paiement.DoesNotExist as e:
-            logger.warning('intent not found %s %s', json.dumps(intent), course_uid)
+            logger.warning('intent not found %s %s', json.dumps(data), course_uid)
         # Fulfill the customer's purchase
     return HttpResponse('OK')
 
@@ -780,9 +795,10 @@ def intent_paiement(request, course_uid, methode='stripe'):
         raise Http404()
 
     montant = 0
-    frais = Decimal(0)
     for equipe in equipes:
         montant += equipe.reste_a_payer
+    if montant <= 0:
+        return redirect('inscriptions_done', course_uid=course.uid, numero=equipes[0].numero)
     try: 
         (intent_id, frais, response) = get_intent(request, course, equipes, methode, montant)
 
@@ -813,6 +829,7 @@ def intent_paiement(request, course_uid, methode='stripe'):
 
 def get_intent(request, course, equipes, methode, montant):
     if methode == 'stripe':
+        frais = Decimal(0)
         if not course.frais_stripe_inclus:
             frais = stripe_templatetags.frais(montant)
 
