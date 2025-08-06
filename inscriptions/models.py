@@ -1453,6 +1453,6 @@ class PaiementRepartition(models.Model):
 
 class Tour(models.Model):
     equipier = models.ForeignKey(Equipier, related_name='tours', on_delete=models.CASCADE)
-    timestamp = models.IntegerField()
-    duree = models.IntegerField()
+    timestamp = models.DecimalField(_('Heure (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
+    duree = models.DecimalField(_('Duree (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
 
