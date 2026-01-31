@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-27 12:27+0100\n"
+"POT-Creation-Date: 2024-10-03 21:01+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,49 +18,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 
-#: inscriptions/static/form.js:74
+#: inscriptions/static/form.js:93
 msgid "Ce nom d'équipe est déjà utilisé !"
 msgstr ""
 
-#: inscriptions/static/form.js:103
+#: inscriptions/static/form.js:121
 msgid ""
 "Désolé, il n'y a plus de place dans cette catégorie. Changez le nombre de "
 "participants."
 msgstr ""
 
-#: inscriptions/static/form.js:135
+#: inscriptions/static/form.js:125
+msgid ""
+"Désolé, la course est complete, vous ne pouvez pas inscrire une équipe avec "
+"autant d'équipiers."
+msgstr ""
+
+#: inscriptions/static/form.js:158
 msgid "Veuillez corriger les champs en rouge."
 msgstr ""
 
-#: inscriptions/static/form.js:155
+#: inscriptions/static/form.js:185
 msgid ""
 "Votre équipe n'est éligible dans aucune des catégories proposées pour cette "
 "compétition. Veuillez vous référer au réglement de la course disponible sur "
 "le site pour voir les critères de chaque catégorie."
 msgstr ""
 
-#: inscriptions/static/form.js:182
+#: inscriptions/static/form.js:219
 msgid ""
 "Vos modifications impliquent un changement de catégorie. Veuillez "
 "sélectionner la nouvelle catégorie."
 msgstr ""
 
-#: inscriptions/static/form.js:246
+#: inscriptions/static/form.js:327
 msgid "Licence"
 msgstr ""
 
-#: inscriptions/static/form.js:250
+#: inscriptions/static/form.js:332
 msgid "Certificat médical"
 msgstr ""
 
-#: inscriptions/static/form.js:265
+#: inscriptions/static/form.js:349
 msgid "E-mail (confirmation) :"
 msgstr ""
 
-#: inscriptions/static/form.js:342
-msgid "Vous devez choisir une catégorie"
+#: inscriptions/static/form.js:436
+msgid "Vous devez choisir une catégorie. "
 msgstr ""
 
-#: inscriptions/static/form.js:346
-msgid "Vous devez accépter le règlement de la compétition"
+#: inscriptions/static/form.js:440
+msgid "Vous devez accépter le règlement de la compétition. "
+msgstr ""
+
+#: static/dist/js/site.js:15
+msgid "["
 msgstr ""

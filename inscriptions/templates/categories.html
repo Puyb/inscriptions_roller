@@ -1,0 +1,55 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load stats %}
+{% block body %}
+{% with page="categories" %}
+{% include "_course_header.html" %}
+{% endwith %}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table class="list_inscrits">
+            <tr>
+                <th></th>
+                {% for d in course.dernier_jours_tarif_reduit %}
+                <th>
+                    {% trans "Tarif réduit" %}<br />
+                    {% blocktrans with date=d %}(jusqu'au {{ date }} inclus){% endblocktrans %}
+                </th>
+                {% endfor %}
+                <th>
+                    {% trans "Plein tarif" %}<br />
+                    {% blocktrans with date=course.dernier_jour_inscription %}(inscriptions jusqu'au {{ date }} inclus){% endblocktrans %}
+                </th>
+            </tr>
+            {% for categorie in categories %}
+            <tr data-toggle="collapse" data-target="#details{{ categorie.id }}" class="accordion-toggle">
+                <td>{{ categorie.nom }} ({{ categorie.code }})</td>
+                {% for price in categorie.prices %}
+                <td>{{ price }} €</td>
+                {% endfor %}
+            </tr>
+            <tr >
+                <td colspan="{{ course.dates_augmentation|length|add:2 }}" class="hiddenRow">
+                    <div class="accordian-body collapse" id="details{{ categorie.id }}">
+                        <div class="panel panel-default"><div class="panel-body">
+                        {% if categorie.min_equipiers == categorie.max_equipiers %}
+                        {{ categorie.min_equipiers }} {% if categorie.min_equipiers < 2 %}{% trans "équipier" %}{% else %}{% trans "équipiers" %}{% endif %}
+                        {% else %}
+                        {% blocktrans with min=categorie.min_equipiers max=categorie.max_equipiers %}De {{ min }} à {{ max }} équipiers{% endblocktrans %}
+                        {% endif %}<br />
+                        {% trans "Sexe :" %} {{ mixite_choices|get:categorie.sexe }}<br />
+                        {% blocktrans with age=categorie.min_age %}A partir de {{ age }} ans{% endblocktrans %}<br />
+                        {{ categorie.description|default:"" }}
+                        </div></div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br />
+        <span>{% trans "Cliquez sur une catégorie pour avoir des détails, ou consultez le" %} <a href="{{ course.url_reglement }}">règlement de la course</a></span>
+    </div>
+</div>
+{% endblock %}
+

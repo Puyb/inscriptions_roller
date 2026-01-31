@@ -1,0 +1,18 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load l10n %}
+{% load bootstrap %}
+{% block body %}
+{% include "_course_header.html" %}
+<h1>{% trans "Facture" %}</h1>
+    <form method="post">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                {% trans "Le lien pour télécharger votre facture à changé. cliquez sur le bouton pour recevoir le nouveau lien par email" %}<br />
+            </div>
+        </div>
+        {% csrf_token %}
+        <button class="btn btn-success" id="button_submit" type="submit">{% trans "Recevoir le lien vers la facture" %}</button>
+    </form>
+</form>
+{% endblock %}

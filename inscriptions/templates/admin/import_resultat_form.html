@@ -15,45 +15,54 @@
     {% csrf_token %}
 </form>
 <script>
-var f = $('[type=file]');
-var p = $('<p>').append($('<label>').text('Aperçu:')).append($('<div>')).insertAfter(f.parent());
-var selects = [];
-$('[type=number]').each(function() {
-    var s = $('<select>').attr('name', this.name);
-    selects.push(s);
-    $(this).replaceWith(s)
-});
-function parse() {
-    f.parse({
-        config: {
-            preview: 4,
-            delimiter: $('[name=delimiter]').val(),
-            complete: function(results) {
-                $('[name=delimiter]').val(results.meta.delimiter);
-                p.find('div').html('<table>' + results.data.map(function(r) {
-                    return '<tr><td>' + r.join('</td><td>') + '</td></tr>';
-                }).join('') + '</table>');
 
-                selects.forEach(function(s) {
-                    s.empty();
-                    s.append($('<option>'));
-                    results.data[0].forEach(function(c, i) {
-                        s.append($('<option>').val(i + 1).text('Colonne ' + (i + 1) + ' - ' + c));
-                    });
-                });
-            }
-        }
+function installParse(f) {
+    var p = $('<p>').append($('<label>').text('Aperçu:')).append($('<div>')).insertAfter(f.parent());
+    var selects = [];
+    $('[type=number]').each(function() {
+        if (f.attr('name') === 'tours_csv' && !this.name.startsWith('tours_')) return;
+        if (f.attr('name') !== 'tours_csv' && this.name.startsWith('tours_')) return;
+        var s = $('<select>').attr('name', this.name);
+        selects.push(s);
+        $(this).replaceWith(s)
     });
-};
-f.change(parse);
-parse();
+    console.log(f, selects)
+    function parse() {
+        f.parse({
+            config: {
+                preview: 4,
+                delimiter: $('[name=delimiter]').val(),
+                complete: function(results) {
+                    $('[name=delimiter]').val(results.meta.delimiter);
+                    p.find('div').html('<table>' + results.data.map(function(r) {
+                        return '<tr><td>' + r.join('</td><td>') + '</td></tr>';
+                    }).join('') + '</table>');
 
-function temps_change() {
-    var p = $('[name=time_column]').val() ? 'show' : 'hide';
-    $('[name=time_format]').parent()[p]();
+                    selects.forEach(function(s) {
+                        s.empty();
+                        s.append($('<option>'));
+                        results.data[0].forEach(function(c, i) {
+                            s.append($('<option>').val(i + 1).text('Colonne ' + (i + 1) + ' - ' + c));
+                        });
+                    });
+                }
+            }
+        });
+    };
+    f.change(parse);
+    parse();
 }
-$('[name=time_column]').change(temps_change);
-temps_change();
+installParse($('[name=csv]'));
+installParse($('[name=tours_csv]'));
+
+for (const k in ['time', 'tours_time', 'tours_timestamp']) {
+    const temps_change = function () {
+        var p = $(`[name=${k}_column]`).val() ? 'show' : 'hide';
+        $(`[name=${k}_format]`).parent()[p]();
+    };
+    $(`[name=${k}_column]`).change(temps_change);
+    temps_change();
+}
 </script>
 {% endblock %}
 

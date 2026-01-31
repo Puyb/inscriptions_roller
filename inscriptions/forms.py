@@ -68,6 +68,7 @@ class CourseForm(ModelForm):
             'url': _("""Adresse internet pointant vers le site présentant la course"""),
             'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
             'email_contact': _("""Email utilisée pour envoyer les emails"""),
+            'texte_accueil': _("""Ce texte sera affiché sur la page d'inscription. Vous pouvez l'utiliser si vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas mettre de message."""),
         }
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_course.js', )
@@ -94,10 +95,8 @@ class CourseForm(ModelForm):
                     obj.course = instance
                     if key == 'categories':
                         if obj.code in prix:
-                            obj.prix_base1 = prix[obj.code]['prix_base1']
-                            obj.prix_base2 = prix[obj.code]['prix_base2']
-                            obj.prix_equipier1 = prix[obj.code]['prix_equipier1']
-                            obj.prix_equipier2 = prix[obj.code]['prix_equipier2']
+                            obj.prices_base = prix[obj.code]['prices_base']
+                            obj.prices_equipier = prix[obj.code]['prices_equipier']
                     obj.save()
 
         else:
@@ -107,10 +106,8 @@ class CourseForm(ModelForm):
                 if 'categories' in models[model]:
                     for c in models[model]['categories']:
                         if c['code'] in prix:
-                            c['prix_base1'] = prix[c['code']]['prix_base1']
-                            c['prix_base2'] = prix[c['code']]['prix_base2']
-                            c['prix_equipier1'] = prix[c['code']]['prix_equipier1']
-                            c['prix_equipier2'] = prix[c['code']]['prix_equipier2']
+                            c['prices_base'] = prix[c['code']]['prices_base']
+                            c['prices_equipier'] = prix[c['code']]['prices_equipier']
 
                 instance = super().save(commit=False)
                 instance.is_active = False
@@ -130,17 +127,23 @@ class ContactForm(Form):
     message = CharField(widget=Textarea())
 
 class ImportResultatForm(Form):
-    csv = FileField(label=_('Fichier CSV'))
     delimiter = CharField(label=_('Délimiteur'), max_length=1)
     skip_first = BooleanField(label=_('Sauter la première ligne'), required=False)
-    dossard_column = IntegerField(label=_('Dossard'))
+    csv = FileField(label=_('Equipes - Fichier CSV'))
+    dossard_column = IntegerField(label=_('Numéro équipe'))
     time_column = IntegerField(label=_('Temps'), required=False)
     time_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
-    tours_column = IntegerField(label=_('Tours'), required=False)
+    nbtours_column = IntegerField(label=_('Tours'), required=False)
     position_generale_column = IntegerField(label=_('Position générale'), required=False)
     position_categorie_column = IntegerField(label=_('Position catégorie'), required=False)
     nom_column = IntegerField(label=_('Nom de l\'équipe'), required=False)
     categorie_column = IntegerField(label=_('Code catégorie'), required=False)
+    tours_csv = FileField(label=_('Tours - Fichier CSV'), required=False)
+    tours_dossard_column = IntegerField(label=_('Dossard (tour)'), required=False)
+    tours_duree_column = IntegerField(label=_('Durée (tour)'), required=False)
+    tours_duree_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
+    tours_timestamp_column = IntegerField(label=_('Heure passage (tour)'), required=False)
+    tours_timestamp_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
 
 class ChallengeForm(ModelForm):
     class Meta:

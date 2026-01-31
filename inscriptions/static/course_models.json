@@ -1,522 +1,1035 @@
 {
-    "paris": {
-        "categories": [
-            {
-                "numero_debut": 301,
-                "nom": "Individuel Homme",
-                "prix_base1": "40.00",
-                "min_equipiers": 1,
-                "numero_fin": 365,
-                "sexe": "H",
-                "validation": "function(data) { return true; }",
-                "min_age": 18,
-                "max_equipiers": 1,
-                "code": "IDH",
-                "prix_base2": "50.00"
-            },
-            {
-                "numero_debut": 301,
-                "nom": "Individuel Femme",
-                "prix_base1": "40.00",
-                "min_equipiers": 1,
-                "numero_fin": 365,
-                "sexe": "F",
-                "validation": "function(data) { return true; }",
-                "min_age": 18,
-                "max_equipiers": 1,
-                "code": "IDF",
-                "prix_base2": "50.00"
-            },
-            {
-                "numero_debut": 401,
-                "nom": "Duo Homme ou Mixte",
-                "prix_base1": "50.00",
-                "min_equipiers": 2,
-                "numero_fin": 490,
-                "sexe": "HX",
-                "validation": "function(data) { return true; }",
-                "min_age": 18,
-                "max_equipiers": 2,
-                "code": "DUX",
-                "prix_base2": "60.00"
-            },
-            {
-                "numero_debut": 401,
-                "nom": "Duo Femme",
-                "prix_base1": "50.00",
-                "min_equipiers": 2,
-                "numero_fin": 490,
-                "sexe": "F",
-                "validation": "function(data) { return true; }",
-                "min_age": 18,
-                "max_equipiers": 2,
-                "code": "DUF",
-                "prix_base2": "60.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Junior",
-                "prix_base1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "",
-                "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
-                "min_age": 12,
-                "max_equipiers": 5,
-                "code": "JNX",
-                "prix_base2": "90.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Sénior Homme ou Mixte",
-                "prix_base1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "HX",
-                "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
-                "min_age": 14,
-                "max_equipiers": 5,
-                "code": "SNX",
-                "prix_base2": "90.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Sénior Femme",
-                "prix_base1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "F",
-                "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
-                "min_age": 14,
-                "max_equipiers": 5,
-                "code": "SNF",
-                "prix_base2": "90.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Vétéran",
-                "prix_base1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "",
-                "validation": "function(data) { return true; }",
-                "min_age": 35,
-                "max_equipiers": 5,
-                "code": "VEX",
-                "prix_base2": "90.00"
-            },
-            {
-                "numero_debut": 1,
-                "nom": "Quad",
-                "prix_base1": "75.00",
-                "min_equipiers": 3,
-                "numero_fin": 300,
-                "sexe": "",
-                "validation": "function(data) { return true; }",
-                "min_age": 14,
-                "max_equipiers": 5,
-                "code": "QDX",
-                "prix_base2": "90.00"
-            }
+  "paris": {
+    "categories": [
+      {
+        "numero_debut": 301,
+        "nom": "Individuel Homme",
+        "min_equipiers": 1,
+        "numero_fin": 365,
+        "sexe": "H",
+        "validation": "function(data) { return true; }",
+        "min_age": 18,
+        "max_equipiers": 1,
+        "code": "IDH",
+        "prices_base": [
+          "40.00",
+          "50.00"
         ],
-        "templatemail_set": [
-            {
-                "destinataire": "Equipe",
-                "nom": "paiement",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/paiement.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "inscription",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/inscription.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "paiement_admin",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-                "message": "{% include \"mails/paiement_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "inscription_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/inscription_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "changement_numero",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
-                "message": "{% include \"mails/changement_numero.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "changement_numero_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/changement_numero_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "change_request",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 301,
+        "nom": "Individuel Femme",
+        "min_equipiers": 1,
+        "numero_fin": 365,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 18,
+        "max_equipiers": 1,
+        "code": "IDF",
+        "prices_base": [
+          "40.00",
+          "50.00"
         ],
-        "_name": "Challenge Grand Nord"
-    },
-    "grol": {
-        "categories": [
-            {
-                "nom": "Scratch",
-                "code": "Scratch",
-                "min_equipiers": 1,
-                "max_equipiers": 8,
-                "numero_debut": 1,
-                "numero_fin": 99,
-                "max_equipiers": 8,
-                "ajouter_nombre": true,
-                "prix_base1": "0",
-                "prix_equipier1": "66.00",
-                "prix_base2": "0",
-                "prix_equipier2": "80.00",
-                "sexe": "HX",
-                "validation": "function(data) { return true; }",
-                "min_age": 14
-            },
-            {
-                "nom": "Quad",
-                "code": "Quad",
-                "min_equipiers": 1,
-                "max_equipiers": 8,
-                "numero_debut": 1,
-                "numero_fin": 99,
-                "max_equipiers": 8,
-                "ajouter_nombre": true,
-                "prix_base1": "0",
-                "prix_equipier1": "66.00",
-                "prix_base2": "0",
-                "prix_equipier2": "80.00",
-                "sexe": "",
-                "validation": "function(data) { return true; }",
-                "min_age": 14
-            },
-            {
-                "nom": "Femmes",
-                "code": "Femmes",
-                "min_equipiers": 1,
-                "max_equipiers": 8,
-                "numero_debut": 1,
-                "numero_fin": 99,
-                "max_equipiers": 8,
-                "ajouter_nombre": true,
-                "prix_base1": "0",
-                "prix_equipier1": "66.00",
-                "prix_base2": "0",
-                "prix_equipier2": "80.00",
-                "sexe": "F",
-                "validation": "function(data) { return true; }",
-                "min_age": 14
-            },
-            {
-                "nom": "Junior",
-                "code": "Junior",
-                "min_equipiers": 1,
-                "max_equipiers": 8,
-                "numero_debut": 1,
-                "numero_fin": 99,
-                "prix_base1": "0",
-                "prix_equipier1": "66.00",
-                "prix_base2": "0",
-                "prix_equipier2": "80.00",
-                "sexe": "",
-                "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
-                "min_age": 14
-            }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Duo Homme ou Mixte",
+        "min_equipiers": 2,
+        "numero_fin": 490,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 18,
+        "max_equipiers": 2,
+        "code": "DUX",
+        "prices_base": [
+          "50.00",
+          "60.00"
         ],
-        "templatemail_set": [
-            {
-                "destinataire": "Equipe",
-                "nom": "paiement",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/paiement.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "inscription",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/inscription.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "paiement_admin",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-                "message": "{% include \"mails/paiement_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "inscription_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/inscription_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "changement_numero",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
-                "message": "{% include \"mails/changement_numero.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "changement_numero_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "change_request",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Duo Femme",
+        "min_equipiers": 2,
+        "numero_fin": 490,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 18,
+        "max_equipiers": 2,
+        "code": "DUF",
+        "prices_base": [
+          "50.00",
+          "60.00"
         ],
-        "_name": "Grol Race"
-    },
-    "centre": {
-        "categories": [
-            {
-                "nom": "Junior",
-                "code": "JNX",
-                "numero_debut": 401,
-                "numero_fin": 499,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 12,
-                "min_equipiers": 3,
-                "max_equipiers": 5,
-                "sexe": "",
-                "validation": "function(data) { return !data.equipiers.some(age(19)) && (data.age_moyen > 15 || (data.equipiers.length > 4 && data.age_moyen >= 14));  }"
-            },
-            {
-                "nom": "Senior Femme",
-                "code": "SNF",
-                "numero_debut": 501,
-                "numero_fin": 599,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 14,
-                "min_equipiers": 2,
-                "max_equipiers": 5,
-                "sexe": "F",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && (data.age_moyen >= 18 && data.age_moyen < 50) && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }"
-            },
-            {
-                "nom": "Senior Mixte",
-                "code": "SNX",
-                "numero_debut": 601,
-                "numero_fin": 699,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 14,
-                "min_equipiers": 2,
-                "max_equipiers": 5,
-                "sexe": "HX",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18 && data.age_moyen < 36 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }"
-            },
-            {
-                "nom": "V\u00e9t\u00e9ran",
-                "code": "VEX",
-                "numero_debut": 701,
-                "numero_fin": 799,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 14,
-                "min_equipiers": 2,
-                "max_equipiers": 5,
-                "sexe": "HX",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 36 && data.age_moyen < 50 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }"
-            },
-            {
-                "nom": "Super V\u00e9t\u00e9ran",
-                "code": "SVX",
-                "numero_debut": 801,
-                "numero_fin": 899,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 14,
-                "min_equipiers": 2,
-                "max_equipiers": 5,
-                "sexe": "",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 50 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }"
-            },
-            {
-                "nom": "Duo",
-                "code": "DUO",
-                "numero_debut": 201,
-                "numero_fin": 299,
-                "prix_base1": "60.00",
-                "prix_base2": "60.00",
-                "min_age": 18,
-                "min_equipiers": 2,
-                "max_equipiers": 2,
-                "sexe": "",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18; }"
-            },
-            {
-                "nom": "G3 Mixte",
-                "code": "G3X",
-                "numero_debut": 301,
-                "numero_fin": 399,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 14,
-                "min_equipiers": 3,
-                "max_equipiers": 3,
-                "sexe": "X",
-                "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18 ; }"
-            },
-            {
-                "nom": "Individuel Homme",
-                "code": "IDH",
-                "numero_debut": 1101,
-                "numero_fin": 1199,
-                "prix_base1": "38.00",
-                "prix_base2": "38.00",
-                "min_age": 18,
-                "min_equipiers": 1,
-                "max_equipiers": 1,
-                "sexe": "H",
-                "validation": "function(data) { return !data.equipiers.some(age(56)); }"
-            },
-            {
-                "nom": "Individuel Femme",
-                "code": "IDF",
-                "numero_debut": 1001,
-                "numero_fin": 1099,
-                "prix_base1": "38.00",
-                "prix_base2": "38.00",
-                "min_age": 18,
-                "min_equipiers": 1,
-                "max_equipiers": 1,
-                "sexe": "F",
-                "validation": "function(data) { return !data.equipiers.some(age(78)); }"
-            },
-            {
-                "nom": "3H roller des Bleuets",
-                "code": "B3H",
-                "numero_debut": 1,
-                "numero_fin": 99,
-                "prix_base1": "53.00",
-                "prix_base2": "53.00",
-                "min_age": 10,
-                "min_equipiers": 4,
-                "max_equipiers": 5,
-                "sexe": "",
-                "validation": "function(data) { return !data.equipiers.some(age(15)) && data.age_moyen <= 14 && (data.age_moyen >= 13 || (data.age_moyen > 11 && data.nombre === 5)) && !data.equipiers.some(age(15));  }"
-            },
-            {
-                "nom": "Individuel V\u00e9t\u00e9ran",
-                "code": "IVH",
-                "numero_debut": 1201,
-                "numero_fin": 1299,
-                "prix_base1": "38.00",
-                "prix_base2": "38.00",
-                "min_age": 56,
-                "min_equipiers": 1,
-                "max_equipiers": 1,
-                "sexe": "H",
-                "validation": "function(data) { return !data.equipiers.some(age(78)); }"
-            },
-            {
-                "nom": "Individuel Longboard",
-                "code": "ISK",
-                "numero_debut": 1301,
-                "numero_fin": 1399,
-                "prix_base1": "38.00",
-                "prix_base2": "38.00",
-                "min_age": 18,
-                "min_equipiers": 1,
-                "max_equipiers": 1,
-                "sexe": "",
-                "validation": "function(data) { return !data.equipiers.some(age(78)); }"
-            },
-            {
-                "nom": "Cat\u00e9gorie d'Attente",
-                "code": "OTX",
-                "numero_debut": 901,
-                "numero_fin": 999,
-                "prix_base1": "70.00",
-                "prix_base2": "70.00",
-                "min_age": 10,
-                "min_equipiers": 2,
-                "max_equipiers": 5,
-                "sexe": "",
-                "validation": "/* closure function pour permettre de remplacer la fonction age2 */\r\n(function() {\r\nANNEE = 2019;\r\nMOIS = 4;\r\nJOUR = 1;\r\n/* remplacer la fonction d'age pour l'age moyen */\r\nwindow.age2 = function (eq) {\r\n    var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));\r\n    var course = new Date(ANNEE, MOIS -1, JOUR);\r\n    var age = course.getFullYear() - birthday.getFullYear();\r\n    birthday.setFullYear(ANNEE);\r\n    if (!age) return null;\r\n    if (birthday > course) return age - 1;\r\n    return age;\r\n}\r\n\r\n/* r\u00e9el fonction de validation */\r\nvar recursionLock = false;\r\nreturn function(data) { \r\n    if (recursionLock) return false;\r\n    recursionLock = true;\r\n    /* calcul des cat\u00e9gories possibles */\r\n    var catFound = CATEGORIES.some(function(c) {\r\n        return c.min_equipiers <= data.nombre && data.nombre <= c.max_equipiers\r\n            && data.equipiers.filter(age(c.min_age)).length === data.nombre\r\n            && ((c.sexe === 'H' && data.nombre === data.nombre_h) ||\r\n                (c.sexe === 'F' && data.nombre === data.nombre_f) ||\r\n                (c.sexe === 'HX' && data.nombre_h >= 1) ||\r\n                (c.sexe === 'FX' && data.nombre_f >= 1) ||\r\n                (c.sexe === 'X' && data.nombre_h >= 1 && data.nombre_f >= 1) ||\r\n                (c.sexe === ''))\r\n            && c.valid(data);\r\n    });\r\n    recursionLock = false;\r\n    return !catFound  && !data.equipiers.some(age(78)); \r\n};\r\n})()"
-            }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 1,
+        "nom": "Junior",
+        "min_equipiers": 3,
+        "numero_fin": 300,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 12,
+        "max_equipiers": 5,
+        "code": "JNX",
+        "prices_base": [
+          "75.00",
+          "90.00"
         ],
-        "templatemail_set": [
-            {
-                "destinataire": "Equipe",
-                "nom": "paiement",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/paiement.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "inscription",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/inscription.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "paiement_admin",
-                "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-                "message": "{% include \"mails/paiement_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "inscription_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/inscription_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "changement_numero",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
-                "message": "{% include \"mails/changement_numero.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Organisateur",
-                "nom": "changement_numero_admin",
-                "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-                "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
-                "bcc": ""
-            },
-            {
-                "destinataire": "Equipe",
-                "nom": "change_request",
-                "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
-                "message": "{% include \"mails/change_request.html\" %}",
-                "bcc": ""
-            }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 1,
+        "nom": "Sénior Homme ou Mixte",
+        "min_equipiers": 3,
+        "numero_fin": 300,
+        "sexe": "HX",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "SNX",
+        "prices_base": [
+          "75.00",
+          "90.00"
         ],
-        "_name": "Rallye roller (LCRS)"
-    }
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 1,
+        "nom": "Sénior Femme",
+        "min_equipiers": 3,
+        "numero_fin": 300,
+        "sexe": "F",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length > 0 && data.equipiers.filter(age(35)).length < data.nombre; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "SNF",
+        "prices_base": [
+          "75.00",
+          "90.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 1,
+        "nom": "Vétéran",
+        "min_equipiers": 3,
+        "numero_fin": 300,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 35,
+        "max_equipiers": 5,
+        "code": "VEX",
+        "prices_base": [
+          "75.00",
+          "90.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 1,
+        "nom": "Quad",
+        "min_equipiers": 3,
+        "numero_fin": 300,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "QDX",
+        "prices_base": [
+          "75.00",
+          "90.00"
+        ],
+        "prices_equipier": []
+      }
+    ],
+    "templatemail_set": [
+      {
+        "destinataire": "Equipe",
+        "nom": "paiement",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/paiement.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "inscription",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/inscription.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "paiement_admin",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
+        "message": "{% include \"mails/paiement_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "inscription_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/inscription_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "changement_numero",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
+        "message": "{% include \"mails/changement_numero.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "changement_numero_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/changement_numero_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "change_request",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/change_request.html\" %}",
+        "bcc": ""
+      }
+    ],
+    "_name": "Challenge Grand Nord"
+  },
+  "grol": {
+    "categories": [
+      {
+        "numero_debut": 101,
+        "nom": "Solo Scratch",
+        "min_equipiers": 1,
+        "numero_fin": 199,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 1,
+        "code": "Solo Scratch",
+        "prices_base": [
+          "66.00",
+          "80.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 101,
+        "nom": "Solo Quad",
+        "min_equipiers": 1,
+        "numero_fin": 199,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 1,
+        "code": "Solo Quad",
+        "prices_base": [
+          "66.00",
+          "80.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 101,
+        "nom": "Solo Femmes",
+        "min_equipiers": 1,
+        "numero_fin": 199,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 1,
+        "code": "Solo Femmes",
+        "prices_base": [
+          "66.00",
+          "80.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 101,
+        "nom": "Solo Junior",
+        "min_equipiers": 1,
+        "numero_fin": 199,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 1,
+        "code": "Solo Junior",
+        "prices_base": [
+          "66.00",
+          "80.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 201,
+        "nom": "Duo Scratch",
+        "min_equipiers": 2,
+        "numero_fin": 299,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 2,
+        "code": "Duo Scratch",
+        "prices_base": [
+          "132.00",
+          "160.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 201,
+        "nom": "Duo Quad",
+        "min_equipiers": 2,
+        "numero_fin": 299,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 2,
+        "code": "Duo Quad",
+        "prices_base": [
+          "132.00",
+          "160.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 201,
+        "nom": "Duo Femmes",
+        "min_equipiers": 2,
+        "numero_fin": 299,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 2,
+        "code": "Duo Femmes",
+        "prices_base": [
+          "132.00",
+          "160.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 201,
+        "nom": "Duo Junior",
+        "min_equipiers": 2,
+        "numero_fin": 299,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 2,
+        "code": "Duo Junior",
+        "prices_base": [
+          "132.00",
+          "160.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 301,
+        "nom": "Equipe 3 Scratch",
+        "min_equipiers": 3,
+        "numero_fin": 399,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 3,
+        "code": "Equipe 3 Scratch",
+        "prices_base": [
+          "198.00",
+          "240.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 301,
+        "nom": "Equipe 3 Quad",
+        "min_equipiers": 3,
+        "numero_fin": 399,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 3,
+        "code": "Equipe 3 Quad",
+        "prices_base": [
+          "198.00",
+          "240.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 301,
+        "nom": "Equipe 3 Femmes",
+        "min_equipiers": 3,
+        "numero_fin": 399,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 3,
+        "code": "Equipe 3 Femmes",
+        "prices_base": [
+          "198.00",
+          "240.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 301,
+        "nom": "Equipe 3 Junior",
+        "min_equipiers": 3,
+        "numero_fin": 399,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 3,
+        "code": "Equipe 3 Junior",
+        "prices_base": [
+          "198.00",
+          "240.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Equipe 4 Scratch",
+        "min_equipiers": 4,
+        "numero_fin": 499,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 4,
+        "code": "Equipe 4 Scratch",
+        "prices_base": [
+          "264.00",
+          "320.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Equipe 4 Quad",
+        "min_equipiers": 4,
+        "numero_fin": 499,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 4,
+        "code": "Equipe 4 Quad",
+        "prices_base": [
+          "264.00",
+          "320.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Equipe 4 Femmes",
+        "min_equipiers": 4,
+        "numero_fin": 499,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 4,
+        "code": "Equipe 4 Femmes",
+        "prices_base": [
+          "264.00",
+          "320.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 401,
+        "nom": "Equipe 4 Junior",
+        "min_equipiers": 4,
+        "numero_fin": 499,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 4,
+        "code": "Equipe 4 Junior",
+        "prices_base": [
+          "264.00",
+          "320.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 501,
+        "nom": "Equipe 5 Scratch",
+        "min_equipiers": 5,
+        "numero_fin": 599,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "Equipe 5 Scratch",
+        "prices_base": [
+          "330.00",
+          "400.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 501,
+        "nom": "Equipe 5 Quad",
+        "min_equipiers": 5,
+        "numero_fin": 599,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "Equipe 5 Quad",
+        "prices_base": [
+          "330.00",
+          "400.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 501,
+        "nom": "Equipe 5 Femmes",
+        "min_equipiers": 5,
+        "numero_fin": 599,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "Equipe 5 Femmes",
+        "prices_base": [
+          "330.00",
+          "400.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 501,
+        "nom": "Equipe 5 Junior",
+        "min_equipiers": 5,
+        "numero_fin": 599,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 5,
+        "code": "Equipe 5 Junior",
+        "prices_base": [
+          "330.00",
+          "400.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 601,
+        "nom": "Equipe 6 Scratch",
+        "min_equipiers": 6,
+        "numero_fin": 699,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 6,
+        "code": "Equipe 6 Scratch",
+        "prices_base": [
+          "396.00",
+          "480.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 601,
+        "nom": "Equipe 6 Quad",
+        "min_equipiers": 6,
+        "numero_fin": 699,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 6,
+        "code": "Equipe 6 Quad",
+        "prices_base": [
+          "396.00",
+          "480.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 601,
+        "nom": "Equipe 6 Femmes",
+        "min_equipiers": 6,
+        "numero_fin": 699,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 6,
+        "code": "Equipe 6 Femmes",
+        "prices_base": [
+          "396.00",
+          "480.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 601,
+        "nom": "Equipe 6 Junior",
+        "min_equipiers": 6,
+        "numero_fin": 699,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 6,
+        "code": "Equipe 6 Junior",
+        "prices_base": [
+          "396.00",
+          "480.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 701,
+        "nom": "Equipe 7 Scratch",
+        "min_equipiers": 7,
+        "numero_fin": 799,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 7,
+        "code": "Equipe 7 Scratch",
+        "prices_base": [
+          "462.00",
+          "560.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 701,
+        "nom": "Equipe 7 Quad",
+        "min_equipiers": 7,
+        "numero_fin": 799,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 7,
+        "code": "Equipe 7 Quad",
+        "prices_base": [
+          "462.00",
+          "560.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 701,
+        "nom": "Equipe 7 Femmes",
+        "min_equipiers": 7,
+        "numero_fin": 799,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 7,
+        "code": "Equipe 7 Femmes",
+        "prices_base": [
+          "462.00",
+          "560.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 701,
+        "nom": "Equipe 7 Junior",
+        "min_equipiers": 7,
+        "numero_fin": 799,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 7,
+        "code": "Equipe 7 Junior",
+        "prices_base": [
+          "462.00",
+          "560.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 801,
+        "nom": "Equipe 8 Scratch",
+        "min_equipiers": 8,
+        "numero_fin": 899,
+        "sexe": "HX",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 8,
+        "code": "Equipe 8 Scratch",
+        "prices_base": [
+          "528.00",
+          "640.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 801,
+        "nom": "Equipe 8 Quad",
+        "min_equipiers": 8,
+        "numero_fin": 899,
+        "sexe": "",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 8,
+        "code": "Equipe 8 Quad",
+        "prices_base": [
+          "528.00",
+          "640.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 801,
+        "nom": "Equipe 8 Femmes",
+        "min_equipiers": 8,
+        "numero_fin": 899,
+        "sexe": "F",
+        "validation": "function(data) { return true; }",
+        "min_age": 14,
+        "max_equipiers": 8,
+        "code": "Equipe 8 Femmes",
+        "prices_base": [
+          "528.00",
+          "640.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "numero_debut": 801,
+        "nom": "Equipe 8 Junior",
+        "min_equipiers": 8,
+        "numero_fin": 899,
+        "sexe": "",
+        "validation": "function(data) { return data.equipiers.filter(age(18)).length == 0 }",
+        "min_age": 14,
+        "max_equipiers": 8,
+        "code": "Equipe 8 Junior",
+        "prices_base": [
+          "528.00",
+          "640.00"
+        ],
+        "prices_equipier": []
+      }
+    ],
+    "templatemail_set": [
+      {
+        "destinataire": "Equipe",
+        "nom": "paiement",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/paiement.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "inscription",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/inscription.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "paiement_admin",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
+        "message": "{% include \"mails/paiement_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "inscription_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/inscription_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "changement_numero",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
+        "message": "{% include \"mails/changement_numero.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "changement_numero_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "change_request",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/change_request.html\" %}",
+        "bcc": ""
+      }
+    ],
+    "_name": "Grol Race"
+  },
+  "centre": {
+    "categories": [
+      {
+        "nom": "Junior",
+        "code": "JNX",
+        "numero_debut": 401,
+        "numero_fin": 499,
+        "min_age": 12,
+        "min_equipiers": 3,
+        "max_equipiers": 5,
+        "sexe": "",
+        "validation": "function(data) { return !data.equipiers.some(age(19)) && (data.age_moyen > 15 || (data.equipiers.length > 4 && data.age_moyen >= 14));  }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Senior Femme",
+        "code": "SNF",
+        "numero_debut": 501,
+        "numero_fin": 599,
+        "min_age": 14,
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "sexe": "F",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && (data.age_moyen >= 18 && data.age_moyen < 50) && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Senior Mixte",
+        "code": "SNX",
+        "numero_debut": 601,
+        "numero_fin": 699,
+        "min_age": 14,
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "sexe": "HX",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18 && data.age_moyen < 36 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Vétéran",
+        "code": "VEX",
+        "numero_debut": 701,
+        "numero_fin": 799,
+        "min_age": 14,
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "sexe": "HX",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 36 && data.age_moyen < 50 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Super Vétéran",
+        "code": "SVX",
+        "numero_debut": 801,
+        "numero_fin": 899,
+        "min_age": 14,
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "sexe": "",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 50 && !(data.equipiers.length === 2  && !data.equipiers.every(age(18))); }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Duo",
+        "code": "DUO",
+        "numero_debut": 201,
+        "numero_fin": 299,
+        "min_age": 18,
+        "min_equipiers": 2,
+        "max_equipiers": 2,
+        "sexe": "",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18; }",
+        "prices_base": [
+          "60.00",
+          "60.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "G3 Mixte",
+        "code": "G3X",
+        "numero_debut": 301,
+        "numero_fin": 399,
+        "min_age": 14,
+        "min_equipiers": 3,
+        "max_equipiers": 3,
+        "sexe": "X",
+        "validation": "function(data) { return !data.equipiers.some(age(78)) && data.age_moyen >= 18 ; }",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Individuel Homme",
+        "code": "IDH",
+        "numero_debut": 1101,
+        "numero_fin": 1199,
+        "min_age": 18,
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "sexe": "H",
+        "validation": "function(data) { return !data.equipiers.some(age(56)); }",
+        "prices_base": [
+          "38.00",
+          "38.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Individuel Femme",
+        "code": "IDF",
+        "numero_debut": 1001,
+        "numero_fin": 1099,
+        "min_age": 18,
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "sexe": "F",
+        "validation": "function(data) { return !data.equipiers.some(age(78)); }",
+        "prices_base": [
+          "38.00",
+          "38.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "3H roller des Bleuets",
+        "code": "B3H",
+        "numero_debut": 1,
+        "numero_fin": 99,
+        "min_age": 10,
+        "min_equipiers": 4,
+        "max_equipiers": 5,
+        "sexe": "",
+        "validation": "function(data) { return !data.equipiers.some(age(15)) && data.age_moyen <= 14 && (data.age_moyen >= 13 || (data.age_moyen > 11 && data.nombre === 5)) && !data.equipiers.some(age(15));  }",
+        "prices_base": [
+          "53.00",
+          "53.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Individuel Vétéran",
+        "code": "IVH",
+        "numero_debut": 1201,
+        "numero_fin": 1299,
+        "min_age": 56,
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "sexe": "H",
+        "validation": "function(data) { return !data.equipiers.some(age(78)); }",
+        "prices_base": [
+          "38.00",
+          "38.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Individuel Longboard",
+        "code": "ISK",
+        "numero_debut": 1301,
+        "numero_fin": 1399,
+        "min_age": 18,
+        "min_equipiers": 1,
+        "max_equipiers": 1,
+        "sexe": "",
+        "validation": "function(data) { return !data.equipiers.some(age(78)); }",
+        "prices_base": [
+          "38.00",
+          "38.00"
+        ],
+        "prices_equipier": []
+      },
+      {
+        "nom": "Catégorie d'Attente",
+        "code": "OTX",
+        "numero_debut": 901,
+        "numero_fin": 999,
+        "min_age": 10,
+        "min_equipiers": 2,
+        "max_equipiers": 5,
+        "sexe": "",
+        "validation": "/* closure function pour permettre de remplacer la fonction age2 */\r\n(function() {\r\nANNEE = 2019;\r\nMOIS = 4;\r\nJOUR = 1;\r\n/* remplacer la fonction d'age pour l'age moyen */\r\nwindow.age2 = function (eq) {\r\n    var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));\r\n    var course = new Date(ANNEE, MOIS -1, JOUR);\r\n    var age = course.getFullYear() - birthday.getFullYear();\r\n    birthday.setFullYear(ANNEE);\r\n    if (!age) return null;\r\n    if (birthday > course) return age - 1;\r\n    return age;\r\n}\r\n\r\n/* réel fonction de validation */\r\nvar recursionLock = false;\r\nreturn function(data) { \r\n    if (recursionLock) return false;\r\n    recursionLock = true;\r\n    /* calcul des catégories possibles */\r\n    var catFound = CATEGORIES.some(function(c) {\r\n        return c.min_equipiers <= data.nombre && data.nombre <= c.max_equipiers\r\n            && data.equipiers.filter(age(c.min_age)).length === data.nombre\r\n            && ((c.sexe === 'H' && data.nombre === data.nombre_h) ||\r\n                (c.sexe === 'F' && data.nombre === data.nombre_f) ||\r\n                (c.sexe === 'HX' && data.nombre_h >= 1) ||\r\n                (c.sexe === 'FX' && data.nombre_f >= 1) ||\r\n                (c.sexe === 'X' && data.nombre_h >= 1 && data.nombre_f >= 1) ||\r\n                (c.sexe === ''))\r\n            && c.valid(data);\r\n    });\r\n    recursionLock = false;\r\n    return !catFound  && !data.equipiers.some(age(78)); \r\n};\r\n})()",
+        "prices_base": [
+          "70.00",
+          "70.00"
+        ],
+        "prices_equipier": []
+      }
+    ],
+    "templatemail_set": [
+      {
+        "destinataire": "Equipe",
+        "nom": "paiement",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/paiement.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "inscription",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/inscription.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "paiement_admin",
+        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
+        "message": "{% include \"mails/paiement_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "inscription_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/inscription_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "changement_numero",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
+        "message": "{% include \"mails/changement_numero.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Organisateur",
+        "nom": "changement_numero_admin",
+        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
+        "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
+        "bcc": ""
+      },
+      {
+        "destinataire": "Equipe",
+        "nom": "change_request",
+        "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
+        "message": "{% include \"mails/change_request.html\" %}",
+        "bcc": ""
+      }
+    ],
+    "_name": "Rallye roller (LCRS)"
+  }
 }
+

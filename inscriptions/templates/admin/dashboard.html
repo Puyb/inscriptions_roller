@@ -134,7 +134,8 @@ location.href = "choose/";
                     Total
                 </th>
                 <td>
-                    {{ stats.course.prix|floatformat:2 }}€
+                    {{ stats.course.prix|floatformat:2 }}€ /
+                    {{ stats.course.equipiers }} personnes
                 </td>
                 <td>
                     <a href="inscriptions/equipe/?status=complet">
@@ -308,6 +309,10 @@ location.href = "choose/";
                     <a target="_blank" href="/course/inscriptions/equipe/export/">
                         <i class="fa fa-table"></i><br />
                         <label>{% blocktrans %}Générer un export{% endblocktrans %}</label>
+                    </a>
+                    <a target="_blank" href="/course/inscriptions/equipe/download/">
+                        <i class="fa fa-file"></i><br />
+                        <label>{% blocktrans %}Télécharger les justificatifs{% endblocktrans %}</label>
                     </a>
                 </td>
             </tr>

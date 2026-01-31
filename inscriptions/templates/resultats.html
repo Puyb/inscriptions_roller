@@ -21,6 +21,7 @@
                         <th>Cat.</th>
                         <th>Position</th>
                         <th>Tours</th>
+                        <th>Distance</th>
                         <th>Temps</th>
                     </tr>
                 {% endifchanged %}
@@ -33,17 +34,19 @@
                         <th>Cat.</th>
                         <th>Position</th>
                         <th>Tours</th>
+                        <th>Distance</th>
                         <th>Temps</th>
                     </tr>
                 {% endif %}
             {% endif %}
                 <tr class="{% cycle 'odd' 'even' %}">
-                    <td>{{ equipe.numero }}</td>
-                    <td>{{ equipe.nom }}</td>
+                    <td><a href="{% url "inscriptions_resultats_equipe" course_uid=COURSE.uid numero=equipe.numero %}">{{ equipe.numero }}</a></td>
+                    <td><a href="{% url "inscriptions_resultats_equipe" course_uid=COURSE.uid numero=equipe.numero %}">{{ equipe.nom }}</a></td>
                     <td>{{ equipe.position_generale }}</td>
                     <td>{{ equipe.categorie.code }}</td>
                     <td>{{ equipe.position_categorie }}</td>
                     <td>{{ equipe.tours }}</td>
+                    <td>{{ equipe.distance|floatformat }} km</td>
                     <td>{{ equipe.temps_humain }}</td>
                 </tr>
             {% endfor %}

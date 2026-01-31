@@ -25,18 +25,18 @@ var challenge_categories = null;
 
 function age(a) {
     return function(eq) {
-        var b = COURSE.YEAR - parseFloat(eq.date_de_naissance_year);
+        var b = COURSE.YEAR_AGE - parseFloat(eq.date_de_naissance_year);
         if(b !== a) return b > a;
-        if(parseFloat(eq.date_de_naissance_month) !== COURSE.MONTH)
-            return parseFloat(eq.date_de_naissance_month) < COURSE.MONTH;
-        return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY;
+        if(parseFloat(eq.date_de_naissance_month) !== COURSE.MONTH_AGE)
+            return parseFloat(eq.date_de_naissance_month) < COURSE.MONTH_AGE;
+        return parseFloat(eq.date_de_naissance_day) <= COURSE.DAY_AGE;
     };
 }
 function age2(eq) {
     var birthday = new Date(parseFloat(eq.date_de_naissance_year), parseFloat(eq.date_de_naissance_month) -1, parseFloat(eq.date_de_naissance_day));
-    var course = new Date(COURSE.YEAR, COURSE.MONTH -1, COURSE.DAY);
+    var course = new Date(COURSE.YEAR_AGE, COURSE.MONTH_AGE - 1, COURSE.DAY_AGE);
     var age = course.getFullYear() - birthday.getFullYear();
-    birthday.setFullYear(COURSE.YEAR);
+    birthday.setFullYear(COURSE.YEAR_AGE);
     if (!age) return null;
     if (birthday > course) return age - 1;
     return age;
@@ -317,14 +317,12 @@ $(function() {
         var $formGroup = $this.parents('.form-group');
         var id = this.id.split('-').slice(0, 2).join('-');
         $formGroup.hide() // num_licence
-            .next().hide() // piece_jointe
-            .next().hide(); // cerfa
+            .next().hide(); // piece_jointe
         $formGroup
             .next().find('.certificat, .licence').hide() // piece_jointe
         var handler = function() {
             $formGroup.hide() // num_licence
-                .next().hide() // piece_jointe
-                .next().hide(); // cerfa
+                .next().hide(); // piece_jointe
             $formGroup
                 .next().find('.certificat, .licence').hide() // piece_jointe
             if($('#' + id + '-justificatif_1')[0].checked) {

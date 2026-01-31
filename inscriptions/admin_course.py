@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import operator
-from functools import reduce
+from functools import reduce, update_wrapper
 from inscriptions.models import *
 from django.conf.urls import url
 from django.contrib import admin
@@ -14,11 +14,11 @@ from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
-from .utils import ChallengeUpdateThread, send_mail
+from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -29,6 +29,7 @@ import re
 from Levenshtein import distance
 import csv, io
 import inspect
+import zipstream
 
 import logging
 logger = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ ICON_KO = '🚫'
 ICON_CHECK = '❔'
 ICON_MISSING = '📨'
 ICON_LOCK = '🔒'
+ICON_GIFT = '🎁'
 
 def getCourse(request, qs=Course.objects.all()):
     uid = request.COOKIES['course_uid']
@@ -221,6 +223,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             form = ImportResultatForm(request.POST, request.FILES)
             if form.is_valid():
                 csv_file = request.FILES['csv']
+                tours_csv_file = request.FILES['tours_csv']
                 data = form.cleaned_data
 
                 class AbortException(Exception):
@@ -233,6 +236,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                             position_generale  = None,
                             position_categorie = None,
                         )
+                        Tour.objects.filter(equipier__equipe__course=course).delete()
 
                         for enc in ('utf-8', 'iso8859-1'):
                             try:
@@ -292,19 +296,17 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         else:
                                             numeros.remove(numero)
 
-                                        equipe.tours = g(row, 'tours_column', intOrNone)
+                                        equipe.tours = g(row, 'nbtours_column', intOrNone)
+                                        if data.get('categorie_column'):
+                                            try:
+                                                equipe.categorie = course.categories.get(code=g(row, 'categorie_column'))
+                                            except:
+                                                pass
                                         if data.get('time_column'):
                                             try:
-                                                if data['time_format'] == 'HMS':
-                                                    s = re.split('[^0-9.,]+', g(row, 'time_column').strip())
-                                                    time = Decimal(0)
-                                                    n = Decimal(1)
-                                                    while len(s):
-                                                        time += n * Decimal(s.pop().replace(',', '.'))
-                                                        n *= Decimal(60)
-                                                else:
-                                                    time = Decimal(g(row, 'time_column'))
-                                            except:
+                                                time = parse_csv_time(g(row, 'time_column'), data['time_format'])
+                                            except Exception as e:
+                                                logger.error(e)
                                                 messages.add_message(
                                                     request,
                                                     messages.ERROR,
@@ -317,6 +319,76 @@ class CourseAdminSite(admin.sites.AdminSite):
 
 
                                         #super(Equipe, equipe).save()
+                                break
+                            except UnicodeDecodeError as exc:
+                                if enc == 'iso8859-1':
+                                    raise exc
+                        # Tours
+                        for enc in ('utf-8', 'iso8859-1'):
+                            try:
+                                tours_csv_file.seek(0)
+                                with io.StringIO(tours_csv_file.read().decode(enc)) as io_file:
+                                    csv_reader = csv.reader(io_file, delimiter=request.POST.get('delimiter', ','))
+                                    if data.get('skip_first'):
+                                        next(csv_reader)
+
+                                    def g(row, n, f=lambda x: x):
+                                        if not data.get(n):
+                                            return None
+                                        return f(row[data[n] - 1])
+                                    equipiers = list(Equipier.objects.filter(equipe__course=course))
+                                    dossards = [ e.dossard() for e in equipiers]
+                                    equipiers_by_numero = { e.dossard(): e for e in equipiers }
+
+                                    def intOrNone(x):
+                                        try:
+                                            return int(x)
+                                        except:
+                                            return None
+
+                                    line = 0
+                                    for row in csv_reader:
+                                        line += 1
+                                        try:
+                                            dossard = int(g(row, 'tours_dossard_column'))
+                                        except ValueError as e:
+                                            messages.add_message(
+                                                request,
+                                                messages.ERROR,
+                                                _(u'Dossard Equipier incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_dossard_column'], line, g(row, 'tours_dossard_column'))
+                                            )
+                                            raise AbortException()
+                                        equipier = equipiers_by_numero.get(dossard)
+                                        if not equipier:
+                                            raise Exception('Dossard inconu')
+                                        # else:
+                                        #     dossards.remove(dossard)
+
+                                        if data.get('tours_duree_column'):
+                                            try:
+                                                duree = parse_csv_time(g(row, 'tours_duree_column'), data['tours_duree_format'])
+                                            except Exception as e:
+                                                logger.error(e)
+                                                messages.add_message(
+                                                    request,
+                                                    messages.ERROR,
+                                                    _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_duree_column'], line, g(row, 'tours_duree_column'))
+                                                )
+                                                raise AbortException()
+                                        if data.get('tours_timestamp_column'):
+                                            try:
+                                                timestamp = parse_csv_time(g(row, 'tours_timestamp_column'), data['tours_timestamp_format'])
+                                            except Exception as e:
+                                                logger.error(e)
+                                                messages.add_message(
+                                                    request,
+                                                    messages.ERROR,
+                                                    _(u'Temps incorrect dans la colonne %d à la ligne %d (%s)') % (data['tours_timestamp_column'], line, g(row, 'tours_timestamp_column'))
+                                                )
+                                                raise AbortException()
+
+                                        t = Tour(equipier=equipier, timestamp=timestamp, duree=duree)
+                                        t.save()
                                 break
                             except UnicodeDecodeError as exc:
                                 if enc == 'iso8859-1':
@@ -388,7 +460,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'equipe': r.equipe,
                 'montant': r.montant,
                 'paiement': r.equipe.montant_paiements - r.montant,
-                'reste': r.equipe.prix - r.equipe.montant_paiements + r.montant,
+                'reste': r.equipe.prix_reel - r.equipe.montant_paiements + r.montant,
             } for r in paiement.equipes.all()]
         elif request.GET.get('equipe_id'):
             repartitions = []
@@ -398,9 +470,9 @@ class CourseAdminSite(admin.sites.AdminSite):
                     'equipe': equipe,
                     'montant': None,
                     'paiement': equipe.montant_paiements,
-                    'reste': equipe.prix - equipe.montant_paiements,
+                    'reste': equipe.prix_reel - equipe.montant_paiements,
                 });
-                initials['montant'] += equipe.prix - equipe.montant_paiements
+                initials['montant'] += equipe.prix_reel - equipe.montant_paiements
 
         paiement_form = AdminPaiementForm(instance=paiement, initial=initials)
 
@@ -428,12 +500,12 @@ class CourseAdminSite(admin.sites.AdminSite):
                             'equipe': repartition.equipe,
                             'montant': repartition.montant,
                             'paiement': repartition.equipe.montant_paiements,
-                            'reste': repartition.equipe.prix - repartition.equipe.montant_paiements,
+                            'reste': repartition.equipe.prix_reel - repartition.equipe.montant_paiements,
                         })
 
                         montant += repartition.montant
                         print(montant, equipe_id, repartition_montant, montant, paiement.montant)
-                    if montant != paiement.montant:
+                    if montant != paiement.montant and paiement.type != 'offert':
                         raise PaiementException('montant incorrect')
                     print('len equipe_id', len(request.GET.getlist('equipe_id')))
                     paiement.send_equipes_mail()
@@ -478,7 +550,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 'course': e.course.nom,
                 'numero': e.numero,
                 'nom': e.nom,
-                'prix': str(e.prix),
+                'prix': str(e.prix_reel),
                 'paiement': str(e.montant_paiements or '0'),
                 'montant': str(repartitions.get(e.id, '0')),
             } for e in equipes],
@@ -552,11 +624,11 @@ class EquipierInline(admin.StackedInline):
     model = Equipier
     extra = 0
     max_num = 5
-    readonly_fields = [ 'nom', 'prenom', 'sexe', 'adresse1', 'adresse2', 'ville', 'code_postal', 'pays', 'email', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'cerfa_valide', 'age']
+    readonly_fields = [ 'nom', 'prenom', 'sexe', 'adresse1', 'adresse2', 'ville', 'code_postal', 'pays', 'email', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'age']
     fieldsets = (
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
         (u'Coordonnées', { 'classes': ('collapse', 'collapsed'), 'fields': ('adresse1', 'adresse2', ('ville', 'code_postal'), 'pays', 'email') }),
-        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe', 'cerfa_valide')) }),
+        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
     )
 
 class StatusFilter(SimpleListFilter):
@@ -596,23 +668,28 @@ class PaiementCompletFilter(SimpleListFilter):
             ('exact', _('= Paiement exact')),
             ('partiel', _('< Partiel')),
             ('impaye', _('0 Impayé')),
+            ('offert', _('%s offert' % ICON_GIFT)),
         )
     def queryset(self, request, queryset):
         qs = Equipe.objects.filter(course=getCourse(request)).annotate(
-            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
+            _montant_paiements=Sum(Case(When(paiements__paiement__montant__isnull=False, then=F('paiements__montant')), default=Value(0), output_field=models.DecimalField(max_digits=7, decimal_places=2))),
+            _offert=Sum(Case(When(Q(paiements__paiement__type__exact='offert'), then=Value(1)), default=Value(0), output_field=models.IntegerField()))
         )
         if self.value() == 'complet':
-            qs = qs.filter(_montant_paiements__gte=F('prix'))
+            qs = qs.filter(_montant_paiements__gte=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'incomplet':
-            qs = qs.filter(Q(_montant_paiements__lt=F('prix')) | Q(_montant_paiements__isnull=True))
+            qs = qs.filter(Q(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2))) | Q(_montant_paiements__isnull=True))
         if self.value() == 'trop':
-            qs = qs.filter(_montant_paiements__gt=F('prix'))
+            qs = qs.filter(_montant_paiements__gt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'exact':
-            qs = qs.filter(_montant_paiements=F('prix'))
+            qs = qs.filter(_montant_paiements=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)))
         if self.value() == 'partiel':
-            qs = qs.filter(_montant_paiements__lt=F('prix'), _montant_paiements__gt=0, _montant_paiements__isnull=False)
+            qs = qs.filter(_montant_paiements__lt=Case(When(_offert__gt=0, then=Value(0)), default=F('prix'), output_field=models.DecimalField(max_digits=7, decimal_places=2)), _montant_paiements__gt=0, _montant_paiements__isnull=False)
         if self.value() == 'impaye':
-            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(prix=0)
+            qs = qs.filter(Q(_montant_paiements=0) | Q(_montant_paiements__isnull=True)).exclude(Q(prix=0) | Q(_offert__gt=0))
+        if self.value() == 'offert':
+            qs = qs.filter(_offert__gt=0)
+        logger.info(qs.query)
         return queryset.filter(id__in=qs);
 
 class CategorieFilter(SimpleListFilter):
@@ -662,7 +739,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     class Media:
         css = {"all": ("admin.css",)}
         js = ('custom_admin/equipe.js', )
-    readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adress2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
+    readonly_fields = [ 'numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'gerant_adresse1', 'gerant_adresse2', 'gerant_ville', 'gerant_code_postal', 'gerant_pays', 'gerant_telephone', 'categorie', 'nombre', 'prix', 'date', 'password', 'date']
     list_display = ['numero', 'categorie', 'nom', 'club', 'gerant_email', 'date', 'nombre2', 'paiement_complet2', 'documents_manquants2', 'dossier_complet_auto2']
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
     list_filter = [PaiementCompletFilter, StatusFilter, 'verrou', CategorieFilter, 'nombre', MineurFilter, 'date']
@@ -672,11 +749,11 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 #TODO add paiements amount, and link to add a new one
     fieldsets = (
         (None, { 'fields': (('numero', 'nom', 'club'), ('categorie', 'nombre', 'date'), ('prix',), 'commentaires')}),
-        (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adress2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
+        (u'Gérant', { 'classes': ('collapse', 'collapsed'), 'fields': (('gerant_nom', 'gerant_prenom'), 'gerant_adresse1', 'gerant_adresse2', ('gerant_ville', 'gerant_code_postal'), 'gerant_pays', 'gerant_email', 'gerant_telephone', 'password') }),
         (None, { 'description': '<div id="autre"></div>', 'fields': ('verrou', ) }),
 
     )
-    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock']
+    actions = ['send_mails', 'export', 'do_paiement', 'lock', 'unlock', 'download']
     search_fields = ('numero', 'nom', 'club', 'gerant_nom', 'gerant_prenom', 'equipier__nom', 'equipier__prenom')
     list_per_page = 500
 
@@ -687,7 +764,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     def paiement_complet2(self, obj):
         span = '<span title="%(title)s">%(text)s</span>';
         return mark_safe(span % {
-            'text': obj.paiement_complet() and ICON_OK or ICON_KO,
+            'text': obj.offert and ICON_GIFT or (obj.paiement_complet() and ICON_OK or ICON_KO),
             'title': '%s / %s €' % (obj.montant_paiements, obj.prix),
         })
     paiement_complet2.allow_tags = True
@@ -717,12 +794,18 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            wrapper.model_admin = self
+            return update_wrapper(wrapper, view)
         my_urls = [
-            url(r'^send/$', self.send_mails, name='equipe_send_mails'),
-            url(r'^export/$', self.export, name='equipe_send_mails'),
-            url(r'^send/preview/$', self.preview_mail, name='equipe_preview_mail'),
-            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', self.send_mail, name='equipe_send_mail'),
-            url(r'^(?P<id>\d+)/autre/$', self.autre, name='equipe_autre'),
+            url(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
+            url(r'^export/$', wrap(self.export), name='equipe_export'),
+            url(r'^download/$', wrap(self.download), name='equipe_downloads'),
+            url(r'^send/preview/$', wrap(self.preview_mail), name='equipe_preview_mail'),
+            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', wrap(self.send_mail), name='equipe_send_mail'),
+            url(r'^(?P<id>\d+)/autre/$', wrap(self.autre), name='equipe_autre'),
         ]
         return my_urls + urls
 
@@ -881,6 +964,49 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ))
     export.short_description = _(u'Exporter')
 
+    def download(self, request, queryset=None):
+        request.current_app = self.admin_site.name
+        course = getCourse(request)
+
+        queryset = queryset or Equipe.objects.all()
+        queryset = queryset.filter(course=course)
+        equipiers = Equipier.objects.filter(equipe__course=course, equipe__in=queryset)
+
+        z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
+        for equipier in equipiers:
+            if equipier.piece_jointe:
+                path = Path(settings.MEDIA_ROOT) / equipier.piece_jointe.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - %s%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        equipier.justificatif,
+                        path.suffix
+                    )
+                    z.write(path, dest)
+            if equipier.autorisation:
+                path = Path(settings.MEDIA_ROOT) / equipier.autorisation.name
+                if path.exists():
+                    dest = '%d - %s/%d%d - %s %s - autorisation parentale%s' % (
+                        equipier.equipe.numero,
+                        equipier.equipe.nom.replace('/', '_'),
+                        equipier.equipe.numero,
+                        equipier.numero,
+                        equipier.prenom,
+                        equipier.nom,
+                        path.suffix
+                    )
+                    z.write(path, dest)
+
+        response = StreamingHttpResponse(z, content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{} - Justificatifs de {} equipes.zip"'.format(course.nom, queryset.count())
+        return response
+    download.short_description = _(u'Télécharger les justificatifs')
+
     def autre(self, request, id):
         request.current_app = self.admin_site.name
         instance = get_object_or_404(Equipe, id=id)
@@ -968,10 +1094,8 @@ class CourseAdmin(admin.ModelAdmin):
                     {
                         'code': cat.code,
                         'nom': cat.nom,
-                        'prix_base1': str(cat.prix_base1),
-                        'prix_base2': str(cat.prix_base2),
-                        'prix_equipier1': str(cat.prix_equipier1),
-                        'prix_equipier2': str(cat.prix_equipier2),
+                        'prices_base': list(map(str, cat.prices_base)),
+                        'prices_equipier': list(map(str, cat.prices_equipier)),
                     } for cat in course.categories.all()
                 ],
             }
@@ -1067,12 +1191,12 @@ class ExtraQuestionChoiceInline(admin.TabularInline):
     model = ExtraQuestionChoice
     extra = 0
     max_num = 20
-    fields = ('label', 'price1', 'price2', )
+    fields = ('label', 'prices', )
 
 class ExtraQuestionAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/extraquestion.js', )
-    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'price1', 'price2', )
+    fields = ('course', 'page', 'type', 'label', 'help_text', 'required', 'prices', )
     list_display = ('label', 'page', 'type', )
     inlines = [ ExtraQuestionChoiceInline ]
 site.register(ExtraQuestion, ExtraQuestionAdmin)

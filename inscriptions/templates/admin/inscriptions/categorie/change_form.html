@@ -1,0 +1,37 @@
+{% extends "admin/change_form.html" %}
+{% load json %}
+
+{% block content %}
+{{ block.super }}
+{% if original %}
+<script>
+COURSE_DATES = [ '{{ original.course.date_ouverture.isoformat }}' ]
+    {% for d in original.course.dates_augmentation %}
+    COURSE_DATES.push('{{ d.isoformat }}');
+    {% endfor %}
+
+(function($) {
+    'use strict';
+    $(document).ready(function() {
+        $('form#categorie_form input[name=prices]').each(function() {
+            const input = $(this);
+            input.attr('hidden', true);
+            input.before('<table id="prices_table"><tr></tr><tr></tr></table>')
+            const values = input.val().split(',');
+            for (const d of COURSE_DATES) {
+                $('#prices_table tr:first').append('<td> A partir du ' + new Date(d).toLocaleDateString() + '</td>')
+                $('#prices_table tr+tr').append('<td><input value="' + (values.shift() || '') + '"></td>')
+            }
+            $('#prices_table input').change(function() {
+                const res = [];
+                $('#prices_table input').each(function() {
+                    res.push($(this).val())
+                });
+                input.val(res.join(','))
+            });
+        });
+    });
+})(django.jQuery);
+</script>
+{% endif %}
+{% endblock %}

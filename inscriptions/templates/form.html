@@ -2,32 +2,45 @@
 {% load i18n %}
 {% load l10n %}
 {% load json %}
+{% load price %}
 {% load bootstrap %}
 {% block body %}
 {% get_current_language as LANGUAGE_CODE %}
 {% get_available_languages as LANGUAGES %}
-{% if not update %}<h1>{% trans 'Inscription' %} - {{ TITLE }}</h1>{% endif %}
-{% if update %}<h1>{% trans 'Modification de votre inscription' %} - {{ TITLE }}</h1>{% endif %}
+{% if not update %}{% trans 'Inscription' as TITLE %}{% endif %}
+{% if update %}{% trans 'Modification de votre inscription' as TITLE %}{% endif %}
+{% with page="inscription" %}
+{% include "_course_header.html" %}
+{% endwith %}
 <form class="form-horizontal" method="post" enctype="multipart/form-data" onsubmit="if (!good) { $('#button_submit')[0].disabled = true; $('#button_submit').css('display', 'none'); } return good">
     {% if errors %}
     <div class="panel panel-danger">
-        {% if equipe_form.errors %}
         <div class="panel-heading">{% blocktrans %}Votre inscription comporte des erreurs :{% endblocktrans %}</div>
         <div class="panel-body">
             {% blocktrans %}Veuillez les corriger et valider à nouveau votre inscription.{% endblocktrans %}
-            <h3>{% trans 'Informations générales' %}</h3>
+            {% if equipe_form.errors or error_messages %}
+                <h3>{% trans 'Informations générales' %}</h3>
+                <ul>
+                {% for v in error_messages %}
+                    <li>{{ v }}</li>
+                {% endfor %}
                 {% for k,v in equipe_form.errors.items %}
+                    <li>
                     {% if k != "prix" %}
                     {{ k }} : {{ v }}
                     {% endif %}
+                    </li>
                 {% endfor %}
+                </ul>
             {% endif %}
             {% for equipier_form in equipier_formset %}
                 {% if equipier_form.errors %}
-                <h3>{% blocktrans with n=forloop.counter %}Équipier {{ n }}{% endblocktrans %}</h3>
+                    <h3>{% blocktrans with n=forloop.counter %}Équipier {{ n }}{% endblocktrans %}</h3>
+                    <ul>
                     {% for k,v in equipier_form.errors.items %}
-                        {{ k }} : {{ v }}
+                        <li>{{ k }} : {{ v }}</li>
                     {% endfor %}
+                    </ul>
                 {% endif %}
             {% endfor %}
         </div>
@@ -36,22 +49,24 @@
     <div id="part0" class="parts">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="media">
-                    <div class="media-left">
-                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="100" class="visible-xs"/>
-                        <img src="{{ MEDIA_URL }}{{ COURSE.logo }}" align="left" width="200" class="hidden-xs"/>
+                {% if course.texte_accueil %}<div class="panel">
+                    <div class="panel-body">
+                        {{ course.texte_accueil }}
                     </div>
-                    <div class="media-body">
+                </div>
+                {% endif %}
+                <div class="panel">
+                    <div class="panel-body">
                         {% blocktrans %}Inscrivez votre équipe, votre duo ou votre solo en quelques étapes. Laissez vous guider.{% endblocktrans%}<br />
                         <br />
                         {% blocktrans %}Vérifiez bien l'adresse email que vous allez entrer. Elle sera utilisée pour vous communiquer les informations sur la course et pour vous permettre de modifier votre inscription ultérieurement.{% endblocktrans %}<br />
                         <br />
                         {% blocktrans %}Vous pouvez envoyer vos justificatifs par internet ou par courrier.{% endblocktrans %}
-                        {% if course.ordre and course.paypal %}
+                        {% if course.ordre and course.paiement_internet %}
                         {% blocktrans %}Vous pouvez payer votre inscription par internet ou par chèque.{% endblocktrans %}
                         {% else %}{% if course.ordre %}
                         {% blocktrans %}Vous pouvez payer votre inscription par chèque.{% endblocktrans %}
-                        {% else %}{% if course.paypal %}
+                        {% else %}{% if course.paiement_internet %}
                         {% blocktrans %}Vous pouvez payer votre inscription par internet.{% endblocktrans %}
                         {% else %}
                         {% endif %}{% endif %}{% endif %}
@@ -120,15 +135,14 @@
 {% block extra_body %}
 <script type="text/javascript" src="{% url "javascript_catalog" %}"></script>
 <script>
-    var AUGMENTATION_PASSED = new Date("{{ COURSE.date_augmentation|date:'c' }}") <= new Date({% if instance %}"{{ instance.date|date:'c' }}"{% endif %}) 
     var CATEGORIES = [
     {% for cat in COURSE.categories.all %}
         {
             id:    "{{ cat.id }}",
             code:  "{{ cat.code|escapejs }}",
             label: "{{ cat.nom|escapejs }}",
-            prix_base:  AUGMENTATION_PASSED ? {{ cat.prix_base2|unlocalize }} : {{ cat.prix_base1|unlocalize }},
-            prix_equipier:  AUGMENTATION_PASSED ? {{ cat.prix_equipier2|unlocalize }} : {{ cat.prix_equipier1|unlocalize }},
+            prix_base: {{ cat|price_base:instance|unlocalize }},
+            prix_equipier: {{ cat|price_equipier:instance|unlocalize }},
             min_equipiers: {{ cat.min_equipiers }},
             max_equipiers: {{ cat.max_equipiers }},
             min_age: {{ cat.min_age }},
@@ -148,9 +162,9 @@
     });
     {% endif %}
     var COURSE = {
-        YEAR: {{ YEAR }},
-        MONTH: {{ MONTH }},
-        DAY: {{ DAY }},
+        YEAR_AGE: {{ COURSE.date_age.year|default:course.date.year }},
+        MONTH_AGE: {{ COURSE.date_age.month|default:course.date.month }},
+        DAY_AGE: {{ COURSE.date_age.day|default:course.date.day }},
         CLOSE_DATE: new Date({{ CLOSE_YEAR }},{{ CLOSE_MONTH }}-1,{{ CLOSE_DAY }}),
         MIN_AGE: {{ MIN_AGE|default:0 }},
         EQUIPIERS_COUNT: {{ equipiers_count }}{% if instance %} - {{ instance.nombre }}{% endif %},
@@ -194,11 +208,11 @@
     {% for extra in course.extra_equipe %}
         {% if extra.type == 'list' or extra.type == 'radio' %}
         {% for choice in extra.choices.all %}
-        if (data.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        if (data.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += {{choice|price:instance|default:0|unlocalize}};
         {% endfor %}
         {% else %}
         {% if extra.type == 'checkbox' %}
-        if (data.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        if (data.extra{{extra.id}}) prix += {{extra|price:instance|default:0|unlocalize}};
         {% endif %}
         {% endif %}
     {% endfor %}
@@ -206,11 +220,11 @@
         data.equipiers.forEach(function(equipier) {
         {% if extra.type == 'list' or extra.type == 'radio' %}
         {% for choice in extra.choices.all %}
-        if (equipier.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += AUGMENTATION_PASSED ? {{choice.price2|default:0|unlocalize}} : {{choice.price1|default:0|unlocalize}};
+        if (equipier.extra{{extra.id}} === '{{choice.label|escapejs}}') prix += {{choice|price:instance|default:0|unlocalize}};
         {% endfor %}
         {% else %}
         {% if extra.type == 'checkbox' %}
-        if (equipier.extra{{extra.id}}) prix += AUGMENTATION_PASSED ? {{extra.price2|default:0|unlocalize}} : {{extra.price1|default:0|unlocalize}};
+        if (equipier.extra{{extra.id}}) prix += {{extra|price:instance|default:0|unlocalize}};
         {% endif %}
         {% endif %}
         });

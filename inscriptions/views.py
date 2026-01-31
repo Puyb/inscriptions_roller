@@ -23,15 +23,20 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement
+from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
 from .templatetags import stripe as stripe_templatetags
 from .templatetags import paypal as paypal_templatetags
 from pathlib import Path
+from uuid import uuid4
+import urllib.parse
 
 logger = logging.getLogger(__name__)
+
+HELLOASSO_URL = 'https://api.helloasso.com'
+HELLOASSO_SANDBOX_URL = 'https://api.helloasso-sandbox.com'
 
 @open_closed
 @transaction.atomic
@@ -129,18 +134,16 @@ def form(request, course_uid, numero=None, code=None):
         link = '<a href="%s" target="_blank">%s</a>'
         autorisation_link = link % (reverse('inscriptions_model_autorisation', kwargs={ 'course_uid': course.uid }), _("Modèle d'autorisation"))
         certificat_link   = link % (reverse('inscriptions_model_certificat',   kwargs={ 'course_uid': course.uid }), _("Modèle de certificat"))
-        cerfa_link        = link % ('https://www.formulaires.modernisation.gouv.fr/gf/cerfa_15699.do', _("QS-SPORT Cerfa N°15699*01"))
 
         for equipier_form in equipier_formset:
-            equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date }
+            equipier_form.fields['date_de_naissance'].help_text = _(Equipier.DATE_DE_NAISSANCE_HELP) % { 'min_age': course.min_age, 'date': course.date_age or course.date }
             equipier_form.fields['autorisation'].help_text = _(Equipier.AUTORISATION_HELP) % { 'link': autorisation_link }
             equipier_form.fields['piece_jointe'].help_text = '<span class="certificat">%s</span><span class="licence">%s</span>' % (
-                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link, 'link_cerfa': cerfa_link },
+                _(Equipier.CERTIFICAT_HELP) % { 'link': certificat_link },
                 _(Equipier.LICENCE_HELP),
             )
-            equipier_form.fields['cerfa_valide'].label = _('Je certifie que cette personne a renseigné le questionnaire de santé QS-SPORT Cerfa N°15699*01 et a répondu par la négative à l’ensemble des questions')
 
-    nombres_par_tranche = { e['range']: e['count'] 
+    nombres_par_tranche = { e['range']: e['count']
             for e in course.equipe_set
                 .annotate(range=Concat(
                     'categorie__numero_debut',
@@ -150,11 +153,15 @@ def form(request, course_uid, numero=None, code=None):
                 )).values('range').annotate(count=Count('numero'))
         }
     extra_categorie = [ q.id for q in course.extra_equipe if q.page == 'Categorie' ]
-    
+
+    error_messages = request.GET.getlist('message')
+    errors = len(error_messages) > 0 or len(equipe_form.errors) > 0 or reduce(lambda a,b: a or b, [len(e.errors) > 0 for e in equipier_formset])
+    logger.info('error_messages', error_messages, errors)
     return TemplateResponse(request, "form.html", {
         "equipe_form": equipe_form,
         "equipier_formset": equipier_formset,
-        "errors": equipe_form.errors or reduce(lambda a,b: a or b, [e.errors for e in equipier_formset]),
+        "errors": errors,
+        "error_messages": error_messages,
         "instance": instance,
         "update": update,
         "nombres_par_tranche": nombres_par_tranche,
@@ -335,6 +342,18 @@ def resultats(request, course_uid):
     (_('position_generale'), _('position_categorie'), _('numero'), _('nom'), _('categorie__code'))
     return _list(course_uid, equipes, request, template='resultats.html', sorts=['position_generale', 'position_categorie', 'numero', 'nom', 'categorie__code'], show_stats=False)
 
+def resultats_equipe(request, course_uid, numero):
+    equipe = get_object_or_404(Equipe.objects.select_related('course', 'categorie'), course__uid=course_uid, numero=numero)
+    course = equipe.course
+    equipiers = equipe.equipier_set.prefetch_related(Prefetch('tours', Tour.objects.order_by('timestamp'))).order_by('numero')
+    tours = Tour.objects.filter(equipier__in=equipiers).order_by('timestamp')
+    return TemplateResponse(request, 'resultats_equipe.html', {
+        'course': course,
+        'equipe': equipe,
+        'equipiers': equipiers,
+        'tours': tours,
+    })
+
 def _list(course_uid, equipes, request, template, sorts, show_stats=True):
     if request.GET.get('search'):
         equipes = equipes.filter(Q(nom__icontains=request.GET['search']) | Q(club__icontains=request.GET['search']))
@@ -355,10 +374,10 @@ def _list(course_uid, equipes, request, template, sorts, show_stats=True):
                 equipes = equipes.filter(position_categorie__lte=top)
             else:
                 equipes = equipes.filter(position_generale__lte=top)
-        except ValueError as e:
+        except ValueError:
             pass
 
-    user_is_staff = (request.user and request.user.is_staff and 
+    user_is_staff = (request.user and request.user.is_staff and
         request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
     stats = None
     if show_stats:
@@ -415,8 +434,9 @@ def stats_compare(request, course_uid, course_uid2):
     align = request.GET.get('align', '')
     course1 = get_object_or_404(Course, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
-    if align == "augment":
-        duree1 = (course1.date_augmentation - course1.date_ouverture).days
+    # FIXME support multiple date of augmentation
+    if align == "augment" and course1.dates_augmentation[0]:
+        duree1 = (course1.dates_augmentation[0] - course1.date_ouverture).days
 
     res = []
     i = 0;
@@ -426,7 +446,7 @@ def stats_compare(request, course_uid, course_uid2):
         
         duree = (course.date - course.date_ouverture).days
         if align == "augment":
-            duree = (course.date_augmentation - course.date_ouverture).days
+            duree = (course.dates_augmentation[0] - course.date_ouverture).days
 
         delta = duree1 - duree
         if align == 'start':
@@ -437,7 +457,7 @@ def stats_compare(request, course_uid, course_uid2):
             'course': course,
             'json': json.dumps(stats),
             'delta': delta,
-            'augment': (course.date_augmentation - course.date_ouverture).days,
+            'augment': (course.dates_augmentation[0] - course.date_ouverture).days if course.dates_augmentation[0] else 0,
         });
         i += 1;
 
@@ -475,13 +495,33 @@ Email: %s
         return HttpResponseRedirect('thankyou/')
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
-def contact_done(request, course_uid):
+def contact_done(request, course_uid, numero=None):
     course = get_object_or_404(Course, uid=course_uid)
     return TemplateResponse(request, 'contact_done.html', {'course': course})
 
-def facture(request, course_uid, numero):
+def categories(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    categories = course.categories.annotate(nb=(F('min_equipiers') + F('max_equipiers')) / 2).order_by('nb', 'code');
+    return TemplateResponse(request, 'categories.html', {
+        'course': course,
+        'categories': categories,
+        'mixite_choices': dict(MIXITE_CHOICES),
+    })
+
+def facture(request, course_uid, numero, code=None):
     equipe = get_object_or_404(Equipe, course__uid=course_uid, numero=numero)
     if not equipe.paiement_complet():
+        raise Http404()
+    if not code:
+        if request.method == 'POST':
+            equipe.send_mail('paiement')
+            return HttpResponseRedirect('thankyou/')
+
+        return TemplateResponse(request, 'facture_new_url.html', {
+            "instance": equipe,
+        })
+
+    if equipe.password != code:
         raise Http404()
 
     if not equipe.date_facture:
@@ -693,7 +733,7 @@ def stripe_webhook(request, course_uid):
         intent = event_dict['data']['object']
         try:
             paiement = Paiement.objects.get(
-                stripe_intent=intent['id'],
+                intent_id=intent['id'],
                 equipes__equipe__course=course,
             )
             paiement.montant = Decimal(intent['amount']) / 100
@@ -708,7 +748,7 @@ def stripe_webhook(request, course_uid):
         intent = event_dict['data']['object']
         try:
             paiement = Paiement.objects.get(
-                stripe_intent=intent['id'],
+                intent_id=intent['id'],
                 equipes__equipe__course=course,
             )
             error_message = intent['last_payment_error']['message'] if intent.get('last_payment_error') else None
@@ -719,7 +759,35 @@ def stripe_webhook(request, course_uid):
 
     return HttpResponse('OK')
 
-def stripe_paiement(request, course_uid):
+@csrf_exempt
+def helloasso_webhook(request, course_uid):
+    course = get_object_or_404(Course, uid=course_uid)
+    data = json.loads(request.body)
+    logger.info(data)
+
+    if data['eventType'] == 'Order':
+        try:
+            if 'metadata' not in data: return HttpResponse('OK')
+            if 'uuid' not in data['metadata']: return HttpResponse('OK')
+            payment = data['data']['payments'][0]
+            uuid = data['metadata']['uuid']
+            paiement = Paiement.objects.get(
+                intent_id=uuid,
+                equipes__equipe__course=course,
+            )
+            if payment['state'] == 'Authorized':
+                paiement.montant = Decimal(payment['amount']) / 100
+            paiement.detail += '\n%s on %s\n%s' % (payment['state'], datetime.now(), payment['paymentReceiptUrl'])
+            paiement.save()
+            if payment['state'] == 'Authorized':
+                paiement.send_equipes_mail()
+                paiement.send_admin_mail()
+        except Paiement.DoesNotExist as e:
+            logger.warning('intent not found %s %s', json.dumps(data), course_uid)
+        # Fulfill the customer's purchase
+    return HttpResponse('OK')
+
+def intent_paiement(request, course_uid, methode='stripe'):
     success = False
     course = get_object_or_404(Course, uid=course_uid)
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
@@ -727,25 +795,18 @@ def stripe_paiement(request, course_uid):
         raise Http404()
 
     montant = 0
-    frais = Decimal(0)
     for equipe in equipes:
         montant += equipe.reste_a_payer
-    if not course.frais_stripe_inclus:
-        frais = stripe_templatetags.frais(montant)
-
-    stripe.api_key = course.stripe_secret
+    if montant <= 0:
+        return redirect('inscriptions_done', course_uid=course.uid, numero=equipes[0].numero)
     try: 
-        intent = stripe.PaymentIntent.create(
-            amount=int((montant + frais) * 100),
-            currency='EUR',
-            description=', '.join('%s' % (equipe, ) for equipe in equipes),
-        )
+        (intent_id, frais, response) = get_intent(request, course, equipes, methode, montant)
 
         paiement = Paiement(
-            type='stripe',
+            type=methode,
             montant=None, # will be updated when confirmation is received from stripe
             montant_frais=frais or None,
-            stripe_intent = intent.id,
+            intent_id = intent_id,
         )
         paiement.save()
         frais_equipes = repartition_frais([
@@ -759,17 +820,81 @@ def stripe_paiement(request, course_uid):
             )
         success = True
 
-        return HttpResponse(json.dumps({
-            'success': success,
-            'client_secret': intent.client_secret,
-        }))
+        return response
     except Exception as e:
         logger.exception('error handling stripe intent creation')
         return HttpResponse(json.dumps({
             'success': False,
         }), status=500)
 
+def get_intent(request, course, equipes, methode, montant):
+    if methode == 'stripe':
+        frais = Decimal(0)
+        if not course.frais_stripe_inclus:
+            frais = stripe_templatetags.frais(montant)
 
+        stripe.api_key = course.stripe_secret
+        intent = stripe.PaymentIntent.create(
+            amount=int((montant + frais) * 100),
+            currency='EUR',
+            description=', '.join('%s' % (equipe, ) for equipe in equipes),
+        )
+        return (
+            intent.id,
+            frais,
+            HttpResponse(json.dumps({
+                'success': True,
+                'client_secret': intent.client_secret,
+            })),
+        )
+    if methode == 'helloasso':
+        token = get_helloasso_token(course)
+        instance = equipes[0]
+        uuid = str(uuid4())
+        returnUrl = request.build_absolute_uri(reverse("inscriptions_done", kwargs={ "course_uid": course.uid, "numero": instance.numero })).replace('http://', 'https://')
+        body = {
+          "totalAmount": int(montant * 100),
+          "initialAmount": int(montant * 100),
+          "itemName": '%s - %s - %s' % (course.uid, instance.categorie.code, instance.numero),
+          "backUrl":   returnUrl,
+          "errorUrl":  returnUrl,
+          "returnUrl": returnUrl,
+          "containsDonation": False,
+          "payer": {
+            "firstName": instance.gerant_prenom,
+            "lastName": instance.gerant_nom,
+            "email": instance.gerant_email,
+            "address": '%s %s' % (instance.gerant_adresse1, instance.gerant_adresse2),
+            "city": instance.gerant_ville,
+            "zipCode": instance.gerant_code_postal,
+            # "country": instance.gerant_pays, # convert to 3 letters code
+            "companyName": instance.club,
+          },
+          "metadata": { "uuid": uuid },
+        }
+        logger.info(body)
+        baseUrl = HELLOASSO_URL if not course.helloasso_sandbox else HELLOASSO_SANDBOX_URL
+        url = '%s/v5/organizations/%s/checkout-intents' % (baseUrl, course.helloasso_organisation)
+        response = requests.post(url, json.dumps(body), headers={
+            "Content-type": "application/json",
+            "Authorization": "Bearer %s" % (token, ),
+        })
+        responseData = response.json()
+        logger.info(responseData)
+        if 'errors' in responseData:
+            url = reverse('inscriptions_edit', kwargs={ 'course_uid': course.uid, 'numero': instance.numero, 'code': instance.password })
+            url += '?' + '&'.join(['message=%s' % (urllib.parse.quote_plus(e['message']), ) for e in responseData['errors']])
+            return (
+                uuid,
+                0,
+                redirect(url),
+            )
+        return (
+            uuid,
+            0,
+            redirect(responseData['redirectUrl']),
+        )
+    raise Exception('Methode de paiement inconnue')
 
 def equipe_payee(request, course_uid, numero):
     course = get_object_or_404(Course, uid=course_uid)
@@ -781,3 +906,17 @@ def equipe_payee(request, course_uid, numero):
 def blank(request):
     with open(Path(settings.STATIC_ROOT) / 'blank.gif', 'rb') as f:
         return HttpResponse(f, content_type="image/gif")
+
+def get_helloasso_token(course):
+    params = urlencode({
+        'grant_type': 'client_credentials', 
+        'client_id': course.helloasso_id,
+        'client_secret': course.helloasso_secret,
+    })
+    baseUrl = HELLOASSO_URL if not course.helloasso_sandbox else HELLOASSO_SANDBOX_URL
+    logger.info(baseUrl)
+    url = '%s%s' % (baseUrl, '/oauth2/token')
+    response = requests.post(url, params, headers={ "Content-type": "application/x-www-form-urlencoded" })
+    responseData = response.json()
+    logger.info(responseData)
+    return responseData['access_token']
