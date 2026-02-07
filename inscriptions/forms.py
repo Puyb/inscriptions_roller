@@ -72,6 +72,7 @@ class CourseForm(ModelForm):
         }
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_course.js', )
+        css = { 'all': ('admin_create_course.css', ) }
 
     course_model = CharField(
         label=_("Model de course"),

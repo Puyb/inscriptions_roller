@@ -4,6 +4,7 @@ from functools import reduce, update_wrapper
 from inscriptions.models import *
 from django.conf.urls import url
 from django.contrib import admin
+from django.forms import CharField, HiddenInput
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
@@ -1109,6 +1110,12 @@ class CategorieAdmin(CourseFilteredObjectAdmin):
     class Media:
         js = ('custom_admin/categorie.js', )
     list_display = ('code', 'nom', 'min_equipiers', 'max_equipiers', 'min_age', 'sexe', 'numero_debut', 'numero_fin', )
+    fieldsets = (
+        (None, { 'fields': (('code', 'nom'), ('description', ), ('numero_debut', 'numero_fin', 'ajouter_nombre'))}),
+        ('Règles', { 'fields': (('min_equipiers', 'max_equipiers'), 'min_age', 'sexe', 'validation') }),
+        ('Tarifs', { 'classes': ('fieldset_prix',), 'fields': ('prices_base', 'prices_equipier') }),
+    )
+    
 site.register(Categorie, CategorieAdmin)
 
 

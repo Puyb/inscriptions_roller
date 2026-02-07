@@ -419,18 +419,48 @@ class Categorie(models.Model):
         prix_base = self.prices_base[0] if len(self.prices_base) else 0
         prix_equipier = self.prices_equipier[0] if len(self.prices_equipier) else 0
         for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
-            if date_augmentation <= d and len(self.prices) > i + 1:
+            if date_augmentation <= d and len(self.prices_base) > i + 1:
                 prix_base = self.prices_base[i + 1]
+            if date_augmentation <= d and len(self.prices_equipier) > i + 1:
                 prix_equipier = self.prices_equipier[i + 1]
-        return prix + nombre * prix_equipier
+        return prix_base + nombre * prix_equipier
 
-    def price(self, d=None):
-        return self.prix(d)
+    def price_base(self, d=None):
+        if isinstance(d, datetime):
+            d = d.date()
+        d = d or date.today()
+        prix_base = self.prices_base[0] if len(self.prices_base) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices_base) > i + 1:
+                prix_base = self.prices_base[i + 1]
+        return prix_base
+
+    def price_equipier(self, d=None):
+        if isinstance(d, datetime):
+            d = d.date()
+        d = d or date.today()
+        prix_equipier = self.prices_equipier[0] if len(self.prices_equipier) else 0
+        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+            if date_augmentation <= d and len(self.prices_equipier) > i + 1:
+                prix_equipier = self.prices_equipier[i + 1]
+        return prix_equipier
 
     def get_prefix(self, nombre):
         if not self.ajouter_nombre:
             return 0
         return int(str(nombre) + '0' * len(str(self.numero_fin)))
+
+    def prices(self):
+        base = list(self.prices_base)
+        equipier = list(self.prices_equipier)
+        dates = len(self.course.dates_augmentation) + 1
+        lastBase = base[-1] if len(base) else 0
+        for i in range(len(base), dates):
+            base.append(lastBase)
+        lastEquipier = equipier[-1] if len(equipier) else 0
+        for i in range(len(equipier), dates):
+            equipier.append(lastEquipier)
+        return zip(base, equipier)
 
 
 class Ville(models.Model):

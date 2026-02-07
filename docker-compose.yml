@@ -1,6 +1,9 @@
 services:
   django:
-    build: ./
+    build: 
+      context: ./
+      args:
+        DEBUG: "True"
     volumes:
       - ./:/app
     ports:

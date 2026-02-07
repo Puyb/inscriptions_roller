@@ -52,14 +52,7 @@
         <h3 class="panel-title">{% trans "Paiement :" %}</h3>
     </div>
     <div class="panel-body">
-        {% if request.GET.code == 'succeeded' %}
-        <p>{% blocktrans with prix=instance.montant_paiements %}Votre réglement des frais d'inscription ({{ prix }} €) est en attente de validation. Vous recevrez un email de confirmation rapidement{% endblocktrans %}</p>
-        <script> setTimeout(() => location.href = location.href.split('?')[0], 5000)</script>
-        {% else %}{% if not instance.paiement_complet %}
-        {% if COURSE.paiement_internet %}
-        {% if instance.montant_paiements > 0 %}{% blocktrans with montant_paiements=instance.montant_paiements reste_a_payer=instance.reste_a_payer %}
-        Nous avons reçu votre paiement de {{ montant_paiements }} €. Il vous reste a payer {{ reste_a_payer }} €.
-        {% endblocktrans %}{% endif %}
+        {% if not instance.paiement_complet %}
         {% if COURSE.paypal or COURSE.stripe_public %}
         <p>{% trans 'Pour régler votre inscription vous pouvez payer par internet :' %}</p>
 
@@ -74,7 +67,6 @@
         <p>{% blocktrans with date=instance.date_annulation %}Envoyez votre paiement avant le {{ date }}. Si nous n'avons pas reçu votre paiement à cette date, votre inscription sera annulée.{% endblocktrans %}</p>
         {% else %}
         <p>{% blocktrans with prix=instance.montant_paiements %}Vos frais d'inscription ({{ prix }} €) ont bien été reçus.{% endblocktrans %}</p>
-        {% endif %}
         {% endif %}
     </div>
 </div>
@@ -97,7 +89,7 @@
 
             {% if instance.certificat_manquantes %}
             <div class="clearfix">
-                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>) de :{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les certificats médicaux de (<a href="/{{ course_uid }}/model/certificat/" target="_blank">modèle</a>):{% endblocktrans %}<ul>
                 {% for e in instance.certificat_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}
@@ -107,7 +99,7 @@
 
             {% if instance.autorisation_manquantes %}
             <div class="clearfix">
-                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) de :{% endblocktrans %}<ul>
+                {% blocktrans with course_uid=COURSE.uid %}Il manque les autorisations parentales (<a href="/{{ course_uid }}/model/autorisation/" target="_blank">modèle</a>) :{% endblocktrans %}<ul>
                 {% for e in instance.autorisation_manquantes %}
                 <li>{{ e.prenom }} {{ e.nom }}</li>
                 {% endfor %}

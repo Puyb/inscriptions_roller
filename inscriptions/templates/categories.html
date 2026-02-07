@@ -10,23 +10,27 @@
     <div class="panel-body">
         <table class="list_inscrits">
             <tr>
-                <th></th>
+                <th>
+                    {% trans "Jusqu'au (inclus) :" %}<br />
+                </th>
                 {% for d in course.dernier_jours_tarif_reduit %}
                 <th>
-                    {% trans "Tarif réduit" %}<br />
-                    {% blocktrans with date=d %}(jusqu'au {{ date }} inclus){% endblocktrans %}
+                    {{ d }}
                 </th>
                 {% endfor %}
                 <th>
-                    {% trans "Plein tarif" %}<br />
-                    {% blocktrans with date=course.dernier_jour_inscription %}(inscriptions jusqu'au {{ date }} inclus){% endblocktrans %}
+                    {{ course.dernier_jour_inscription }}
                 </th>
             </tr>
             {% for categorie in categories %}
             <tr data-toggle="collapse" data-target="#details{{ categorie.id }}" class="accordion-toggle">
                 <td>{{ categorie.nom }} ({{ categorie.code }})</td>
                 {% for price in categorie.prices %}
-                <td>{{ price }} €</td>
+                <td>
+                    {% if price.1 %}{{ price.1 }} €/pers.{% endif %}
+                    {% if price.0 and price.1 %}+{% endif %}
+                    {% if price.0 %}{{ price.0 }} €{% endif %}
+                </td>
                 {% endfor %}
             </tr>
             <tr >
