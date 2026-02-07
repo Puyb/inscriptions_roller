@@ -1,0 +1,8 @@
+services:
+  django:
+    build: 
+      args:
+        DEBUG: "True"
+    environment:
+      ALLOWED_HOSTS: "enduroller.fr,www.enduroller.fr,localhost,test3.puyb.net"
+
