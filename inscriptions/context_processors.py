@@ -1,5 +1,5 @@
 from django.conf import settings
-from .models import Course
+from .models import CourseEdition
 from django.db.models import Min, Max
 from django.contrib.sites.models import Site
 
@@ -8,10 +8,10 @@ def course(request):
     if uid in ('course', 'admin'):
         if 'course_uid' not in request.COOKIES:
             return {
-                'COURSES': request.user.is_superuser and Course.objects.all() or [],
+                'COURSES': request.user.is_superuser and CourseEdition.objects.all() or [],
             }
         uid = request.COOKIES['course_uid']
-    course = (Course.objects
+    course = (CourseEdition.objects
         .filter(uid=uid)
         .prefetch_related('categories')
         .annotate(min_age=Min('categories__min_age'), max_equipiers=Max('categories__max_equipiers')))
@@ -30,7 +30,7 @@ def course(request):
         'CLOSE_MONTH':     course.date_fermeture.month,
         'CLOSE_DAY':       course.date_fermeture.day,
         'PAYPAL_BUSINESS': course.paypal,
-        'COURSES':         request.user.is_superuser and Course.objects.all() or [],
+        'COURSES':         request.user.is_superuser and CourseEdition.objects.all() or [],
     }
 
 def import_settings(request):

@@ -127,6 +127,31 @@ class Course(models.Model):
     uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
+    url                 = models.URLField(_(u'URL'))
+    logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
+    paypal              = models.EmailField(_(u'Adresse paypal'), blank=True)
+    frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
+    stripe_secret       = models.CharField(_('Stripe Secret Key'), max_length=200, blank=True, null=True)
+    stripe_public       = models.CharField(_('Stripe Public Key'), max_length=200, blank=True, null=True)
+    stripe_endpoint_secret = models.CharField(_('Stripe End Point Secret'), max_length=200, blank=True, null=True)
+    frais_stripe_inclus = models.BooleanField(_(u'Frais stripe inclus'))
+    helloasso_organisation = models.CharField(_('HelloAsso organization name'), max_length=200, blank=True, null=True)
+    helloasso_id        = models.CharField(_('HelloAsso clientId'), max_length=200, blank=True, null=True)
+    helloasso_secret    = models.CharField(_('HelloAsso clientSecret'), max_length=200, blank=True, null=True)
+    helloasso_sandbox   = models.BooleanField(_('HelloAsso sandbox'))
+    ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
+    adresse             = models.TextField(_(u'Adresse'), blank=True)
+    active              = models.BooleanField(_(u'Activée'), default=False)
+
+    def __str__(self):
+        return self.nom
+
+class CourseEdition(models.Model):
+    course              = models.ForeignKey(Course, null=True, related_name='editions', on_delete=models.SET_NULL)
+    nom                 = models.CharField(_(u'Nom'), max_length=200)
+    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
+    organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
+    ville               = models.CharField(_(u'Ville'), max_length=200)
     date                = models.DateField(_(u'Date'))
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
@@ -197,7 +222,7 @@ class Course(models.Model):
                 to=(('', settings.CONTACT_MAIL), ),
                 content_type='plain',
             )
-        if self.active and self.id  and not Course.objects.get(id=self.id).active:
+        if self.active and self.id  and not CourseEdition.objects.get(id=self.id).active:
             send_mail(
                 subject='Votre course %s est activée' % self.nom,
                 body="""Votre course %s est activée.
@@ -206,7 +231,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 to=[self.email_contact],
                 content_type='text',
             )
-        super(Course, self).save(*args, **kwargs)
+        super(CourseEdition, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.nom, self.date)
@@ -376,7 +401,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             p=Unaccent(Lower(RegexpReplace('prenom', Value('[ -]\\+'), Value(' ')))),
         )
         equipiers1 = equipiers.filter(equipe__course=self)
-        if isinstance(course2, Course):
+        if isinstance(course2, CourseEdition):
             equipiers2 = equipiers.filter(equipe__course=course2)
         else:
             equipiers2 = equipiers.filter(equipe__course__in=course2)
@@ -394,7 +419,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         return doublons
 
 class Categorie(models.Model):
-    course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
+    course          = models.ForeignKey(CourseEdition, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
     prices_base     = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix de base") )
@@ -538,7 +563,7 @@ class Equipe(models.Model):
     password           = models.CharField(_(u'Mot de passe'), max_length=200, blank=True)
     gerant_telephone   = models.CharField(_(u'Téléphone'), max_length=200, blank=True)
     categorie          = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    course             = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course             = models.ForeignKey(CourseEdition, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
     dossier_complet    = models.NullBooleanField(_(u'Dossier complet'))
@@ -864,7 +889,7 @@ class ExtraQuestion(models.Model):
         ('list', _('Liste déroulante')),
         ('checkbox', _('Case à cocher')),
     )
-    course = models.ForeignKey(Course, related_name='extra', on_delete=models.CASCADE)
+    course = models.ForeignKey(CourseEdition, related_name='extra', on_delete=models.CASCADE)
     page = models.CharField(_('Rattaché à'), max_length=20, choices=PAGE_CHOICES)
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
@@ -941,7 +966,7 @@ class ExtraQuestionChoice(models.Model):
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name='accreditations', on_delete=models.CASCADE)
+    course = models.ForeignKey(CourseEdition, related_name='accreditations', on_delete=models.CASCADE)
     role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='', blank=True)
     class Meta:
         unique_together = (('user', 'course'), )
@@ -960,7 +985,7 @@ Connectez vous sur enduroller pour y accéder.
         super().save(*args, **kwargs)
 
 class TemplateMail(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(CourseEdition, on_delete=models.CASCADE)
     nom = models.CharField(_('Nom'), max_length=200)
     destinataire = models.CharField(_('Destinataire'), max_length=20, choices=DESTINATAIRE_CHOICES)
     bcc = models.CharField(_(u'Copie cachée à'), max_length=1000, blank=True)
@@ -1015,7 +1040,7 @@ class TemplateMail(models.Model):
             m.send()
 
 class Mail(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(CourseEdition, on_delete=models.CASCADE)
     template = models.ForeignKey(TemplateMail, null=True, on_delete=models.SET_NULL)
     equipe = models.ForeignKey(Equipe, null=True, on_delete=models.SET_NULL)
     emetteur = models.EmailField()
@@ -1045,7 +1070,7 @@ class Mail(models.Model):
 
 CHALLENGE_LEVENSHTEIN_DISTANCE = 3
 # test:
-# from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in Course.objects.filter(date__year=2016)]
+# from inscriptions.models import *; Challenge.objects.all().delete(); c=Challenge(nom='Challenge Grand Nord 2016'); c.save(); [c.add_course(course) for course in CourseEdition.objects.filter(date__year=2016)]
 class Challenge(models.Model):
     MODE_CHOICES = (
         ('nord2017', _('Points / Participations (égalités possibles)')),
@@ -1055,7 +1080,7 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
+    courses = models.ManyToManyField(CourseEdition, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
     mode = models.CharField(max_length=20, choices=MODE_CHOICES)
 
@@ -1405,7 +1430,7 @@ class CompareNames(Func):
         return cols
 
 class LiveSnapshot(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(CourseEdition, on_delete=models.CASCADE)
     date = models.DateTimeField()
     received = models.DateTimeField(auto_now=True)
 
@@ -1447,7 +1472,7 @@ class Paiement(models.Model):
         if self.montant:
             try:
                 equipes = Equipe.objects.filter(paiements__paiement=self)
-                courses = Course.objects.filter(equipe__in=equipes).distinct()
+                courses = CourseEdition.objects.filter(equipe__in=equipes).distinct()
                 for course in courses:
                     mail = TemplateMail.objects.select_related('course').get(course=course, nom='paiement')
                     mail.send(equipes.filter(course=course))
@@ -1459,7 +1484,7 @@ class Paiement(models.Model):
         message = render_to_string('mails/paiement_admin.html', {
             'paiement': self,
         })
-        dest = [ c.email_contact for c in Course.objects.filter(equipe__paiements__paiement=self) ]
+        dest = [ c.email_contact for c in CourseEdition.objects.filter(equipe__paiements__paiement=self) ]
         send_mail(
             subject=subject,
             body=message,

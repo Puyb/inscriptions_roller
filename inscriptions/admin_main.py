@@ -2,6 +2,7 @@
 from inscriptions.models import *
 from django.contrib import admin
 from django.contrib import messages
+from django.db.models import Count, Max
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.template.response import TemplateResponse
@@ -45,8 +46,32 @@ class LogAdmin(admin.ModelAdmin):
     modified_object.allow_tags = True
 site.register(LogEntry, LogAdmin)
 
-
 class CourseAdmin(admin.ModelAdmin):
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.prefetch_related('editions')
+        qs = qs.annotate(
+            _editions = Count('editions__id'),
+            _derniere = Max('editions__date'),
+        )
+        return qs
+    list_display = ('uid', 'nom', 'ville', 'edition', 'derniere', )
+    list_filter = ('active', )
+
+    def active2(self, obj):
+        return obj.active and ICON_OK or ICON_KO
+    active2.allow_tags = True
+    active2.short_description = 'Active'
+
+    def edition(self, obj):
+        return obj._editions
+
+    def derniere(self, obj):
+        return obj._derniere
+
+site.register(Course, CourseAdmin)
+
+class CourseEditionAdmin(admin.ModelAdmin):
     list_display = ('uid', 'nom', 'date', 'active2', )
     list_filter = ('active', )
 
@@ -55,7 +80,7 @@ class CourseAdmin(admin.ModelAdmin):
     active2.allow_tags = True
     active2.short_description = 'Active'
 
-site.register(Course, CourseAdmin)
+site.register(CourseEdition, CourseEditionAdmin)
 
 class AccreditationAdmin(admin.ModelAdmin):
     list_display = ('user', 'course', 'role', )
@@ -117,9 +142,9 @@ class ChallengeAdmin(admin.ModelAdmin):
             challenge = Challenge.objects.filter(id=int(request.POST['challenge_id'])).prefetch_related('categories__categories__course').get()
             challenge_categories = { c.id: c for c in challenge.categories.all() }
 
-            courses = Course.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories').order_by('date')
+            courses = CourseEdition.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories').order_by('date')
             courses_by_id = { c.id: { 'course': c, 'categories': { cat.id: cat for cat in c.categories.all() } } for c in courses }
-            categories = defaultdict(lambda: defaultdict(set)) # nested object, keys : Course, ChallengeCategorie, value: array of Categorie
+            categories = defaultdict(lambda: defaultdict(set)) # nested object, keys : CourseEdition, ChallengeCategorie, value: array of Categorie
             for key in request.POST.keys():
                 key = key.split('_')
                 if key[0] != 'course' and len(key) != 4:
@@ -169,7 +194,7 @@ class ChallengeAdmin(admin.ModelAdmin):
 
         return TemplateResponse(request, 'admin/challenge/courses.html', dict(self.admin_site.each_context(request),
             challenge=challenge,
-            courses=Course.objects.prefetch_related('categories'),
+            courses=CourseEdition.objects.prefetch_related('categories'),
         ))
     manage_courses.short_description = _(u'Gérer les courses')
 

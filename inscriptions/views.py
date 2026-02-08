@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
+from .models import Equipe, Equipier, Categorie, CourseEdition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -42,7 +42,7 @@ HELLOASSO_SANDBOX_URL = 'https://api.helloasso-sandbox.com'
 @transaction.atomic
 def form(request, course_uid, numero=None, code=None):
     eq = ExtraQuestion.objects.prefetch_related('choices')
-    course = get_object_or_404(Course.objects.prefetch_related(
+    course = get_object_or_404(CourseEdition.objects.prefetch_related(
             Prefetch('extra', queryset=eq.filter(page__in=("Equipe", "Categorie")), to_attr='extra_equipe'),
             Prefetch('extra', queryset=eq.filter(page="Equipier"), to_attr='extra_equipier'),
             'categories',
@@ -121,7 +121,7 @@ def form(request, course_uid, numero=None, code=None):
             raise e
     else:
         if not instance and 'course' in request.GET and 'numero' in request.GET:
-            course2 = get_object_or_404(Course, uid=request.GET['course'])
+            course2 = get_object_or_404(CourseEdition, uid=request.GET['course'])
             instance = get_object_or_404(Equipe, course=course2, numero=request.GET['numero'])
             code = request.GET.get('code',  request.COOKIES.get(instance.cookie_key(), None))
             if instance.password != code:
@@ -175,7 +175,7 @@ def form(request, course_uid, numero=None, code=None):
 @open_closed
 def find_challenges_categories(request, course_uid):
     EQ = ExtraQuestion.objects.prefetch_related('choices')
-    course = get_object_or_404(Course.objects.prefetch_related(
+    course = get_object_or_404(CourseEdition.objects.prefetch_related(
             Prefetch('extra', queryset=EQ.filter(page="Equipier"), to_attr='extra_equipier'),
         ), uid=course_uid)
     if request.method != 'POST':
@@ -196,7 +196,7 @@ def find_challenges_categories(request, course_uid):
     course_categories = course.categories.filter(code__in=request.POST.getlist('categories'))
     
     all_result = defaultdict(list)
-    for challenge in course.challenges.prefetch_related(Prefetch('courses', Course.objects.order_by('date'))):
+    for challenge in course.challenges.prefetch_related(Prefetch('courses', CourseEdition.objects.order_by('date'))):
         result = challenge.find_categories(equipiers, course_categories, course)
         for ec, cc in result.items():
             participations = list(challenge.find_participation_for_equipe_raw(
@@ -217,13 +217,13 @@ def find_challenges_categories(request, course_uid):
 
 @open_closed
 def done(request, course_uid, numero):
-    course = get_object_or_404(Course, uid=request.path.split('/')[1])
+    course = get_object_or_404(CourseEdition, uid=request.path.split('/')[1])
     try:
         instance = Equipe.objects.select_related('course').prefetch_related(
 		'equipier_set',
                 Prefetch('challenges', EquipeChallenge.objects.select_related('participation', 'participation__challenge').prefetch_related(
                     Prefetch('participation__equipes', EquipeChallenge.objects.select_related('equipe__course')),
-                    Prefetch('participation__challenge__courses', Course.objects.order_by('date'))
+                    Prefetch('participation__challenge__courses', CourseEdition.objects.order_by('date'))
                 )),
             ).get(course=course, numero=numero)
         #prefetch_related_objects([instance], [Prefetch('equipier_set', Equipier.objects.filter(numero__lte=instance.nombre))])
@@ -263,7 +263,7 @@ def ipn(request, course_uid):
             logger.warning('ipn is not a payment %s', json.dumps(request.POST))
             return HttpResponse()
 
-        course = get_object_or_404(Course, uid=course_uid)
+        course = get_object_or_404(CourseEdition, uid=course_uid)
         equipes = list(course.equipe_set.filter(id=data['invoice'][0:-4]))
 
         montant = 0
@@ -418,7 +418,7 @@ def change(request, course_uid, numero=None, sent=None):
     })
 
 def stats(request, course_uid):
-    course = get_object_or_404(Course, uid=request.path.split('/')[1])
+    course = get_object_or_404(CourseEdition, uid=request.path.split('/')[1])
     stats = course.stats()
 
     return TemplateResponse(request, 'stats.html', {
@@ -432,7 +432,7 @@ def stats_compare(request, course_uid, course_uid2):
     uids.extend(course_uid2.split(','))
 
     align = request.GET.get('align', '')
-    course1 = get_object_or_404(Course, uid=course_uid)
+    course1 = get_object_or_404(CourseEdition, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
     # FIXME support multiple date of augmentation
     if align == "augment" and course1.dates_augmentation[0]:
@@ -441,7 +441,7 @@ def stats_compare(request, course_uid, course_uid2):
     res = []
     i = 0;
     for uid in uids:
-        course = get_object_or_404(Course, uid=uid)
+        course = get_object_or_404(CourseEdition, uid=uid)
         stats = course.stats()
         
         duree = (course.date - course.date_ouverture).days
@@ -469,12 +469,12 @@ def stats_compare(request, course_uid, course_uid2):
 
 def index(request):
     return TemplateResponse(request, 'index.html', {
-        'prochaines_courses': Course.objects.filter(active=True, date__gt=date.today()).order_by('date'),
-        'anciennes_courses': Course.objects.filter(active=True, date__lte=date.today()).order_by('date'),
+        'prochaines_courses': CourseEdition.objects.filter(active=True, date__gt=date.today()).order_by('date'),
+        'anciennes_courses': CourseEdition.objects.filter(active=True, date__lte=date.today()).order_by('date'),
     })
 
 def contact(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     name = request.POST.get('name', '')
     subject = request.POST.get('subject', '')
     message = request.POST.get('message', '')
@@ -496,11 +496,11 @@ Email: %s
     return TemplateResponse(request, 'contact.html', {'form': ContactForm()})
 
 def contact_done(request, course_uid, numero=None):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     return TemplateResponse(request, 'contact_done.html', {'course': course})
 
 def categories(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     categories = course.categories.annotate(nb=(F('min_equipiers') + F('max_equipiers')) / 2).order_by('nb', 'code');
     return TemplateResponse(request, 'categories.html', {
         'course': course,
@@ -532,7 +532,7 @@ def facture(request, course_uid, numero, code=None):
     })
 
 def challenges(request):
-    challenges = Challenge.objects.filter(active=True).order_by('nom').prefetch_related(Prefetch('courses', Course.objects.order_by('date')))
+    challenges = Challenge.objects.filter(active=True).order_by('nom').prefetch_related(Prefetch('courses', CourseEdition.objects.order_by('date')))
     prochains_challenges = []
     anciens_challenges = []
     for challenge in challenges:
@@ -550,7 +550,7 @@ def challenge(request, challenge_uid):
     sorts = ['position2', 'count', 'nom', 'categorie__code', 'distance' ]
     (_('position2'), _('count'), _('nom'), _('categorie__code'), _('distance'))
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
-        Prefetch('courses', Course.objects.order_by('date')),
+        Prefetch('courses', CourseEdition.objects.order_by('date')),
         'categories',
     ), uid=challenge_uid)
 
@@ -617,7 +617,7 @@ def challenge_participation(request, challenge_uid, participation_id):
             return redirect('inscriptions_challenge', challenge_uid=challenge.uid)
 
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
-        Prefetch('courses', Course.objects.order_by('date')),
+        Prefetch('courses', CourseEdition.objects.order_by('date')),
         'categories',
     ), uid=challenge_uid)
     participations = ParticipationChallenge.objects.prefetch_related(
@@ -640,10 +640,10 @@ def challenge_participation(request, challenge_uid, participation_id):
 
 def get_participations_to_move(request, challenge_uid, participation_id, course_uid):
     challenge = get_object_or_404(Challenge.objects.prefetch_related(
-        Prefetch('courses', Course.objects.order_by('date')),
+        Prefetch('courses', CourseEdition.objects.order_by('date')),
         'categories',
     ), uid=challenge_uid)
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     participation = get_object_or_404(ParticipationChallenge.objects.select_related('categorie'), id=participation_id)
     participations = ParticipationChallenge.objects.filter(
         challenge=challenge,
@@ -678,7 +678,7 @@ def model_certificat(request, course_uid):
 
 def live_push(request, course_uid):
     if request.method == 'POST':
-        course = get_object_or_404(Course, uid=course_uid)
+        course = get_object_or_404(CourseEdition, uid=course_uid)
         date = dateTime.strptime(request.GET['date'], '%d/%m/%Y %H:%M:%S')
         snapshort = LiveSnapshort(
             course=course,
@@ -709,7 +709,7 @@ def countries(request):
 
 @csrf_exempt
 def stripe_webhook(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     stripe.api_key = course.stripe_secret
     endpoint_secret = course.stripe_endpoint_secret
 
@@ -761,7 +761,7 @@ def stripe_webhook(request, course_uid):
 
 @csrf_exempt
 def helloasso_webhook(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     data = json.loads(request.body)
     logger.info(data)
 
@@ -789,7 +789,7 @@ def helloasso_webhook(request, course_uid):
 
 def intent_paiement(request, course_uid, methode='stripe'):
     success = False
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     equipes = list(course.equipe_set.filter(numero__in=request.GET.getlist('equipe')))
     if not equipes:
         raise Http404()
@@ -897,7 +897,7 @@ def get_intent(request, course, equipes, methode, montant):
     raise Exception('Methode de paiement inconnue')
 
 def equipe_payee(request, course_uid, numero):
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(CourseEdition, uid=course_uid)
     equipe = get_object_or_404(Equipe, course=course, numero=numero)
     return HttpResponse(json.dumps({
         'success': equipe.paiement_complet(),

@@ -42,7 +42,7 @@ ICON_MISSING = '📨'
 ICON_LOCK = '🔒'
 ICON_GIFT = '🎁'
 
-def getCourse(request, qs=Course.objects.all()):
+def getCourse(request, qs=CourseEdition.objects.all()):
     uid = request.COOKIES['course_uid']
     if request.user.is_superuser:
         return qs.get(uid=uid)
@@ -87,7 +87,7 @@ class CourseAdminSite(admin.sites.AdminSite):
     def course_choose(self, request):
         request.current_app = self.name
         accreditations = request.user.accreditations.all()
-        qs = Course.objects.all()
+        qs = CourseEdition.objects.all()
         if 'old' not in request.GET:
             qs = qs.filter(date__gte=datetime.now() - timedelta(days=60))
         return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
@@ -99,7 +99,7 @@ class CourseAdminSite(admin.sites.AdminSite):
     def course_ask_accreditation(self, request, course_uid=None):
         request.current_app = self.name
         if course_uid:
-            course = get_object_or_404(Course, uid=course_uid)
+            course = get_object_or_404(CourseEdition, uid=course_uid)
             Accreditation(
                 user=request.user,
                 course=course,
@@ -113,8 +113,8 @@ class CourseAdminSite(admin.sites.AdminSite):
             )
             return redirect('../')
 
-        courses = Course.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
-        demandes = Course.objects.filter(accreditations__user=request.user, accreditations__role='')
+        courses = CourseEdition.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
+        demandes = CourseEdition.objects.filter(accreditations__user=request.user, accreditations__role='')
         context = dict(self.each_context(request),
             courses=courses,
             demandes=demandes,
@@ -217,7 +217,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def resultats(self, request):
         request.current_app = self.name
-        course = getCourse(request, Course.objects.prefetch_related('categories', 'challenges'))
+        course = getCourse(request, CourseEdition.objects.prefetch_related('categories', 'challenges'))
         form = ImportResultatForm()
 
         if request.method == 'POST':
@@ -446,8 +446,8 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def paiement_change(self, request, id=None):
         paiement = None
-        course = getCourse(request, Course.objects.all())
-        courses = set(Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60)))
+        course = getCourse(request, CourseEdition.objects.all())
+        courses = set(CourseEdition.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60)))
         courses.add(course)
 
         equipes = {}
@@ -530,8 +530,8 @@ class CourseAdminSite(admin.sites.AdminSite):
     def paiement_search_equipe(self, request):
         search = request.POST['search']
 
-        course = getCourse(request, Course.objects.all())
-        courses = Course.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
+        course = getCourse(request, CourseEdition.objects.all())
+        courses = CourseEdition.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
 
         equipes = Equipe.objects.filter(Q(course__in=courses) | Q(course=course)).distinct()
         for bit in search.split():
@@ -558,17 +558,17 @@ class CourseAdminSite(admin.sites.AdminSite):
         }))
 
     def test_categories(self, request):
-        course = getCourse(request, Course.objects.all())
+        course = getCourse(request, CourseEdition.objects.all())
         return TemplateResponse(request, "admin/test_categories.html", {
             "course": course,
         })
 
     def stats(self, request):
-        courses = Course.objects.filter(accreditations__user=request.user)
-        courses_other = Course.objects.none()
+        courses = CourseEdition.objects.filter(accreditations__user=request.user)
+        courses_other = CourseEdition.objects.none()
         if request.user.is_superuser:
-            courses_other = Course.objects.exclude(accreditations__user=request.user)
-        course = getCourse(request, Course.objects.all())
+            courses_other = CourseEdition.objects.exclude(accreditations__user=request.user)
+        course = getCourse(request, CourseEdition.objects.all())
         return TemplateResponse(request, "admin/stats.html", {
             "course": course,
             "courses": courses,
@@ -576,7 +576,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         })
 
     def get_stats_api(self, request, course_uid):
-        course = get_object_or_404(Course, uid=course_uid)
+        course = get_object_or_404(CourseEdition, uid=course_uid)
         stats = course.stats()
         def iso(d):
             return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
@@ -1087,7 +1087,7 @@ class CourseAdmin(admin.ModelAdmin):
         models = {}
         with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
             models = json.load(f)
-        for course in Course.objects.filter(accreditations__user=request.user):
+        for course in CourseEdition.objects.filter(accreditations__user=request.user):
             models[course.id] = {
                 '_name': str(course),
                 'categories': [
@@ -1102,7 +1102,7 @@ class CourseAdmin(admin.ModelAdmin):
             
         return HttpResponse(json.dumps(models))
 
-site.register(Course, CourseAdmin)
+site.register(CourseEdition, CourseAdmin)
 
 
 class CategorieAdmin(CourseFilteredObjectAdmin):

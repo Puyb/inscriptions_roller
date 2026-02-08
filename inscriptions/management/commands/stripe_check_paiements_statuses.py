@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from inscriptions.models import Paiement, Course
+from inscriptions.models import Paiement, CourseEdition
 from decimal import Decimal
 import requests
 from datetime import datetime
@@ -11,7 +11,7 @@ class Command(BaseCommand):
         parser.add_argument('course_uid', type=str)
 
     def handle(self, *args, **options):
-        course = Course.objects.get(uid=options['course_uid'])
+        course = CourseEdition.objects.get(uid=options['course_uid'])
 
         if not course.stripe_secret:
             self.stdout.write(self.style.ERROR('Stripe is not configured for this course'))

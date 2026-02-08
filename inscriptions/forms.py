@@ -7,7 +7,7 @@ from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
-from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
+from .models import Equipe, Equipier, CourseEdition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
@@ -54,7 +54,7 @@ EquipierFormset.model = Equipier
 
 class CourseForm(ModelForm):
     class Meta:
-        model = Course
+        model = CourseEdition
         exclude = ('active', )
         widgets = {
             'date': AdminDateWidget(),
@@ -84,7 +84,7 @@ class CourseForm(ModelForm):
         model = self.cleaned_data['course_model']
         prix = json.loads(self.cleaned_data['course_prix'])
         if re.match('^[0-9]+$', model):
-            course = Course.objects.get(id=model)
+            course = CourseEdition.objects.get(id=model)
             original = course
             instance = super().save(commit=False)
             instance.is_active = False

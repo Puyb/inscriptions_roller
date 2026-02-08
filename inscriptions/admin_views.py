@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import csv, io
-from .models import Equipe, Equipier, TemplateMail, Course
+from .models import Equipe, Equipier, TemplateMail, CourseEdition
 from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
@@ -22,14 +22,14 @@ def dossards(request, course_uid):
 @login_required
 def listing(request, course_uid, template='listing.html'):
     return TemplateResponse(request, template, {
-        'course': get_object_or_404(Course, uid=course_uid),
+        'course': get_object_or_404(CourseEdition, uid=course_uid),
         'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
     })
 
 def equipiers(request, course_uid):
     return TemplateResponse(request, 'equipiers.html', {
-        'course': get_object_or_404(Course, uid=course_uid),
+        'course': get_object_or_404(CourseEdition, uid=course_uid),
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid)
     })
 

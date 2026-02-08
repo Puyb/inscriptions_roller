@@ -1,6 +1,6 @@
 from django.test import Client, TestCase
 from datetime import date, timedelta
-from inscriptions.models import Course, Equipe
+from inscriptions.models import CourseEdition, Equipe
 
 tomorrow = date.today() + timedelta(days=1)
 tomorrow2 = date.today() + timedelta(days=2)
@@ -10,7 +10,7 @@ yesterday2 = date.today() - timedelta(days=2)
 class InscriptionsTestCase(TestCase):
     fixtures = ('course1.json', )
     def setUp(self):
-        self.course = Course.objects.get(id=1)
+        self.course = CourseEdition.objects.get(id=1)
         self.course.date_ouverture = date.today()
         self.course.date_fermeture = tomorrow2
         self.course.save()
