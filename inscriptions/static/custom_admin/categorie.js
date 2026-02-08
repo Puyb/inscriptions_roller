@@ -35,10 +35,12 @@ $(function() {
     $table.append(tr1);
     $table.append(tr2);
     $table.append(tr3);
-    $table.find('input').change(function() {
+    $table.find('input').change(save);
+    function save() {
         const priceBase = Array.from($table.find('input[name^=prices_base]')).map(f => f.value).join(',');
         const priceEquipier = Array.from($table.find('input[name^=prices_equipier]')).map(f => f.value).join(',');
         $('#id_prices_base').val(priceBase);
         $('#id_prices_equipier').val(priceEquipier);
-    });
+    }
+    save();
 });
