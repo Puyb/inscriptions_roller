@@ -136,9 +136,6 @@ function check_step(data) {
             nom:                /^.+$/i,
             prenom:             /^.+$/i,
             sexe:               /^[HF]$/,
-            ville:              /^.+$/i,
-            code_postal:        function(k) { return this.pays === 'FR' ? /^[0-9]{4,6}$/i.test(this.code_postal) : this.code_postal.length > 0; },
-            email:              /^[a-z0-9+\-\._]+@([a-z0-9\-_]+\.)+[a-z]{2,5}$/i,
             date_de_naissance:  function(k) { return check_date(this, k) && age(COURSE.MIN_AGE)(this); },
             justificatif:       /^(licence|certificat)$/,
             num_licence:        function(k) { return this.justificatif !== 'licence' || /^[0-9]{3,9}$/i.test(this[k]); }

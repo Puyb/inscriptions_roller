@@ -775,12 +775,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     nom               = models.CharField(_(u'Nom'), max_length=200)
     prenom            = models.CharField(_(u'Prénom'), max_length=200, blank=True)
     sexe              = models.CharField(_(u'Sexe'), max_length=1, choices=SEXE_CHOICES)
-    adresse1          = models.CharField(_(u'Adresse'), max_length=200, blank=True)
-    adresse2          = models.CharField(_(u'Adresse'), max_length=200, blank=True)
-    ville             = models.CharField(max_length=200)
-    code_postal       = models.CharField(max_length=200)
-    pays              = models.CharField(_(u'Pays'), max_length=2, default='FR')
-    email             = models.EmailField(_(u'e-mail'), max_length=200, blank=True)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
     autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_autorisation_filename , blank=True, help_text=AUTORISATION_HELP)
     autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
@@ -788,7 +782,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    ville2            = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
     extra             = JSONField(default={})
 
     # Pre-calculated fields
@@ -840,8 +833,6 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
         self.valide = self.piece_jointe_valide == True and (self.age() >= 18 or self.autorisation_valide == True)
         self.homme = self.sexe == 'H'
 
-        if not self.ville2:
-            self.ville2 = lookup_ville(self.ville, self.code_postal, self.pays)
         super(Equipier, self).save(*args, **kwargs)
 
     def dossard(self):
