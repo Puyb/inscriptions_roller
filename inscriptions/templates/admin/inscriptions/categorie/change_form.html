@@ -5,7 +5,7 @@
 {{ block.super }}
 {% if original %}
 <script>
-COURSE_DATES = [ '{{ original.course.date_ouverture.isoformat }}' ]
+COURSE_DATES = [ '{{ original.course.date_ouverture.isoformat }}' ];
     {% for d in original.course.dates_augmentation %}
     COURSE_DATES.push('{{ d.isoformat }}');
     {% endfor %}
