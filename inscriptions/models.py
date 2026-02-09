@@ -133,7 +133,7 @@ class Course(models.Model):
     email_contact       = models.EmailField(_(u'Email contact'))
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
-    dates_augmentation  = ArrayField(models.DateField(), default=[], verbose_name=_("Date d'augmentation des tarifs"))
+    dates_augmentation  = ArrayField(models.DateField(), default=[], null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
     date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
