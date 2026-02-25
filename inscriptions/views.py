@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery
+from django.db.models import Count, Sum, Min, Max, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
@@ -23,7 +23,7 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm
-from .models import Equipe, Equipier, Categorie, CourseEdition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
+from .models import Equipe, Equipier, Categorie, Course, CourseEdition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -468,9 +468,10 @@ def stats_compare(request, course_uid, course_uid2):
     });
 
 def index(request):
+    courses = Course.objects.filter(active=True).annotate(date=Max('editions__date'))
     return TemplateResponse(request, 'index.html', {
-        'prochaines_courses': CourseEdition.objects.filter(active=True, date__gt=date.today()).order_by('date'),
-        'anciennes_courses': CourseEdition.objects.filter(active=True, date__lte=date.today()).order_by('date'),
+        'prochaines_courses': courses.filter(date__gt=date.today()).order_by('date'),
+        'anciennes_courses': courses.filter(date__lte=date.today()).order_by('date'),
     })
 
 def contact(request, course_uid):
