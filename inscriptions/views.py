@@ -761,7 +761,6 @@ def stripe_webhook(request, course_uid):
 
 @csrf_exempt
 def helloasso_webhook(request, course_uid):
-    course = get_object_or_404(Course, uid=course_uid)
     data = json.loads(request.body)
     logger.info(data)
 
@@ -773,7 +772,6 @@ def helloasso_webhook(request, course_uid):
             uuid = data['metadata']['uuid']
             paiement = Paiement.objects.get(
                 intent_id=uuid,
-                equipes__equipe__course=course,
             )
             if payment['state'] == 'Authorized':
                 paiement.montant = Decimal(payment['amount']) / 100
