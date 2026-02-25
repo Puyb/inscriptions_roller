@@ -3,10 +3,9 @@
 
 {% block content %}
 {{ block.super }}
-{% if original %}
 <script>
-COURSE_DATES = [ '{{ original.course.date_ouverture.isoformat }}' ];
-    {% for d in original.course.dates_augmentation %}
+COURSE_DATES = [ '{{ COURSE.date_ouverture.isoformat }}' ];
+    {% for d in COURSE.dates_augmentation %}
     COURSE_DATES.push('{{ d.isoformat }}');
     {% endfor %}
 
@@ -33,5 +32,4 @@ COURSE_DATES = [ '{{ original.course.date_ouverture.isoformat }}' ];
     });
 })(django.jQuery);
 </script>
-{% endif %}
 {% endblock %}

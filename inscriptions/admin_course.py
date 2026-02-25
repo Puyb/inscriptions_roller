@@ -1110,7 +1110,7 @@ class CategorieAdmin(CourseFilteredObjectAdmin):
         js = ('custom_admin/categorie.js', )
     list_display = ('code', 'nom', 'min_equipiers', 'max_equipiers', 'min_age', 'sexe', 'numero_debut', 'numero_fin', )
     fieldsets = (
-        (None, { 'fields': (('code', 'nom'), ('description', ), ('numero_debut', 'numero_fin', 'ajouter_nombre'))}),
+        (None, { 'fields': ('course', ('code', 'nom'), ('description', ), ('numero_debut', 'numero_fin', 'ajouter_nombre'))}),
         ('Règles', { 'fields': (('min_equipiers', 'max_equipiers'), 'min_age', 'sexe', 'validation') }),
         ('Tarifs', { 'classes': ('fieldset_prix',), 'fields': ('prices_base', 'prices_equipier') }),
     )
