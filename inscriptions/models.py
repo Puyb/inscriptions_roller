@@ -149,6 +149,7 @@ class Course(models.Model):
     helloasso_sandbox   = models.BooleanField(_('HelloAsso sandbox'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
+    delai_paiement      = models.IntegerField(_('Délai de paiement avant annulation'), default=31, help_text=_('En jours. Ce délai est affiché purement à titre indicatif. La suppression devra être faite manuellement (ou pas).'))
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
     texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
@@ -720,7 +721,7 @@ class Equipe(models.Model):
 
     @property
     def date_annulation(self):
-        return min(self.date.date() + timedelta(days=31), self.course.date)
+        return min(self.date.date() + timedelta(days=self.course.delai_paiement), self.course.date)
 
     def temps_humain(self):
         if not self.temps:
