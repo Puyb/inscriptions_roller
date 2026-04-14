@@ -137,6 +137,7 @@ INSTALLED_APPS = [
     "formadmin",
     "pinax_theme_bootstrap",
     "account",
+    "turnstile",
 
     'django.contrib.sites.apps.SitesConfig',
     'django.contrib.humanize.apps.HumanizeConfig',

@@ -38,3 +38,6 @@ DATABASES = {
         "HOST": os.environ.get('DB_HOST', ''),
     }
 }
+
+TURNSTILE_SITEKEY = os.environ.get('TURNSTILE_SITEKEY', '')
+TURNSTILE_SECRET = os.environ.get('TURNSTILE_SECRET', '')

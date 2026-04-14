@@ -23,6 +23,8 @@ services:
       REDIS_HOST: "redis"
       DEV_SERVER: "True"
       LOCAL_SETTINGS: ".docker"
+      TURNSTILE_SITEKEY: ""
+      TURNSTILE_SECRET: ""
     depends_on:
       - db
       - redis

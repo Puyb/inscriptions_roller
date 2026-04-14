@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from turnstile.fields import TurnstileField
 
 class ExtraModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -126,6 +127,7 @@ class ContactForm(Form):
     email = EmailField()
     subject = CharField()
     message = CharField(widget=Textarea())
+    turnstile = TurnstileField(label='', size='compact')
 
 class ImportResultatForm(Form):
     delimiter = CharField(label=_('Délimiteur'), max_length=1)
