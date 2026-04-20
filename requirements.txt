@@ -10,7 +10,7 @@ certifi==2018.10.15
 channels==2.1.7
 channels-redis==2.3.3
 daphne==2.2.5
-Django==2.0
+Django==2.2.27
 django-appconf==1.0.2
 django-bootstrap-form==3.3
 django-classy-tags==0.8.0
