@@ -128,7 +128,7 @@ class ContactForm(Form):
     email = EmailField()
     subject = CharField()
     message = CharField(widget=Textarea())
-    turnstile = TurnstileField(label='', size='compact')
+    turnstile = TurnstileField(label='')
 
 class ImportResultatForm(Form):
     delimiter = CharField(label=_('Délimiteur'), max_length=1)
@@ -197,5 +197,5 @@ class AdminPaiementForm(ModelForm):
         self.fields['montant_frais'].widget.attrs['readonly'] = True
 
 class SignupForm(account.forms.SignupForm):
-    turnstile = TurnstileField(label='', size='compact')
+    turnstile = TurnstileField(label='')
 
