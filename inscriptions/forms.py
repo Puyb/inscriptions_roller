@@ -11,6 +11,7 @@ from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Pai
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from turnstile.fields import TurnstileField
+import account.forms
 
 class ExtraModelForm(ModelForm):
     def __init__(self, *args, **kwargs):
@@ -194,3 +195,7 @@ class AdminPaiementForm(ModelForm):
             for field in ('type', 'montant', 'montant_frais', 'detail'):
                 self.fields[field].widget.attrs['readonly'] = True
         self.fields['montant_frais'].widget.attrs['readonly'] = True
+
+class SignupForm(account.forms.SignupForm):
+    turnstile = TurnstileField(label='', size='compact')
+

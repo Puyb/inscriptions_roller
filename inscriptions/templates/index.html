@@ -29,8 +29,10 @@
                     {% if course.ouverte %}
                     <p>
                         {% blocktrans with date=course.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}<br />
+                        {% if not course.lien_externe %}
                         <a href="{% url "inscriptions_list" course_uid=course.uid %}">{% trans "Liste des inscrits" %}</a><br />
                         <a href="{% url "inscriptions_stats" course_uid=course.uid %}">{% trans "Statistiques" %}</a><br />
+                        {% endif %}
                     </p>
                     {% else %}
                     <p>

@@ -153,6 +153,7 @@ class Course(models.Model):
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
     texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
+    lien_externe        = models.URLField(_('Lien inscription externe'), blank=True, null=True)
 
     @property
     def paiement_internet(self):

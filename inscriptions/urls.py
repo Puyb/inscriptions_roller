@@ -15,6 +15,7 @@ urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += [
     path(r'admin/', admin.main_site.urls),
+    url(r"^account/signup/$", views.SignupView.as_view(), name="account_signup"),
     url(r"account/", include("account.urls")),
     url(r'i18n/', include('django.conf.urls.i18n')),
     path(r'jsi18n/', JavaScriptCatalog.as_view(), { 'packages': 'inscriptions', 'domain': 'djangojs' }, name='javascript_catalog'),

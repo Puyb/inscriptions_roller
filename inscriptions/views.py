@@ -22,7 +22,7 @@ from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
-from .forms import EquipeForm, EquipierFormset, ContactForm
+from .forms import EquipeForm, EquipierFormset, ContactForm, SignupForm
 from .models import Equipe, Equipier, Categorie, Course, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
@@ -32,6 +32,7 @@ from .templatetags import paypal as paypal_templatetags
 from pathlib import Path
 from uuid import uuid4
 import urllib.parse
+import account.views
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,8 @@ def form(request, course_uid, numero=None, code=None):
             Prefetch('extra', queryset=eq.filter(page="Equipier"), to_attr='extra_equipier'),
             'categories',
         ).annotate(min_age=Min('categories__min_age')), uid=course_uid)
+    if course.lien_externe:
+        return redirect(course.lien_externe)
     instance = None
     old_password = None
     update = False
@@ -918,3 +921,8 @@ def get_helloasso_token(course):
     responseData = response.json()
     logger.info(responseData)
     return responseData['access_token']
+
+class SignupView(account.views.SignupView):
+   form_class = SignupForm
+
+
