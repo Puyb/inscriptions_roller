@@ -1,3 +1,22 @@
+x-test-env: &test-env
+  ALLOWED_HOSTS: "*"
+  ADMIN_EMAILS: ""
+  DEBUG: "True"
+  EMAIL_HOST: ""
+  EMAIL_HOST_USER: ""
+  EMAIL_HOST_PASSWORD: ""
+  DEFAULT_FROM_MAIL: "test@example.com"
+  MAPQUEST_API_KEY: ""
+  CONTACT_MAIL: "test@example.com"
+  DB_USER: "enduroller"
+  DB_PASSWORD: "jirshIgViax0"
+  DB_HOST: "db"
+  REDIS_HOST: "redis"
+  DEV_SERVER: "True"
+  LOCAL_SETTINGS: ".docker"
+  TURNSTILE_SITEKEY: ""
+  TURNSTILE_SECRET: ""
+
 services:
   django:
     build: 
@@ -55,4 +74,54 @@ services:
 
   redis:
     image: redis
+
+  # --- test-only services, gated behind the "test" profile so they never
+  # start on a plain `docker-compose up` --------------------------------
+  test:
+    profiles: ["test"]
+    build:
+      context: ./
+      args:
+        DEBUG: "True"
+    volumes:
+      - ./:/app
+    environment:
+      <<: *test-env
+      DB_NAME: "enduroller_test"
+    depends_on:
+      - db
+      - redis
+
+  django-e2e:
+    profiles: ["test"]
+    build:
+      context: ./
+      args:
+        DEBUG: "True"
+    volumes:
+      - ./:/app
+    environment:
+      <<: *test-env
+      DB_NAME: "enduroller_e2e"
+    command: >
+      sh -c "./manage.py ensure_database &&
+             ./manage.py migrate --noinput &&
+             ./manage.py collectstatic --noinput &&
+             ./manage.py setup_e2e_data &&
+             ./manage.py runserver 0.0.0.0:29000"
+    depends_on:
+      - db
+      - redis
+
+  e2e:
+    profiles: ["test"]
+    build:
+      context: ./
+      dockerfile: Dockerfile.e2e
+    volumes:
+      - ./:/app
+    environment:
+      BASE_URL: "http://django-e2e:29000"
+    depends_on:
+      - django-e2e
 

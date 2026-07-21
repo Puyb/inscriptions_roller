@@ -5,6 +5,7 @@
 *~
 *.bak
 __pycache__
+.pytest_cache/
 static/dist/
 node_modules/
 env/
