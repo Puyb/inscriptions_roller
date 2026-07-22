@@ -2,12 +2,13 @@ import json, re
 from datetime import datetime
 from pathlib import Path
 from django.contrib.admin.widgets import AdminDateWidget, AdminRadioSelect
+from django.core.exceptions import ValidationError
 from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect, Form, EmailField, FileField, IntegerField, ChoiceField, BooleanField, TextInput
 from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import ugettext_lazy as _
-from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, SEXE_CHOICES, JUSTIFICATIF_CHOICES 
+from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from turnstile.fields import TurnstileField
@@ -148,6 +149,35 @@ class ImportResultatForm(Form):
     tours_duree_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
     tours_timestamp_column = IntegerField(label=_('Heure passage (tour)'), required=False)
     tours_timestamp_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
+
+class TranspondeurUploadForm(Form):
+    mode = ChoiceField(label=_(u"Mode d'assignation"), choices=Course.TRANSPONDEUR_MODE_CHOICES, widget=RadioSelect())
+    fichier = FileField(label=_(u'Fichier des transpondeurs (1 code par ligne)'))
+
+
+class TranspondeurForm(ModelForm):
+    class Meta:
+        model = Transpondeur
+        fields = ('numero', 'equipe', 'equipier')
+
+    def __init__(self, *args, course=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        course = course or (self.instance.course if self.instance and self.instance.pk else None)
+        self.fields['equipe'].queryset = Equipe.objects.filter(course=course)
+        self.fields['equipier'].queryset = Equipier.objects.filter(equipe__course=course)
+        if course and course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPE:
+            self.fields['equipier'].widget = HiddenInput()
+            self.fields['equipier'].required = False
+        elif course and course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPIER:
+            self.fields['equipe'].widget = HiddenInput()
+            self.fields['equipe'].required = False
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('equipe') and cleaned.get('equipier'):
+            raise ValidationError(_(u"Un transpondeur ne peut être assigné qu'à une équipe OU un équipier, pas les deux."))
+        return cleaned
+
 
 class ChallengeForm(ModelForm):
     class Meta:

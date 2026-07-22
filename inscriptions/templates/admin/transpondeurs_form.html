@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block content %}
+<h1>{% trans "Transpondeurs" %}</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <table>
+        <caption>{% trans "Nombre de transpondeurs par catégorie" %}</caption>
+        <thead>
+            <tr>
+                <th>{% trans "Catégorie" %}</th>
+                <th>{% trans "Nombre de transpondeurs" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for categorie in categories %}
+            <tr>
+                <td>{{ categorie.code }} - {{ categorie.nom }}</td>
+                <td><input type="number" min="0" name="nombre_transpondeurs_{{ categorie.id }}" value="{{ categorie.nombre_transpondeurs }}" /></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <p><button type="submit">{% trans "Envoyer" %}</button></p>
+</form>
+{% endblock %}

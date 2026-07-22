@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
+from collections import defaultdict, Counter
 from operator import itemgetter
 from django.utils.translation import ugettext_lazy as _
 from django_countries.fields import CountryField
@@ -35,6 +35,20 @@ logger = logging.getLogger(__name__)
 
 class NoPlaceLeftException(Exception):
     pass
+
+class InvalidTranspondeurFileException(Exception):
+    pass
+
+class DuplicateTranspondeurException(Exception):
+    def __init__(self, doublons):
+        self.doublons = doublons
+        super().__init__(doublons)
+
+class NotEnoughTranspondeursException(Exception):
+    def __init__(self, requis, fournis):
+        self.requis = requis
+        self.fournis = fournis
+        super().__init__(requis, fournis)
 
 SEXE_CHOICES = (
     ('H', _(u'Homme')),
@@ -154,6 +168,16 @@ class Course(models.Model):
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
     texte_accueil       = models.TextField(_('Texte d\'accueil'), blank=True, null=True)
     lien_externe        = models.URLField(_('Lien inscription externe'), blank=True, null=True)
+
+    TRANSPONDEUR_MODE_EQUIPE = 'equipe'
+    TRANSPONDEUR_MODE_EQUIPIER = 'equipier'
+    TRANSPONDEUR_MODE_CHOICES = (
+        (TRANSPONDEUR_MODE_EQUIPE, _(u"Par équipe (non nominatif)")),
+        (TRANSPONDEUR_MODE_EQUIPIER, _(u"Par équipier (nominatif)")),
+    )
+    transpondeur_mode   = models.CharField(_(u"Mode d'assignation des transpondeurs"),
+                                            max_length=10, choices=TRANSPONDEUR_MODE_CHOICES,
+                                            null=True, blank=True)
 
     @property
     def paiement_internet(self):
@@ -395,6 +419,51 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
 
         return doublons
 
+    def assign_transpondeurs(self, mode, codes):
+        """codes : liste de str dans l'ordre du fichier, déjà validée (ASCII, non vide,
+        strip) par parse_transpondeurs_file(). Régénère entièrement les Transpondeur de
+        la course : équipes ou équipiers (selon `mode`), dans l'ordre des dossards,
+        reçoivent chacun le nombre de transpondeurs de leur catégorie, en consommant les
+        codes dans l'ordre ; les codes restants sont créés non assignés."""
+        doublons = {code for code, n in Counter(codes).items() if n > 1}
+        if doublons:
+            raise DuplicateTranspondeurException(doublons)
+
+        if mode == Course.TRANSPONDEUR_MODE_EQUIPE:
+            unites = list(self.equipe_set.order_by('numero').select_related('categorie'))
+            compte = lambda e: e.categorie.nombre_transpondeurs
+        else:
+            unites = [
+                equipier
+                for equipe in self.equipe_set.order_by('numero').select_related('categorie')
+                for equipier in equipe.equipier_set.filter(numero__lte=equipe.nombre).order_by('numero')
+            ]
+            compte = lambda eq: eq.equipe.categorie.nombre_transpondeurs
+
+        total_requis = sum(compte(u) for u in unites)
+        if total_requis > len(codes):
+            raise NotEnoughTranspondeursException(total_requis, len(codes))
+
+        with transaction.atomic():
+            self.transpondeurs.all().delete()
+            self.transpondeur_mode = mode
+            self.save(update_fields=['transpondeur_mode'])
+
+            objs = []
+            i = 0
+            for u in unites:
+                for _n in range(compte(u)):
+                    objs.append(Transpondeur(
+                        course=self, ordre=i + 1, numero=codes[i],
+                        equipe=u if mode == Course.TRANSPONDEUR_MODE_EQUIPE else None,
+                        equipier=u if mode == Course.TRANSPONDEUR_MODE_EQUIPIER else None,
+                    ))
+                    i += 1
+            for code in codes[i:]:
+                i += 1
+                objs.append(Transpondeur(course=self, ordre=i, numero=code))
+            Transpondeur.objects.bulk_create(objs)
+
 class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
@@ -410,6 +479,9 @@ class Categorie(models.Model):
     numero_fin      = models.IntegerField(_(u'Numero de dossard (fin)'), default=0)
     description     = models.TextField(_('Description'), blank=True, null=True)
     ajouter_nombre  = models.BooleanField(_(u'Numero de dossard (ajouter le nombre d\'équipiers)'), default=False)
+    nombre_transpondeurs = models.PositiveIntegerField(
+        _(u"Nombre de transpondeurs (par équipe ou par équipier selon le mode de la course)"),
+        default=1)
 
     def __str__(self):
         return self.code
@@ -939,6 +1011,52 @@ class ExtraQuestionChoice(models.Model):
         if price:
             return '%s (%s€)' % (self.label, price)
         return self.label
+
+
+def parse_transpondeurs_file(f):
+    raw = f.read()
+    try:
+        text = raw.decode('ascii')
+    except UnicodeDecodeError:
+        raise InvalidTranspondeurFileException(_(u"Le fichier doit être encodé en ASCII (caractère non-ASCII détecté)."))
+
+    codes = []
+    for line in text.splitlines():
+        code = line.strip()
+        if not code:
+            continue
+        if not all(0x20 <= ord(c) <= 0x7E for c in code):
+            raise InvalidTranspondeurFileException(_(u"Le fichier contient des caractères non affichables."))
+        codes.append(code)
+    return codes
+
+
+class Transpondeur(models.Model):
+    course   = models.ForeignKey(Course, related_name='transpondeurs', on_delete=models.CASCADE)
+    ordre    = models.PositiveIntegerField(_(u'Ordre'))
+    numero   = models.CharField(_(u'Numéro de transpondeur'), max_length=50)
+    equipe   = models.ForeignKey(Equipe, null=True, blank=True,
+                                  related_name='transpondeurs', on_delete=models.SET_NULL)
+    equipier = models.ForeignKey(Equipier, null=True, blank=True,
+                                  related_name='transpondeurs', on_delete=models.SET_NULL)
+
+    class Meta:
+        unique_together = (('course', 'ordre'), ('course', 'numero'))
+        ordering = ['ordre']
+
+    def __str__(self):
+        return self.numero
+
+    def assigne_a(self):
+        if self.equipe_id:
+            return _(u'Équipe %(numero)s (%(nom)s)') % {'numero': self.equipe.numero, 'nom': self.equipe.nom}
+        if self.equipier_id:
+            return _(u'Équipier — dossard %(dossard)s (%(nom)s %(prenom)s)') % {
+                'dossard': self.equipier.dossard(),
+                'nom': self.equipier.nom,
+                'prenom': self.equipier.prenom,
+            }
+        return _(u'— non assigné —')
 
 
 class Accreditation(models.Model):

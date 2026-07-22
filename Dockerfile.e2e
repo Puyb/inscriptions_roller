@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
+
+WORKDIR /app
+
+COPY requirements_e2e.txt /app/
+RUN pip install -r requirements_e2e.txt
+
+CMD ["pytest", "e2e", "-v"]

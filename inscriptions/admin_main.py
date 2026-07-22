@@ -47,6 +47,7 @@ site.register(LogEntry, LogAdmin)
 
 
 class CourseAdmin(admin.ModelAdmin):
+    exclude = ('transpondeur_mode', )
     list_display = ('uid', 'nom', 'date', 'active2', )
     list_filter = ('active', )
 

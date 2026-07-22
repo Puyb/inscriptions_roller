@@ -71,6 +71,11 @@ services:
       POSTGRES_DB: "enduroller"
       POSTGRES_USER: "enduroller"
       POSTGRES_PASSWORD: "jirshIgViax0"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "enduroller"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis

@@ -18,7 +18,7 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, ImportResultatForm, AdminPaiementForm
+from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm
 from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -75,6 +75,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
+            url(r'^transpondeurs/$', self.admin_view(self.transpondeurs), name='course_transpondeurs'),
             url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
             url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
             url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
@@ -444,6 +445,46 @@ class CourseAdminSite(admin.sites.AdminSite):
             form=form,
         ))
 
+    def transpondeurs(self, request):
+        request.current_app = self.name
+        course = getCourse(request, Course.objects.prefetch_related('categories'))
+
+        if course.transpondeurs.exists():
+            return redirect('/course/inscriptions/transpondeur/')
+
+        categories = list(course.categories.order_by('code'))
+        form = TranspondeurUploadForm(initial={'mode': course.transpondeur_mode or Course.TRANSPONDEUR_MODE_EQUIPE})
+
+        if request.method == 'POST':
+            form = TranspondeurUploadForm(request.POST, request.FILES)
+            for categorie in categories:
+                try:
+                    categorie.nombre_transpondeurs = int(request.POST.get('nombre_transpondeurs_%d' % categorie.id, categorie.nombre_transpondeurs))
+                except (TypeError, ValueError):
+                    pass
+            if form.is_valid():
+                try:
+                    codes = parse_transpondeurs_file(form.cleaned_data['fichier'])
+                    with transaction.atomic():
+                        for categorie in categories:
+                            categorie.save(update_fields=['nombre_transpondeurs'])
+                        course.assign_transpondeurs(form.cleaned_data['mode'], codes)
+                    return redirect('/course/inscriptions/transpondeur/')
+                except InvalidTranspondeurFileException as e:
+                    messages.add_message(request, messages.ERROR, str(e))
+                except DuplicateTranspondeurException as e:
+                    messages.add_message(request, messages.ERROR,
+                        _(u"Le fichier contient des transpondeurs en double : %s") % ', '.join(sorted(e.doublons)))
+                except NotEnoughTranspondeursException as e:
+                    messages.add_message(request, messages.ERROR,
+                        _(u"Le fichier ne contient pas assez de transpondeurs (%d requis, %d fournis)") % (e.requis, e.fournis))
+
+        return TemplateResponse(request, 'admin/transpondeurs_form.html', dict(self.each_context(request),
+            course=course,
+            categories=categories,
+            form=form,
+        ))
+
     def paiement_change(self, request, id=None):
         paiement = None
         course = getCourse(request, Course.objects.all())
@@ -625,11 +666,31 @@ class EquipierInline(admin.StackedInline):
     model = Equipier
     extra = 0
     max_num = 5
-    readonly_fields = [ 'nom', 'prenom', 'sexe', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'age']
+    readonly_fields = [ 'nom', 'prenom', 'sexe', 'date_de_naissance', 'autorisation', 'justificatif', 'num_licence', 'piece_jointe', 'age', 'transpondeurs_display']
     fieldsets = (
         (None, { 'fields': (('nom', 'prenom', 'sexe'), ) }),
-        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe')) }),
+        (None, { 'classes': ('wide', ), 'fields': (('date_de_naissance', 'age', ), ('autorisation_valide', 'autorisation'), ('justificatif', 'num_licence', ), ('piece_jointe_valide', 'piece_jointe'), 'transpondeurs_display') }),
     )
+
+    def transpondeurs_display(self, obj):
+        if not obj.pk:
+            return ''
+        return ', '.join(t.numero for t in obj.transpondeurs.order_by('ordre'))
+    transpondeurs_display.short_description = _(u'Transpondeurs')
+
+class TranspondeurInline(admin.TabularInline):
+    model = Transpondeur
+    fk_name = 'equipe'
+    extra = 0
+    fields = ('ordre', 'numero')
+    readonly_fields = ('ordre', 'numero')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 class StatusFilter(SimpleListFilter):
     title = _('Statut')
@@ -744,7 +805,13 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
     list_display_links = ['numero', 'categorie', 'nom', 'club', ]
     list_filter = [PaiementCompletFilter, StatusFilter, 'verrou', CategorieFilter, 'nombre', MineurFilter, 'date']
     ordering = ['-date', ]
-    inlines = [ EquipierInline ]
+    inlines = [ EquipierInline, TranspondeurInline ]
+
+    def get_inline_instances(self, request, obj=None):
+        inlines = super().get_inline_instances(request, obj)
+        if not obj or obj.course.transpondeur_mode != Course.TRANSPONDEUR_MODE_EQUIPE:
+            inlines = [ i for i in inlines if not isinstance(i, TranspondeurInline) ]
+        return inlines
 
 #TODO add paiements amount, and link to add a new one
     fieldsets = (
@@ -1034,10 +1101,55 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 #main_site.disable_action('delete_selected')
 site.register(Equipe, EquipeAdmin)
 
+class TranspondeurAdmin(CourseFilteredObjectAdmin):
+    list_display = ('ordre', 'numero', 'assigne_a')
+    ordering = ('ordre',)
+    search_fields = ('numero',)
+    form = TranspondeurForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        Form = super().get_form(request, obj, **kwargs)
+        course = getCourse(request)
+        class CourseScopedForm(Form):
+            def __init__(self, *args, **kwargs2):
+                kwargs2['course'] = course
+                super().__init__(*args, **kwargs2)
+        return CourseScopedForm
+
+    def changelist_view(self, request, extra_context=None):
+        course = getCourse(request)
+        if not course.transpondeurs.exists():
+            return redirect('/course/transpondeurs/')
+        return super().changelist_view(request, extra_context)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        my_urls = [
+            url(r'^reset/$', self.admin_site.admin_view(self.reset_view), name='course_transpondeurs_reset'),
+        ]
+        return my_urls + urls
+
+    def reset_view(self, request):
+        course = getCourse(request)
+        if request.method == 'POST':
+            course.transpondeurs.all().delete()
+            course.transpondeur_mode = None
+            course.save(update_fields=['transpondeur_mode'])
+            messages.add_message(request, messages.INFO, _(u'Liste des transpondeurs réinitialisée.'))
+        return redirect('/course/inscriptions/transpondeur/')
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.course = getCourse(request)
+            if not obj.ordre:
+                obj.ordre = (obj.course.transpondeurs.aggregate(Max('ordre'))['ordre__max'] or 0) + 1
+        super().save_model(request, obj, form, change)
+site.register(Transpondeur, TranspondeurAdmin)
+
 class CourseAdmin(admin.ModelAdmin):
     class Media:
         js = ('custom_admin/course.js', )
-    exclude = ('active', )
+    exclude = ('active', 'transpondeur_mode')
     def get_fieldsets(self, request, obj=None):
         return (
             (None, {

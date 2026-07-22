@@ -329,6 +329,10 @@ location.href = "choose/";
                         <i class="fa fa-upload"></i><br />
                         <label>{% blocktrans %}Résultats{% endblocktrans %}</label>
                     </a>
+                    <a href="{% url "admin:inscriptions_transpondeur_changelist" %}">
+                        <i class="fa fa-microchip"></i><br />
+                        <label>{% blocktrans %}Transpondeurs{% endblocktrans %}</label>
+                    </a>
                 </td>
             </tr>
         </table>

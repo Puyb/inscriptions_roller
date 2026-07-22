@@ -42,4 +42,7 @@ def handle_user_postsave(sender, instance, **kwargs):
         Permission.objects.get(codename='add_paiementrepartition'),
         Permission.objects.get(codename='change_paiementrepartition'),
         Permission.objects.get(codename='delete_paiementrepartition'),
+        Permission.objects.get(codename='add_transpondeur'),
+        Permission.objects.get(codename='change_transpondeur'),
+        Permission.objects.get(codename='delete_transpondeur'),
     )

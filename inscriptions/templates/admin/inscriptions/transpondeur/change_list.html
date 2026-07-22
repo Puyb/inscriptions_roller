@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+{{ block.super }}
+<li>
+    <form method="post" action="reset/" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="deletelink" onclick="return confirm('{% trans "Réinitialiser la liste des transpondeurs ?" %}')">{% trans "Réinitialiser la liste" %}</button>
+    </form>
+</li>
+{% endblock %}
