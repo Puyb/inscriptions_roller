@@ -1,3 +1,4 @@
+import csv
 import importlib
 
 from django.apps import apps
@@ -321,3 +322,79 @@ class TranspondeurPermissionsTestCase(BaseTestCase):
         self.assertTrue(user.user_permissions.filter(codename='add_transpondeur').exists())
         self.assertTrue(user.user_permissions.filter(codename='change_transpondeur').exists())
         self.assertTrue(user.user_permissions.filter(codename='delete_transpondeur').exists())
+
+
+class TranspondeursCSVExportTestCase(BaseTestCase):
+    """Fichier CSV dossard/id pour le chronomètrage, cf. dashboard.html."""
+
+    def setUp(self):
+        super().setUp()
+        self.course = CourseFactory()
+
+    def csv_rows(self):
+        response = self.client.get('/%s/transpondeurs.csv' % self.course.uid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/csv')
+        lines = response.content.decode('utf-8').splitlines()
+        return list(csv.reader(lines))
+
+    def test_equipe_mode_uses_numero_equipe_and_ordinal_suffix(self):
+        categorie = CategorieFactory(course=self.course, nombre_transpondeurs=2)
+        e1 = EquipeFactory(course=self.course, categorie=categorie)
+        e2 = EquipeFactory(course=self.course, categorie=categorie)
+        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3', 'T4'])
+
+        rows = self.csv_rows()
+        self.assertEqual(rows[0], ['dossard', 'id'])
+        self.assertEqual(rows[1:], [
+            ['%d1' % e1.numero, 'T1'],
+            ['%d2' % e1.numero, 'T2'],
+            ['%d1' % e2.numero, 'T3'],
+            ['%d2' % e2.numero, 'T4'],
+        ])
+
+    def test_equipier_mode_uses_dossard(self):
+        categorie = CategorieFactory(course=self.course, min_equipiers=1, max_equipiers=2, nombre_transpondeurs=1)
+        equipe = EquipeFactory(course=self.course, categorie=categorie, nombre=2)
+        eq1 = EquipierFactory(equipe=equipe, numero=1)
+        eq2 = EquipierFactory(equipe=equipe, numero=2)
+        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPIER, ['A1', 'A2'])
+
+        rows = self.csv_rows()
+        self.assertEqual(rows[0], ['dossard', 'id'])
+        self.assertEqual(rows[1:], [
+            [str(eq1.dossard()), 'A1'],
+            [str(eq2.dossard()), 'A2'],
+        ])
+
+    def test_unassigned_surplus_transpondeurs_are_excluded(self):
+        categorie = CategorieFactory(course=self.course, nombre_transpondeurs=1)
+        EquipeFactory(course=self.course, categorie=categorie)
+        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
+
+        rows = self.csv_rows()
+        self.assertEqual(len(rows), 2)
+        self.assertEqual([row[1] for row in rows[1:]], ['T1'])
+
+    def test_no_transpondeurs_yields_header_only(self):
+        rows = self.csv_rows()
+        self.assertEqual(rows, [['dossard', 'id']])
+
+
+class DashboardTranspondeursCSVIconTestCase(BaseTestCase):
+    """L'icone de téléchargement du CSV transpondeurs ne doit apparaitre que si
+    des transpondeurs ont été assignés pour la course."""
+
+    def setUp(self):
+        super().setUp()
+        self.course = CourseFactory()
+        login_as_organizer(self.client, self.course)
+
+    def test_icon_hidden_when_no_transpondeurs(self):
+        response = self.client.get('/course/')
+        self.assertNotContains(response, '/%s/transpondeurs.csv' % self.course.uid)
+
+    def test_icon_shown_when_transpondeurs_exist(self):
+        Transpondeur.objects.create(course=self.course, ordre=1, numero='T1')
+        response = self.client.get('/course/')
+        self.assertContains(response, '/%s/transpondeurs.csv' % self.course.uid)

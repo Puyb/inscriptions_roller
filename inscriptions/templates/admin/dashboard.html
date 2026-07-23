@@ -299,6 +299,12 @@ location.href = "choose/";
                         <i class="fa fa-table"></i><br />
                         <label>{% blocktrans %}Equipiers{% endblocktrans %}</label>
                     </a>
+                    {% if COURSE.transpondeurs.exists %}
+                    <a target="_blank" href="/{{ COURSE.uid }}/transpondeurs.csv">
+                        <i class="fa fa-microchip"></i><br />
+                        <label>{% blocktrans %}Transpondeurs{% endblocktrans %}</label>
+                    </a>
+                    {% endif %}
                 </td>
             </tr>
             <tr>

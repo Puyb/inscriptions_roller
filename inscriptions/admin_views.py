@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import csv, io
-from .models import Equipe, Equipier, TemplateMail, Course
+from .models import Equipe, Equipier, TemplateMail, Course, Transpondeur
 from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
@@ -71,6 +71,31 @@ def dossardsCSV(request, course_uid):
             e.equipe.gerant_code_postal,
             e.equipe.gerant_pays,
         ]
+        row = [ str(i) for i in row ]
+        o.writerow(row)
+
+    r = HttpResponse(out.getvalue().encode(code), content_type='text/csv', charset=code)
+    out.close()
+    return r
+
+def transpondeursCSV(request, course_uid):
+    code = request.GET.get('code', 'utf-8')
+    out = io.StringIO()
+    o=csv.writer(out, dialect='excel')
+    o.writerow([
+        'dossard',
+        'id',
+    ])
+    course = get_object_or_404(Course, uid=course_uid)
+    transpondeurs = Transpondeur.objects.filter(course=course).exclude(equipe=None, equipier=None)
+    compteurs = {}
+    for t in transpondeurs:
+        if course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPIER:
+            dossard = t.equipier.dossard()
+        else:
+            compteurs[t.equipe_id] = compteurs.get(t.equipe_id, 0) + 1
+            dossard = '%d%d' % (t.equipe.numero, compteurs[t.equipe_id])
+        row = [dossard, t.numero]
         row = [ str(i) for i in row ]
         o.writerow(row)
 

@@ -68,6 +68,7 @@ urlpatterns += [
     path(r'<str:course_uid>/dossards.csv', admin_views.dossardsCSV, name='inscriptions_dossardsCSV'),
     path(r'<str:course_uid>/dossards_equipes.csv', admin_views.dossardsEquipesCSV, name='inscriptions_dossardsEquipesCSV'),
     path(r'<str:course_uid>/dossards_equipiers.csv', admin_views.dossardsEquipiersCSV, name='inscriptions_dossardsEquipiersCSV'),
+    path(r'<str:course_uid>/transpondeurs.csv', admin_views.transpondeursCSV, name='inscriptions_transpondeursCSV'),
     path(r'<str:course_uid>/listing/', admin_views.listing, name='inscriptions_listing'),
 ]
 
