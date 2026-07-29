@@ -146,6 +146,7 @@ class Course(models.Model):
     url_reglement       = models.URLField(_(u'URL Réglement'))
     email_contact       = models.EmailField(_(u'Email contact'))
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
+    fond_dossard        = models.ImageField(_(u'Image de fond des dossards'), upload_to='fond_dossard', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
     dates_augmentation  = ArrayField(models.DateField(), default=[], null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
@@ -482,6 +483,7 @@ class Categorie(models.Model):
     nombre_transpondeurs = models.PositiveIntegerField(
         _(u"Nombre de transpondeurs (par équipe ou par équipier selon le mode de la course)"),
         default=1)
+    couleur_dossard = models.CharField(_(u'Couleur du dossard'), max_length=30, default='black', blank=True)
 
     def __str__(self):
         return self.code

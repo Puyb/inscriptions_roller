@@ -155,6 +155,12 @@ class TranspondeurUploadForm(Form):
     fichier = FileField(label=_(u'Fichier des transpondeurs (1 code par ligne)'))
 
 
+class DossardFondForm(ModelForm):
+    class Meta:
+        model = Course
+        fields = ('fond_dossard', )
+
+
 class TranspondeurForm(ModelForm):
     class Meta:
         model = Transpondeur

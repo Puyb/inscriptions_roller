@@ -18,7 +18,7 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect, StreamingHttpResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm
+from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
 from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -72,6 +72,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             url(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
             url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
+            url(r'^dossards/$', self.admin_view(self.dossards), name='course_dossards'),
             url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
             url(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
             url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
@@ -177,6 +178,36 @@ class CourseAdminSite(admin.sites.AdminSite):
                 keys=keys,
             ))
         return TemplateResponse(request, 'admin/listing_dossards_form.html', dict(self.each_context(request), course=course))
+
+    def dossards(self, request):
+        request.current_app = self.name
+        course = getCourse(request)
+        categories = list(course.categories.order_by('code'))
+
+        form = DossardFondForm(instance=course)
+        if request.method == 'POST':
+            form = DossardFondForm(request.POST, request.FILES, instance=course)
+            for categorie in categories:
+                categorie.couleur_dossard = request.POST.get('couleur_dossard_%d' % categorie.id, categorie.couleur_dossard) or 'black'
+            if form.is_valid():
+                form.save()
+                for categorie in categories:
+                    categorie.save(update_fields=['couleur_dossard'])
+                equipiers = Equipier.objects.filter(equipe__course=course, numero__lte=F('equipe__nombre')) \
+                    .select_related('equipe__categorie') \
+                    .prefetch_related('transpondeurs', 'equipe__transpondeurs') \
+                    .order_by('equipe__numero', 'numero')
+                return TemplateResponse(request, 'dossards_print.html', dict(self.each_context(request),
+                    course=course,
+                    categories=categories,
+                    equipiers=equipiers,
+                ))
+
+        return TemplateResponse(request, 'admin/dossards_form.html', dict(self.each_context(request),
+            course=course,
+            categories=categories,
+            form=form,
+        ))
 
     def anomalies(self, request):
         request.current_app = self.name

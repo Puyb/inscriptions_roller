@@ -1,0 +1,44 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<fieldset class="module aligned">
+    <h2>{% trans "Dossards à imprimer" %}</h2>
+    <div class="description">
+        <p>{% blocktrans %}Choisissez une image de fond pour les dossards, ou conservez celle déjà enregistrée, puis cliquez sur "Générer" pour ouvrir la page prête à imprimer (un dossard par équipier).{% endblocktrans %}</p>
+    </div>
+</fieldset>
+
+{% if course.fond_dossard %}
+<fieldset class="module aligned">
+    <div class="form-row">
+        <img src="{{ MEDIA_URL }}{{ course.fond_dossard }}" style="max-width: 400px; max-height: 300px;" />
+    </div>
+</fieldset>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" target="_blank">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <table>
+        <caption>{% trans "Couleur du texte du dossard par catégorie" %}</caption>
+        <thead>
+            <tr>
+                <th>{% trans "Catégorie" %}</th>
+                <th>{% trans "Couleur" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for categorie in categories %}
+            <tr>
+                <td>{{ categorie.code }} - {{ categorie.nom }}</td>
+                <td><input type="text" name="couleur_dossard_{{ categorie.id }}" value="{{ categorie.couleur_dossard }}" /></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <p><button type="submit">{% trans "Générer" %}</button></p>
+</form>
+{% endblock %}
