@@ -265,6 +265,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                     with transaction.atomic():
                         course.equipe_set.all().update(
                             tours              = None,
+                            penalite           = 0,
+                            penalite_info      = '',
                             temps              = None,
                             position_generale  = None,
                             position_categorie = None,
@@ -330,6 +332,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                                             numeros.remove(numero)
 
                                         equipe.tours = g(row, 'nbtours_column', intOrNone)
+                                        equipe.penalite = g(row, 'penalite_column', intOrNone) or 0
+                                        equipe.penalite_info = g(row, 'penalite_info_column') or ''
                                         if data.get('categorie_column'):
                                             try:
                                                 equipe.categorie = course.categories.get(code=g(row, 'categorie_column'))
@@ -433,7 +437,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                             #equipes = course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('tours', 'temps')
                             equipes_to_compute = [ e for e in equipes if e.numero not in numeros ]
                             equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps)
-                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours, reverse=True)
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours_total(), reverse=True)
 
                         elif not data.get('position_categorie_column') and data.get('position_generale_column'):
                             #equipes = course.equipe_set.exclude(numero__in=numeros).filter(position_generale__isnull=False).select_related('categorie').order_by('position_generale')

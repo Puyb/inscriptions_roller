@@ -40,6 +40,15 @@
                             <th>Nombre de tours :</th><td>{{ equipe.tours }}</td>
                         <tr>
                         </tr>
+                        {% if equipe.penalite < 0 %}
+                            <th>{% if equipe.penalite <= -2 %}Pénalités :{% else %}Pénalité :{% endif %}</th><td>{{ equipe.penalite }}{% if equipe.penalite_info %} ({{ equipe.penalite_info }}){% endif %}</td>
+                        <tr>
+                        </tr>
+                        {% elif equipe.penalite > 0 %}
+                            <th>Bonus :</th><td>{{ equipe.penalite|stringformat:"+d" }}{% if equipe.penalite_info %} ({{ equipe.penalite_info }}){% endif %}</td>
+                        <tr>
+                        </tr>
+                        {% endif %}
                             <th>Temps total:</th><td>{{ equipe.temps|duree }}</td>
                         <tr>
                         </tr>

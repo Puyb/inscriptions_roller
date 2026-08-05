@@ -139,6 +139,8 @@ class ImportResultatForm(Form):
     time_column = IntegerField(label=_('Temps'), required=False)
     time_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
     nbtours_column = IntegerField(label=_('Tours'), required=False)
+    penalite_column = IntegerField(label=_('Pénalité'), required=False)
+    penalite_info_column = IntegerField(label=_('Info pénalité'), required=False)
     position_generale_column = IntegerField(label=_('Position générale'), required=False)
     position_categorie_column = IntegerField(label=_('Position catégorie'), required=False)
     nom_column = IntegerField(label=_('Nom de l\'équipe'), required=False)

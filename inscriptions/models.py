@@ -624,6 +624,8 @@ class Equipe(models.Model):
     numero             = models.IntegerField(_(u'Numéro'))
     date_facture       = models.DateField(_('Date facture'), blank=True, null=True)
     tours              = models.IntegerField(_('Nombre de tours'), blank=True, null=True)
+    penalite           = models.IntegerField(_('Pénalité'), default=0)
+    penalite_info      = models.CharField(_('Info pénalité'), max_length=255, blank=True, default='')
     temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
@@ -814,11 +816,16 @@ class Equipe(models.Model):
     def cookie_key(self):
         return 'code_%s' % self.id
 
+    def tours_total(self):
+        return self.tours + self.penalite if self.tours is not None else None
+
     def distance(self):
-        return self.tours * self.course.distance if self.tours and self.course.distance else None
+        tours_total = self.tours_total()
+        return tours_total * self.course.distance if tours_total and self.course.distance else None
 
     def vitesse(self):
-        return self.tours * self.course.distance / self.temps * 3600 if self.temps and self.course.distance else 0
+        tours_total = self.tours_total()
+        return tours_total * self.course.distance / self.temps * 3600 if tours_total and self.temps and self.course.distance else 0
 
 def equipier_piece_jointe_filename(instance, filename):
     name = instance.justificatif
