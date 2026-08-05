@@ -77,7 +77,7 @@
                     <th>Meilleur temps</th>
                 </tr>
                 {% for equipier in equipiers %}
-                <tr class="equipier{{ equipier.numero }} {{ equipier.numero|choose:"danger,success,warning,info,primary" }}">
+                <tr class="equipier{{ equipier.numero }} {{ equipier.numero|choose:"danger,success,warning,info,primary,purple" }}">
                     <td>{{ equipier.dossard }}</td>
                     <td>{{ equipier.prenom }} {{ equipier.nom }}</td>
                     <td>{{ equipier.tours_info.count }}</td>
@@ -97,7 +97,7 @@
                 <div class="col-md-3">
                     <table class="table">
                         {% for tour in tours %}
-                        <tr class="equipier{{ tour.equipier.numero }} {{ tour.equipier.numero|choose:"danger,success,warning,info,primary" }}">
+                        <tr class="equipier{{ tour.equipier.numero }} {{ tour.equipier.numero|choose:"danger,success,warning,info,primary,purple" }}">
 
                             <th>{{ forloop.counter }}</th>
                             <td>{{ tour.duree|duree }}</td>

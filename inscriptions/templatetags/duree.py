@@ -19,4 +19,8 @@ def mod3(value, total):
 
 @register.filter
 def choose(value, lst):
-    return lst.split(',')[int(value) - 1]
+    index = int(value) - 1
+    choices = lst.split(',')
+    if index < 0 or index >= len(choices):
+        return 'color%d' % (index + 1)
+    return choices[index]
