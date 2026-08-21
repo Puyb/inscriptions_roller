@@ -5,7 +5,7 @@ async-timeout==3.0.1
 attrs==19.1.0
 autobahn==19.2.1
 Automat==0.7.0
-bleach==2.1.4
+bleach==3.3.0
 certifi==2018.10.15
 channels==2.1.7
 channels-redis==2.3.3
