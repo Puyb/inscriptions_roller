@@ -45,7 +45,7 @@ txaio==18.8.1
 typing==3.6.2
 urllib3==1.22
 wiki==0.4.4
-setuptools==45
+setuptools==65.5.1
 zope.interface==4.6.0
 django-resized==1.0.1
 zipstream==1.1.4
