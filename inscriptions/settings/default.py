@@ -252,3 +252,5 @@ CONTACT_MAIL = 'contact@enduroller.fr'
 with (Path(PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
     MODELS_COURSES=json.load(f)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 100 * 1024 * 1024
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

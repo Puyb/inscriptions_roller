@@ -1001,6 +1001,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             if not field.one_to_many and field.name not in ('id', 'course', 'gerant_ville2', 'categorie', 'extra')
         }
         fields.update({
+            'categorie.code': 'Catégorie - Code',
+            'categorie.nom': 'Catégorie - Nom',
+        })
+        fields.update({
             'equipe.extra%d' % extra.id: '%s - %s' % (_('Equipe'), extra.label)
             for extra in course.extra.filter(page__in=('Equipe', 'Categorie'))
         })
@@ -1022,11 +1026,11 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             header = request.POST.get('header', 'yes')
             ids = json.loads(request.POST['ids'])
             if objet == 'equipes':
-                objects = Equipe.objects.filter(course=course)
+                objects = Equipe.objects.filter(course=course).select_related('categorie')
                 if len(ids):
                     objects = objects.filter(id__in=ids)
             else:
-                objects = Equipier.objects.filter(equipe__course=course, numero__lte=F('equipe__nombre'))
+                objects = Equipier.objects.filter(equipe__course=course, numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie')
                 if len(ids):
                     objects = objects.filter(equipe_id__in=ids)
             response = HttpResponse(content_type='text/csv', charset=encoding)
@@ -1035,6 +1039,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             writer = csv.writer(response, delimiter=delimiter)
             def resolve(obj, field):
                 field = field.split('.')
+                if isinstance(obj, Equipe) and field[0] == 'categorie':
+                    obj = obj.categorie
+                if isinstance(obj, Equipier) and field[0] == 'categorie':
+                    obj = obj.equipe.categorie
                 if isinstance(obj, Equipier) and field[0] == 'equipe':
                     obj = obj.equipe
                 if field[1].startswith('extra'):
@@ -1044,7 +1052,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
                     return str(v())
                 return str(v)
             
-            fieldnames = [ f for f in request.POST.getlist('colonnes') if objet == 'equipiers' or f.startswith('equipe.') ]
+            fieldnames = [ f for f in request.POST.getlist('colonnes') if objet == 'equipiers' or f.startswith('equipe.') or f.startswith('categorie.') ]
 
             if header:
                 writer.writerow([ fields[f] for f in fieldnames ])

@@ -13,11 +13,12 @@ if [ "$DEV_SERVER" = True ]; then
     ./manage.py runserver 0.0.0.0:29000
 else
     echo "Running prod server"
-    uwsgi --socket 0.0.0.0:29000 \
-          --protocol uwsgi \
+    uwsgi --http-socket 0.0.0.0:29000 \
           --enable-threads \
           --processes 4 \
           -b 32768 \
+          --static-map /static=/app/_static \
+          --static-map /uploads=/app/inscriptions/uploads \
           --wsgi inscriptions.wsgi:application
     # /usr/local/bin/uwsgi --emperor docker/uwsgi --gid www-data --logto /var/log/uwsgi/emperor.log
 fi
