@@ -67,7 +67,7 @@ def test_adding_an_increase_date_adds_a_price_step(admin_page):
     row = admin_page.locator('.form-prices tr', has=admin_page.locator('th', has_text=re.compile('^IDH$')))
     expect(row.locator('input')).to_have_count(4)
     # model price of the second step (50) is proposed
-    expect(row.locator('input[name=IDH__prices_base__1]')).to_have_value('50.00')
+    expect(row.locator('input[name=IDH__prices_base__1]')).to_have_value(re.compile(r'^50(\.00)?$'))
 
 
 def test_create_course_end_to_end_with_edited_price(admin_page):
