@@ -1529,20 +1529,6 @@ class CompareNames(Func):
             cols.extend(source.get_group_by_cols())
         return cols
 
-class LiveSnapshot(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    date = models.DateTimeField()
-    received = models.DateTimeField(auto_now=True)
-
-class LiveResult(models.Model):
-    snapshot = models.ForeignKey(LiveSnapshot, on_delete=models.CASCADE)
-    equipe = models.ForeignKey(Equipe, on_delete=models.CASCADE)
-    position = models.IntegerField()
-    tours = models.IntegerField()
-    temps = models.DecimalField(max_digits=8, decimal_places=3)
-    meilleur_tour = models.DecimalField(max_digits=8, decimal_places=3)
-    penalité = models.IntegerField()
-
 class Paiement(models.Model):
     TYPE_CHOICES = (
         ('espèce', _('espèce')),

@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory
 from inscriptions.models import (
-    Accreditation, Equipe, LiveResult, LiveSnapshot, Tour,
+    Accreditation, Equipe, Tour,
 )
 from inscriptions.templatetags.duree import choose, duree, mod3
 from inscriptions.tests.base import BaseTestCase
@@ -414,30 +414,3 @@ class AdminResultatsImportTestCase(ResultsTestCase):
         self.post('%d,2\n' % self.e1.numero, '%d,100\n' % eq.dossard(), nbtours_column='2',
                   tours_dossard_column='1', tours_timestamp_column='2')
         self.assertEqual(Tour.objects.filter(equipier=eq).count(), 1)
-
-
-class LiveModelsAndPushTestCase(ResultsTestCase):
-    def test_live_snapshot_and_result_models(self):
-        from django.utils import timezone
-        e = EquipeFactory(course=self.course, categorie=self.cat)
-        snap = LiveSnapshot.objects.create(course=self.course, date=timezone.now())
-        r = LiveResult.objects.create(snapshot=snap, equipe=e, position=1, tours=3,
-                                      temps=Decimal('100.5'), meilleur_tour=Decimal('30.1'),
-                                      **{'penalité': 0})
-        self.assertEqual(snap.liveresult_set.get(), r)
-        self.assertIsNotNone(snap.received)
-
-    @unittest.expectedFailure
-    def test_live_push_creates_snapshot_and_results(self):
-        """live_push has several bugs: `dateTime`/`LiveSnapshort`/`snapshort`
-        typos (NameError), `LiveResult(penalite=...)` is missing while the
-        field is named `penalité`, and the view is not csrf_exempt so external
-        pushers are rejected."""
-        e = EquipeFactory(course=self.course, categorie=self.cat)
-        url = reverse('inscriptions_live_push', kwargs={'course_uid': self.course.uid})
-        response = self.client.post(
-            url + '?date=01/01/2026 10:00:00',
-            {'csv': csv_file('%d,3,100.5,1,30.1,0\n' % e.numero)})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(LiveSnapshot.objects.filter(course=self.course).count(), 1)
-        self.assertEqual(LiveResult.objects.count(), 1)
