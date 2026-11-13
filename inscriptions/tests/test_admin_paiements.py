@@ -344,7 +344,6 @@ class PaiementEditDeleteTestCase(PaiementChangeBaseTestCase):
         r = self.client.get(change_url(p))
         self.assertTrue(r.context['readonly'])
 
-    @unittest.expectedFailure
     def test_cannot_edit_paiement_of_a_course_user_has_no_access_to(self):
         # BUG suspecté : paiement_change fait get_object_or_404(Paiement, id=id)
         # sans filtrer par course/accréditation -> un organisateur peut lire et

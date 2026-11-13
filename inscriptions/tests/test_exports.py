@@ -442,7 +442,6 @@ class DocumentReviewTestCase(ExportBaseTestCase):
         })
         self.assertRedirects(response, '/course/', fetch_redirect_response=False)
 
-    @unittest.expectedFailure
     def test_cannot_review_equipier_of_another_course(self):
         other = CourseFactory()
         other_eq = pending_equipier(

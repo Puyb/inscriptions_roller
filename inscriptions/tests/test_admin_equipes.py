@@ -176,7 +176,6 @@ class IsolationTestCase(AdminTestCase):
         r = self.client.get('%s%d/change/' % (CHANGELIST, mine.id))
         self.assertEqual(r.status_code, 200)
 
-    @unittest.expectedFailure  # BUG suspecté : get_object_or_404/filter non scopés à la course
     def test_send_mail_view_refuses_team_of_other_course(self):
         """Un organisateur ne doit pas pouvoir préparer un mail pour une équipe d'une autre course."""
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
@@ -185,7 +184,6 @@ class IsolationTestCase(AdminTestCase):
         r = self.client.get('%s%d/send/%d/' % (CHANGELIST, theirs.id, t.id))
         self.assertIn(r.status_code, (302, 403, 404))
 
-    @unittest.expectedFailure  # BUG suspecté : get_object_or_404/filter non scopés à la course
     def test_preview_mail_refuses_team_of_other_course(self):
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
         t = TemplateMail.objects.create(course=self.course, nom='x', destinataire='Equipe',
@@ -193,7 +191,6 @@ class IsolationTestCase(AdminTestCase):
         r = self.client.get(CHANGELIST + 'send/preview/', {'id': theirs.id, 'template': t.id})
         self.assertIn(r.status_code, (302, 403, 404))
 
-    @unittest.expectedFailure  # BUG suspecté : get_object_or_404/filter non scopés à la course
     def test_send_mails_does_not_mail_teams_of_other_course(self):
         t = TemplateMail.objects.create(course=self.course, nom='x', destinataire='Equipe',
                                         sujet='s', message='m')
@@ -202,7 +199,6 @@ class IsolationTestCase(AdminTestCase):
             self.client.post(CHANGELIST + 'send/', {'template': t.id, 'ids': json.dumps([theirs.id])})
         self.assertEqual(sm.call_count, 0)
 
-    @unittest.expectedFailure  # BUG suspecté : get_object_or_404/filter non scopés à la course
     def test_template_mail_of_other_course_cannot_be_used(self):
         mine = self.equipe()
         foreign = TemplateMail.objects.create(course=self.other_course, nom='f',

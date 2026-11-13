@@ -134,7 +134,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         if request.method == 'POST':
             if 'skip' in request.POST and request.POST['skip'] != '':
                 skip = request.POST['skip'].split(',')
-            equipier = Equipier.objects.get(id=request.POST['id'])
+            equipier = get_object_or_404(Equipier, id=request.POST['id'], equipe__course=course)
             if request.POST['value'] == 'yes' or request.POST['value'] == 'no':
                 equipier.piece_jointe_valide = request.POST['value'] == 'yes'
                 equipier.save()
@@ -532,7 +532,10 @@ class CourseAdminSite(admin.sites.AdminSite):
         repartitions = []
         
         if id:
-            paiement = get_object_or_404(Paiement, id=id)
+            paiements = Paiement.objects.all()
+            if not request.user.is_superuser:
+                paiements = paiements.filter(equipes__equipe__course__in=courses).distinct()
+            paiement = get_object_or_404(paiements, id=id)
             repartitions = [{
                 'equipe': r.equipe,
                 'montant': r.montant,
@@ -913,7 +916,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
     def send_mail(self, request, id, template):
         request.current_app = self.admin_site.name
-        instance = get_object_or_404(Equipe, id=id)
+        course = getCourse(request)
+        instance = get_object_or_404(Equipe, id=id, course=course)
 
         if request.method == 'POST':
             mail = Mail(
@@ -931,7 +935,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             return redirect('/course/inscriptions/equipe/%s/' % (instance.id, ))
 
 
-        template = get_object_or_404(TemplateMail, id=template)
+        template = get_object_or_404(TemplateMail, id=template, course=course)
         sujet = ''
         message = ''
         try:
@@ -952,9 +956,10 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         ))
 
     def preview_mail(self, request):
-        instance = get_object_or_404(Equipe, id=request.GET['id'])
+        course = getCourse(request)
+        instance = get_object_or_404(Equipe, id=request.GET['id'], course=course)
 
-        mail = get_object_or_404(TemplateMail, id=request.GET['template'])
+        mail = get_object_or_404(TemplateMail, id=request.GET['template'], course=course)
         sujet = ''
         message = ''
         try:
@@ -979,8 +984,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
         if 'template' in request.POST and 'ids' in request.POST:
             ids = json.loads(request.POST['ids'])
-            mail = get_object_or_404(TemplateMail, id=request.POST['template'])
-            equipes = Equipe.objects.filter(id__in=ids)
+            mail = get_object_or_404(TemplateMail, id=request.POST['template'], course=course)
+            equipes = Equipe.objects.filter(id__in=ids, course=course)
             mail.send(equipes)
             messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
             return redirect('/course/inscriptions/equipe/')
