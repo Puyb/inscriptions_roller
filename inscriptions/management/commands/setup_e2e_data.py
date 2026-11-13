@@ -3,10 +3,17 @@ from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 
-from inscriptions.factories import CategorieFactory, CourseFactory
-from inscriptions.models import Course, Ville
+from django.contrib.auth.models import User
+
+from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory
+from inscriptions.models import Accreditation, Course, Ville
 
 COURSE_UID = 'e2e'
+ADMIN_USERNAME = 'e2e-admin'
+ADMIN_PASSWORD = 'e2e-password'
+# Teams reserved for the backoffice payment tests: "Paiement 1".."Paiement 8",
+# price 40 for odd numbers, 60 for even ones. Each test uses its own teams.
+PAIEMENT_TEAMS = 8
 
 
 class Command(BaseCommand):
@@ -52,5 +59,18 @@ class Command(BaseCommand):
             prices_base=[Decimal('60.00')], prices_equipier=[Decimal('15.00')],
             validation='function(data) { return true; }',
         )
+
+        categorie = course.categories.get(code='SOLO')
+        for i in range(1, PAIEMENT_TEAMS + 1):
+            EquipeFactory(
+                course=course, categorie=categorie, nom='Paiement %d' % i,
+                prix=Decimal('40.00') if i % 2 else Decimal('60.00'),
+            )
+
+        # Backoffice organizer: staff + admin accreditation on the e2e course
+        User.objects.filter(username=ADMIN_USERNAME).delete()
+        user = User.objects.create_user(
+            ADMIN_USERNAME, 'e2e-admin@example.com', ADMIN_PASSWORD)
+        Accreditation.objects.create(user=user, course=course, role='admin')
 
         self.stdout.write(self.style.SUCCESS('e2e course ready: /%s/' % COURSE_UID))
