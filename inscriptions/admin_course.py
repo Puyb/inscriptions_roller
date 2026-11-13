@@ -606,6 +606,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
         return TemplateResponse(request, 'admin/paiement/add.html', dict(self.each_context(request),
             courses=courses,
+            paiement=paiement,
             readonly=paiement.type in ('stripe', 'paypal') if paiement else False,
             paiement_form=paiement_form,
             repartitions=repartitions,
@@ -627,10 +628,11 @@ class CourseAdminSite(admin.sites.AdminSite):
                             for field in EquipeAdmin.search_fields ]
             equipes = equipes.filter(reduce(operator.or_, or_queries))
         repartitions = {}
-        if request.GET.get('id'):
+        paiement_id = request.POST.get('id') or request.GET.get('id')
+        if paiement_id and paiement_id.isdigit():
             repartitions = {
                 r.equipe_id: r.montant
-                for r in PaiementRepartition.objects.filter(paiement_id=request.GET.get('id'))
+                for r in PaiementRepartition.objects.filter(paiement_id=paiement_id)
             }
 
         return HttpResponse(json.dumps({

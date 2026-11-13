@@ -133,3 +133,29 @@ def test_save_payment_redirects_to_list_and_shows_in_team(admin_page):
 
     expect(admin_page).to_have_url(re.compile(r'/course/inscriptions/paiement/$'))
     expect(admin_page.locator('#result_list')).to_contain_text('Paiement 4')
+
+
+def open_seeded_payment(page):
+    """Open the payment seeded on team "Paiement 8" (20 EUR) from the list."""
+    page.goto('/course/inscriptions/paiement/')
+    page.locator('#result_list tbody tr', has_text='Paiement 8').locator('a').first.click()
+    expect(page).to_have_url(re.compile(r'/paiement/\d+/change/$'))
+
+
+def test_edit_existing_payment_shows_its_repartition(admin_page):
+    open_seeded_payment(admin_page)
+    expect(admin_page.locator('#id_montant')).to_have_value(re.compile(r'^20[.,]00$'))
+    expect(admin_page.locator('.repartition-montant')).to_have_value(re.compile(r'^20[.,]00$'))
+    expect(reste(admin_page)).to_have_text('Reste à répartir : 0')
+
+
+def test_search_while_editing_counts_this_payments_share(admin_page):
+    """The payment id must reach the search endpoint so the amount already
+    split by *this* payment is not counted as "already paid"."""
+    open_seeded_payment(admin_page)
+    paiement_id = re.search(r'/paiement/(\d+)/change/', admin_page.url).group(1)
+    res = admin_page.request.post('/course/inscriptions/paiement/search/equipe/',
+                                  form=dict(search='Paiement 8', id=paiement_id))
+    equipe = [e for e in res.json()['equipes'] if e['nom'] == 'Paiement 8'][0]
+    assert equipe['paiement'] == '20.00'
+    assert equipe['montant'] == '20.00'

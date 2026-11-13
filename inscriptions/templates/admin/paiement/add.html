@@ -107,7 +107,9 @@
         });
         updateReste()
     });
+    var searchSeq = 0;
     $('#id_search').on('keyup', function() {
+        const seq = ++searchSeq;
         if (!this.value) {
             $('#repartition-div').show();
             $('#results-div').hide();
@@ -120,10 +122,11 @@
                 id: {{ paiement.id|default:"undefined" }}
             },
             success: function(r) {
+                if (seq !== searchSeq) return; // stale response
                 var data = JSON.parse(r);
                 $('#repartition-div').hide();
                 $('#results-div').show();
-                $('#search_results td').remove();
+                $('#search_results tbody').empty();
                 data.equipes.forEach(function(equipe) {
                     equipe.prix = parseFloat(equipe.prix);
                     equipe.paiement = parseFloat(equipe.paiement);

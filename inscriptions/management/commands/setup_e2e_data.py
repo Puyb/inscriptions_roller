@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 
 from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory
-from inscriptions.models import Accreditation, Course, Ville
+from inscriptions.models import Accreditation, Course, Paiement, PaiementRepartition, Ville
 
 COURSE_UID = 'e2e'
 ADMIN_USERNAME = 'e2e-admin'
@@ -66,6 +66,12 @@ class Command(BaseCommand):
                 course=course, categorie=categorie, nom='Paiement %d' % i,
                 prix=Decimal('40.00') if i % 2 else Decimal('60.00'),
             )
+
+        # An existing payment (20 EUR by cheque) on "Paiement 8", to edit
+        paiement = Paiement.objects.create(type='chèque', montant=Decimal('20.00'))
+        PaiementRepartition.objects.create(
+            paiement=paiement, equipe=course.equipe_set.get(nom='Paiement 8'),
+            montant=Decimal('20.00'))
 
         # Backoffice organizer: staff + admin accreditation on the e2e course
         User.objects.filter(username=ADMIN_USERNAME).delete()
