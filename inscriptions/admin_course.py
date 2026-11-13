@@ -993,7 +993,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
         if 'template' in request.POST and 'ids' in request.POST:
             ids = json.loads(request.POST['ids'])
-            mail = get_object_or_404(TemplateMail, id=request.POST['template'], course=course)
+            mail = get_object_or_404(TemplateMail.objects.exclude(destinataire='Organisateur'), id=request.POST['template'], course=course)
             equipes = Equipe.objects.filter(id__in=ids, course=course)
             mail.send(equipes)
             messages.add_message(request, messages.INFO, u'Message envoyé à %d équipes' % (len(equipes), ))
@@ -1001,7 +1001,7 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
 
         return TemplateResponse(request, 'admin/equipe/send_mails.html', dict(self.admin_site.each_context(request),
             queryset=queryset,
-            templates=TemplateMail.objects.filter(course=course),
+            templates=TemplateMail.objects.filter(course=course).exclude(destinataire='Organisateur'),
         ))
     send_mails.short_description = _(u'Envoyer un mail groupé')
 
@@ -1288,6 +1288,7 @@ site.register(Categorie, CategorieAdmin)
 
 
 class TemplateMailAdmin(CourseFilteredObjectAdmin):
+    exclude = ('destinataire', )
     class Media:
         js  = ('https://tinymce.cachefly.net/4.0/tinymce.min.js', 'custom_admin/templatemail.js', )
     list_display = ('nom', 'sujet', )

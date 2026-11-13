@@ -428,6 +428,36 @@ class ActionsTestCase(AdminTestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(list(r.context['templates']), [mine])
 
+    def test_send_mails_form_does_not_offer_organizer_templates(self):
+        e = self.equipe()
+        mine = TemplateMail.objects.create(course=self.course, nom='a', destinataire='Equipe',
+                                           sujet='s', message='m')
+        TemplateMail.objects.create(course=self.course, nom='inscription_admin',
+                                    destinataire='Organisateur', sujet='s', message='m')
+        r = self.client.post(CHANGELIST, {'action': 'send_mails', '_selected_action': [e.id]})
+        self.assertEqual(list(r.context['templates']), [mine])
+
+    def test_send_mails_post_refuses_organizer_template(self):
+        e = self.equipe()
+        t = TemplateMail.objects.create(course=self.course, nom='inscription_admin',
+                                        destinataire='Organisateur', sujet='s', message='m')
+        with mock.patch('inscriptions.models.send_mail') as sm:
+            r = self.client.post(CHANGELIST + 'send/', {'template': t.id, 'ids': json.dumps([e.id])})
+        self.assertEqual(r.status_code, 404)
+        self.assertEqual(sm.call_count, 0)
+
+    def test_template_mail_admin_form_has_no_destinataire_field(self):
+        r = self.client.get('/course/inscriptions/templatemail/add/')
+        self.assertEqual(r.status_code, 200)
+        self.assertNotIn('destinataire', r.context['adminform'].form.fields)
+
+    def test_template_mail_created_from_admin_is_addressed_to_equipe(self):
+        r = self.client.post('/course/inscriptions/templatemail/add/', {
+            'course': self.course.id, 'nom': 'nouveau', 'bcc': '', 'sujet': 'Sujet', 'message': 'Msg',
+        })
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(TemplateMail.objects.get(nom='nouveau').destinataire, 'Equipe')
+
     def test_send_mails_post_creates_mails_and_redirects(self):
         e1, e2 = self.equipe(), self.equipe()
         t = TemplateMail.objects.create(course=self.course, nom='a', destinataire='Equipe',
@@ -667,25 +697,27 @@ class TemplateMailTestCase(BaseTestCase):
     def test_str(self):
         self.assertEqual(str(self.make('Equipe')), 't-Equipe')
 
-    @unittest.expectedFailure
-    def test_destinataire_equipier_choice_reaches_team_members(self):
-        """BUG suspecté : le choix 'Equipier' (DESTINATAIRE_CHOICES) n'est jamais traité,
-        `send` teste 'Equipiers'. Et `Equipier` n'a pas de champ `email`."""
+    def test_legacy_equipier_choice_is_sent_to_the_team_manager(self):
+        """Les equipiers n'ont pas d'e-mail : l'ancien choix 'Equipier' (encore en base)
+        part vers le gerant de l'equipe."""
         t = self.make('Equipier')
         with mock.patch('inscriptions.models.send_mail'):
             t.send([self.equipe])
-        self.assertTrue(Mail.objects.get().destinataires)
+        self.assertEqual(Mail.objects.get().destinataires, ['chef@example.com'])
 
-    @unittest.expectedFailure
-    def test_destinataire_tous_does_not_crash_on_team_with_members(self):
-        """BUG suspecté : 'Tous' sur une Equipe appelle `equipier.email`, attribut inexistant
-        sur le modèle Equipier -> AttributeError."""
+    def test_legacy_tous_choice_is_sent_to_the_team_manager_only(self):
         t = self.make('Tous')
         with mock.patch('inscriptions.models.send_mail'):
             t.send([self.equipe])
-        dests = Mail.objects.get().destinataires
-        self.assertIn('chef@example.com', dests)
-        self.assertIn('orga@example.com', dests)
+        self.assertEqual(Mail.objects.get().destinataires, ['chef@example.com'])
+
+    def test_destinataire_defaults_to_equipe(self):
+        t = TemplateMail.objects.create(course=self.course, nom='defaut', sujet='s', message='m')
+        self.assertEqual(t.destinataire, 'Equipe')
+
+    def test_only_equipe_and_organisateur_remain_as_choices(self):
+        self.assertEqual([c[0] for c in TemplateMail._meta.get_field('destinataire').choices],
+                         ['Equipe', 'Organisateur'])
 
 
 class UtilsSendMailTestCase(BaseTestCase):

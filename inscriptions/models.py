@@ -76,11 +76,13 @@ ROLE_CHOICES = (
     ('validateur', _(u'Validateur')),
 )
 
+# Les equipiers n'ont pas d'adresse e-mail : un modele de mail s'adresse au gerant
+# de l'equipe. 'Organisateur' ne sert qu'aux notifications automatiques (mails
+# `*_admin`), il n'est pas propose dans l'admin. Les anciennes valeurs 'Equipier'
+# et 'Tous' encore presentes en base sont traitees comme 'Equipe'.
 DESTINATAIRE_CHOICES = (
     ('Equipe', _(u"Gerant d'équipe")),
-    ('Equipier', _(u'Equipier')),
     ('Organisateur', _(u'Organisateur')),
-    ('Tous', _(u'Tous')),
 )
 
 REGION_NORMALISATION = {
@@ -1091,7 +1093,7 @@ Connectez vous sur enduroller pour y accéder.
 class TemplateMail(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     nom = models.CharField(_('Nom'), max_length=200)
-    destinataire = models.CharField(_('Destinataire'), max_length=20, choices=DESTINATAIRE_CHOICES)
+    destinataire = models.CharField(_('Destinataire'), max_length=20, choices=DESTINATAIRE_CHOICES, default='Equipe')
     bcc = models.CharField(_(u'Copie cachée à'), max_length=1000, blank=True)
     sujet = models.CharField(_('Sujet'), max_length=200)
     message = models.TextField(_('Message'))
@@ -1109,16 +1111,10 @@ class TemplateMail(models.Model):
             instances.prefetch_related('equipier_set')
         for instance in instances:
             dests = set()
-            if self.destinataire in ('Organisateur', 'Tous'):
+            if self.destinataire == 'Organisateur':
                 dests.add(self.course.email_contact)
-            if self.destinataire in ('Equipe', 'Tous') and isinstance(instance, Equipe):
-                    dests.add(instance.gerant_email)
-            if self.destinataire in ('Equipiers', 'Tous'):
-                if isinstance(instance, Equipier):
-                    dests.add(instance.email)
-                if isinstance(instance, Equipe):
-                    for equipier in instance.equipier_set.filter(numero__lte=F('equipe__nombre')):
-                        dests.add(equipier.email)
+            elif isinstance(instance, Equipe):
+                dests.add(instance.gerant_email)
 
             context = Context({
                 "instance": instance,
