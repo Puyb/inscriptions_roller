@@ -76,15 +76,6 @@ ROLE_CHOICES = (
     ('validateur', _(u'Validateur')),
 )
 
-# Les equipiers n'ont pas d'adresse e-mail : un modele de mail s'adresse au gerant
-# de l'equipe. 'Organisateur' ne sert qu'aux notifications automatiques (mails
-# `*_admin`), il n'est pas propose dans l'admin. Les anciennes valeurs 'Equipier'
-# et 'Tous' encore presentes en base sont traitees comme 'Equipe'.
-DESTINATAIRE_CHOICES = (
-    ('Equipe', _(u"Gerant d'équipe")),
-    ('Organisateur', _(u'Organisateur')),
-)
-
 REGION_NORMALISATION = {
     'Alsace': 'Grand-Est',
     'Alsace-Champagne-Ardenne-Lorraine': 'Grand-Est',
@@ -764,7 +755,7 @@ class Equipe(models.Model):
                     except Exception as e:
                         traceback.print_exc()
                     try:
-                        self.send_mail('changement_numero_admin')
+                        self.send_admin_mail('changement_numero_admin')
                     except Exception as e:
                         traceback.print_exc()
         else:
@@ -778,6 +769,27 @@ class Equipe(models.Model):
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])
+
+    def send_admin_mail(self, template):
+        """Notification a l'organisateur : rend directement `mails/<template>.html`
+        (pas de TemplateMail) et l'envoie a l'adresse de contact de la course."""
+        course = self.course
+        message = render_to_string('mails/%s.html' % template, {
+            'instance': self,
+            'ROOT_URL': 'https://%s' % Site.objects.get_current(),
+        })
+        mail = Mail(
+            course=course,
+            template=None,
+            equipe=self,
+            emetteur=course.email_contact,
+            destinataires=[course.email_contact],
+            bcc=[],
+            sujet='[%s] %s - %s - %s' % (course.uid, self.categorie, self.numero, self.nom),
+            message=message,
+        )
+        mail.save()
+        mail.send()
 
     def getNumero(self):
         prefix = self.categorie.get_prefix(self.nombre)
@@ -1093,7 +1105,6 @@ Connectez vous sur enduroller pour y accéder.
 class TemplateMail(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     nom = models.CharField(_('Nom'), max_length=200)
-    destinataire = models.CharField(_('Destinataire'), max_length=20, choices=DESTINATAIRE_CHOICES, default='Equipe')
     bcc = models.CharField(_(u'Copie cachée à'), max_length=1000, blank=True)
     sujet = models.CharField(_('Sujet'), max_length=200)
     message = models.TextField(_('Message'))
@@ -1110,11 +1121,8 @@ class TemplateMail(models.Model):
         elif hasattr(instances, 'prefetch_related'):
             instances.prefetch_related('equipier_set')
         for instance in instances:
-            dests = set()
-            if self.destinataire == 'Organisateur':
-                dests.add(self.course.email_contact)
-            elif isinstance(instance, Equipe):
-                dests.add(instance.gerant_email)
+            # les equipiers n'ont pas d'adresse e-mail : tout part vers le gerant de l'equipe
+            dests = { instance.gerant_email }
 
             context = Context({
                 "instance": instance,

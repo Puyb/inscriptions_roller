@@ -148,49 +148,24 @@
     ],
     "templatemail_set": [
       {
-        "destinataire": "Equipe",
         "nom": "paiement",
         "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/paiement.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Equipe",
         "nom": "inscription",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/inscription.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "paiement_admin",
-        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-        "message": "{% include \"mails/paiement_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Organisateur",
-        "nom": "inscription_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/inscription_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "changement_numero",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
         "message": "{% include \"mails/changement_numero.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "changement_numero_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/changement_numero_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "change_request",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/change_request.html\" %}",
@@ -716,49 +691,24 @@
     ],
     "templatemail_set": [
       {
-        "destinataire": "Equipe",
         "nom": "paiement",
         "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/paiement.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Equipe",
         "nom": "inscription",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/inscription.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "paiement_admin",
-        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-        "message": "{% include \"mails/paiement_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Organisateur",
-        "nom": "inscription_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/inscription_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "changement_numero",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
         "message": "{% include \"mails/changement_numero.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "changement_numero_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "change_request",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/change_request.html\" %}",
@@ -980,49 +930,24 @@
     ],
     "templatemail_set": [
       {
-        "destinataire": "Equipe",
         "nom": "paiement",
         "sujet": "[{{instance.course.uid}}] Paiement reçu pour votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/paiement.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Equipe",
         "nom": "inscription",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/inscription.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "paiement_admin",
-        "sujet": "[{{instance.course.uid}}] Paiement reçu {{ instance.numero }}",
-        "message": "{% include \"mails/paiement_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Organisateur",
-        "nom": "inscription_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/inscription_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "changement_numero",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}²",
         "message": "{% include \"mails/changement_numero.html\" %}",
         "bcc": ""
       },
       {
-        "destinataire": "Organisateur",
-        "nom": "changement_numero_admin",
-        "sujet": "[{{instance.course.uid}}] {{ instance.categorie }} - {{ instance.numero }} - {{ instance.nom }}",
-        "message": "{% include \"mails/gchangement_numero_admin.html\" %}",
-        "bcc": ""
-      },
-      {
-        "destinataire": "Equipe",
         "nom": "change_request",
         "sujet": "[{{instance.course.uid}}] Votre inscription {{ instance.numero }}",
         "message": "{% include \"mails/change_request.html\" %}",

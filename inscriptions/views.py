@@ -96,7 +96,7 @@ def form(request, course_uid, numero=None, code=None):
                     except Exception as e:
                         logging.exception('Fail to send "inscription" mail')
                     try:
-                        course.send_mail('inscription_admin', [ new_instance ])
+                        new_instance.send_admin_mail('inscription_admin')
                     except Exception as e:
                         logging.exception('Fail to send "inscription_admin" mail')
                 for challenge in course.challenges.all():

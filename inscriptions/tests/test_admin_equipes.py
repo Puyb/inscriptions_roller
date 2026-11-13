@@ -179,21 +179,18 @@ class IsolationTestCase(AdminTestCase):
     def test_send_mail_view_refuses_team_of_other_course(self):
         """Un organisateur ne doit pas pouvoir préparer un mail pour une équipe d'une autre course."""
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
-        t = TemplateMail.objects.create(course=self.course, nom='x', destinataire='Equipe',
-                                        sujet='s', message='m')
+        t = TemplateMail.objects.create(course=self.course, nom='x', sujet='s', message='m')
         r = self.client.get('%s%d/send/%d/' % (CHANGELIST, theirs.id, t.id))
         self.assertIn(r.status_code, (302, 403, 404))
 
     def test_preview_mail_refuses_team_of_other_course(self):
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
-        t = TemplateMail.objects.create(course=self.course, nom='x', destinataire='Equipe',
-                                        sujet='s', message='m')
+        t = TemplateMail.objects.create(course=self.course, nom='x', sujet='s', message='m')
         r = self.client.get(CHANGELIST + 'send/preview/', {'id': theirs.id, 'template': t.id})
         self.assertIn(r.status_code, (302, 403, 404))
 
     def test_send_mails_does_not_mail_teams_of_other_course(self):
-        t = TemplateMail.objects.create(course=self.course, nom='x', destinataire='Equipe',
-                                        sujet='s', message='m')
+        t = TemplateMail.objects.create(course=self.course, nom='x', sujet='s', message='m')
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
         with mock.patch('inscriptions.models.send_mail') as sm:
             self.client.post(CHANGELIST + 'send/', {'template': t.id, 'ids': json.dumps([theirs.id])})
@@ -202,7 +199,7 @@ class IsolationTestCase(AdminTestCase):
     def test_template_mail_of_other_course_cannot_be_used(self):
         mine = self.equipe()
         foreign = TemplateMail.objects.create(course=self.other_course, nom='f',
-                                              destinataire='Equipe', sujet='s', message='m')
+                                              sujet='s', message='m')
         with mock.patch('inscriptions.models.send_mail') as sm:
             self.client.post(CHANGELIST + 'send/', {'template': foreign.id, 'ids': json.dumps([mine.id])})
         self.assertEqual(sm.call_count, 0)
@@ -420,48 +417,15 @@ class ActionsTestCase(AdminTestCase):
 
     def test_send_mails_action_shows_form_with_course_templates_only(self):
         e = self.equipe()
-        mine = TemplateMail.objects.create(course=self.course, nom='a', destinataire='Equipe',
-                                           sujet='s', message='m')
-        TemplateMail.objects.create(course=self.other_course, nom='b', destinataire='Equipe',
-                                    sujet='s', message='m')
+        mine = TemplateMail.objects.create(course=self.course, nom='a', sujet='s', message='m')
+        TemplateMail.objects.create(course=self.other_course, nom='b', sujet='s', message='m')
         r = self.client.post(CHANGELIST, {'action': 'send_mails', '_selected_action': [e.id]})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(list(r.context['templates']), [mine])
-
-    def test_send_mails_form_does_not_offer_organizer_templates(self):
-        e = self.equipe()
-        mine = TemplateMail.objects.create(course=self.course, nom='a', destinataire='Equipe',
-                                           sujet='s', message='m')
-        TemplateMail.objects.create(course=self.course, nom='inscription_admin',
-                                    destinataire='Organisateur', sujet='s', message='m')
-        r = self.client.post(CHANGELIST, {'action': 'send_mails', '_selected_action': [e.id]})
-        self.assertEqual(list(r.context['templates']), [mine])
-
-    def test_send_mails_post_refuses_organizer_template(self):
-        e = self.equipe()
-        t = TemplateMail.objects.create(course=self.course, nom='inscription_admin',
-                                        destinataire='Organisateur', sujet='s', message='m')
-        with mock.patch('inscriptions.models.send_mail') as sm:
-            r = self.client.post(CHANGELIST + 'send/', {'template': t.id, 'ids': json.dumps([e.id])})
-        self.assertEqual(r.status_code, 404)
-        self.assertEqual(sm.call_count, 0)
-
-    def test_template_mail_admin_form_has_no_destinataire_field(self):
-        r = self.client.get('/course/inscriptions/templatemail/add/')
-        self.assertEqual(r.status_code, 200)
-        self.assertNotIn('destinataire', r.context['adminform'].form.fields)
-
-    def test_template_mail_created_from_admin_is_addressed_to_equipe(self):
-        r = self.client.post('/course/inscriptions/templatemail/add/', {
-            'course': self.course.id, 'nom': 'nouveau', 'bcc': '', 'sujet': 'Sujet', 'message': 'Msg',
-        })
-        self.assertEqual(r.status_code, 302)
-        self.assertEqual(TemplateMail.objects.get(nom='nouveau').destinataire, 'Equipe')
 
     def test_send_mails_post_creates_mails_and_redirects(self):
         e1, e2 = self.equipe(), self.equipe()
-        t = TemplateMail.objects.create(course=self.course, nom='a', destinataire='Equipe',
-                                        sujet='Bonjour {{ instance.nom }}', message='<p>msg</p>')
+        t = TemplateMail.objects.create(course=self.course, nom='a', sujet='Bonjour {{ instance.nom }}', message='<p>msg</p>')
         with mock.patch('inscriptions.models.send_mail') as sm:
             r = self.client.post(CHANGELIST + 'send/', {'template': t.id,
                                                         'ids': json.dumps([e1.id, e2.id])})
@@ -544,8 +508,7 @@ class SendMailViewTestCase(AdminTestCase):
         super().setUp()
         self.e = self.equipe(nom='Les Rapides', gerant_email='chef@example.com')
         self.t = TemplateMail.objects.create(
-            course=self.course, nom='bienvenue', destinataire='Equipe',
-            sujet='Salut {{ instance.nom }}', message='<p>Equipe {{ instance.nom }} {{ ROOT_URL }}</p>',
+            course=self.course, nom='bienvenue', sujet='Salut {{ instance.nom }}', message='<p>Equipe {{ instance.nom }} {{ ROOT_URL }}</p>',
         )
 
     def test_get_renders_template_in_form(self):
@@ -629,11 +592,10 @@ class TemplateMailTestCase(BaseTestCase):
         EquipierFactory(equipe=self.equipe, numero=1)
         EquipierFactory(equipe=self.equipe, numero=2)
 
-    def make(self, destinataire, **kw):
+    def make(self, nom, **kw):
         kw.setdefault('sujet', 'Bonjour {{ instance.nom }}')
         kw.setdefault('message', '<p>{{ instance.nom }} {{ ROOT_URL }}</p>')
-        return TemplateMail.objects.create(course=self.course, nom='t-' + destinataire,
-                                           destinataire=destinataire, **kw)
+        return TemplateMail.objects.create(course=self.course, nom='t-' + nom, **kw)
 
     def test_send_to_equipe_creates_mail_and_dispatches(self):
         t = self.make('Equipe', bcc='a@example.com, b@example.com;c@example.com')
@@ -652,13 +614,6 @@ class TemplateMailTestCase(BaseTestCase):
         sm.assert_called_once()
         self.assertEqual(sm.call_args[1]['message_id'], m.uid)
         self.assertEqual(sm.call_args[1]['bcc'], m.bcc)
-
-    def test_send_to_organisateur(self):
-        t = self.make('Organisateur')
-        with mock.patch('inscriptions.models.send_mail') as sm:
-            t.send([self.equipe])
-        self.assertEqual(Mail.objects.get().destinataires, ['orga@example.com'])
-        self.assertEqual(sm.call_args[1]['to'], ['orga@example.com'])
 
     def test_send_accepts_queryset(self):
         t = self.make('Equipe')
@@ -697,27 +652,64 @@ class TemplateMailTestCase(BaseTestCase):
     def test_str(self):
         self.assertEqual(str(self.make('Equipe')), 't-Equipe')
 
-    def test_legacy_equipier_choice_is_sent_to_the_team_manager(self):
-        """Les equipiers n'ont pas d'e-mail : l'ancien choix 'Equipier' (encore en base)
-        part vers le gerant de l'equipe."""
-        t = self.make('Equipier')
+    def test_course_models_only_use_existing_templatemail_fields(self):
+        """course_models.json alimente TemplateMail(**item) a la creation d'une course."""
+        from django.conf import settings
+        fields = {f.name for f in TemplateMail._meta.get_fields()}
+        for uid, model in settings.MODELS_COURSES.items():
+            names = [t['nom'] for t in model['templatemail_set']]
+            self.assertFalse([n for n in names if n.endswith('_admin')], uid)
+            for item in model['templatemail_set']:
+                self.assertLessEqual(set(item), fields, uid)
+
+
+class EquipeSendAdminMailTestCase(BaseTestCase):
+    """Notifications organisateur : template HTML rendu directement, sans TemplateMail."""
+
+    def setUp(self):
+        super().setUp()
+        self.course = CourseFactory(uid='adm', email_contact='orga@example.com')
+        self.cat = CategorieFactory(course=self.course, code='SOLO')
+        self.equipe = EquipeFactory(course=self.course, categorie=self.cat, nom='Les Rapides',
+                                    gerant_email='chef@example.com')
+        EquipierFactory(equipe=self.equipe, numero=1)
+
+    def test_inscription_admin_goes_to_the_organizer_without_any_templatemail(self):
+        self.assertFalse(TemplateMail.objects.exists())
+        with mock.patch('inscriptions.models.send_mail') as sm:
+            self.equipe.send_admin_mail('inscription_admin')
+        m = Mail.objects.get()
+        self.assertEqual(m.destinataires, ['orga@example.com'])
+        self.assertEqual(m.emetteur, 'orga@example.com')
+        self.assertIsNone(m.template)
+        self.assertEqual(m.equipe, self.equipe)
+        self.assertEqual(m.sujet, '[adm] %s - %s - Les Rapides' % (self.cat, self.equipe.numero))
+        self.assertIn('Les Rapides', m.message)
+        self.assertEqual(sm.call_args[1]['to'], ['orga@example.com'])
+
+    def test_subject_is_not_html_escaped(self):
+        self.equipe.nom = 'Dupont & Fils'
         with mock.patch('inscriptions.models.send_mail'):
-            t.send([self.equipe])
-        self.assertEqual(Mail.objects.get().destinataires, ['chef@example.com'])
+            self.equipe.send_admin_mail('inscription_admin')
+        self.assertTrue(Mail.objects.get().sujet.endswith('Dupont & Fils'))
 
-    def test_legacy_tous_choice_is_sent_to_the_team_manager_only(self):
-        t = self.make('Tous')
+    def test_changement_numero_admin_template_is_rendered(self):
         with mock.patch('inscriptions.models.send_mail'):
-            t.send([self.equipe])
-        self.assertEqual(Mail.objects.get().destinataires, ['chef@example.com'])
+            self.equipe.send_admin_mail('changement_numero_admin')
+        self.assertIn('Changement de num', Mail.objects.get().message)
 
-    def test_destinataire_defaults_to_equipe(self):
-        t = TemplateMail.objects.create(course=self.course, nom='defaut', sujet='s', message='m')
-        self.assertEqual(t.destinataire, 'Equipe')
-
-    def test_only_equipe_and_organisateur_remain_as_choices(self):
-        self.assertEqual([c[0] for c in TemplateMail._meta.get_field('destinataire').choices],
-                         ['Equipe', 'Organisateur'])
+    def test_public_registration_notifies_the_organizer(self):
+        from inscriptions.tests.base import equipe_form_data, equipier_formset_data
+        course = CourseFactory(uid='reg', email_contact='orga2@example.com')
+        categorie = CategorieFactory(course=course, min_equipiers=1, max_equipiers=1, min_age=0,
+                                     numero_debut=1, numero_fin=99)
+        data = equipe_form_data(categorie=categorie.id, nombre='1')
+        data.update(equipier_formset_data([{
+            'nom': 'Martin', 'prenom': 'Luc', 'sexe': 'H', 'justificatif': 'certificat',
+            'date_de_naissance': date(1990, 1, 1)}]))
+        with mock.patch('inscriptions.models.send_mail'):
+            self.client.post('/reg/', data)
+        self.assertEqual(Mail.objects.filter(destinataires=['orga2@example.com']).count(), 1)
 
 
 class UtilsSendMailTestCase(BaseTestCase):

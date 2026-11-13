@@ -395,8 +395,7 @@ class FactureViewTestCase(BaseTestCase):
 
     def _template_mail(self):
         return TemplateMail.objects.create(
-            course=self.course, nom='paiement', destinataire='Equipe',
-            sujet='Paiement recu', message='Merci {{ instance.nom }}')
+            course=self.course, nom='paiement', sujet='Paiement recu', message='Merci {{ instance.nom }}')
 
     def test_unpaid_team_is_404_without_code(self):
         self.assertEqual(self.client.get(self.base).status_code, 404)
