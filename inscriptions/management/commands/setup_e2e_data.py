@@ -40,11 +40,12 @@ class Command(BaseCommand):
             date_fermeture=date.today() + timedelta(days=60),
             limite_participants=700,
             active=True,
+            dates_augmentation=[date.today() + timedelta(days=30)],
         )
         CategorieFactory(
             course=course, code='SOLO', nom='Solo', min_equipiers=1, max_equipiers=1,
             min_age=15, sexe='', numero_debut=100, numero_fin=199,
-            prices_base=[Decimal('30.00')], prices_equipier=[],
+            prices_base=[Decimal('30.00'), Decimal('35.00')], prices_equipier=[],
             validation='function(data) { return true; }',
         )
         CategorieFactory(
