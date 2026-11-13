@@ -27,7 +27,7 @@ class Command(BaseCommand):
     help = "Seed a fixed 'e2e' course + categories for the Playwright suite."
 
     def handle(self, *args, **options):
-        Course.objects.filter(uid=COURSE_UID).delete()
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew']).delete()  # e2enew: made by tests
         Ville.objects.get_or_create(nom='paris', defaults=dict(
             region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
         ))

@@ -63,16 +63,25 @@ $(function() {
         if(model.categories)
             model.categories.sort((a,b) => a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
             model.categories.forEach(function(c) {
-                let lastPriceBase = c.code in previous ? previous[c.code].prices_base[0] : c.prices_base[0];
-                let lastPriceEquipier = c.code in previous ? previous[c.code].prices_equipier[0] : c.prices_equipier[0];
+                // value typed by the user if any, else the model's, else the previous step's
+                const pick = (field, i) => {
+                    const mine = c.code in previous ? previous[c.code][field][i] : undefined;
+                    return mine !== undefined ? mine : c[field][i];
+                };
+                const lastPriceBase = pick('prices_base', 0);
+                const lastPriceEquipier = pick('prices_equipier', 0);
                 const tr = $('<tr>');
                 tr.append($('<th>').html(c.code))
                 tr.append($('<td>').html(c.nom))
                 tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_base__0').val(lastPriceBase)));
                 tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_equipier__0').val(lastPriceEquipier)));
+                let previousBase = lastPriceBase;
+                let previousEquipier = lastPriceEquipier;
                 for (let i = 1; i <= datesAugmentations.length; i++) {
-                    tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_base__' + i).val(lastPrice = ((c.code in previous ? previous[c.code].prices_base[i] : c.prices_base[i]) || lastPriceBase))));
-                    tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_equipier__' + i).val(lastPrice = ((c.code in previous ? previous[c.code].prices_equipier[i] : c.prices_equipier[i]) || lastPriceEquipier))));
+                    previousBase = pick('prices_base', i) || previousBase;
+                    previousEquipier = pick('prices_equipier', i) || previousEquipier;
+                    tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_base__' + i).val(previousBase)));
+                    tr.append($('<td>').append($('<input>').attr('name', c.code + '__prices_equipier__' + i).val(previousEquipier)));
                 }
                 tr.appendTo($table);
             });
