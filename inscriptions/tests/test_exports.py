@@ -46,6 +46,10 @@ class ExportBaseTestCase(BaseTestCase):
 
 
 class DossardsCSVTestCase(ExportBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        login_as_organizer(self.client, self.course)
+
     def test_headers_rows_and_order(self):
         e1 = EquipeFactory(course=self.course, categorie=self.categorie, nombre=2, nom='Alpha',
                            gerant_nom='Martin', gerant_prenom='Luc', gerant_ville='Lyon',
@@ -113,6 +117,10 @@ class DossardsCSVTestCase(ExportBaseTestCase):
 
 
 class DossardsEquipesCSVTestCase(ExportBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        login_as_organizer(self.client, self.course)
+
     def test_headers_and_rows(self):
         e1 = EquipeFactory(course=self.course, categorie=self.categorie, nom='Alpha',
                            gerant_nom='Martin', gerant_prenom='Luc', gerant_ville='Lyon',
@@ -144,6 +152,10 @@ class DossardsEquipesCSVTestCase(ExportBaseTestCase):
 
 
 class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        login_as_organizer(self.client, self.course)
+
     def test_headers_rows_and_order(self):
         e1 = EquipeFactory(course=self.course, categorie=self.categorie, nombre=2)
         q1 = EquipierFactory(equipe=e1, numero=1, nom='Durand', prenom='Anne', sexe='F',
@@ -182,40 +194,66 @@ class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
 
 
 
-class PublicExportAccessTestCase(ExportBaseTestCase):
-    """Les CSV et la page equipiers contiennent des données personnelles
-    (noms, dates de naissance, adresses de gérants) : ils ne devraient pas être
-    accessibles sans connexion (le @login_required est commenté sur dossardsCSV,
-    absent sur les autres)."""
+class PersonalDataExportAccessTestCase(ExportBaseTestCase):
+    """Les CSV, la page equipiers et le listing contiennent des donnees personnelles
+    (noms, dates de naissance, adresses de gerants) : connexion ET role sur la course."""
+
+    PATHS = ['dossards.csv', 'dossards_equipes.csv', 'dossards_equipiers.csv', 'equipiers/', 'listing/']
 
     def setUp(self):
         super().setUp()
         equipe = EquipeFactory(course=self.course, categorie=self.categorie)
         EquipierFactory(equipe=equipe, numero=1, nom='Secret')
 
-    def assert_requires_login(self, path):
-        response = self.client.get(path)
-        self.assertEqual(response.status_code, 302)
-        self.assertIn('login', response.url)
+    def url(self, path):
+        return '/%s/%s' % (self.course.uid, path)
 
-    @unittest.expectedFailure
-    def test_dossards_csv_requires_login(self):
-        self.assert_requires_login('/%s/dossards.csv' % self.course.uid)
+    def test_anonymous_is_redirected_to_login(self):
+        for path in self.PATHS:
+            response = self.client.get(self.url(path))
+            self.assertEqual(response.status_code, 302, path)
+            self.assertIn('login', response.url, path)
 
-    @unittest.expectedFailure
-    def test_dossards_equipes_csv_requires_login(self):
-        self.assert_requires_login('/%s/dossards_equipes.csv' % self.course.uid)
+    def test_logged_user_without_accreditation_is_forbidden(self):
+        self.client.force_login(User.objects.create_user('outsider', 'o@example.com', 'pass1234'))
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 403, path)
 
-    @unittest.expectedFailure
-    def test_dossards_equipiers_csv_requires_login(self):
-        self.assert_requires_login('/%s/dossards_equipiers.csv' % self.course.uid)
+    def test_accreditation_on_another_course_is_forbidden(self):
+        login_as_organizer(self.client, CourseFactory())
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 403, path)
 
-    @unittest.expectedFailure
-    def test_equipiers_page_requires_login(self):
-        self.assert_requires_login('/%s/equipiers/' % self.course.uid)
+    def test_accreditation_without_role_is_forbidden(self):
+        user = User.objects.create_user('pending', 'p@example.com', 'pass1234')
+        Accreditation.objects.create(user=user, course=self.course, role='')
+        self.client.force_login(user)
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 403, path)
+
+    def test_organizer_has_access(self):
+        login_as_organizer(self.client, self.course)
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 200, path)
+
+    def test_validateur_role_has_access(self):
+        user = User.objects.create_user('valid', 'v@example.com', 'pass1234')
+        Accreditation.objects.create(user=user, course=self.course, role='validateur')
+        self.client.force_login(user)
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 200, path)
+
+    def test_superuser_has_access_without_accreditation(self):
+        self.client.force_login(User.objects.create_superuser('root', 'r@example.com', 'pass1234'))
+        for path in self.PATHS:
+            self.assertEqual(self.client.get(self.url(path)).status_code, 200, path)
 
 
 class EquipiersPageTestCase(ExportBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        login_as_organizer(self.client, self.course)
+
     def test_lists_names_of_the_course_only(self):
         EquipierFactory(equipe=EquipeFactory(course=self.course, categorie=self.categorie),
                         numero=1, nom='Dupuis', prenom='Marie')
