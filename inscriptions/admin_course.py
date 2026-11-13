@@ -15,7 +15,8 @@ from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
-from django.http import HttpResponseRedirect, StreamingHttpResponse
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingHttpResponse
+from decimal import InvalidOperation
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
@@ -102,17 +103,20 @@ class CourseAdminSite(admin.sites.AdminSite):
         request.current_app = self.name
         if course_uid:
             course = get_object_or_404(Course, uid=course_uid)
-            Accreditation(
+            accreditation, created = Accreditation.objects.get_or_create(
                 user=request.user,
                 course=course,
-            ).save()
-            messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
-
-            send_mail(
-                subject="Demande d'accès à %s" % (course.uid, ),
-                body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
-                to=[course.email_contact],
             )
+            if created:
+                messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
+
+                send_mail(
+                    subject="Demande d'accès à %s" % (course.uid, ),
+                    body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
+                    to=[course.email_contact],
+                )
+            else:
+                messages.add_message(request, messages.INFO, u'Une demande d\'accreditation pour la course "%s" existe déjà.' % (course.nom, ))
             return redirect('../')
 
         courses = Course.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
@@ -162,7 +166,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         if request.method == 'POST':
             equipes = Equipe.objects.filter(course=course).order_by(*request.GET.get('order','numero').split(','))
             numero_max = equipes.aggregate(Max('numero'))['numero__max'] + 1
-            splits = ('1,' + request.POST.get('split', numero_max)).split(',')
+            splits = ('1,' + str(request.POST.get('split', numero_max))).split(',')
             splits = [ int(i) for i in splits ]
             if splits[-1] < numero_max:
                 splits.append(numero_max)
@@ -256,7 +260,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             form = ImportResultatForm(request.POST, request.FILES)
             if form.is_valid():
                 csv_file = request.FILES['csv']
-                tours_csv_file = request.FILES['tours_csv']
+                tours_csv_file = request.FILES.get('tours_csv')
                 data = form.cleaned_data
 
                 class AbortException(Exception):
@@ -360,8 +364,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                             except UnicodeDecodeError as exc:
                                 if enc == 'iso8859-1':
                                     raise exc
-                        # Tours
-                        for enc in ('utf-8', 'iso8859-1'):
+                        # Tours (fichier facultatif)
+                        for enc in (('utf-8', 'iso8859-1') if tours_csv_file else ()):
                             try:
                                 tours_csv_file.seek(0)
                                 with io.StringIO(tours_csv_file.read().decode(enc)) as io_file:
@@ -401,6 +405,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                                         # else:
                                         #     dossards.remove(dossard)
 
+                                        duree = None
+                                        timestamp = None
                                         if data.get('tours_duree_column'):
                                             try:
                                                 duree = parse_csv_time(g(row, 'tours_duree_column'), data['tours_duree_format'])
@@ -433,11 +439,11 @@ class CourseAdminSite(admin.sites.AdminSite):
 
                         # compute positions
                         equipes_to_compute = None
-                        if data.get('time_column') and data.get('tours_column'):
+                        if data.get('time_column') and data.get('nbtours_column') and not data.get('position_generale_column') and not data.get('position_categorie_column'):
                             #equipes = course.equipe_set.exclude(numero__in=numeros).select_related('categorie').order_by('tours', 'temps')
                             equipes_to_compute = [ e for e in equipes if e.numero not in numeros ]
-                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps)
-                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours_total(), reverse=True)
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.temps or 0)
+                            equipes_to_compute = sorted(equipes_to_compute, key=lambda e: e.tours_total() or 0, reverse=True)
 
                         elif not data.get('position_categorie_column') and data.get('position_generale_column'):
                             #equipes = course.equipe_set.exclude(numero__in=numeros).filter(position_generale__isnull=False).select_related('categorie').order_by('position_generale')
@@ -563,39 +569,40 @@ class CourseAdminSite(admin.sites.AdminSite):
 
             class PaiementException(Exception):
                 pass
-            try:
-                with transaction.atomic():
-                    paiement = paiement_form.save()
-                    paiement.equipes.all().delete()
-                    montant = Decimal(0)
-                    repartitions = []
-                    for equipe_id, repartition_montant in montants:
-                        repartition = PaiementRepartition(
-                            paiement=paiement,
-                            equipe=equipes[equipe_id],
-                            montant=Decimal(repartition_montant.replace(',', '.')),
-                        )
-                        repartition.save()
-                        repartitions.append({
-                            'equipe': repartition.equipe,
-                            'montant': repartition.montant,
-                            'paiement': repartition.equipe.montant_paiements,
-                            'reste': repartition.equipe.prix_reel - repartition.equipe.montant_paiements,
-                        })
+            if paiement_form.is_valid():
+                try:
+                    with transaction.atomic():
+                        paiement = paiement_form.save()
+                        paiement.equipes.all().delete()
+                        montant = Decimal(0)
+                        repartitions = []
+                        for equipe_id, repartition_montant in montants:
+                            if equipe_id not in equipes:
+                                raise PaiementException('equipe inconnue')
+                            repartition = PaiementRepartition(
+                                paiement=paiement,
+                                equipe=equipes[equipe_id],
+                                montant=Decimal(repartition_montant.replace(',', '.')),
+                            )
+                            repartition.save()
+                            repartitions.append({
+                                'equipe': repartition.equipe,
+                                'montant': repartition.montant,
+                                'paiement': repartition.equipe.montant_paiements,
+                                'reste': repartition.equipe.prix_reel - repartition.equipe.montant_paiements,
+                            })
 
-                        montant += repartition.montant
-                        print(montant, equipe_id, repartition_montant, montant, paiement.montant)
-                    if montant != paiement.montant and paiement.type != 'offert':
-                        raise PaiementException('montant incorrect')
-                    print('len equipe_id', len(request.GET.getlist('equipe_id')))
-                    paiement.send_equipes_mail()
-                    if len(request.GET.getlist('equipe_id')) == 1:
-                        return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
-                    if len(request.GET.getlist('equipe_id')) > 1:
-                        return redirect('/course/inscriptions/equipe/')
-                    return redirect('/course/inscriptions/paiement/')
-            except PaiementException as e:
-                messages.add_message(request, messages.ERROR, u'Répartition des montants incorrectes')
+                            montant += repartition.montant
+                        if montant != paiement.montant and paiement.type != 'offert':
+                            raise PaiementException('montant incorrect')
+                        paiement.send_equipes_mail()
+                        if len(request.GET.getlist('equipe_id')) == 1:
+                            return redirect('/course/inscriptions/equipe/%s/change/' % request.GET['equipe_id'])
+                        if len(request.GET.getlist('equipe_id')) > 1:
+                            return redirect('/course/inscriptions/equipe/')
+                        return redirect('/course/inscriptions/paiement/')
+                except (PaiementException, InvalidOperation):
+                    messages.add_message(request, messages.ERROR, u'Répartition des montants incorrectes')
 
         return TemplateResponse(request, 'admin/paiement/add.html', dict(self.each_context(request),
             courses=courses,
@@ -607,6 +614,8 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     @csrf_exempt
     def paiement_search_equipe(self, request):
+        if 'search' not in request.POST:
+            return HttpResponseBadRequest('search is required')
         search = request.POST['search']
 
         course = getCourse(request, Course.objects.all())
@@ -621,7 +630,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         if request.GET.get('id'):
             repartitions = {
                 r.equipe_id: r.montant
-                for r in PaiementRepartition.object.filter(paiement_id=request.GET.get('id'))
+                for r in PaiementRepartition.objects.filter(paiement_id=request.GET.get('id'))
             }
 
         return HttpResponse(json.dumps({
@@ -1059,8 +1068,8 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             
             fieldnames = [ f for f in request.POST.getlist('colonnes') if objet == 'equipiers' or f.startswith('equipe.') or f.startswith('categorie.') ]
 
-            if header:
-                writer.writerow([ fields[f] for f in fieldnames ])
+            if header != 'no':
+                writer.writerow([ fields[f].encode(encoding, 'replace').decode(encoding) for f in fieldnames ])
             for obj in objects:
                 writer.writerow([
                     resolve(obj, field).encode(encoding, 'replace').decode(encoding) 
@@ -1424,12 +1433,15 @@ class PaiementAdmin(admin.ModelAdmin):
         course = getCourse(request)
         total = {
             'montant': Decimal(0),
-            'monntant_frais': Decimal(0),
+            'montant_frais': Decimal(0),
         }
-        for obj in course.paiements.filter(**request.GET):
-            total['montant'] += obj.montant
-            total['montant_frais'] += self.montant_frais2(obj.montant_frais)
-        return HttpResponse(json.dumps(total), content_type='application/json')
+        paiements = Paiement.objects.filter(equipes__equipe__course=course).distinct()
+        if request.GET.get('type'):
+            paiements = paiements.filter(type=request.GET['type'])
+        for obj in paiements:
+            total['montant'] += obj.montant or Decimal(0)
+            total['montant_frais'] += self.montant_frais2(obj)
+        return HttpResponse(json.dumps(total, default=str), content_type='application/json')
 
     def montant_frais2(self, obj):
         if obj.montant_frais:

@@ -110,8 +110,6 @@ class DossardsCSVTestCase(ExportBaseTestCase):
         rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.uid))
         self.assertEqual([r[4] for r in rows[1:]], ['Actif'])
 
-    test_equipiers_beyond_team_size_are_not_exported = unittest.expectedFailure(
-        test_equipiers_beyond_team_size_are_not_exported)
 
 
 class DossardsEquipesCSVTestCase(ExportBaseTestCase):
@@ -182,8 +180,6 @@ class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
         rows = parse_csv(self.client.get('/%s/dossards_equipiers.csv' % self.course.uid))
         self.assertEqual([r[2] for r in rows[1:]], ['Actif'])
 
-    test_equipiers_beyond_team_size_are_not_exported = unittest.expectedFailure(
-        test_equipiers_beyond_team_size_are_not_exported)
 
 
 class PublicExportAccessTestCase(ExportBaseTestCase):
@@ -483,7 +479,6 @@ class ListingDossardsTestCase(ExportBaseTestCase):
         response = self.client.post('/course/listing/dossards/', {'split': '5'})
         self.assertEqual(list(response.context['equipes']['1 à 4']), [self.e[0]])
 
-    @unittest.expectedFailure
     def test_post_without_split_gives_a_single_range(self):
         response = self.client.post('/course/listing/dossards/')
         self.assertEqual(response.status_code, 200)
@@ -716,13 +711,11 @@ class EquipeExportTestCase(ExportBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(';?', response.content.decode('iso-8859-1'))
 
-    @unittest.expectedFailure
     def test_unencodable_header_characters_are_replaced(self):
         # l'en-tête n'est pas passé par encode(..., 'replace') comme les données : 500
         response = self.post(encoding='ascii', colonnes=['equipe.nom'])
         self.assertEqual(response.status_code, 200)
 
-    @unittest.expectedFailure
     def test_header_can_be_disabled(self):
         response = self.post(header='no', colonnes=['equipe.nom'])
         rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter=';'))

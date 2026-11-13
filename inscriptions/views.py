@@ -317,16 +317,15 @@ def confirm_ipn_data(data, PP_URL):
 
 @csrf_exempt
 def check_name(request, course_uid):
-    if 'nom' not in request.POST and 'id' not in request.POST:
+    if 'nom' not in request.POST or 'id' not in request.POST:
         return HttpResponse(status=422)
-    return HttpResponse(
-            Equipe.objects
-                .filter(course__uid=course_uid, nom__iexact=request.POST['nom'])
-                .exclude(id=request.POST['id'])
-                .count(),
-            content_type="text/plain")
+    equipes = Equipe.objects.filter(course__uid=course_uid, nom__iexact=request.POST['nom'])
+    if request.POST['id']:
+        equipes = equipes.exclude(id=request.POST['id'])
+    return HttpResponse(equipes.count(), content_type="text/plain")
 
 def equipe_list(request, course_uid):
+    get_object_or_404(Course, uid=course_uid)
     equipes = Equipe.objects.filter(course__uid=course_uid).select_related('categorie', 'gerant_ville2')
     if request.user and request.user.is_staff:
         equipes = equipes.annotate(
@@ -438,7 +437,7 @@ def stats_compare(request, course_uid, course_uid2):
     course1 = get_object_or_404(Course, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
     # FIXME support multiple date of augmentation
-    if align == "augment" and course1.dates_augmentation[0]:
+    if align == "augment" and course1.dates_augmentation:
         duree1 = (course1.dates_augmentation[0] - course1.date_ouverture).days
 
     res = []
@@ -448,7 +447,7 @@ def stats_compare(request, course_uid, course_uid2):
         stats = course.stats()
         
         duree = (course.date - course.date_ouverture).days
-        if align == "augment":
+        if align == "augment" and course.dates_augmentation:
             duree = (course.dates_augmentation[0] - course.date_ouverture).days
 
         delta = duree1 - duree
@@ -460,7 +459,7 @@ def stats_compare(request, course_uid, course_uid2):
             'course': course,
             'json': json.dumps(stats),
             'delta': delta,
-            'augment': (course.dates_augmentation[0] - course.date_ouverture).days if course.dates_augmentation[0] else 0,
+            'augment': (course.dates_augmentation[0] - course.date_ouverture).days if course.dates_augmentation else 0,
         });
         i += 1;
 

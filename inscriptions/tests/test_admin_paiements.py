@@ -212,7 +212,6 @@ class PaiementAddTestCase(PaiementChangeBaseTestCase):
             self.assertNotEqual(r.status_code, 302)
         self.assertFalse(Paiement.objects.exists())
 
-    @unittest.expectedFailure
     def test_invalid_type_rejected_cleanly(self):
         # BUG suspecté : paiement_change appelle paiement_form.save() sans
         # is_valid() -> ValueError (HTTP 500) au lieu de réafficher le formulaire.
@@ -226,7 +225,6 @@ class PaiementAddTestCase(PaiementChangeBaseTestCase):
             self.assertNotEqual(r.status_code, 302)
         self.assertFalse(Paiement.objects.exists())
 
-    @unittest.expectedFailure
     def test_invalid_montant_rejected_cleanly(self):
         # BUG suspecté : paiement_change appelle paiement_form.save() sans
         # is_valid() -> ValueError (HTTP 500) au lieu de réafficher le formulaire.
@@ -240,7 +238,6 @@ class PaiementAddTestCase(PaiementChangeBaseTestCase):
             self.assertNotEqual(r.status_code, 302)
         self.assertFalse(Paiement.objects.exists())
 
-    @unittest.expectedFailure
     def test_montant_too_many_digits_rejected_cleanly(self):
         # BUG suspecté : paiement_change appelle paiement_form.save() sans
         # is_valid() -> ValueError (HTTP 500) au lieu de réafficher le formulaire.
@@ -274,7 +271,6 @@ class PaiementAddTestCase(PaiementChangeBaseTestCase):
         self.assertFalse(Paiement.objects.exists())
         self.assertFalse(PaiementRepartition.objects.exists())
 
-    @unittest.expectedFailure
     def test_equipe_of_other_course_gives_clean_error_not_a_crash(self):
         # BUG suspecté : `equipes[equipe_id]` lève KeyError (HTTP 500) au lieu
         # d'un message d'erreur de validation.
@@ -418,14 +414,12 @@ class PaiementSearchEquipeTestCase(PaiementChangeBaseTestCase):
         self.assertEqual(r.status_code, 302)
         self.assertIn('login', r['Location'])
 
-    @unittest.expectedFailure
     def test_search_without_search_param_fails_cleanly(self):
         # BUG suspecté : request.POST['search'] -> MultiValueDictKeyError (500).
         r = post_tolerant(self.client, SEARCH_URL, {})
         self.assertIsNotNone(r)
         self.assertEqual(r.status_code, 400)
 
-    @unittest.expectedFailure
     def test_search_with_paiement_id_returns_existing_montants(self):
         # BUG suspecté : `PaiementRepartition.object` (faute de frappe pour
         # `.objects`) -> AttributeError dès que ?id=<paiement> est passé
@@ -565,7 +559,6 @@ class PaiementAdminListTestCase(PaiementChangeBaseTestCase):
         self.assertEqual(inline.equipe_nom(rep), self.e1.nom)
         self.assertEqual(inline.prix(rep), self.e1.prix)
 
-    @unittest.expectedFailure
     def test_total_view_returns_json_totals(self):
         # BUG suspecté : PaiementAdmin.total utilise `course.paiements` (inexistant
         # sur Course), `filter(**request.GET)` (listes), la clé 'monntant_frais'

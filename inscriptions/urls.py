@@ -51,7 +51,7 @@ urlpatterns += [
     path(r'<str:course_uid>/resultats/', views.resultats, name='inscriptions_resultats'),
     path(r'<str:course_uid>/resultats/<int:numero>/', views.resultats_equipe, name='inscriptions_resultats_equipe'),
     path(r'<str:course_uid>/change/<int:numero>/', views.change, name='inscriptions_change'),
-    path(r'<str:course_uid>/change/sent/', views.change, { 'sent': True }, 'inscriptions.change_sent'),
+    path(r'<str:course_uid>/change/sent/', views.change, { 'sent': True }, 'inscriptions_change_sent'),
     path(r'<str:course_uid>/change/', views.change, name='inscriptions_change'),
     path(r'<str:course_uid>/stats/', views.stats, name='inscriptions_stats'),
     path(r'<str:course_uid>/stats/<str:course_uid2>', views.stats_compare, name='inscriptions_stats_compare'),

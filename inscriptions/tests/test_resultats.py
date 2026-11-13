@@ -390,7 +390,6 @@ class AdminResultatsImportTestCase(ResultsTestCase):
 
     # ---- suspected bugs ----
 
-    @unittest.expectedFailure
     def test_positions_computed_from_time_and_tours(self):
         """The view tests `data.get('tours_column')`, but the form field is
         `nbtours_column`, so positions are never derived from time + laps."""
@@ -401,7 +400,6 @@ class AdminResultatsImportTestCase(ResultsTestCase):
         self.assertEqual([self.e3.position_generale, self.e2.position_generale, self.e1.position_generale],
                          [1, 2, 3])
 
-    @unittest.expectedFailure
     def test_import_without_tours_csv_is_accepted(self):
         """`tours_csv` is `required=False` in the form but the view does
         `request.FILES['tours_csv']` unconditionally (MultiValueDictKeyError)."""
@@ -410,7 +408,6 @@ class AdminResultatsImportTestCase(ResultsTestCase):
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
 
-    @unittest.expectedFailure
     def test_tours_import_with_timestamp_only(self):
         """Without a duration column `duree` is never bound -> UnboundLocalError."""
         eq = EquipierFactory(equipe=self.e1, numero=1)

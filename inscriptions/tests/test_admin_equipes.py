@@ -270,7 +270,6 @@ class CourseChooseAskTestCase(AdminTestCase):
         r = self.client.get('/course/ask/')
         self.assertIn(self.other_course, list(r.context['demandes']))
 
-    @unittest.expectedFailure  # BUG suspecté : IntegrityError (500) sur 2e demande
     def test_ask_twice_for_same_course_is_handled(self):
         """unique_together(user, course) : une seconde demande ne doit pas provoquer de 500."""
         with mock.patch('inscriptions.admin_course.send_mail'):

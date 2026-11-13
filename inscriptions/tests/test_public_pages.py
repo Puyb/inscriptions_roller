@@ -134,7 +134,6 @@ class EquipeListTestCase(BaseTestCase):
         self.assertNotIn(other.nom, self.names(response))
         self.assertNotContains(response, 'Autre Course Equipe')
 
-    @unittest.expectedFailure
     def test_unknown_course_is_404(self):
         # BUG: no `get_object_or_404` on the course: the template is rendered
         # without `COURSE` and crashes (HTTP 500) instead of returning 404.
@@ -221,7 +220,6 @@ class StatsTestCase(BaseTestCase):
         url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'nope', 'course_uid2': 'stats1'})
         self.assertEqual(self.client.get(url).status_code, 404)
 
-    @unittest.expectedFailure
     def test_stats_compare_course_without_augmentation_date(self):
         # BUG: `course.dates_augmentation[0]` is indexed unconditionally, but
         # the field defaults to `[]` -> IndexError (HTTP 500) for any course
@@ -280,7 +278,6 @@ class CheckNameTestCase(BaseTestCase):
     def test_missing_parameters_is_422(self):
         self.assertEqual(self.client.post(self.url, {}).status_code, 422)
 
-    @unittest.expectedFailure
     def test_missing_id_only_is_422(self):
         # BUG: the guard uses `and` so a request with `nom` but no `id` passes
         # it, then `request.POST['id']` raises MultiValueDictKeyError (500).
@@ -348,7 +345,6 @@ class ChangeTestCase(BaseTestCase):
                 pass
         send_mail.assert_called_once_with('change_request')
 
-    @unittest.expectedFailure
     def test_right_answer_redirects_to_sent_page(self):
         # BUG: the view redirects to the URL name 'inscriptions_change_sent'
         # but urls.py registers it as 'inscriptions.change_sent' (dot) ->

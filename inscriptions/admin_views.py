@@ -6,7 +6,7 @@ from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Count, Sum, Case, When, Value, IntegerField
+from django.db.models import Count, F, Sum, Case, When, Value, IntegerField
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.response import TemplateResponse
@@ -54,7 +54,7 @@ def dossardsCSV(request, course_uid):
         'gerant_code_postal',
         'gerant_code_pays',
     ])
-    for e in Equipier.objects.filter(equipe__course__uid=course_uid):
+    for e in Equipier.objects.filter(equipe__course__uid=course_uid, numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
         row = [
             e.equipe.numero,
             e.equipe.nom,
@@ -148,7 +148,7 @@ def dossardsEquipiersCSV(request, course_uid):
         'date_de_naissance',
         'num_licence',
     ])
-    for e in Equipier.objects.filter(equipe__course__uid=course_uid):
+    for e in Equipier.objects.filter(equipe__course__uid=course_uid, numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
         row = [
             e.equipe.numero,
             e.dossard(),
