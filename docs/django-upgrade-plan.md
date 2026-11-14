@@ -18,15 +18,15 @@ Document de travail, aucune ligne de code applicatif n'a été modifiée pour pr
   - `allow_tags` (7 occurrences) — déjà mort depuis Django 2.0 lui-même (no-op silencieux, le rendu sûr passe déjà par `mark_safe()`), à nettoyer par hygiène seulement.
   - DB functions custom (`Unaccent`, `RegexpReplace`, `CompareNames`, `DayOfWeek`, `Hour` dans `models.py`/`functions.py`) : API `Func`/`as_sql` stable, à retester à chaque palier plutôt qu'à réécrire.
 - **Le vrai risque, ce sont les dépendances tierces quasi abandonnées** :
-  - `django-user-accounts` (`account==2.0.3`) — colonne vertébrale de l'auth (`SignupView`/`LogoutView`), maintenance **inactive**, dernière release oct. 2023, support Django 4/5 non garanti.
+  - `django-user-accounts` (`account==2.0.3`) — colonne vertébrale de l'auth (`SignupView`/`LogoutView`), maintenance **inactive**, dernière release oct. 2023, support Django 4/5 non garanti. Le comportement actuel est figé par `inscriptions/tests/test_auth.py` (signup + confirmation e-mail, login par username, redirection `/course/choose/`, logout, reset et changement de mot de passe, ouverture du back-office via un vrai login).
   - `pinax-theme-bootstrap==7.1.1` — thème visuel, projet Pinax abandonné dès 2018 pour cette approche.
-  - `wiki==0.4.4` (django-wiki) — figé ~2015-2016 alors que la version actuelle (0.12.x) supporte Django 5.0 ; écart énorme (modèles/migrations/plugins ont changé).
   - `channels==2.1.7` / `channels-redis==2.3.3` / `daphne==2.2.5` / `asgiref==2.3.2` — la stack 4.x actuelle supporte Django 5.2, mais c'est un saut de 2 versions majeures, à faire monter en lockstep avec Django.
-  - `django-mptt`, `django-nyt`, `django-sekizai`, `django-classy-tags`, `sorl-thumbnail` — tirés par `django-wiki`/`pinax`, à faire évoluer en bloc avec elles.
   - `django-form-admin` / `django-bootstrap-form` — apps installées, jamais importées en Python (utilisées via templates), à auditer.
   - `stripe==2.12.1` — SDK très ancien (actuel ~v10+), API conceptuellement stable côté Stripe mais signatures d'appel à revoir.
   - `zipstream==1.1.4` — peu actif, fork mieux maintenu `zipstream-ng` disponible, indépendant de Django.
-- **Filet de sécurité existant** : suite de tests `inscriptions/tests/` (~940 lignes : pricing, paiements, webhooks, challenges, numérotation, dossiers) + e2e Playwright (`e2e/`). C'est ce qui rend une migration incrémentale réaliste plutôt que risquée.
+- **Hypothèse de départ : le wiki (`django-wiki` et ses plugins) est supprimé avant d'exécuter ce plan.** Cela retire `wiki`, `django-mptt`, `django-nyt`, `django-sekizai`, `django-classy-tags` et `sorl-thumbnail` du périmètre, et supprime la décision produit « upgrade ou abandon » de l'étape 3. Les sections ci-dessous en tiennent compte.
+- **Filet de sécurité existant** : suite `inscriptions/tests/` (534 tests, 16 modules : back-office `admin_course`, exports, résultats, transpondeurs, dossards, pricing, paiements + webhooks, challenges, pages publiques, mails/tracking, **authentification**) + e2e Playwright (`e2e/`, 17 fichiers, ~1 200 lignes, back-office et wizard d'inscription). C'est ce qui rend une migration incrémentale réaliste plutôt que risquée.
+- **Zones encore faiblement couvertes** (à garder en tête, voir §5) : routage Channels de bout en bout (`MailConsumer.send_mail` est appelé directement, pas via la channel layer / `runworker`), envoi réel via le SDK Stripe (mocké), `zipstream`, rendu visuel des templates admin, absence de test automatique de migrations (`makemigrations --check`) et de promotion des `DeprecationWarning` en erreurs.
 
 ---
 
@@ -46,12 +46,14 @@ Règle à chaque palier :
 ## 3. Étapes détaillées
 
 ### Étape 0 — Préparation (avant tout changement de version)
-- Vérifier que `scripts/test.sh` et `scripts/test-e2e.sh` passent en l'état actuel (baseline verte, seule référence fiable de non-régression).
+- Vérifier que `scripts/test.sh` (534 tests, dont `test_auth.py`) et `scripts/test-e2e.sh` passent en l'état actuel (baseline verte, seule référence fiable de non-régression).
+- **Supprimer le wiki** (prérequis du plan) : retirer `wiki*` de `INSTALLED_APPS` et `WIKI_*` des settings, les routes `wiki/` et `notifications/` de `urls.py`, `django-nyt`/`sekizai`/`mptt`/`classy-tags`/`sorl-thumbnail` de `requirements.txt` (après vérification qu'aucun autre code ne les utilise), et les templates/context processors associés. Les tables du wiki restent en base (ou migration de nettoyage dédiée, à décider). Vérifier que `pinax-theme-bootstrap` n'est pas lui-même appelé par des templates du wiki. Suite complète + e2e verts après ce retrait = nouvelle baseline.
+- Ajouter à `scripts/test.sh` : `./manage.py makemigrations --check --dry-run` et une option pour lancer avec `-W error::DeprecationWarning` (aujourd'hui absents).
 - Nettoyage à risque nul, à faire en premier pour réduire le bruit des étapes suivantes :
   - Supprimer l'import mort `render_to_response` dans `admin_views.py`.
   - Supprimer `default_app_config` (l'auto-détection d'`AppConfig` fonctionne sans).
   - Nettoyer les `allow_tags` (déjà no-op).
-- Spike de compatibilité (branche jetable, en parallèle du reste) : installer `django-user-accounts` et `pinax-theme-bootstrap` dans un venv avec Django 3.2 puis 4.2, voir où ça casse concrètement. C'est la découverte qui conditionne le plus le budget temps global — à faire tôt, pas à la fin.
+- Spike de compatibilité (branche jetable, en parallèle du reste) : installer `django-user-accounts` et `pinax-theme-bootstrap` (et lancer `inscriptions.tests.test_auth` contre eux) dans un venv avec Django 3.2 puis 4.2, voir où ça casse concrètement. C'est la découverte qui conditionne le plus le budget temps global — à faire tôt, pas à la fin.
 - Geler/versionner un tag ou une branche de référence pour pouvoir revenir en arrière à tout moment.
 
 ### Étape 1 — Django 2.0 → 2.2 LTS
@@ -67,7 +69,7 @@ Règle à chaque palier :
   - Vérifier `django.contrib.postgres.fields.JSONField` : encore utilisable mais déprécié depuis 3.1, laisser passer un warning pour l'instant, migration réelle prévue à l'étape 3.
 - **Channels** : bump `channels` 2.1.7 → 3.x, `channels-redis`, `daphne`, `asgiref` en conséquence. Revalidation de `routing.py`/`consumers.py` (le `SyncConsumer` change peu, mais tester l'envoi de mail via `runworker mail`).
 - **Point de décision critique** : confirmer ici si `django-user-accounts` et `pinax-theme-bootstrap` tournent sous Django 3.2 (résultat du spike de l'étape 0). Si ça casse déjà, la suite du plan doit intégrer leur remplacement avant de continuer vers 4.2.
-- **Tests** : suite complète + e2e + smoke test manuel de l'auth (signup/login/logout/confirmation email) car c'est la zone la plus exposée par `django-user-accounts`.
+- **Tests** : suite complète + e2e + `test_auth.py` (automatisé) + smoke test manuel rapide de l'auth avec un vrai serveur de mail (signup/login/logout/confirmation email), car c'est la zone la plus exposée par `django-user-accounts`.
 
 ### Étape 3 — Django 3.2 → 4.2 LTS (le palier le plus lourd)
 C'est ici que tombent la plupart des suppressions d'API :
@@ -77,17 +79,16 @@ C'est ici que tombent la plupart des suppressions d'API :
 - `ugettext`/`ugettext_lazy` : si pas déjà fait à l'étape 2, c'est le point de non-retour, la suppression est effective.
 - Python : viser 3.10 ou 3.11.
 - **Dépendances tierces à trancher ici, pas après** :
-  - `django-user-accounts` : si le spike montre une incompatibilité, migrer vers `django-allauth` (ou vues d'auth Django natives) — impact sur `views.SignupView`, `forms.SignupForm`, `admin_course.py` (import `LogoutView`), et les templates d'auth. C'est le chantier le plus incertain en taille : à isoler dans son propre lot de commits/PR.
+  - `django-user-accounts` : si le spike montre une incompatibilité, migrer vers `django-allauth` (ou vues d'auth Django natives) — impact sur `views.SignupView`, `forms.SignupForm`, `admin_course.py` (import `LogoutView`), et les templates d'auth. C'est le chantier le plus incertain en taille : à isoler dans son propre lot de commits/PR. `test_auth.py` est le critère d'acceptation : il décrit le comportement à préserver (login par username, redirection `/course/choose/`, e-mail de confirmation, reset, logout) ; l'adapter uniquement pour les détails de rendu, pas pour le comportement.
   - `pinax-theme-bootstrap` : remplacer par des templates Bootstrap 5 maison (le thème n'apporte plus de valeur, autant s'en débarrasser plutôt que le maintenir sous respirateur artificiel).
-  - `wiki==0.4.4` : décision produit à prendre — soit upgrade vers la branche actuelle de django-wiki (réintégration quasi complète des modèles/migrations/plugins), soit abandon de la fonctionnalité wiki intégrée. À trancher avec le métier avant d'investir du temps dessus.
   - `channels` → 4.x, aligné avec Django 4.2.
-- **Tests** : suite complète + e2e après *chaque* sous-lot (url→re_path, puis NullBooleanField, puis JSONField, puis auth, puis wiki/thème) plutôt qu'à la fin du palier. Ajouter une passe manuelle complète (voir checklist §5) car c'est le palier qui touche le plus de surface fonctionnelle.
+- **Tests** : suite complète + e2e après *chaque* sous-lot (url→re_path, puis NullBooleanField, puis JSONField, puis auth, puis thème) plutôt qu'à la fin du palier. Ajouter une passe manuelle complète (voir checklist §5) car c'est le palier qui touche le plus de surface fonctionnelle.
 
 ### Étape 4 — Django 4.2 → 5.2 LTS
 - Python : 3.10–3.13.
 - Peu de suppressions nouvelles pour ce projet : surtout retirer `USE_L10N` des settings (déjà sans effet).
 - Revalider les DB functions custom (`Unaccent`, `RegexpReplace`, `CompareNames`, `DayOfWeek`, `Hour`) — API stable mais à retester formellement (elles touchent le calcul des doublons et des challenges, zone sensible et peu couverte visuellement par les tests unitaires).
-- Dernier bump `channels`/`stripe`/`sorl-thumbnail`/`django-mptt`/`django-nyt` vers leurs dernières versions compatibles Django 5.2.
+- Dernier bump `channels`/`stripe` vers leurs dernières versions compatibles Django 5.2.
 - **Tests** : suite complète + e2e + checklist manuelle complète (§5) + un passage de charge léger sur les pages de classement/challenges (requêtes lourdes avec `annotate`/`Subquery`).
 
 ### Étape 5 — Nettoyage final
@@ -103,11 +104,9 @@ C'est ici que tombent la plupart des suppressions d'API :
 
 | Priorité | Paquet | Action | Raison |
 |---|---|---|---|
-| 1 (urgent, à investiguer avant de s'engager) | `django-user-accounts` (`account`) | Spike de compat, puis migrer vers `django-allauth` si nécessaire | Maintenance inactive, cœur de l'auth, conditionne le budget temps du projet |
+| 1 (urgent, à investiguer avant de s'engager) | `django-user-accounts` (`account`) | Spike de compat, puis migrer vers `django-allauth` si nécessaire (critère d'acceptation : `test_auth.py`) | Maintenance inactive, cœur de l'auth, conditionne le budget temps du projet |
 | 1 | `pinax-theme-bootstrap` | Remplacer par templates Bootstrap 5 maison | Abandonné depuis 2018, aucune garantie de compat future |
-| 2 | `wiki` (django-wiki) | Décision produit : upgrade complet ou suppression de la fonctionnalité | Écart de ~8 ans de version, upgrade = quasi-réécriture |
 | 2 | `channels` / `channels-redis` / `daphne` / `asgiref` | Bump en lockstep avec chaque palier Django | Nécessaire pour l'envoi de mail async, mais API stable donc risque modéré |
-| 3 | `django-mptt`, `django-nyt`, `django-sekizai`, `django-classy-tags`, `sorl-thumbnail` | Bump groupé avec django-wiki | Dépendances transitives, pas de décision indépendante |
 | 3 | `stripe` | Bump SDK, retester `stripe_webhook`/`intent_paiement` | Ancien mais API Stripe stable conceptuellement, bonne couverture de tests existante (`test_payment_webhooks.py`) |
 | 4 | `zipstream`, `django-jsonfield`, `django-form-admin`, `django-bootstrap-form` | Auditer usage réel, supprimer ou remplacer | Faible risque, faible urgence, à traiter en fin de projet |
 
@@ -126,8 +125,7 @@ C'est ici que tombent la plupart des suppressions d'API :
 - Inscription complète : formulaire équipe + équipiers + questions extra (`ExtraQuestion`).
 - Paiement : IPN Paypal, intent + webhook Stripe, webhook HelloAsso.
 - Back-office (`/course/`) : login, choix de course (cookie `course_uid`), validation de dossiers (`document_review`), envoi de mail groupé, export CSV, listing dossards, listing anomalies/anniversaires, import de résultats CSV, stats.
-- Envoi de mail asynchrone (`runworker mail`) + pixel de tracking (`middleware.tracking_middleware`).
+- Envoi de mail asynchrone via la vraie channel layer (`runworker mail`, non couvert en automatisé) + pixel de tracking (`middleware.tracking_middleware`).
 - Challenges : calcul de classement (`compute_challenge`), fusion/déplacement de participations entre courses.
-- Wiki (si conservé après la décision de l'étape 3).
 - Rendu visuel des templates admin custom (`admin/dashboard.html`, `admin/course_choose.html`, `admin/equipe/*.html`, etc.) — l'UI Django admin change d'apparence entre 2.x, 3.x/4.x et 5.x.
 - `npm run build` (webpack) — pas lié à Django mais à vérifier que la collecte de statiques fonctionne toujours après chaque palier.
