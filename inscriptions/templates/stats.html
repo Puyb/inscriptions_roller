@@ -127,9 +127,12 @@
             <div class="col-md-12">
                 <div id="map"></div>
             </div>
+            {% if stats.origine %}
             <div class="col-md-12">
+                <p>{% blocktrans with nom=stats.origine.nom %}Distance depuis {{ nom }}{% endblocktrans %}</p>
                 <canvas id="canvas_distance"></canvas>
             </div>
+            {% endif %}
             {% else %}
             <div class="col-md-12">
                 <p id="no-map">{% trans "Localisation indisponible" %}</p>
@@ -242,15 +245,17 @@
         }).addTo(map);
 
         var point;
-        var origine = new L.LatLng(48.852775, 2.247415);
         {% localize off %}
+        var origine = {% if stats.origine %}new L.LatLng({{ stats.origine.lat }}, {{ stats.origine.lng }}){% else %}null{% endif %};
         {% for ville in stats.villes %}
         {% if ville.lat and ville.lng %}
         points.push(point=[{{ ville.lat }}, {{ ville.lng }}]);
         point = new L.LatLng(point[0], point[1]);
         L.marker(point).addTo(map).bindPopup("{{ ville.nom|escapejs }} : {{ ville.count }}");
-        var distance = Math.ceil(origine.distanceTo(point) / 1000 / tranche);
-        distances[distance] = (distances[distance] || 0) + {{ ville.count }};
+        if (origine) {
+            var distance = Math.ceil(origine.distanceTo(point) / 1000 / tranche);
+            distances[distance] = (distances[distance] || 0) + {{ ville.count }};
+        }
         {% endif %}{% endfor %}
         {% endlocalize %}
         if (points.length) {

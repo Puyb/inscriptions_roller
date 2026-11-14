@@ -79,7 +79,7 @@ REGION_NORMALISATION = {
     'Alsace': 'Grand-Est',
     'Alsace-Champagne-Ardenne-Lorraine': 'Grand-Est',
     'Champagne-Ardenne': 'Grand-Est',
-    'Lorraine': 'Grand-est',
+    'Lorraine': 'Grand-Est',
     'Grand Est': 'Grand-Est',
     'Aquitaine': 'Nouvelle-Aquitaine',
     'Aquitaine-Limousin-Poitou-Charentes': 'Nouvelle-Aquitaine',
@@ -96,8 +96,7 @@ REGION_NORMALISATION = {
     'Roussillon': 'Occitanie',
     'Languedoc-Roussillon': 'Occitanie',
     'Occitania': 'Occitanie',
-    'Pays-de-la-Loire': 'Centre-Val de Loire',
-    'Pays de la Loire': 'Centre-Val de Loire',
+    'Pays-de-la-Loire': 'Pays de la Loire',
     'Centre': 'Centre-Val de Loire',
     'Centre-Loire Valley': 'Centre-Val de Loire',
     'Brittany': 'Bretagne',
@@ -135,6 +134,7 @@ class Course(models.Model):
     uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
+    ville2              = models.ForeignKey('Ville', null=True, blank=True, on_delete=models.SET_NULL, related_name='+', verbose_name=_('Localisation'), help_text=_("Origine du calcul des distances dans les statistiques. Renseignée automatiquement d'après la ville (France) ; à modifier pour une course à l'étranger."))
     date                = models.DateField(_(u'Date'))
     url                 = models.URLField(_(u'URL'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
@@ -232,6 +232,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 to=[self.email_contact],
                 content_type='text',
             )
+        if not self.ville2_id and self.ville:
+            self.ville2 = lookup_ville(self.ville, '', 'FR')
         super(Course, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -371,8 +373,15 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 'count': ville.count,
             } for ville in Ville.objects.filter(equipe__course=self).annotate(count=Coalesce(Sum('equipe__nombre'), Value(0)))
             if ville.count > 0 ]
-        sorted(result['villes'], key=itemgetter('nom'))
-        sorted(result['villes'], key=itemgetter('count'), reverse=True)
+        result['villes'].sort(key=itemgetter('nom'))
+        result['villes'].sort(key=itemgetter('count'), reverse=True)
+        result['origine'] = None
+        if self.ville2_id:
+            result['origine'] = {
+                'nom': self.ville2.nom,
+                'lat': float(self.ville2.lat),
+                'lng': float(self.ville2.lng),
+            }
 
         result['course']['paiements_par_type'] = {
             row['paiement__type']: row['n']

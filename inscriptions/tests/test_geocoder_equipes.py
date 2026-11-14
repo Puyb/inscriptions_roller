@@ -54,6 +54,13 @@ class GeocoderEquipesTestCase(BaseTestCase):
         self.assertIsNotNone(self.ville(self.paris))
         self.assertIsNone(self.ville(self.autre))
 
+    def test_localise_aussi_les_courses(self):
+        self.c1.ville = 'Paris'
+        type(self.c1).objects.filter(pk=self.c1.pk).update(ville='Paris', ville2=None)
+        out = self.run_cmd('--course', 'geo1')
+        self.assertIn('1 courses localisees', out)
+        self.assertEqual(type(self.c1).objects.get(pk=self.c1.pk).ville2.nom, 'Paris')
+
     def test_force_recalcule_et_sans_force_conserve(self):
         ancienne = Ville.objects.create(nom='Ancienne', pays='FR', region='X', lat=1, lng=1)
         Equipe.objects.filter(pk=self.paris.pk).update(gerant_ville2=ancienne)
