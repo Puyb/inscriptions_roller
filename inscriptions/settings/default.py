@@ -40,7 +40,6 @@ USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale.
-USE_L10N = True
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # If you set this to False, Django will not use timezone-aware datetimes.
@@ -134,8 +133,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
-    "bootstrapform",
-    "formadmin",
     "account",
     "turnstile",
 

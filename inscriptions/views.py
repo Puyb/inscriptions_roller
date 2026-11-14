@@ -28,6 +28,10 @@ from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
 from .templatetags import stripe as stripe_templatetags
+
+# Le SDK epingle une version d'API Stripe ; on garde celle par defaut du compte Stripe de
+# chaque course (comportement du SDK 2.x utilise jusqu'ici).
+stripe.api_version = None
 from .templatetags import paypal as paypal_templatetags
 from pathlib import Path
 from uuid import uuid4
@@ -698,7 +702,7 @@ def stripe_webhook(request, course_uid):
     except ValueError as e:
         # invalid payload
         return HttpResponse('Invalid payload', status=400)
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.SignatureVerificationError as e:
         # invalid signature
         return HttpResponse('Invalid payload', status=400)
 

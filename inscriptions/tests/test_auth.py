@@ -179,7 +179,8 @@ class LoginLogoutTestCase(TestCase):
     def test_course_admin_logout_logs_out(self):
         # /course/logout/ : le CourseAdminSite l'autorise meme sans accreditation
         self.client.force_login(self.user)
-        response = self.client.get('/course/logout/')
+        # Django >= 5 : la deconnexion de l'admin n'accepte plus que POST
+        response = self.client.post('/course/logout/')
         self.assertIn(response.status_code, (200, 302))
         self.assertNotIn('_auth_user_id', self.client.session)
 

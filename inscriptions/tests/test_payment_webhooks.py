@@ -39,7 +39,7 @@ class StripeWebhookTestCase(BaseTestCase):
             )
 
     def test_invalid_signature_is_rejected(self):
-        with mock.patch('stripe.Webhook.construct_event', side_effect=stripe.error.SignatureVerificationError('bad sig', 'sig_header')):
+        with mock.patch('stripe.Webhook.construct_event', side_effect=stripe.SignatureVerificationError('bad sig', 'sig_header')):
             response = self.client.post(
                 '/%s/stripe/webhook/' % self.course.uid,
                 data='{}', content_type='application/json',

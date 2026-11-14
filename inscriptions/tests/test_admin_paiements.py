@@ -512,7 +512,7 @@ class PaiementAdminListTestCase(PaiementChangeBaseTestCase):
     def test_equipe_filter_lookups_with_value_shows_team(self):
         from inscriptions.admin_course import PaiementEquipeFilter
         from django.test import RequestFactory
-        params = {'equipe_id': str(self.e1.id)}
+        params = {'equipe_id': [str(self.e1.id)]}  # Django >= 5 : valeurs en liste (comme request.GET)
         f = PaiementEquipeFilter(RequestFactory().get('/'), params, Paiement, course_site._registry[Paiement])
         lookups = f.lookups(None, None)
         self.assertEqual(lookups[0][0], str(self.e1.id))
