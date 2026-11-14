@@ -42,7 +42,6 @@ class LogAdmin(admin.ModelAdmin):
             obj.get_admin_url(),
             escape(obj.object_repr)
         ))
-    modified_object.allow_tags = True
 site.register(LogEntry, LogAdmin)
 
 
@@ -53,7 +52,6 @@ class CourseAdmin(admin.ModelAdmin):
 
     def active2(self, obj):
         return obj.active and ICON_OK or ICON_KO
-    active2.allow_tags = True
     active2.short_description = 'Active'
 
 site.register(Course, CourseAdmin)

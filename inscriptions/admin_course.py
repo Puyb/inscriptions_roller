@@ -883,7 +883,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             'text': obj.offert and ICON_GIFT or (obj.paiement_complet() and ICON_OK or ICON_KO),
             'title': '%s / %s €' % (obj.montant_paiements, obj.prix),
         })
-    paiement_complet2.allow_tags = True
     paiement_complet2.short_description = '€'
     
     def nombre2(self, obj):
@@ -902,7 +901,6 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
         if auto == False:
             return ICON_KO + ret
         return ICON_MISSING + ret
-    dossier_complet_auto2.allow_tags = True
     dossier_complet_auto2.short_description = mark_safe(ICON_OK)
 
     def has_add_permission(self, request):
@@ -1303,14 +1301,12 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
 
     def active(self, obj):
         return obj.role != '' and ICON_OK or ICON_KO
-    active.allow_tags = True
 
     def user_name(self, obj):
         return obj.user.username
 
     def user_email(self, obj):
         return mark_safe('<a href="mailto:%s">%s</a>' % (obj.user.email, obj.user.email))
-    user_email.allow_tags = True
 
     def has_add_permission(self, request):
         return False
@@ -1360,7 +1356,6 @@ class MailAdmin(CourseFilteredObjectAdmin):
         if obj.error:
             return ICON_KO
         return ''
-    status.allow_tags = True
     status.short_description = mark_safe(ICON_OK)
 site.register(Mail, MailAdmin)
 

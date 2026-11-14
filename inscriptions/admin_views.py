@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count, F, Sum, Case, When, Value, IntegerField
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect, HttpResponseServerError, Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.http import urlencode
 from django.utils.translation import ugettext as _
