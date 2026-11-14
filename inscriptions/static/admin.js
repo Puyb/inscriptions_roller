@@ -9,14 +9,4 @@ $(function() {
         resetCookie();
     if (COURSES_UID !== false && !~COURSES_UID.indexOf(COURSE_UID) && !/^\/((course\/(login|choose|inscriptions\/course\/add|ask)\/$)|admin)/.test(location.pathname))
         location.href = '/course/choose/';
-
-    $('#course_chooser').change(function() {
-        var v = $(this).val();
-        if(v) {
-            location.href = '/' + v + '/admin/';
-        } else {
-            resetCookie();
-            location.href = '/admin/';
-        }
-    });
 });
