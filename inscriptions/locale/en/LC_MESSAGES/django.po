@@ -2199,3 +2199,7 @@ msgstr "Location unavailable"
 #, python-format
 msgid "Distance depuis %(nom)s"
 msgstr "Distance from %(nom)s"
+
+#: inscriptions/templates/stats.html
+msgid "Localisation des villes : données GeoNames (CC BY 4.0)."
+msgstr "City locations: GeoNames data (CC BY 4.0)."

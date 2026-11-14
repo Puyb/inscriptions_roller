@@ -1,6 +1,14 @@
 # Spec : réparation des pages de statistiques
 
-> **Statut : à exécuter.** Décision prise : le géocodage passe sur un **référentiel local de codes postaux (GeoNames)**, sans aucun appel externe (« solution C »).
+> **Statut : lots 1 à 7 exécutés** (branche `stats-repair`, un commit par lot, 578 tests unitaires + 102 e2e verts). Lot 8 (modernisation, optionnel) non fait. Décision prise : le géocodage passe sur un **référentiel local de codes postaux (GeoNames)**, sans aucun appel externe (« solution C »).
+>
+> Écarts et constats d'exécution :
+> - `import_codes_postaux` : FR contient ~51 600 lignes (pas ~38 000) ; un pays absent de GeoNames (404, ex. `BT`) est ignoré au lieu de faire échouer l'import.
+> - Rattrapage validé sur le dump du 2026-08-04 : **99,8 % des équipes des courses 60+** localisées (1 282 / 1 332 sur l'ensemble, les non résolues sont surtout des adresses `?`).
+> - `REGION_NORMALISATION` fusionnait à tort *Pays de la Loire* dans *Centre-Val de Loire* (et `Grand-est` mal casé) : corrigé au lot 5.
+> - L'alignement « Date de début » de l'admin était cassé (`delta.start` inexistant → graphique vide) : corrigé au lot 6.
+> - `geocoder_equipes` renseigne aussi `Course.ville2`.
+> - Procédure de déploiement : `migrate`, `import_codes_postaux`, `geocoder_equipes --toutes --dry-run`, puis sans `--dry-run`.
 
 ## 1. Contexte et constats
 

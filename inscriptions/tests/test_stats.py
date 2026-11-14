@@ -133,6 +133,7 @@ class StatsGeographieTestCase(BaseTestCase):
         self.assertIn('new L.LatLng(46.9894', html)
         self.assertNotIn('48.852775', html)
         self.assertIn('id="map"', html)
+        self.assertIn('GeoNames', html)
 
     def test_page_sans_origine_pas_de_graphique_distance(self):
         self.course.ville2 = None
