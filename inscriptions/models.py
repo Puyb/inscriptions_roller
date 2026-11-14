@@ -610,7 +610,7 @@ class Equipe(models.Model):
     course             = models.ForeignKey(Course, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
-    dossier_complet    = models.NullBooleanField(_(u'Dossier complet'))
+    dossier_complet    = models.BooleanField(_(u'Dossier complet'), null=True)
     date               = models.DateTimeField(_(u"Date d'insciption"), auto_now_add=True)
     commentaires       = models.TextField(_(u'Commentaires'), blank=True)
     gerant_ville2      = models.ForeignKey(Ville, null=True, on_delete=models.SET_NULL)
@@ -872,11 +872,11 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     sexe              = models.CharField(_(u'Sexe'), max_length=1, choices=SEXE_CHOICES)
     date_de_naissance = models.DateField(_(u'Date de naissance'), help_text=DATE_DE_NAISSANCE_HELP)
     autorisation      = models.FileField(_(u'Autorisation parentale'), upload_to=equipier_autorisation_filename , blank=True, help_text=AUTORISATION_HELP)
-    autorisation_valide  = models.NullBooleanField(_(u'Autorisation parentale valide'))
+    autorisation_valide  = models.BooleanField(_(u'Autorisation parentale valide'), null=True)
     justificatif      = models.CharField(_(u'Justificatif'), max_length=15, choices=JUSTIFICATIF_CHOICES, help_text=JUSTIFICATIF_HELP)
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
-    piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
+    piece_jointe_valide  = models.BooleanField(_(u'Certificat ou licence valide'), null=True)
     extra             = JSONField(default=dict)
 
     # Pre-calculated fields
