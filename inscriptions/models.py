@@ -589,7 +589,10 @@ class Edition(models.Model):
 def edition_lookup(key, prefixe=''):
     """Filtres ORM pour la cle d'URL « course/edition » ; `prefixe` est le chemin
     depuis le modele filtre vers l'Edition (ex. 'course__' pour une Equipe)."""
-    uid_course, _sep, uid_edition = key.partition('/')
+    uid_course, sep, uid_edition = key.partition('/')
+    if not sep:
+        # ancien uid d'edition (sans '/') : encore present dans d'anciens liens/formulaires
+        return {prefixe + 'legacy_uid': key}
     return {prefixe + 'course__uid': uid_course, prefixe + 'uid': uid_edition}
 
 

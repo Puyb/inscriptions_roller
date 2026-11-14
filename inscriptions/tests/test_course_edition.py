@@ -95,6 +95,16 @@ class LegacyRedirectTestCase(BaseTestCase):
     def test_uid_inconnu_reste_404(self):
         self.assertEqual(self.client.get('/jamais/list/').status_code, 404)
 
+    def test_get_edition_accepte_un_ancien_uid(self):
+        from inscriptions.models import get_edition
+        self.assertEqual(get_edition('6hdp13'), self.edition)
+        self.assertEqual(get_edition('6hparis/2013'), self.edition)
+
+    def test_stats_compare_avec_anciens_uids(self):
+        autre = CourseFactory(course=self.edition.course, uid='2014', legacy_uid='6hdp14')
+        reponse = self.client.get('/6hparis/2013/stats/6hdp14')
+        self.assertNotEqual(reponse.status_code, 404, autre)
+
 
 class MappingMigrationTestCase(SimpleTestCase):
     """Le mapping des editions historiques doit rester coherent."""
