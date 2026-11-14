@@ -71,7 +71,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         from django.urls import re_path
         urls = [
             re_path(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
-            re_path(r'^ask/(?P<course_uid>[^/]+/[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
+            re_path(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
             re_path(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
             re_path(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             re_path(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
@@ -114,25 +114,26 @@ class CourseAdminSite(admin.sites.AdminSite):
     def course_ask_accreditation(self, request, course_uid=None):
         request.current_app = self.name
         if course_uid:
-            course = get_edition(course_uid)
+            course = get_object_or_404(Course, uid=course_uid)
             accreditation, created = Accreditation.objects.get_or_create(
                 user=request.user,
-                course=course.course,
+                course=course,
             )
             if created:
                 messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
-
-                send_mail(
-                    subject="Demande d'accès à %s" % (course.key, ),
-                    body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
-                    to=[course.email_contact],
-                )
+                edition = course.derniere_edition
+                if edition:
+                    send_mail(
+                        subject="Demande d'accès à %s" % (course.uid, ),
+                        body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
+                        to=[edition.email_contact],
+                    )
             else:
                 messages.add_message(request, messages.INFO, u'Une demande d\'accreditation pour la course "%s" existe déjà.' % (course.nom, ))
             return redirect('../')
 
-        courses = Edition.objects.exclude(course__in=[a.course for a in request.user.accreditations.all()])
-        demandes = Edition.objects.filter(course__accreditations__user=request.user, course__accreditations__role='')
+        courses = Course.objects.exclude(accreditations__user=request.user)
+        demandes = Course.objects.filter(accreditations__user=request.user, accreditations__role='')
         context = dict(self.each_context(request),
             courses=courses,
             demandes=demandes,

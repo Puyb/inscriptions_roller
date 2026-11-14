@@ -241,12 +241,12 @@ class CourseChooseAskTestCase(AdminTestCase):
     def test_ask_list_excludes_already_requested_courses(self):
         r = self.client.get('/course/ask/')
         self.assertEqual(r.status_code, 200)
-        self.assertNotIn(self.course, list(r.context['courses']))
-        self.assertIn(self.other_course, list(r.context['courses']))
+        self.assertNotIn(self.course.course, list(r.context['courses']))
+        self.assertIn(self.other_course.course, list(r.context['courses']))
 
     def test_ask_creates_pending_accreditation_and_notifies_organizer(self):
         with mock.patch('inscriptions.admin_course.send_mail') as sm:
-            r = self.client.get('/course/ask/%s/' % self.other_course.key)
+            r = self.client.get('/course/ask/%s/' % self.other_course.course.uid)
         self.assertEqual(r.status_code, 302)
         acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         self.assertEqual(acc.role, '')
@@ -255,7 +255,7 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_pending_accreditation_still_does_not_grant_access(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.key)
+            self.client.get('/course/ask/%s/' % self.other_course.course.uid)
         e = self.equipe(course=self.other_course, categorie=self.other_cat)
         set_course_cookie(self.client, self.other_course)
         r = self.client.get(CHANGELIST)
@@ -268,20 +268,20 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_demandes_listed_in_ask_page(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.key)
+            self.client.get('/course/ask/%s/' % self.other_course.course.uid)
         r = self.client.get('/course/ask/')
-        self.assertIn(self.other_course, list(r.context['demandes']))
+        self.assertIn(self.other_course.course, list(r.context['demandes']))
 
     def test_ask_twice_for_same_course_is_handled(self):
         """unique_together(user, course) : une seconde demande ne doit pas provoquer de 500."""
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.key)
-            r = self.client.get('/course/ask/%s/' % self.other_course.key)
+            self.client.get('/course/ask/%s/' % self.other_course.course.uid)
+            r = self.client.get('/course/ask/%s/' % self.other_course.course.uid)
         self.assertLess(r.status_code, 500)
 
     def test_accreditation_granted_sends_mail_to_user(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.key)
+            self.client.get('/course/ask/%s/' % self.other_course.course.uid)
         acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         with mock.patch('inscriptions.models.send_mail') as sm:
             acc.role = 'admin'
