@@ -10,10 +10,11 @@ from inscriptions.factories import (
     CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory, ExtraQuestionFactory,
 )
 from inscriptions.models import (
-    Accreditation, Course, Paiement, PaiementRepartition, TemplateMail, Ville,
+    Accreditation, Course, Mail, Paiement, PaiementRepartition, TemplateMail, Ville,
 )
 
 COURSE_UID = 'e2e'
+STATS_UID = 'e2estats'  # second accredited course, to compare in the stats page
 OTHER_UID = 'e2eother'  # course the organizer has NO accreditation on
 ADMIN_USERNAME = 'e2e-admin'
 SUPER_USERNAME = 'e2e-super'
@@ -35,7 +36,7 @@ class Command(BaseCommand):
     help = "Seed a fixed 'e2e' course + categories for the Playwright suite."
 
     def handle(self, *args, **options):
-        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID]).delete()  # e2enew: made by tests
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID]).delete()  # e2enew: made by tests
         Ville.objects.get_or_create(nom='paris', defaults=dict(
             region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
         ))
@@ -95,6 +96,11 @@ class Command(BaseCommand):
             course=course, categorie=categorie, nom='Extra 1',
             extra={'extra%d' % question.id: 'XL'})
 
+        Mail.objects.create(
+            course=course, equipe=course.equipe_set.get(nom='Extra 1'), emetteur='orga@example.com',
+            destinataires=['gerant@example.com'], bcc=[], sujet='Sujet e2e', uid='e2e-mail',
+            message='<p id="mail-body">Contenu <b>riche</b></p>')
+
         # An existing payment (20 EUR by cheque) on "Paiement 8", to edit
         paiement = Paiement.objects.create(type='chèque', montant=Decimal('20.00'))
         PaiementRepartition.objects.create(
@@ -106,6 +112,14 @@ class Command(BaseCommand):
         user = User.objects.create_user(
             ADMIN_USERNAME, 'e2e-admin@example.com', ADMIN_PASSWORD)
         Accreditation.objects.create(user=user, course=course, role='admin')
+        stats_course = CourseFactory(
+            uid=STATS_UID, nom='Course Stats E2E',
+            date=date.today() + timedelta(days=120),
+            date_ouverture=date.today() - timedelta(days=5),
+            date_fermeture=date.today() + timedelta(days=90))
+        stats_categorie = CategorieFactory(course=stats_course, code='S', nom='S', numero_debut=1, numero_fin=99)
+        EquipeFactory(course=stats_course, categorie=stats_categorie, nom='Stats 1')
+        Accreditation.objects.create(user=user, course=stats_course, role='admin')
         User.objects.filter(username=SUPER_USERNAME).delete()
         User.objects.create_superuser(SUPER_USERNAME, 'e2e-super@example.com', ADMIN_PASSWORD)
         CourseFactory(uid=OTHER_UID, nom='Course Autre E2E',

@@ -241,6 +241,7 @@ const draw = () => {
         }
     }
 
+    Object.values(Chart.instances).forEach(c => c.destroy()); // don't leak old charts
     const chart = new Chart('canvas_time', config);
 }
 const init = async () => {
