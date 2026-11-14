@@ -29,7 +29,7 @@ COPY --from=docs /site /srv/documentation
 COPY requirements.txt /app/
 COPY requirements_dev.txt /app/
 
-RUN pip install -r requirements.txt && [ "$DEBUG" = "True" ] && pip install -r requirements_dev.txt || true
+RUN pip install -r requirements.txt && if [ "$DEBUG" = "True" ]; then pip install -r requirements_dev.txt; fi
 
 VOLUME /app
 

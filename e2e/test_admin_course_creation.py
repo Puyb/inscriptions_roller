@@ -30,6 +30,8 @@ def models(page):
 
 def test_models_are_loaded_and_include_own_courses(admin_page):
     admin_page.goto(ADD_URL)
+    # les modeles sont charges en JS : attendre qu'ils soient la avant de les lister
+    expect(models(admin_page).first).to_be_visible()
     values = [m.get_attribute('value') for m in models(admin_page).all()]
     assert {'paris', 'grol', 'centre'} <= set(values)
     # the organizer's own course can be cloned: its id is a numeric value

@@ -882,8 +882,8 @@ def blank(request):
 def get_helloasso_token(course):
     params = urlencode({
         'grant_type': 'client_credentials', 
-        'client_id': course.helloasso_id,
-        'client_secret': course.helloasso_secret,
+        'client_id': course.helloasso_id or '',
+        'client_secret': course.helloasso_secret or '',
     })
     baseUrl = HELLOASSO_URL if not course.helloasso_sandbox else HELLOASSO_SANDBOX_URL
     logger.info(baseUrl)

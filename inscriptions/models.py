@@ -141,7 +141,7 @@ class Course(models.Model):
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
     fond_dossard        = models.ImageField(_(u'Image de fond des dossards'), upload_to='fond_dossard', null=True, blank=True)
     date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
-    dates_augmentation  = ArrayField(models.DateField(), default=[], null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
+    dates_augmentation  = ArrayField(models.DateField(), default=list, null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
     date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
     date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
     limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
@@ -462,8 +462,8 @@ class Categorie(models.Model):
     course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
-    prices_base     = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix de base") )
-    prices_equipier = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix par équipier") )
+    prices_base     = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=list, verbose_name=_("Prix de base") )
+    prices_equipier = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=list, verbose_name=_("Prix par équipier") )
     min_equipiers   = models.IntegerField(_(u"Nombre minimum d'équipiers"))
     max_equipiers   = models.IntegerField(_(u"Nombre maximum d'équipiers"))
     min_age         = models.IntegerField(_(u'Age minimum'), default=12)
@@ -622,7 +622,7 @@ class Equipe(models.Model):
     temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
-    extra              = JSONField(default={})
+    extra              = JSONField(default=dict)
     verrou             = models.BooleanField(_('Equipe verrouillée (modifiable uniquement par l\'organisateur)'), default=False)
 
     class Meta:
@@ -877,7 +877,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
     piece_jointe_valide  = models.NullBooleanField(_(u'Certificat ou licence valide'))
-    extra             = JSONField(default={})
+    extra             = JSONField(default=dict)
 
     # Pre-calculated fields
     verifier               = models.BooleanField(_(u'Verifier'), editable=False)
@@ -964,7 +964,7 @@ class ExtraQuestion(models.Model):
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
     help_text = models.TextField(_('Texte d\'aide'), blank=True, default='')
-    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix"))
+    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=list, verbose_name=_("Prix"))
     required = models.BooleanField()
 
     def price(self, d=None):
@@ -1011,7 +1011,7 @@ class ExtraQuestion(models.Model):
 class ExtraQuestionChoice(models.Model):
     question = models.ForeignKey(ExtraQuestion, related_name='choices', on_delete=models.CASCADE)
     label = models.CharField(_('Label'), max_length=200)
-    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=[], verbose_name=_("Prix augmenté"))
+    prices = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=list, verbose_name=_("Prix augmenté"))
     order = models.IntegerField(default=0)
 
     def __str__(self):

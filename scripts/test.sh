@@ -19,14 +19,15 @@ echo " ready."
 
 # PYTHONWARNINGS est transmis au conteneur, ex. pour promouvoir les
 # DeprecationWarning en erreurs :
-#   PYTHONWARNINGS=error::DeprecationWarning scripts/test.sh
+#   PYTHONWARNINGS=error::DeprecationWarning:inscriptions scripts/test.sh
+# (filtre limite au module inscriptions : les libs tierces figees en emettent trop)
 WARN_ENV=()
 if [ -n "${PYTHONWARNINGS:-}" ]; then
     WARN_ENV=(-e "PYTHONWARNINGS=$PYTHONWARNINGS")
 fi
 
 # Migrations manquantes (changement de type de champ, etc.)
-docker-compose --profile test run --rm test ./manage.py ensure_database
-docker-compose --profile test run --rm "${WARN_ENV[@]}" test ./manage.py makemigrations --check --dry-run
+docker-compose --profile test run --build --rm test ./manage.py ensure_database
+docker-compose --profile test run --build --rm "${WARN_ENV[@]}" test ./manage.py makemigrations --check --dry-run inscriptions
 
-docker-compose --profile test run --rm "${WARN_ENV[@]}" test ./manage.py test "${@:-inscriptions}"
+docker-compose --profile test run --build --rm "${WARN_ENV[@]}" test ./manage.py test "${@:-inscriptions}"
