@@ -56,6 +56,14 @@ npm run watch     # rebuild on change
 ### Documentation (organizer docs)
 The former django-wiki was replaced by static docs: Markdown in `docs/wiki/`, built by mkdocs (`mkdocs.yml`, `requirements_docs.txt`). The `Dockerfile` has a separate `docs` stage (python 3.12, mkdocs-material) whose output is copied to `/srv/documentation` and served by uwsgi under `/documentation` (see `docker-start.sh`). A doc change therefore ships with the next image build. Local preview: `pip install -r requirements_docs.txt && mkdocs serve`.
 
+### Geocodage local (statistiques)
+`Equipe.gerant_ville2` (carte, distances, pays/regions des stats) est resolu **hors-ligne** depuis le referentiel `CodePostal` (GeoNames, CC BY 4.0), jamais par une API externe. A charger apres un deploiement ou sur une base vide :
+```
+./manage.py import_codes_postaux                 # pays presents dans les equipes (+ FR) ; telecharge depuis download.geonames.org
+./manage.py import_codes_postaux --fichier FR.zip --pays FR    # hors-ligne
+```
+Idempotent (remplace les pays importes). Spec et lots : `docs/stats-repair-plan.md`.
+
 ### Background workers
 The app sends email through a Django Channels worker, not synchronously in the request:
 ```

@@ -554,6 +554,28 @@ class Ville(models.Model):
     region   = models.CharField(max_length=200)
     pays     = models.CharField(max_length=200)
 
+class CodePostal(models.Model):
+    """Referentiel local (GeoNames, CC BY 4.0) utilise par `lookup_ville`.
+    Rempli par `manage.py import_codes_postaux`."""
+    pays           = models.CharField(max_length=2)
+    code_postal    = models.CharField(max_length=20)
+    nom            = models.CharField(max_length=200)
+    nom_normalise  = models.CharField(max_length=200)
+    region         = models.CharField(max_length=200, blank=True)
+    departement    = models.CharField(max_length=200, blank=True)
+    lat            = models.DecimalField(max_digits=10, decimal_places=7)
+    lng            = models.DecimalField(max_digits=10, decimal_places=7)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['pays', 'code_postal']),
+            models.Index(fields=['pays', 'nom_normalise']),
+        ]
+
+    def __str__(self):
+        return '%s %s %s' % (self.pays, self.code_postal, self.nom)
+
+
 def lookup_ville(nom, cp, pays):
     nom = nom.lower()
     nom = re.sub('[- ,/]+', ' ', nom)
