@@ -7,7 +7,7 @@ from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect,
 from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType

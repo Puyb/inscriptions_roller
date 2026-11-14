@@ -12,7 +12,7 @@ from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirec
 from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.utils.http import urlencode
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 def organizer_required(view):
     """Reserve la vue aux utilisateurs connectes ayant un role sur la course

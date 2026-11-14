@@ -19,7 +19,7 @@ from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
 from django.utils import timezone
 from django.utils.http import urlencode
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm, SignupForm

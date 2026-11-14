@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.db.models import Sum, Value, F, Q, Max, Prefetch, OuterRef, Subquery
 from django.db.models.functions import Coalesce, Extract
 from django.db.models.query import prefetch_related_objects
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingHttpResponse
 from decimal import InvalidOperation

@@ -3,6 +3,6 @@ from .consumers import MailConsumer
 
 application = ProtocolTypeRouter({
     'channel': ChannelNameRouter({
-        'mail': MailConsumer,
+        'mail': MailConsumer.as_asgi(),
     }),
 })

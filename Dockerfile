@@ -7,7 +7,7 @@ COPY mkdocs.yml .
 COPY docs/wiki docs/wiki
 RUN mkdocs build --strict -d /site
 
-FROM python:3.7
+FROM python:3.9
 
 ARG DEBUG
 
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app/
 
-RUN pip install psycopg2==2.8.6 uwsgi
+RUN pip install psycopg2==2.9.9 uwsgi
 
 RUN mkdir -p /var/log/uwsgi /shared/static /shared/media
 

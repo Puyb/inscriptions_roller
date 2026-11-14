@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict, Counter
 from operator import itemgetter
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django_countries.fields import CountryField
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -938,14 +938,14 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
 
     def tours_info(self):
         if not hasattr(self, '_tours_info'):
-            self._tours_info = self.tours.aggregate(count=Count('duree'), duree=Sum('duree'), duree_moyenne=Avg('duree'), best=Min('duree'))
+            self._tours_info = self.tours.aggregate(count=Count('duree'), duree_total=Sum('duree'), duree_moyenne=Avg('duree'), best=Min('duree'))
         return self._tours_info
 
     def distance(self):
         return self.tours_info()['count'] * self.equipe.course.distance if self.tours and self.equipe.course.distance else None
 
     def vitesse(self):
-        return self.tours_info()['count'] * self.equipe.course.distance / self.tours_info()['duree'] * 3600 if self.tours_info()['duree'] and self.equipe.course.distance else 0
+        return self.tours_info()['count'] * self.equipe.course.distance / self.tours_info()['duree_total'] * 3600 if self.tours_info()['duree_total'] and self.equipe.course.distance else 0
 
 class ExtraQuestion(models.Model):
     PAGE_CHOICES = (

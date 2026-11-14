@@ -751,7 +751,7 @@ class MailConsumerTestCase(BaseTestCase):
         return msg
 
     def consume(self, message):
-        MailConsumer({}).send_mail(message)
+        MailConsumer().send_mail(message)
 
     def setUp(self):
         super().setUp()
@@ -884,7 +884,7 @@ class TrackingTestCase(BaseTestCase):
     def test_message_id_injected_by_consumer_matches_tracking_lookup(self):
         """Le pixel produit par le consumer porte l'uid que le middleware recherche."""
         django_mail.outbox = []
-        MailConsumer({}).send_mail({
+        MailConsumer().send_mail({
             'type': 'send.mail', 'subject': 's', 'body': '<p>x</p>', 'to': ['b@example.com'],
             'message_id': self.mail.uid,
         })

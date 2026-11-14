@@ -3,7 +3,7 @@ from inscriptions.models import *
 from django.contrib import admin
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.template.response import TemplateResponse
 from .forms import ChallengeForm
 
