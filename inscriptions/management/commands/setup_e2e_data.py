@@ -10,7 +10,7 @@ from inscriptions.factories import (
     CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory, ExtraQuestionFactory,
 )
 from inscriptions.models import (
-    Accreditation, Course, Mail, Paiement, PaiementRepartition, TemplateMail, Ville,
+    Accreditation, Challenge, ChallengeCategorie, Course, Mail, Paiement, PaiementRepartition, TemplateMail, Ville,
 )
 
 COURSE_UID = 'e2e'
@@ -36,6 +36,7 @@ class Command(BaseCommand):
     help = "Seed a fixed 'e2e' course + categories for the Playwright suite."
 
     def handle(self, *args, **options):
+        Challenge.objects.filter(uid__in=['e2echal', 'e2enewchal']).delete()
         Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID]).delete()  # e2enew: made by tests
         Ville.objects.get_or_create(nom='paris', defaults=dict(
             region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
@@ -106,6 +107,12 @@ class Command(BaseCommand):
         PaiementRepartition.objects.create(
             paiement=paiement, equipe=course.equipe_set.get(nom='Paiement 8'),
             montant=Decimal('20.00'))
+
+        # A challenge with one category, for the superuser admin
+        challenge = Challenge.objects.create(nom='Challenge E2E', uid='e2echal', mode='nord2017')
+        ChallengeCategorie.objects.create(
+            challenge=challenge, nom='Solo', code='SOLO', min_equipiers=1, max_equipiers=1,
+            validation='function(data) { return true; }')
 
         # Backoffice organizer: staff + admin accreditation on the e2e course
         User.objects.filter(username=ADMIN_USERNAME).delete()
