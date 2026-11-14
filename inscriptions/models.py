@@ -195,6 +195,24 @@ class Course(models.Model):
     def derniere_edition(self):
         return self.editions.order_by('-date').first()
 
+    def charge_editions_publiees(self, editions=None):
+        """Renseigne `editions_publiees` (editions actives, par date) et les
+        raccourcis utilises par l'accueil : `editions_ouvertes` (inscriptions en cours),
+        `prochaine_edition` (la plus proche a venir, ou en cours), `derniere_edition_publiee`."""
+        if editions is None:
+            editions = self.editions.filter(active=True).order_by('date')
+        self.editions_publiees = list(editions)
+        for edition in self.editions_publiees:
+            edition.course = self  # evite une requete par edition pour course.active
+        aujourdhui = date.today()
+        self.editions_ouvertes = [e for e in self.editions_publiees if e.ouverte and not e.fermee]
+        a_venir = [e for e in self.editions_publiees if e.date >= aujourdhui]
+        self.prochaine_edition = (
+            min(self.editions_ouvertes, key=lambda e: abs((e.date - aujourdhui).days)) if self.editions_ouvertes
+            else (a_venir[0] if a_venir else None))
+        self.derniere_edition_publiee = self.editions_publiees[-1] if self.editions_publiees else None
+        return self
+
     def save(self, *args, **kwargs):
         if not self.pk:
             send_mail(

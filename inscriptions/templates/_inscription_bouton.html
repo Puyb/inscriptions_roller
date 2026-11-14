@@ -1,0 +1,43 @@
+{% load i18n %}
+{# course : Course avec editions_ouvertes / prochaine_edition (voir Course.charge_editions_publiees) #}
+{% if course.editions_ouvertes|length == 1 %}
+    {% with edition=course.editions_ouvertes.0 %}
+    <a class="btn btn-lg btn-block btn-primary" role="button" href="{% if edition.lien_externe %}{{ edition.lien_externe }}{% else %}{% url "inscriptions_create" course_uid=edition.key %}{% endif %}">{% trans "Inscription" %}</a><br />
+    <p>
+        {% blocktrans with date=edition.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}<br />
+        {% if not edition.lien_externe %}
+        <a href="{% url "inscriptions_list" course_uid=edition.key %}">{% trans "Liste des inscrits" %}</a><br />
+        <a href="{% url "inscriptions_stats" course_uid=edition.key %}">{% trans "Statistiques" %}</a><br />
+        {% endif %}
+    </p>
+    {% endwith %}
+{% elif course.editions_ouvertes %}
+    <button type="button" class="btn btn-lg btn-block btn-primary" data-toggle="modal" data-target="#editions-{{ course.id }}">{% trans "Inscription" %}</button><br />
+    <div class="modal fade" id="editions-{{ course.id }}" tabindex="-1" role="dialog" aria-labelledby="editions-{{ course.id }}-titre">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Fermer" %}"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="editions-{{ course.id }}-titre">{{ course.nom }} : {% trans "choisissez votre édition" %}</h4>
+          </div>
+          <div class="modal-body">
+            <div class="list-group">
+              {% for edition in course.editions_ouvertes %}
+              <a class="list-group-item" href="{% if edition.lien_externe %}{{ edition.lien_externe }}{% else %}{% url "inscriptions_create" course_uid=edition.key %}{% endif %}">
+                <h4 class="list-group-item-heading">{{ edition.nom }}</h4>
+                <p class="list-group-item-text">
+                  {% blocktrans with date=edition.date %}le {{ date }}{% endblocktrans %}
+                  &middot; {% blocktrans with date=edition.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}
+                </p>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+{% elif course.prochaine_edition %}
+    <p>
+        {% blocktrans with ouverture=course.prochaine_edition.date_ouverture %}Ouverture des inscriptions le {{ ouverture }}{% endblocktrans %}<br />
+    </p>
+{% endif %}

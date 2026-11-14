@@ -81,6 +81,10 @@ urlpatterns += [
     path(r'<edition:course_uid>/transpondeurs.csv', admin_views.transpondeursCSV, name='inscriptions_transpondeursCSV'),
     path(r'<edition:course_uid>/listing/', admin_views.listing, name='inscriptions_listing'),
 ]
+# Page d'une course : en dernier, `<str:course_uid>/` capte tout premier segment inconnu
+urlpatterns += [
+    path(r'<str:course_uid>/', views.course_page, name='course_page'),
+]
 
 if settings.DEBUG:
     import debug_toolbar

@@ -23,7 +23,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm, SignupForm
-from .models import edition_lookup, get_edition, Equipe, Equipier, Categorie, Edition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
+from .models import edition_lookup, get_edition, Course, Equipe, Equipier, Categorie, Edition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -501,9 +501,37 @@ def stats_compare(request, course_uid, course_uid2):
     });
 
 def index(request):
+    """Accueil : une carte par course. Les courses avec au moins une edition a venir
+    (ou en cours) d'abord, les autres ensuite ; un bouton d'inscription (direct s'il
+    n'y a qu'une edition ouverte, menu de choix sinon)."""
+    courses = (Course.objects.filter(active=True)
+        .prefetch_related(Prefetch('editions', Edition.objects.filter(active=True).order_by('date').prefetch_related('challenges'))))
+    prochaines, anciennes = [], []
+    aujourdhui = date.today()
+    for course in courses:
+        course.charge_editions_publiees(course.editions.all())
+        if not course.editions_publiees:
+            continue
+        if course.prochaine_edition and course.prochaine_edition.date > aujourdhui:
+            prochaines.append(course)
+        else:
+            anciennes.append(course)
+    prochaines.sort(key=lambda c: c.prochaine_edition.date if c.prochaine_edition else aujourdhui)
+    anciennes.sort(key=lambda c: c.derniere_edition_publiee.date, reverse=True)
     return TemplateResponse(request, 'index.html', {
-        'prochaines_courses': Edition.objects.filter(active=True, date__gt=date.today()).order_by('date'),
-        'anciennes_courses': Edition.objects.filter(active=True, date__lte=date.today()).order_by('date'),
+        'prochaines_courses': prochaines,
+        'anciennes_courses': anciennes,
+    })
+
+def course_page(request, course_uid):
+    """Page d'une course : ses editions publiees et leurs liens."""
+    course = get_object_or_404(Course, uid=course_uid, active=True)
+    course.charge_editions_publiees()
+    if not course.editions_publiees:
+        raise Http404()
+    return TemplateResponse(request, 'course.html', {
+        'course_obj': course,
+        'editions': list(reversed(course.editions_publiees)),
     })
 
 def contact(request, course_uid):

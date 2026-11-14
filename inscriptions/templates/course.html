@@ -1,0 +1,45 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+
+{% block body_class %}home{% endblock %}
+
+{% block body %}
+<div class="jumbotron">
+    <div class="media">
+        <div class="media-left">
+            {% if course_obj.logo %}<img src="{{ MEDIA_URL }}{{ course_obj.logo }}" align="left" width="200" />{% endif %}
+        </div>
+        <div class="media-body">
+            <h2>{{ course_obj.nom }}</h2>
+            <p>
+                {{ course_obj.ville }}<br />
+                {% blocktrans with organisateur=course_obj.organisateur %}Organisé par {{ organisateur }}.{% endblocktrans %}<br />
+                <a href="{{ course_obj.url }}">{% trans "Site de la course" %}</a>
+            </p>
+            {% with course=course_obj %}{% include "_inscription_bouton.html" %}{% endwith %}
+        </div>
+    </div>
+</div>
+
+<section class="container">
+  <h2>{% trans "Éditions" %}</h2>
+  <div class="list-group">
+    {% for edition in editions %}
+    <div class="list-group-item">
+      <h4 class="list-group-item-heading">{{ edition.nom }}</h4>
+      <p class="list-group-item-text">
+        {% blocktrans with date=edition.date %}le {{ date }}{% endblocktrans %}
+        {% if not edition.lien_externe %}
+        &middot; <a href="{% url "inscriptions_list" course_uid=edition.key %}">{% trans "Liste des inscrits" %}</a>
+        &middot; <a href="{% url "inscriptions_stats" course_uid=edition.key %}">{% trans "Statistiques" %}</a>
+        {% if edition.fermee %}&middot; <a href="{% url "inscriptions_resultats" course_uid=edition.key %}">{% trans "Résultats" %}</a>{% endif %}
+        {% endif %}
+        {% if edition.ouverte and not edition.fermee %}
+        &middot; <a href="{% if edition.lien_externe %}{{ edition.lien_externe }}{% else %}{% url "inscriptions_create" course_uid=edition.key %}{% endif %}"><strong>{% trans "Inscription" %}</strong></a>
+        {% endif %}
+      </p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
