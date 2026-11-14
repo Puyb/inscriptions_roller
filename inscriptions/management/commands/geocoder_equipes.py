@@ -70,4 +70,4 @@ class Command(BaseCommand):
         self.stdout.write('%d courses localisees.' % len(courses_ecrire))
         for e in non_resolues:
             self.stdout.write('  non resolue : %s #%s %s | %s | %s | %s' % (
-                e.course.uid, e.numero, e.nom, e.gerant_ville, e.gerant_code_postal, e.gerant_pays))
+                e.course.key, e.numero, e.nom, e.gerant_ville, e.gerant_code_postal, e.gerant_pays))

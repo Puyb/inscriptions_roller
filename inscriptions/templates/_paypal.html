@@ -8,7 +8,7 @@
         <input type="hidden" name="cmd"           value="_cart" />
         <input type="hidden" name="upload"        value="1" />
         <input type="hidden" name="no_shipping"   value="1" />
-        <input type="hidden" name="item_name_1"   value="{{ COURSE.uid }} - {{ instance.categorie.code }}" />
+        <input type="hidden" name="item_name_1"   value="{{ COURSE.key }} - {{ instance.categorie.code }}" />
         <input type="hidden" name="invoice"       value="{{ instance.id }}{{ hour }}" />
         <input type="hidden" name="amount_1"      value="{% if not COURSE.frais_paypal_inclus %}{{ instance.reste_a_payer|prix_paypal|stringformat:".2f" }}{% else %}{{ instance.reste_a_payer|stringformat:".2f" }}{% endif %}" />
         <input type="hidden" name="quantity_1"    value="1" />

@@ -688,7 +688,7 @@ class EquipeSendAdminMailTestCase(BaseTestCase):
         self.assertEqual(m.emetteur, 'orga@example.com')
         self.assertIsNone(m.template)
         self.assertEqual(m.equipe, self.equipe)
-        self.assertEqual(m.sujet, '[adm] %s - %s - Les Rapides' % (self.cat, self.equipe.numero))
+        self.assertEqual(m.sujet, '[%s] %s - %s - Les Rapides' % (self.equipe.course.key, self.cat, self.equipe.numero))
         self.assertIn('Les Rapides', m.message)
         self.assertEqual(sm.call_args[1]['to'], ['orga@example.com'])
 

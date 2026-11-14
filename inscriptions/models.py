@@ -753,7 +753,7 @@ class Equipe(models.Model):
         unique_together = ( ('course', 'numero'), )
 
     def __str__(self):
-        return u'%s - %s - %s - %s' % (self.numero, self.course.uid, self.categorie, self.nom)
+        return u'%s - %s - %s - %s' % (self.numero, self.course.key, self.categorie, self.nom)
 
     def licence_manquantes(self):
         return [equipier for equipier in self.equipier_set.all() if equipier.numero <= self.numero and equipier.licence_manquante]
@@ -924,7 +924,7 @@ class Equipe(models.Model):
             emetteur=course.email_contact,
             destinataires=[course.email_contact],
             bcc=[],
-            sujet='[%s] %s - %s - %s' % (course.uid, self.categorie, self.numero, self.nom),
+            sujet='[%s] %s - %s - %s' % (course.key, self.categorie, self.numero, self.nom),
             message=message,
         )
         mail.save()

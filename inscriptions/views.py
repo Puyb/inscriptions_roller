@@ -886,7 +886,7 @@ def get_intent(request, course, equipes, methode, montant):
         body = {
           "totalAmount": int(montant * 100),
           "initialAmount": int(montant * 100),
-          "itemName": '%s - %s - %s' % (course.uid, instance.categorie.code, instance.numero),
+          "itemName": '%s - %s - %s' % (course.key, instance.categorie.code, instance.numero),
           "backUrl":   returnUrl,
           "errorUrl":  returnUrl,
           "returnUrl": returnUrl,

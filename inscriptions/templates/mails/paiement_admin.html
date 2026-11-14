@@ -1,6 +1,6 @@
 <p>Paiement de {{ paiement.montant }} &euro; re&ccedil;u par {{ paiement.type }} pour :</p>
 <ul>
 {% for equipe_paiement in paiement.equipes.all %}
-<li><strong>{{ equipe_paiement.equipe.course.uid }} {{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }}</strong>.</li>
+<li><strong>{{ equipe_paiement.equipe.course.key }} {{ equipe_paiement.equipe.numero }} {{ equipe_paiement.equipe.nom }}</strong>.</li>
 {% endfor %}
 </ul>

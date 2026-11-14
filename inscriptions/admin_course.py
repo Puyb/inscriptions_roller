@@ -123,7 +123,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                 messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
 
                 send_mail(
-                    subject="Demande d'accès à %s" % (course.uid, ),
+                    subject="Demande d'accès à %s" % (course.key, ),
                     body=render_to_string('mails/ask_accreditation.html', { 'course': course }),
                     to=[course.email_contact],
                 )
