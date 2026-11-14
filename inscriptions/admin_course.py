@@ -60,7 +60,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/[^/]+/$', request.path) or request.path.endswith('/inscriptions/edition/add/') or request.path.endswith('/inscriptions/edition/models/') or request.path.endswith('/course/jsi18n/'):
+        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/edition/add/') or request.path.endswith('/inscriptions/edition/models/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False

@@ -262,6 +262,13 @@ class CourseChooseAskTestCase(AdminTestCase):
         self.assertEqual(r.status_code, 302)
         self.assertIsNotNone(e)
 
+    def test_ask_sans_cookie_de_course_est_autorise(self):
+        self.client.cookies.pop('course_uid', None)
+        with mock.patch('inscriptions.admin_course.send_mail'):
+            r = self.client.get('/course/ask/%s/' % self.other_course.course.uid)
+        self.assertEqual(r.status_code, 302)
+        self.assertTrue(Accreditation.objects.filter(user=self.user, course=self.other_course.course).exists())
+
     def test_ask_unknown_course_is_404(self):
         r = self.client.get('/course/ask/nope/')
         self.assertEqual(r.status_code, 404)
