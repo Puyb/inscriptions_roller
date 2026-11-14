@@ -217,6 +217,23 @@ class LookupVilleTestCase(BaseTestCase):
         equipe.save()
         self.assertEqual(type(equipe).objects.get(pk=equipe.pk).gerant_ville2.nom, 'Troyes')
 
+    def test_adresse_introuvable_conserve_la_ville_precedente(self):
+        equipe = EquipeFactory(gerant_ville='Paris', gerant_code_postal='75015')
+        ville = equipe.gerant_ville2
+        self.assertIsNotNone(ville)
+        equipe = type(equipe).objects.get(pk=equipe.pk)
+        equipe.gerant_ville, equipe.gerant_code_postal = 'Nulle part', '00000'
+        equipe.save()
+        self.assertEqual(type(equipe).objects.get(pk=equipe.pk).gerant_ville2, ville)
+
+    def test_adresse_introuvable_n_est_pas_regeocodee_a_chaque_save(self):
+        from unittest import mock
+        equipe = EquipeFactory(gerant_ville='Nulle part', gerant_code_postal='00000')
+        with mock.patch('inscriptions.models.lookup_ville', return_value=None) as lookup:
+            equipe.save()
+            equipe.save()
+        self.assertEqual(lookup.call_count, 0)
+
     def test_ville_fournie_explicitement_est_conservee(self):
         ville = Ville.objects.create(nom='Ailleurs', pays='FR', region='X', lat=1, lng=1)
         equipe = EquipeFactory(gerant_ville2=ville)

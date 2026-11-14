@@ -890,8 +890,13 @@ class Equipe(models.Model):
                 self.numero = self.getNumero()
 
         origine = getattr(self, '_adresse_gerant_origine', None)
-        if not self.gerant_ville2_id or (origine is not None and origine != self._adresse_gerant()):
-            self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
+        adresse = self._adresse_gerant()
+        change = origine is not None and origine != adresse
+        if change or (not self.gerant_ville2_id and getattr(self, '_adresse_gerant_tentee', None) != adresse):
+            self._adresse_gerant_tentee = adresse
+            ville = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
+            if ville is not None:  # introuvable : on garde la ville precedente (peut-etre saisie a la main)
+                self.gerant_ville2 = ville
         result = super(Equipe, self).save(*args, **kwargs)
         self._adresse_gerant_origine = self._adresse_gerant()
         return result
