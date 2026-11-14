@@ -82,6 +82,10 @@ class Command(BaseCommand):
             equipier = EquipierFactory(equipe=equipe, numero=1, piece_jointe_valide=None)
             equipier.piece_jointe.save('certificat%d.pdf' % i, ContentFile(b'%PDF-1.4\n%%EOF\n'))
 
+        # A minor equipier (parental authorisation row must stay visible)
+        equipe = EquipeFactory(course=course, categorie=categorie, nom='Mineur 1')
+        EquipierFactory(equipe=equipe, numero=1, date_de_naissance=date(date.today().year - 12, 1, 1))
+
         # A mail template, and a team that answered an extra question
         TemplateMail.objects.create(
             course=course, nom='e2e', sujet='Bonjour {{ instance.nom }}',
