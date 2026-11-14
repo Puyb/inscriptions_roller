@@ -31,7 +31,7 @@ def require_stripe_test_keys():
         pytest.fail('Cles Stripe de test absentes : definir E2E_STRIPE_PUBLIC et E2E_STRIPE_SECRET '
                     'dans .env (voir docker-compose.yml)', pytrace=False)
 
-COURSE = 'e2estripe'
+COURSE = 'e2estripe/e2estripe'
 ENDPOINT_SECRET = os.environ.get('STRIPE_ENDPOINT_SECRET', 'whsec_e2e_local')
 
 VISA = '4242424242424242'

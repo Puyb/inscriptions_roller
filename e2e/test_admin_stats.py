@@ -17,7 +17,7 @@ def test_chart_is_drawn_for_the_current_course(admin_page):
     admin_page.goto(URL)
     expect(admin_page.locator('#canvas_time')).to_be_visible()
     admin_page.wait_for_function("window.Chart && Object.keys(Chart.instances).length === 1")
-    assert datasets(admin_page) == ['e2e']
+    assert datasets(admin_page) == ['e2e/e2e']
 
 
 def test_url_hash_selects_settings_and_courses(admin_page):
@@ -26,15 +26,15 @@ def test_url_hash_selects_settings_and_courses(admin_page):
     expect(admin_page.locator('[name=data][value=equipes]')).to_be_checked()
     admin_page.wait_for_function("window.Chart && Object.keys(Chart.instances).length === 1")
     admin_page.wait_for_function(LAST + ".data.datasets.length >= 2")
-    assert datasets(admin_page)[:2] == ['e2e', 'e2estats']
+    assert datasets(admin_page)[:2] == ['e2e/e2e', 'e2estats/e2estats']
 
 
 def test_adding_a_course_redraws_and_updates_the_hash(admin_page):
     admin_page.goto(URL)
     admin_page.wait_for_function("window.Chart && Object.keys(Chart.instances).length === 1")
-    admin_page.select_option('#add_course', 'e2estats')
+    admin_page.select_option('#add_course', 'e2estats/e2estats')
     admin_page.wait_for_function(LAST + ".data.datasets.length >= 2")
-    assert 'e2estats' in datasets(admin_page)
+    assert 'e2estats/e2estats' in datasets(admin_page)
     expect(admin_page.locator('#add_course option[value=e2estats]')).to_have_count(0)
     assert 'course=e2estats' in admin_page.evaluate('location.hash')
 

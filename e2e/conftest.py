@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-COURSE_PATH = '/e2e/'
+COURSE_PATH = '/e2e/e2e/'
 ADMIN_USERNAME = 'e2e-admin'
 ADMIN_PASSWORD = 'e2e-password'
 SUPER_USERNAME = 'e2e-super'
@@ -57,9 +57,9 @@ def bare_admin_page(browser, base_url, admin_storage_state):
 @pytest.fixture
 def admin_page(browser, base_url, admin_storage_state):
     """A page logged in as organizer, with the course cookies set
-    (course_uid/course_id/course_nom) by the `/e2e/admin/` redirect."""
+    (course_uid/course_id/course_nom) by the `/e2e/e2e/admin/` redirect."""
     context = browser.new_context(base_url=base_url, storage_state=admin_storage_state)
     page = context.new_page()
-    page.goto('/e2e/admin/')
+    page.goto('/e2e/e2e/admin/')
     yield page
     context.close()

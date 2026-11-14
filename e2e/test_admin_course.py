@@ -7,7 +7,7 @@ import re
 
 from playwright.sync_api import expect
 
-COURSE_URL = '/course/inscriptions/course/'
+COURSE_URL = '/course/inscriptions/edition/'
 CORS = {
     'access-control-allow-origin': '*',
     'access-control-allow-headers': '*',
@@ -163,7 +163,7 @@ def test_stripe_confirm_dialog_installs_automatically(admin_page):
 
 def test_stripe_existing_webhook_without_secret_offers_reinstall(admin_page):
     admin_page.goto(COURSE_URL)
-    url = '%s/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
+    url = '%s/e2e/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
     calls = stripe_mock(admin_page, webhooks=[{'id': 'we_123', 'url': url}], secret='whsec_new')
     admin_page.on('dialog', lambda d: d.dismiss())
     admin_page.fill('#id_stripe_endpoint_secret', '')
@@ -177,7 +177,7 @@ def test_stripe_existing_webhook_without_secret_offers_reinstall(admin_page):
 
 def test_stripe_existing_webhook_with_secret_is_reported_installed(admin_page):
     admin_page.goto(COURSE_URL)
-    url = '%s/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
+    url = '%s/e2e/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
     stripe_mock(admin_page, webhooks=[{'id': 'we_123', 'url': url}])
     admin_page.on('dialog', lambda d: d.dismiss())
     admin_page.fill('#id_stripe_endpoint_secret', 'whsec_already')

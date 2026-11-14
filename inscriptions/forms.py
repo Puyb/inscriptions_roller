@@ -8,7 +8,7 @@ from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import gettext_lazy as _
-from .models import COURSE_FIELDS, Course, Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
+from .models import COURSE_FIELDS, COURSE_UID_VALIDATOR, valide_uid_course, Course, Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from turnstile.fields import TurnstileField
@@ -65,9 +65,18 @@ class CourseFieldsMixin:
             for nom in COURSE_FIELDS:
                 self.initial.setdefault(nom, getattr(self.instance.course, nom + ('_id' if nom == 'ville2' else '')))
 
+    def validate_unique(self):
+        super().validate_unique()
+        uid = self.cleaned_data.get('uid')
+        if uid and self.instance.course_id and Edition.objects.filter(
+                course_id=self.instance.course_id, uid=uid).exclude(pk=self.instance.pk).exists():
+            self.add_error('uid', _("Une édition de cette course a déjà cet identifiant."))
+
     def save(self, commit=True):
         instance = super().save(commit=False)
-        course = instance.course if instance.course_id else Course(uid=instance.uid, nom=instance.nom)
+        course = instance.course if instance.course_id else Course(
+            uid=self.cleaned_data.get('course_uid') or instance.uid,
+            nom=self.cleaned_data.get('course_nom') or instance.nom)
         for nom in COURSE_FIELDS:
             setattr(course, nom, self.cleaned_data[nom])
         course.save()
@@ -91,76 +100,180 @@ class CourseFieldsForm(CourseFieldsMixin, ModelForm):
         exclude = ('course', )
 
 
-class CourseForm(CourseFieldsMixin, ModelForm):
-    locals().update(_champs_course())
+def _un_an_plus_tard(valeur):
+    try:
+        return valeur.replace(year=valeur.year + 1)
+    except ValueError:  # 29 fevrier
+        return valeur.replace(year=valeur.year + 1, day=28)
 
-    class Meta:
-        model = Edition
-        exclude = ('active', 'course')
-        widgets = {
-            'date': AdminDateWidget(),
-            'date_ouverture': AdminDateWidget(),
-            'date_augmentation': AdminDateWidget(),
-            'date_fermeture': AdminDateWidget(),
-        }
-        help_texts = {
-            'uid': _("""Code utilisé pour identifier la course. Ce code sera affiché dans l'adresse internet de la page d'inscription. Par exemple, pour les 6h de Paris 2015, le code était 6hdp15. Ce code ne doit contenir que des lettres ou des chiffres."""),
-            'organisateur': _("""Nom du club ou association organisateur"""),
-            'url': _("""Adresse internet pointant vers le site présentant la course"""),
-            'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
-            'email_contact': _("""Email utilisée pour envoyer les emails"""),
-            'texte_accueil': _("""Ce texte sera affiché sur la page d'inscription. Vous pouvez l'utiliser si vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas mettre de message."""),
-        }
+
+def _champs_modele():
+    # les champs declares dans un mixin simple ne sont pas collectes par ModelForm :
+    # chaque formulaire concret les declare (locals().update dans son corps de classe)
+    return {
+        'course_model': CharField(label=_("Modèle de course"), widget=AdminRadioSelect(choices=[])),
+        'course_prix': CharField(widget=HiddenInput),
+    }
+
+
+class ModeleEditionMixin:
+    """Choix du modele d'une nouvelle edition (`course_model`) et des tarifs
+    (`course_prix`) ; recopie categories, mails et questions du modele.
+
+    `course_model` est soit l'id d'une edition existante (« reprendre l'edition
+    precedente »), soit une cle de `static/course_models.json`. `user` est renseigne
+    par l'admin : seules les editions auxquelles il a acces sont copiables."""
+    user = None
+
     class Media:
         js = ('jquery-2.1.4.min.js', 'admin_create_course.js', )
         css = { 'all': ('admin_create_course.css', ) }
 
-    course_model = CharField(
-        label=_("Model de course"),
-        widget=AdminRadioSelect(choices=[])
-    )
-    course_prix = CharField(widget=HiddenInput)
+    def editions_copiables(self):
+        qs = Edition.objects.all()
+        if self.user is None:
+            return qs.none()
+        if not self.user.is_superuser:
+            qs = qs.filter(course__accreditations__user=self.user, course__accreditations__role__gt='')
+        return qs
 
-    def save(self, commit=True):
+    def clean_course_model(self):
+        model = self.cleaned_data['course_model']
+        if re.match('^[0-9]+$', model):
+            if not self.editions_copiables().filter(id=model).exists():
+                raise ValidationError(_("Modèle inconnu."))
+        elif model not in self.modeles_json():
+            raise ValidationError(_("Modèle inconnu."))
+        return model
+
+    @staticmethod
+    def modeles_json():
+        with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
+            return json.load(f)
+
+    def copier_modele(self, instance):
         model = self.cleaned_data['course_model']
         prix = json.loads(self.cleaned_data['course_prix'])
         if re.match('^[0-9]+$', model):
-            course = Edition.objects.get(id=model)
-            original = course
-            instance = super().save(commit=False)
-            instance.is_active = False
-            instance.save()
-
+            original = Edition.objects.get(id=model)
             for key in ['categories', 'templatemail_set', 'extra']:
-                for obj in getattr(course, key).all():
+                for obj in getattr(original, key).all():
                     obj.id = None
                     obj.course = instance
-                    if key == 'categories':
-                        if obj.code in prix:
-                            obj.prices_base = prix[obj.code]['prices_base']
-                            obj.prices_equipier = prix[obj.code]['prices_equipier']
+                    if key == 'categories' and obj.code in prix:
+                        obj.prices_base = prix[obj.code]['prices_base']
+                        obj.prices_equipier = prix[obj.code]['prices_equipier']
                     obj.save()
-
         else:
-            with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
-                models = json.load(f)
+            modele = self.modeles_json()[model]
+            for c in modele.get('categories', []):
+                if c['code'] in prix:
+                    c['prices_base'] = prix[c['code']]['prices_base']
+                    c['prices_equipier'] = prix[c['code']]['prices_equipier']
+            for key, items in modele.items():
+                if key.startswith('_'):
+                    continue
+                for item in items:
+                    getattr(instance, key).create(**item)
 
-                if 'categories' in models[model]:
-                    for c in models[model]['categories']:
-                        if c['code'] in prix:
-                            c['prices_base'] = prix[c['code']]['prices_base']
-                            c['prices_equipier'] = prix[c['code']]['prices_equipier']
 
-                instance = super().save(commit=False)
-                instance.is_active = False
-                instance.save()
+FORM_META_WIDGETS = {
+    'date': AdminDateWidget(),
+    'date_ouverture': AdminDateWidget(),
+    'date_augmentation': AdminDateWidget(),
+    'date_fermeture': AdminDateWidget(),
+}
+FORM_META_HELP_TEXTS = {
+    'uid': _("""Identifiant de l'édition dans l'adresse internet de la page d'inscription, par exemple l'année (2026). Lettres minuscules, chiffres et tirets."""),
+    'organisateur': _("""Nom du club ou association organisateur"""),
+    'url': _("""Adresse internet pointant vers le site présentant la course"""),
+    'url_reglement': _("""Adresse internet pointant vers le réglement de la course"""),
+    'email_contact': _("""Email utilisée pour envoyer les emails"""),
+    'texte_accueil': _("""Ce texte sera affiché sur la page d'inscription. Vous pouvez l'utiliser si vous avez un message à passer lors de l'inscription, ou vous pouvez ne pas mettre de message."""),
+}
 
-                for key, items in models[model].items():
-                    if key.startswith('_'):
-                        continue
-                    for item in items:
-                        getattr(instance, key).create(**item)
+
+class CourseForm(CourseFieldsMixin, ModeleEditionMixin, ModelForm):
+    """Creation d'une nouvelle course et de sa premiere edition."""
+    locals().update(_champs_course())
+    locals().update(_champs_modele())
+    course_nom = CharField(label=_('Nom de la course'), max_length=200,
+                           help_text=_("Par exemple « 6 Heures de Paris ». Le nom de chaque édition se règle ensuite séparément."))
+    course_uid = CharField(
+        label=_('Identifiant de la course'), max_length=200,
+        validators=[COURSE_UID_VALIDATOR, valide_uid_course],
+        help_text=_("Premier élément de l'adresse internet de la course (par exemple 6hdeparis). Lettres minuscules et chiffres uniquement, 3 caractères au moins."))
+    field_order = ['course_nom', 'course_uid', 'nom', 'uid']
+
+    def clean_course_uid(self):
+        uid = self.cleaned_data['course_uid']
+        if Course.objects.filter(uid=uid).exists():
+            raise ValidationError(_("Une course a déjà cet identifiant."))
+        return uid
+
+    class Meta:
+        model = Edition
+        exclude = ('active', 'course')
+        widgets = FORM_META_WIDGETS
+        help_texts = FORM_META_HELP_TEXTS
+
+    Media = ModeleEditionMixin.Media
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.save()
+        self.copier_modele(instance)
         return instance
+
+
+class EditionForm(ModeleEditionMixin, ModelForm):
+    """Creation d'une edition d'une course existante (`course`, renseigne par l'admin).
+    Les champs sont preremplis d'apres la derniere edition, dates decalees d'un an."""
+    course = None
+    locals().update(_champs_modele())
+
+    class Meta:
+        model = Edition
+        exclude = ('active', 'course')
+        widgets = FORM_META_WIDGETS
+        help_texts = FORM_META_HELP_TEXTS
+
+    Media = ModeleEditionMixin.Media
+
+    REPRISE = ('email_contact', 'url_reglement', 'limite_participants', 'delai_paiement',
+               'texte_accueil', 'distance', 'lien_externe')
+    REPRISE_DATES = ('date', 'date_ouverture', 'date_fermeture', 'date_age')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        precedente = self.course.derniere_edition if self.course else None
+        if precedente and not self.instance.pk:
+            for nom in self.REPRISE:
+                self.initial.setdefault(nom, getattr(precedente, nom))
+            for nom in self.REPRISE_DATES:
+                valeur = getattr(precedente, nom)
+                if valeur:
+                    self.initial.setdefault(nom, _un_an_plus_tard(valeur))
+            self.initial.setdefault('dates_augmentation', [_un_an_plus_tard(d) for d in precedente.augmentations])
+            self.initial.setdefault('uid', str(_un_an_plus_tard(precedente.date).year))
+
+    def editions_copiables(self):
+        return super().editions_copiables().filter(course=self.course)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.course = self.course
+        instance.save()
+        self.copier_modele(instance)
+        return instance
+
+    def validate_unique(self):
+        # (course, uid) est unique, mais `course` n'est pas un champ du formulaire
+        super().validate_unique()
+        uid = self.cleaned_data.get('uid')
+        if uid and Edition.objects.filter(course=self.course, uid=uid).exclude(pk=self.instance.pk).exists():
+            self.add_error('uid', _("Une édition de cette course a déjà cet identifiant."))
+
 
 class ContactForm(Form):
     name = CharField()

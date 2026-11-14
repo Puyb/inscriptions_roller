@@ -209,22 +209,27 @@ class CourseChooseAskTestCase(AdminTestCase):
     def test_course_choose_lists_only_accredited_courses(self):
         r = self.client.get('/course/choose/')
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(list(r.context['courses']), [self.course])
+        self.assertEqual([c['course'] for c in r.context['courses']], [self.course.course])
+        self.assertEqual([e for c in r.context['courses'] for e in c['editions']], [self.course])
         self.assertIsNone(r.context['courses_admin'])
 
     def test_course_choose_superuser_sees_other_courses_as_admin(self):
         make_superuser(self.client, self.course)
         r = self.client.get('/course/choose/')
         self.assertEqual(r.status_code, 200)
-        self.assertIn(self.other_course, list(r.context['courses_admin']))
+        self.assertIn(self.other_course.course, [c['course'] for c in r.context['courses_admin']])
 
     def test_course_choose_hides_old_courses_unless_old(self):
         old = CourseFactory(date=date(2000, 1, 1))
         Accreditation.objects.create(user=self.user, course=old.course, role='admin')
+        def editions(r):
+            return [e for c in r.context['courses'] for e in c['editions']]
         r = self.client.get('/course/choose/')
-        self.assertNotIn(old, list(r.context['courses']))
+        self.assertNotIn(old, editions(r))
+        self.assertIn(old.course, [c['course'] for c in r.context['courses']])  # la course reste listee
+        self.assertEqual(sum(c['masquees'] for c in r.context['courses']), 1)
         r = self.client.get('/course/choose/', {'old': ''})
-        self.assertIn(old, list(r.context['courses']))
+        self.assertIn(old, editions(r))
 
     def test_course_setter_sets_cookies(self):
         self.client.cookies.clear()

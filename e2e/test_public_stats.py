@@ -3,8 +3,8 @@
 and without geocoded teams (the geocoding reference is the local `CodePostal` table)."""
 from playwright.sync_api import expect
 
-GEO = '/e2estats/stats/'
-NOGEO = '/e2enogeo/stats/'
+GEO = '/e2estats/e2estats/stats/'
+NOGEO = '/e2enogeo/e2enogeo/stats/'
 
 
 def watch(page):
@@ -63,9 +63,9 @@ def test_payment_charts_are_for_staff_only(page, super_page):
 
 def test_compare_page_aligns_on_the_nth_price_change(page):
     errors = watch(page)
-    page.goto('/e2estats/stats/e2e?align=augment%3A2&data=equipes')
+    page.goto('/e2estats/e2estats/stats/e2e/e2e?align=augment%3A2&data=equipes')
     page.wait_for_function("window.Chart && Object.keys(Chart.instances).length === 1")
-    assert page.evaluate("Object.values(Chart.instances)[0].data.datasets.map(d => d.label)") == ['e2estats', 'e2e']
+    assert page.evaluate("Object.values(Chart.instances)[0].data.datasets.map(d => d.label)") == ['e2estats/e2estats', 'e2e/e2e']
     # menu: one entry per price change (the compared courses have 3 and 1)
     values = page.evaluate("[...document.querySelectorAll('[data-name=align]')].map(a => a.dataset.value)")
     assert values == ['', 'augment', 'augment:2', 'augment:3', 'start']

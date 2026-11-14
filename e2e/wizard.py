@@ -50,7 +50,7 @@ def go_prev(page: Page):
     page.click('#button_prev')
 
 
-def register_full_team(page: Page, nom, nombre, equipiers, course_path='/e2e/'):
+def register_full_team(page: Page, nom, nombre, equipiers, course_path='/e2e/e2e/'):
     """equipiers: list of dicts with nom/prenom/sexe/year/justificatif/num_licence."""
     page.goto(course_path)
     fill_equipe_page(page, nom=nom, nombre=nombre)

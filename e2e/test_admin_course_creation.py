@@ -5,12 +5,14 @@ import re
 
 from playwright.sync_api import expect
 
-ADD_URL = '/course/inscriptions/course/add/'
+ADD_URL = '/course/inscriptions/edition/add/'
 
 
 def fill_course(page, uid='e2enew'):
-    page.fill('#id_nom', 'Course creee par e2e')
-    page.fill('#id_uid', uid)
+    page.fill('#id_course_nom', 'Course creee par e2e')
+    page.fill('#id_course_uid', uid)
+    page.fill('#id_nom', 'Course creee par e2e 2099')
+    page.fill('#id_uid', '2099')
     page.fill('#id_organisateur', 'Club E2E')
     page.fill('#id_ville', 'Paris')
     page.fill('#id_date', '01/06/2099')
@@ -82,7 +84,7 @@ def test_create_course_end_to_end_with_edited_price(admin_page):
 
     expect(admin_page).to_have_url(re.compile(r'/course/$'))
     cookies = {c['name']: c['value'] for c in admin_page.context.cookies()}
-    assert cookies['course_uid'] == 'e2enew'
+    assert cookies['course_uid'] == 'e2enew/2099'
 
     admin_page.goto('/course/inscriptions/categorie/')
     admin_page.locator('#result_list tbody tr', has_text='IDH').locator('a').first.click()

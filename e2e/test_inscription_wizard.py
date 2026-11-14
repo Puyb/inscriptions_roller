@@ -4,14 +4,14 @@ from playwright.sync_api import expect
 
 from wizard import ADULT_YEAR, MINOR_YEAR, fill_equipe_page, fill_equipier_page, go_next, go_prev, register_full_team
 
-COURSE_PATH = '/e2e/'
+COURSE_PATH = '/e2e/e2e/'
 
 
 def test_solo_registration_completes_the_wizard(page):
     register_full_team(page, nom='Equipe Solo E2E', nombre=1, equipiers=[
         dict(nom='Dupont', prenom='Jean', sexe='H', year=ADULT_YEAR),
     ])
-    expect(page).to_have_url(re.compile(r'/e2e/\d+/done/$'))
+    expect(page).to_have_url(re.compile(r'/e2e/e2e/\d+/done/$'))
 
 
 def test_page_count_matches_selected_team_size(page):
@@ -103,7 +103,7 @@ def test_duplicate_team_name_is_flagged_before_submit(page):
     register_full_team(page, nom='Equipe Doublon E2E', nombre=1, equipiers=[
         dict(nom='Dupont', prenom='Jean', sexe='H', year=ADULT_YEAR),
     ])
-    expect(page).to_have_url(re.compile(r'/e2e/\d+/done/$'))
+    expect(page).to_have_url(re.compile(r'/e2e/e2e/\d+/done/$'))
 
     page.goto(COURSE_PATH)
     page.locator('#id_nom').press_sequentially('Equipe Doublon E2E', delay=20)

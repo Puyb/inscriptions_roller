@@ -1,26 +1,16 @@
 {% extends "admin/base_site_common.html" %}
 {% load i18n %}
 {% block content %}
-<h1>{% trans "Sélectionnez votre course :" %}</h1>
-<ul>
-    {% for course in courses %}
-    <li><a href="/{{ course.key }}/admin/">{{ course.nom }} ({{ course.date }})</a> {% if not course.active %}{% trans "(en attente de validation)" %}{% endif %}</li>
-    {% endfor %}
-</ul>
+{% include "admin/_course_hierarchie.html" with titre=_("Sélectionnez votre course :") liste=courses %}
 {% if request.user.is_superuser %}
-<h1>{% trans "Courses sans accreditation :" %}</h1>
-<ul>
-    {% for course in courses_admin %}
-    <li><a href="/{{ course.key }}/admin/">{{ course.nom }} ({{ course.date }})</a> {% if not course.active %}{% trans "(en attente de validation)" %}{% endif %}</li>
-    {% endfor %}
-</ul>
+{% include "admin/_course_hierarchie.html" with titre=_("Courses sans accreditation :") liste=courses_admin %}
 <a href="/admin/"><span>{% trans "Superadmin !" %}</span></a><br />
 {% endif %}
-<a href="/course/inscriptions/course/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
+<a href="/course/inscriptions/edition/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
 <a href="/course/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a><br />
 {% if 'old' in request.GET %}
-    <a href="/course/choose/"><span>{% trans "Cacher les anciennes courses" %}</span></a>
+    <a href="/course/choose/"><span>{% trans "Cacher les anciennes éditions" %}</span></a>
 {% else%}
-    <a href="/course/choose/?old"><span>{% trans "Afficher les anciennes courses" %}</span></a>
+    <a href="/course/choose/?old"><span>{% trans "Afficher les anciennes éditions" %}</span></a>
 {% endif %}
 {% endblock %}

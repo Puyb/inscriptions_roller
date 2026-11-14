@@ -1,12 +1,17 @@
 $(function() {
     COURSE_MODEL = {};
-    $.ajax('../models/', {
+    $.ajax('../models/' + location.search, {
         dataType: 'json',
         success: function(r) {
             COURSE_MODEL = r;
             const field = $('#id_course_model');
             let i = 0;
-            for (const [k, v] of Object.entries(r)) {
+            // `_order` : editions precedentes (la plus recente d'abord) puis modeles ;
+            // les cles numeriques d'un objet JS seraient sinon triees par id.
+            const ordre = r._order || Object.keys(r);
+            for (const k of ordre) {
+                const v = r[k];
+                if (k === '_order' || !v) continue;
                 field.append($('<li>')
                     .append($('<label>').attr({ for: `id_course_model_${i}` })
                         .append($('<input>').attr({
@@ -21,6 +26,9 @@ $(function() {
             $('[name=course_model]').click(function() {
                 generate_prices(this.value);
             });
+            if (r._order && !$('[name=course_model]:checked').length) {
+                $('[name=course_model]').first().prop('checked', true);  // edition precedente par defaut
+            }
             generate_prices($('[name=course_model]:checked').val());
         }
     });
@@ -30,6 +38,15 @@ $(function() {
             .append($('<label class="required">').html('Tarifs&nbsp;:'))
             .append($place)
         );
+
+    // identifiant d'edition propose : l'annee de la date, tant que l'utilisateur n'y a pas touche
+    $('#id_uid').on('input', function() { $(this).data('manuel', true); });
+    $('[name=date]').on('change blur', function() {
+        const uid = $('#id_uid');
+        if (!uid.length || uid.data('manuel') || (uid.val() && !uid.data('auto'))) return;
+        const m = /(\d{4})-\d{2}-\d{2}$|\d{2}\/\d{2}\/(\d{4})$/.exec(this.value);
+        if (m) uid.val(m[1] || m[2]).data('auto', true);
+    });
 
     $('[name=date_ouverture]').change(() => {
         generate_prices($('[name=course_model]:checked').val());

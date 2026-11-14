@@ -6,6 +6,7 @@ from django.urls import re_path
 from django.contrib import admin
 from django.forms import CharField, HiddenInput
 from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.template import Template, Context
 from django.template.response import TemplateResponse
@@ -19,7 +20,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingH
 from decimal import InvalidOperation
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, CourseFieldsForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
+from .forms import CourseForm, EditionForm, CourseFieldsForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
 from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -59,7 +60,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
+        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/[^/]+/$', request.path) or request.path.endswith('/inscriptions/edition/add/') or request.path.endswith('/inscriptions/edition/models/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False
@@ -90,13 +91,23 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def course_choose(self, request):
         request.current_app = self.name
-        courses_accreditees = Course.objects.filter(accreditations__user=request.user)
-        qs = Edition.objects.all()
-        if 'old' not in request.GET:
-            qs = qs.filter(date__gte=datetime.now() - timedelta(days=60))
+        accreditees = Course.objects.filter(accreditations__user=request.user)
+        limite = (datetime.now() - timedelta(days=60)).date()
+        voir_tout = 'old' in request.GET
+
+        def hierarchie(courses):
+            """[{course, editions (les plus recentes d'abord), masquees}] : sans ?old, les
+            editions de plus de 60 jours sont masquees (la course reste, pour y ajouter une edition)."""
+            resultat = []
+            for course in courses.prefetch_related('editions').order_by('nom'):
+                editions = sorted(course.editions.all(), key=lambda e: e.date, reverse=True)
+                visibles = [e for e in editions if voir_tout or e.date >= limite]
+                resultat.append({'course': course, 'editions': visibles, 'masquees': len(editions) - len(visibles)})
+            return resultat
+
         return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
-            courses=qs.filter(course__in=courses_accreditees).order_by('date'),
-            courses_admin=qs.exclude(course__in=courses_accreditees).order_by('date') if request.user.is_superuser else None,
+            courses=hierarchie(accreditees),
+            courses_admin=hierarchie(Course.objects.exclude(pk__in=accreditees)) if request.user.is_superuser else None,
         ))
 
     @transaction.atomic
@@ -1232,16 +1243,34 @@ class CourseAdmin(admin.ModelAdmin):
     def changelist_view(self, request):
         return self.change_view(request, str(self.get_queryset(request)[0].id))
 
+    def course_pour_nouvelle_edition(self, request):
+        """Course parente d'une nouvelle edition (`?course=<uid>`), ou None pour creer
+        une nouvelle course. Reservee aux accredites de la course (et aux superutilisateurs)."""
+        uid = request.GET.get('course')
+        if not uid:
+            return None
+        course = get_object_or_404(Course, uid=uid)
+        if not request.user.is_superuser and not course.accreditations.filter(user=request.user, role__gt='').exists():
+            raise PermissionDenied
+        return course
+
     def get_form(self, request, obj=None, **kwargs):
         if obj == None:
-            return CourseForm
+            course = self.course_pour_nouvelle_edition(request)
+            if course:
+                return type('EditionForm', (EditionForm, ), {'course': course, 'user': request.user})
+            return type('CourseForm', (CourseForm, ), {'user': request.user})
         return super().get_form(request, obj, **kwargs)
 
     def save_model(self, request, obj, form, change):
         obj.save()
         if not change:
-            obj.course.accreditations.create(user=request.user, role='admin')
-            messages.add_message(request, messages.INFO, u"Course créée. Vous recevrez un message dès qu'elle sera activée.")
+            _accreditation, nouvelle = obj.course.accreditations.get_or_create(
+                user=request.user, defaults={'role': 'admin'})
+            if nouvelle:
+                messages.add_message(request, messages.INFO, u"Course créée. Vous recevrez un message dès qu'elle sera activée.")
+            else:
+                messages.add_message(request, messages.INFO, u"Édition créée. Elle n'est pas encore publiée : cochez « Activée » dans ses paramètres quand elle est prête.")
 
     def response_add(self, request, obj, post_url_continue=None):
         response = super().response_add(request, obj, post_url_continue=post_url_continue)
@@ -1262,7 +1291,16 @@ class CourseAdmin(admin.ModelAdmin):
         models = {}
         with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
             models = json.load(f)
-        for course in Edition.objects.filter(course__accreditations__user=request.user):
+        editions = Edition.objects.filter(course__accreditations__user=request.user, course__accreditations__role__gt='')
+        parente = self.course_pour_nouvelle_edition(request)
+        if parente:
+            # nouvelle edition d'une course existante : ses editions precedentes
+            # (la plus recente d'abord) ; les modeles ne servent que sans edition
+            editions = editions.filter(course=parente).order_by('-date')
+            if editions:
+                models = {}
+        ordre = ['%s' % e.id for e in editions] + [k for k in models if k not in ['%s' % e.id for e in editions]]
+        for course in editions:
             models[course.id] = {
                 '_name': str(course),
                 'categories': [
@@ -1274,7 +1312,8 @@ class CourseAdmin(admin.ModelAdmin):
                     } for cat in course.categories.all()
                 ],
             }
-            
+
+        models['_order'] = ordre
         return HttpResponse(json.dumps(models))
 
 site.register(Edition, CourseAdmin)

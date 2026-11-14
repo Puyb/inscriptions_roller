@@ -1,0 +1,17 @@
+{% load i18n %}
+<h1>{{ titre }}</h1>
+<ul>
+    {% for entree in liste %}
+    <li>
+        <strong>{{ entree.course.nom }}</strong>
+        {% if not entree.course.active %}{% trans "(en attente de validation)" %}{% endif %}
+        &middot; <a href="/course/inscriptions/edition/add/?course={{ entree.course.uid }}">{% trans "Nouvelle édition" %}</a>
+        <ul>
+            {% for edition in entree.editions %}
+            <li><a href="/{{ edition.key }}/admin/">{{ edition.nom }} ({{ edition.date }})</a>{% if not edition.active %} {% trans "(non publiée)" %}{% endif %}</li>
+            {% endfor %}
+            {% if entree.masquees %}<li><em>{% blocktrans count n=entree.masquees %}{{ n }} ancienne édition masquée{% plural %}{{ n }} anciennes éditions masquées{% endblocktrans %}</em></li>{% endif %}
+        </ul>
+    </li>
+    {% endfor %}
+</ul>
