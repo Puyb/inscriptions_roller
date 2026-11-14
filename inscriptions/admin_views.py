@@ -23,7 +23,7 @@ def organizer_required(view):
     def wrapper(request, course_uid, *args, **kwargs):
         course = get_object_or_404(Edition, uid=course_uid)
         if not request.user.is_superuser and not Accreditation.objects.filter(
-                user=request.user, course=course).exclude(role='').exists():
+                user=request.user, course=course.course).exclude(role='').exists():
             return HttpResponseForbidden()
         return view(request, course_uid, *args, **kwargs)
     return wrapper

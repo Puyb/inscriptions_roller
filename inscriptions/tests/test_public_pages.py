@@ -142,7 +142,7 @@ class EquipeListTestCase(BaseTestCase):
 
     def test_staff_with_accreditation_sees_payment_stats(self):
         user = User.objects.create_user('orga', 'orga@example.com', 'pw', is_staff=True)
-        Accreditation.objects.create(user=user, course=self.course, role='organisateur')
+        Accreditation.objects.create(user=user, course=self.course.course, role='organisateur')
         self.client.force_login(user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)

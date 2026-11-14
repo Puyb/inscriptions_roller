@@ -47,7 +47,7 @@ def getCourse(request, qs=Edition.objects.all()):
     uid = request.COOKIES['course_uid']
     if request.user.is_superuser:
         return qs.get(uid=uid)
-    return qs.get(uid=uid, accreditations__user=request.user)
+    return qs.get(uid=uid, course__accreditations__user=request.user)
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
@@ -63,7 +63,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         if 'course_uid' not in request.COOKIES:
             return False
         course_uid = request.COOKIES['course_uid']
-        return request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0
+        return request.user.accreditations.filter(course__editions__uid=course_uid).exclude(role='').count() > 0
 
     def get_urls(self):
         from django.urls import re_path
@@ -89,13 +89,13 @@ class CourseAdminSite(admin.sites.AdminSite):
 
     def course_choose(self, request):
         request.current_app = self.name
-        accreditations = request.user.accreditations.all()
+        courses_accreditees = Course.objects.filter(accreditations__user=request.user)
         qs = Edition.objects.all()
         if 'old' not in request.GET:
             qs = qs.filter(date__gte=datetime.now() - timedelta(days=60))
         return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
-            courses=qs.filter(accreditations__in=accreditations).order_by('date'),
-            courses_admin=qs.exclude(accreditations__in=accreditations).order_by('date') if request.user.is_superuser else None,
+            courses=qs.filter(course__in=courses_accreditees).order_by('date'),
+            courses_admin=qs.exclude(course__in=courses_accreditees).order_by('date') if request.user.is_superuser else None,
         ))
 
     @transaction.atomic
@@ -105,7 +105,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             course = get_object_or_404(Edition, uid=course_uid)
             accreditation, created = Accreditation.objects.get_or_create(
                 user=request.user,
-                course=course,
+                course=course.course,
             )
             if created:
                 messages.add_message(request, messages.INFO, u'Demande d\'accreditation pour la course "%s" envoyée. Vous serez prévenu quand elle sera activée.' % (course.nom, ))
@@ -119,8 +119,8 @@ class CourseAdminSite(admin.sites.AdminSite):
                 messages.add_message(request, messages.INFO, u'Une demande d\'accreditation pour la course "%s" existe déjà.' % (course.nom, ))
             return redirect('../')
 
-        courses = Edition.objects.exclude(id__in=[a.course.id for a in request.user.accreditations.filter(user=request.user)])
-        demandes = Edition.objects.filter(accreditations__user=request.user, accreditations__role='')
+        courses = Edition.objects.exclude(course__in=[a.course for a in request.user.accreditations.all()])
+        demandes = Edition.objects.filter(course__accreditations__user=request.user, course__accreditations__role='')
         context = dict(self.each_context(request),
             courses=courses,
             demandes=demandes,
@@ -529,7 +529,7 @@ class CourseAdminSite(admin.sites.AdminSite):
     def paiement_change(self, request, id=None):
         paiement = None
         course = getCourse(request, Edition.objects.all())
-        courses = set(Edition.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60)))
+        courses = set(Edition.objects.filter(course__accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60)))
         courses.add(course)
 
         equipes = {}
@@ -620,7 +620,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         search = request.POST['search']
 
         course = getCourse(request, Edition.objects.all())
-        courses = Edition.objects.filter(accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
+        courses = Edition.objects.filter(course__accreditations__user=request.user, date__gte=datetime.now() - timedelta(days=60))
 
         equipes = Equipe.objects.filter(Q(course__in=courses) | Q(course=course)).distinct()
         for bit in search.split():
@@ -654,10 +654,10 @@ class CourseAdminSite(admin.sites.AdminSite):
         })
 
     def stats(self, request):
-        courses = Edition.objects.filter(accreditations__user=request.user)
+        courses = Edition.objects.filter(course__accreditations__user=request.user)
         courses_other = Edition.objects.none()
         if request.user.is_superuser:
-            courses_other = Edition.objects.exclude(accreditations__user=request.user)
+            courses_other = Edition.objects.exclude(course__accreditations__user=request.user)
         course = getCourse(request, Edition.objects.all())
         return TemplateResponse(request, "admin/stats.html", {
             "course": course,
@@ -711,7 +711,7 @@ class CourseFilteredObjectAdmin(admin.ModelAdmin):
         course_uid = request.COOKIES['course_uid']
         qs = qs.filter(course__uid=course_uid)
         if not request.user.is_superuser:
-            qs = qs.filter(course__accreditations__user=request.user)
+            qs = qs.filter(course__course__accreditations__user=request.user)
         return qs
     pass
 
@@ -1225,7 +1225,7 @@ class CourseAdmin(admin.ModelAdmin):
         course_uid = request.COOKIES['course_uid']
         qs = qs.filter(uid=course_uid)
         if not request.user.is_superuser:
-            qs = qs.filter(accreditations__user=request.user)
+            qs = qs.filter(course__accreditations__user=request.user)
         return qs
 
     def changelist_view(self, request):
@@ -1239,7 +1239,7 @@ class CourseAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
         if not change:
-            obj.accreditations.create(user=request.user, role='admin')
+            obj.course.accreditations.create(user=request.user, role='admin')
             messages.add_message(request, messages.INFO, u"Course créée. Vous recevrez un message dès qu'elle sera activée.")
 
     def response_add(self, request, obj, post_url_continue=None):
@@ -1261,7 +1261,7 @@ class CourseAdmin(admin.ModelAdmin):
         models = {}
         with (Path(settings.PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:
             models = json.load(f)
-        for course in Edition.objects.filter(accreditations__user=request.user):
+        for course in Edition.objects.filter(course__accreditations__user=request.user):
             models[course.id] = {
                 '_name': str(course),
                 'categories': [
@@ -1300,6 +1300,14 @@ site.register(TemplateMail, TemplateMailAdmin)
 
 
 class AccreditationAdmin(CourseFilteredObjectAdmin):
+    def get_queryset(self, request):
+        # les accreditations portent sur la Course ; le cookie designe une edition
+        qs = admin.ModelAdmin.get_queryset(self, request)
+        qs = qs.filter(course__editions__uid=request.COOKIES['course_uid'])
+        if not request.user.is_superuser:
+            qs = qs.filter(course__accreditations__user=request.user)
+        return qs.distinct()
+
     list_display = ('user_name', 'user_email', 'role', 'active', )
     fields = ('user_name', 'user_email', 'role', )
     readonly_fields = ('user_name', 'user_email', )
@@ -1413,7 +1421,7 @@ class PaiementAdmin(admin.ModelAdmin):
         course_uid = request.COOKIES['course_uid']
         qs = qs.filter(equipes__equipe__course__uid=course_uid).distinct()
         if not request.user.is_superuser:
-            qs = qs.filter(equipes__equipe__course__accreditations__user=request.user)
+            qs = qs.filter(equipes__equipe__course__course__accreditations__user=request.user)
         qs = qs.prefetch_related(Prefetch('equipes', PaiementRepartition.objects.select_related('equipe', 'equipe__course', 'equipe__categorie')))
         return qs
     fields = ('montant', 'type', 'date', 'detail', )

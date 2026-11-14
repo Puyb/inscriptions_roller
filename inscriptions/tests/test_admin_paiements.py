@@ -22,7 +22,7 @@ def login_as_organizer(client, course, role='admin', username=None):
     user = User.objects.create_user(
         username or 'organizer%d' % course.id, 'o%d@example.com' % course.id, 'pass1234',
     )
-    Accreditation.objects.create(user=user, course=course, role=role)
+    Accreditation.objects.create(user=user, course=course.course, role=role)
     client.force_login(user)
     set_course_cookie(client, course)
     return user
@@ -280,7 +280,7 @@ class PaiementAddTestCase(PaiementChangeBaseTestCase):
 
     def test_organizer_can_pay_team_of_another_accredited_recent_course(self):
         course2 = CourseFactory()
-        Accreditation.objects.create(user=self.user, course=course2, role='admin')
+        Accreditation.objects.create(user=self.user, course=course2.course, role='admin')
         e = EquipeFactory(course=course2, prix=Decimal('20.00'))
         r = self.client.post(ADD_URL, post_data('70.00', [(self.e1, '50.00'), (e, '20.00')]))
         self.assertEqual(r.status_code, 302)
@@ -403,7 +403,7 @@ class PaiementSearchEquipeTestCase(PaiementChangeBaseTestCase):
 
     def test_search_includes_other_accredited_recent_course(self):
         course2 = CourseFactory()
-        Accreditation.objects.create(user=self.user, course=course2, role='admin')
+        Accreditation.objects.create(user=self.user, course=course2.course, role='admin')
         e = EquipeFactory(course=course2, nom='Voisine Rapide')
         data = json.loads(self.search('voisine').content)
         self.assertEqual([x['id'] for x in data['equipes']], [e.id])
@@ -448,7 +448,7 @@ class PaiementAdminListTestCase(PaiementChangeBaseTestCase):
 
     def test_payment_spanning_two_courses_visible_from_both(self):
         course2 = CourseFactory()
-        Accreditation.objects.create(user=self.user, course=course2, role='admin')
+        Accreditation.objects.create(user=self.user, course=course2.course, role='admin')
         e = EquipeFactory(course=course2)
         make_paiement([(self.e1, '50.00'), (e, '10.00')])
         self.assertEqual(self.client.get(LIST_URL).context['cl'].result_count, 1)

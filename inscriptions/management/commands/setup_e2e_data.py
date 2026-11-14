@@ -129,7 +129,7 @@ class Command(BaseCommand):
         User.objects.filter(username=ADMIN_USERNAME).delete()
         user = User.objects.create_user(
             ADMIN_USERNAME, 'e2e-admin@example.com', ADMIN_PASSWORD)
-        Accreditation.objects.create(user=user, course=course, role='admin')
+        Accreditation.objects.create(user=user, course=course.course, role='admin')
         stats_course = CourseFactory(
             uid=STATS_UID, nom='Course Stats E2E',
             date=date.today() + timedelta(days=120),
@@ -152,7 +152,7 @@ class Command(BaseCommand):
         nogeo_categorie = CategorieFactory(course=nogeo, code='N', nom='N', numero_debut=1, numero_fin=99)
         EquipierFactory(equipe=EquipeFactory(course=nogeo, categorie=nogeo_categorie, nom='Sans ville',
                                              gerant_ville='?', gerant_code_postal='?'), numero=1)
-        Accreditation.objects.create(user=user, course=stats_course, role='admin')
+        Accreditation.objects.create(user=user, course=stats_course.course, role='admin')
         User.objects.filter(username=SUPER_USERNAME).delete()
         User.objects.create_superuser(SUPER_USERNAME, 'e2e-super@example.com', ADMIN_PASSWORD)
         CourseFactory(uid=OTHER_UID, nom='Course Autre E2E',
@@ -176,6 +176,6 @@ class Command(BaseCommand):
             for i in range(1, STRIPE_TEAMS + 1):
                 EquipeFactory(course=stripe_course, categorie=stripe_categorie,
                               nom='Stripe %d' % i, numero=i, password='e2e-pass', prix=Decimal('40.00'))
-            Accreditation.objects.create(user=user, course=stripe_course, role='admin')
+            Accreditation.objects.create(user=user, course=stripe_course.course, role='admin')
 
         self.stdout.write(self.style.SUCCESS('e2e course ready: /%s/' % COURSE_UID))

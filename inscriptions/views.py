@@ -176,7 +176,7 @@ def form(request, course_uid, numero=None, code=None):
         "course": course,
         "message": message,
         "extra_categorie": extra_categorie,
-        "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course).exclude(role='').count() > 0,
+        "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course.course).exclude(role='').count() > 0,
     })
 
 @open_closed
@@ -384,7 +384,7 @@ def _list(course_uid, equipes, request, template, sorts, show_stats=True):
             pass
 
     user_is_staff = (request.user and request.user.is_staff and
-        request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0)
+        request.user.accreditations.filter(course__editions__uid=course_uid).exclude(role='').count() > 0)
     stats = None
     if show_stats:
         stats = equipes.aggregate(

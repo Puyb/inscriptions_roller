@@ -191,7 +191,7 @@ class LoginProtectsBackofficeTestCase(TestCase):
     def setUp(self):
         self.course = CourseFactory(uid='authc')
         self.user = make_user()
-        Accreditation.objects.create(user=self.user, course=self.course, role='admin')
+        Accreditation.objects.create(user=self.user, course=self.course.course, role='admin')
 
     def test_anonymous_is_redirected_to_login(self):
         response = self.client.get('/course/choose/')

@@ -19,7 +19,7 @@ from inscriptions.tests.base import BaseTestCase
 
 def login_as_organizer(client, course, username='orga'):
     user = User.objects.create_user(username, username + '@example.com', 'pass1234')
-    Accreditation.objects.create(user=user, course=course, role='admin')
+    Accreditation.objects.create(user=user, course=course.course, role='admin')
     client.force_login(user)
     client.cookies['course_uid'] = course.uid
     client.cookies['course_id'] = str(course.id)
@@ -226,7 +226,7 @@ class PersonalDataExportAccessTestCase(ExportBaseTestCase):
 
     def test_accreditation_without_role_is_forbidden(self):
         user = User.objects.create_user('pending', 'p@example.com', 'pass1234')
-        Accreditation.objects.create(user=user, course=self.course, role='')
+        Accreditation.objects.create(user=user, course=self.course.course, role='')
         self.client.force_login(user)
         for path in self.PATHS:
             self.assertEqual(self.client.get(self.url(path)).status_code, 403, path)
@@ -238,7 +238,7 @@ class PersonalDataExportAccessTestCase(ExportBaseTestCase):
 
     def test_validateur_role_has_access(self):
         user = User.objects.create_user('valid', 'v@example.com', 'pass1234')
-        Accreditation.objects.create(user=user, course=self.course, role='validateur')
+        Accreditation.objects.create(user=user, course=self.course.course, role='validateur')
         self.client.force_login(user)
         for path in self.PATHS:
             self.assertEqual(self.client.get(self.url(path)).status_code, 200, path)
@@ -372,7 +372,7 @@ class OrganizerAccessTestCase(ExportBaseTestCase):
 
     def test_pending_accreditation_without_role_has_no_access(self):
         user = User.objects.create_user('pending', 'p@example.com', 'pass1234')
-        Accreditation.objects.create(user=user, course=self.course, role='')
+        Accreditation.objects.create(user=user, course=self.course.course, role='')
         self.client.force_login(user)
         self.client.cookies['course_uid'] = self.course.uid
         response = self.client.get('/course/anomalies/')

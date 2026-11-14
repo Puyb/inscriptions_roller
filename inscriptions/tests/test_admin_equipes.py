@@ -37,7 +37,7 @@ def login_organizer(client, course, role='admin', username=None):
     user = User.objects.create_user(
         username or 'org%d' % course.id, '%s@example.com' % (username or course.id), 'pass1234',
     )
-    Accreditation.objects.create(user=user, course=course, role=role)
+    Accreditation.objects.create(user=user, course=course.course, role=role)
     client.force_login(user)
     set_course_cookie(client, course)
     return user
@@ -140,7 +140,7 @@ class IsolationTestCase(AdminTestCase):
         self.assertIn(e.id, self.ids_for())
 
     def test_two_accreditations_switching_cookie_switches_scope(self):
-        Accreditation.objects.create(user=self.user, course=self.other_course, role='admin')
+        Accreditation.objects.create(user=self.user, course=self.other_course.course, role='admin')
         mine = self.equipe()
         theirs = self.equipe(course=self.other_course, categorie=self.other_cat)
         self.assertEqual(self.ids_for() & {mine.id, theirs.id}, {mine.id})
@@ -220,7 +220,7 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_course_choose_hides_old_courses_unless_old(self):
         old = CourseFactory(date=date(2000, 1, 1))
-        Accreditation.objects.create(user=self.user, course=old, role='admin')
+        Accreditation.objects.create(user=self.user, course=old.course, role='admin')
         r = self.client.get('/course/choose/')
         self.assertNotIn(old, list(r.context['courses']))
         r = self.client.get('/course/choose/', {'old': ''})
@@ -243,7 +243,7 @@ class CourseChooseAskTestCase(AdminTestCase):
         with mock.patch('inscriptions.admin_course.send_mail') as sm:
             r = self.client.get('/course/ask/%s/' % self.other_course.uid)
         self.assertEqual(r.status_code, 302)
-        acc = Accreditation.objects.get(user=self.user, course=self.other_course)
+        acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         self.assertEqual(acc.role, '')
         sm.assert_called_once()
         self.assertEqual(sm.call_args[1]['to'], [self.other_course.email_contact])
@@ -277,7 +277,7 @@ class CourseChooseAskTestCase(AdminTestCase):
     def test_accreditation_granted_sends_mail_to_user(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
             self.client.get('/course/ask/%s/' % self.other_course.uid)
-        acc = Accreditation.objects.get(user=self.user, course=self.other_course)
+        acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         with mock.patch('inscriptions.models.send_mail') as sm:
             acc.role = 'admin'
             acc.save()

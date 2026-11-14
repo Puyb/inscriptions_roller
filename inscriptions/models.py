@@ -1163,20 +1163,21 @@ class Transpondeur(models.Model):
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
-    course = models.ForeignKey(Edition, related_name='accreditations', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='accreditations', on_delete=models.CASCADE)
     role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='', blank=True)
     class Meta:
         unique_together = (('user', 'course'), )
 
     def save(self, *args, **kwargs):
         if self.role and self.id  and not Accreditation.objects.get(id=self.id).role:
+            edition = self.course.derniere_edition
             send_mail(
                 subject='[%s] Accès autorisé' % self.course.uid,
                 body="""Votre demande d'accès à la course %s est acceptée.
 Connectez vous sur enduroller pour y accéder.
 """ % self.course.nom,
                 to=[self.user.email],
-                reply_to=[self.course.email_contact,],
+                reply_to=[edition.email_contact] if edition else [],
                 content_type='text',
             )
         super().save(*args, **kwargs)

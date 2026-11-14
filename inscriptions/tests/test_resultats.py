@@ -18,7 +18,7 @@ def login_as_organizer(client, course):
         'orga%d' % course.id, 'orga%d@example.com' % course.id, 'pass1234',
         is_staff=True,
     )
-    Accreditation.objects.create(user=user, course=course, role='admin')
+    Accreditation.objects.create(user=user, course=course.course, role='admin')
     client.force_login(user)
     client.cookies['course_uid'] = course.uid
     client.cookies['course_id'] = str(course.id)
