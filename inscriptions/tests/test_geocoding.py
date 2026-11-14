@@ -78,6 +78,20 @@ class ImportTestCase(TestCase):
         self.assertEqual(CodePostal.objects.filter(pays='FR').count(), 3)
         self.assertEqual(CodePostal.objects.filter(pays='ES').count(), 1)
 
+    def test_pays_absent_de_geonames_ignore(self):
+        import urllib.error
+        from unittest import mock
+        chemin = self._zip()
+
+        def urlopen(url, timeout=None):
+            if url.endswith('/ZZ.zip'):
+                raise urllib.error.HTTPError(url, 404, 'Not Found', {}, None)
+            return open(chemin, 'rb')
+
+        with mock.patch('urllib.request.urlopen', urlopen):
+            self._run('--pays', 'FR,ZZ')
+        self.assertEqual(CodePostal.objects.filter(pays='FR').count(), 3)
+
     def test_import_txt_tous_pays(self):
         f = tempfile.NamedTemporaryFile('w', suffix='.txt', delete=False, encoding='utf-8')
         f.write(GEONAMES)

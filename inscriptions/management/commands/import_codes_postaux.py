@@ -11,6 +11,7 @@ Donnees : GeoNames, CC BY 4.0 (https://www.geonames.org/).
 import csv
 import io
 import tempfile
+import urllib.error
 import urllib.request
 import zipfile
 from collections import defaultdict
@@ -86,6 +87,11 @@ class Command(BaseCommand):
                 try:
                     with urllib.request.urlopen(URL % code, timeout=120) as r:
                         f.write(r.read())
+                except urllib.error.HTTPError as e:
+                    if e.code == 404:  # pays absent du referentiel GeoNames
+                        self.stderr.write('Pays %s : pas de fichier GeoNames, ignore.' % code)
+                        continue
+                    raise CommandError('Telechargement impossible (%s) : %s' % (code, e))
                 except Exception as e:
                     raise CommandError('Telechargement impossible (%s) : %s' % (code, e))
                 f.flush()
