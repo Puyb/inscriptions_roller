@@ -1,3 +1,4 @@
+from django.apps import apps
 from django.conf import settings
 from .models import Course
 from django.db.models import Min, Max
@@ -38,3 +39,15 @@ def import_settings(request):
         'PAYPAL_URL':      settings.PAYPAL_URL,
         'ROOT_URL': 'https://%s' % Site.objects.get_current(),
     }
+
+
+def theme(request):
+    """Variables de gabarit herites de pinax-theme-bootstrap (vendorise)."""
+    ctx = {
+        "THEME_ADMIN_URL": getattr(settings, "THEME_ADMIN_URL", "admin:index"),
+        "THEME_CONTACT_EMAIL": getattr(settings, "THEME_CONTACT_EMAIL", "support@example.com"),
+    }
+    if apps.is_installed('django.contrib.sites'):
+        site = Site.objects.get_current()
+        ctx.update({"SITE_NAME": site.name, "SITE_DOMAIN": site.domain})
+    return ctx

@@ -7,7 +7,7 @@ COPY mkdocs.yml .
 COPY docs/wiki docs/wiki
 RUN mkdocs build --strict -d /site
 
-FROM python:3.9
+FROM python:3.11
 
 ARG DEBUG
 

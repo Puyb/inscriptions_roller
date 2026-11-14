@@ -100,7 +100,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "django.template.context_processors.request",
                 "account.context_processors.account",
-                "pinax_theme_bootstrap.context_processors.theme",
+                "inscriptions.context_processors.theme",
                 'sekizai.context_processors.sekizai',
                 "inscriptions.context_processors.import_settings",
                 "inscriptions.context_processors.course",
@@ -136,7 +136,6 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "bootstrapform",
     "formadmin",
-    "pinax_theme_bootstrap",
     "account",
     "turnstile",
 
