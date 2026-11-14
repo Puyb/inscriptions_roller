@@ -1,5 +1,15 @@
 # Plan de migration Django 2.0 → 5.2 LTS
 
+> **Statut : exécuté** (branche `django-upgrade`, un commit par palier LTS : 2.2, 3.2, 4.2, 5.2 ; 534 tests + 85 e2e verts à chaque palier). Écarts par rapport au plan ci-dessous :
+> - `default_app_config` ne pouvait pas être retiré à l'étape 0 (nécessaire jusqu'à 3.2, sinon `receivers.py` n'est plus branché) ; retiré à 3.2.
+> - `django-user-accounts` 2.0.3 était incompatible dès Django 2.2 : monté en 3.0.4 puis 3.3.2, **pas de migration vers allauth** nécessaire (`test_auth.py` vert).
+> - `pinax-theme-bootstrap` : **vendorisé** (templates, tag, context processor) au lieu d'une refonte Bootstrap 5 ; rendu inchangé. Idem `django-bootstrap-form` (distutils, Python 3.12) et `django-form-admin`.
+> - `django-sekizai` conservé (encore utilisé par `_stripe.html` / `theme_bootstrap/base.html`).
+> - `stripe` 2.12.1 → 11.6.0 (ne s'importait plus sous 3.12), avec `stripe.api_version = None` pour garder la version d'API du compte.
+> - `requirements.txt` réduit aux dépendances directes ; `makemigrations --check` limité à `inscriptions` (le paquet `account` génère une migration dépendante des settings) ; warnings promus en erreurs limités au module `inscriptions` (les libs tierces figées en émettaient trop).
+> - `zipstream` conservé (vérifié sous 3.12) ; channel layer Redis vérifiée avec un vrai `runworker mail`.
+> - Reste à faire à la main : smoke test manuel du back-office / paiements réels (Stripe, HelloAsso, Paypal), rendu visuel de l'admin Django 5.
+
 Document de travail, aucune ligne de code applicatif n'a été modifiée pour produire cette analyse.
 
 ## 1. Résumé des trouvailles

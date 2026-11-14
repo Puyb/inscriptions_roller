@@ -11,6 +11,10 @@ Two audiences share one codebase:
 - **Organizer backoffice** (`admin_course.py`, mounted at `/course/`): a heavily customized Django admin scoped to a single race, for validating registrations, entering payments, managing categories/results.
 - There's also the superuser-only default Django admin (`admin_main.py`, mounted at `/admin/`) for cross-race/global objects (courses, challenges, logs).
 
+## Stack versions
+
+Django 5.2 LTS on Python 3.12 (Dockerfile), Channels 4 (`runworker mail`). `requirements.txt` lists **direct dependencies only**, pinned exactly (transitive ones are resolved by pip); the Dockerfile no longer swallows `pip install` failures. Two former third-party packages are vendored in `inscriptions/` because they were abandoned and broke on recent Python/Django: the `pinax-theme-bootstrap` templates/tags/context processor (`templates/account/*`, `_messages.html`, `templatetags/theme_tags.py`, `context_processors.theme`) and `django-bootstrap-form` / `django-form-admin` (`templatetags/bootstrap.py`, `formadmin_filters.py`, `templates/bootstrapform|formadmin`). `django-user-accounts` is kept (3.3.x). Stripe: `stripe.api_version = None` on purpose (keeps each account's default API version instead of the SDK-pinned one). Migration history: `docs/django-upgrade-plan.md`.
+
 ## Commands
 
 ### Setup / run (virtualenv)
@@ -36,6 +40,7 @@ Tests always run through docker-compose (real PostgreSQL + Redis — some model 
 ```
 scripts/test.sh                                            # unit/functional/integration suite (inscriptions/tests/)
 scripts/test.sh inscriptions.tests.test_pricing             # a single test module/class/method
+PYTHONWARNINGS=error::DeprecationWarning:inscriptions scripts/test.sh   # deprecations from our code as errors
 scripts/test-e2e.sh                                          # Playwright e2e suite (e2e/), brings its own throwaway app+db up and tears it down after
 ```
 Both scripts are thin wrappers around `docker-compose --profile test ...` (services `test`, `django-e2e`, `e2e` — gated behind the `test` compose profile so they never start on a plain `docker-compose up`). Test data is built with `inscriptions/factories.py` (factory_boy), not fixtures — the old `fixtures/course1.json` was removed after it silently bit-rotted out of sync with the model schema (a schema change stops `manage.py test` cold; a factory just fails loudly at the specific field that changed). The e2e stack seeds its own fixed `'e2e'` course via the `setup_e2e_data` management command.
