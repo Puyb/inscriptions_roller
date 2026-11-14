@@ -25,7 +25,7 @@
 (function($) {
     'use strict';
     $(document).ready(function() {
-        $('form#course_form input[name=dates_augmentation]').each(function() {
+        $('form#edition_form input[name=dates_augmentation]').each(function() {
             const input = $(this);
             input.attr('hidden', true);
             input.before('<table id="dates_augmentation_table"></table><a href="#">Ajouter une date d\'augmentation</a>')

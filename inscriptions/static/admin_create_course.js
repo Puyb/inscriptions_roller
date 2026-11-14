@@ -8,7 +8,7 @@ $(function() {
             let i = 0;
             // `_order` : editions precedentes (la plus recente d'abord) puis modeles ;
             // les cles numeriques d'un objet JS seraient sinon triees par id.
-            const ordre = r._order || Object.keys(r);
+            const ordre = (r._order || Object.keys(r)).filter(k => k[0] !== '_');
             for (const k of ordre) {
                 const v = r[k];
                 if (k === '_order' || !v) continue;
@@ -26,7 +26,7 @@ $(function() {
             $('[name=course_model]').click(function() {
                 generate_prices(this.value);
             });
-            if (r._order && !$('[name=course_model]:checked').length) {
+            if (r._preselect && !$('[name=course_model]:checked').length) {
                 $('[name=course_model]').first().prop('checked', true);  // edition precedente par defaut
             }
             generate_prices($('[name=course_model]:checked').val());

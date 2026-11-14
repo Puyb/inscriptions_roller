@@ -21,7 +21,7 @@ def test_chart_is_drawn_for_the_current_course(admin_page):
 
 
 def test_url_hash_selects_settings_and_courses(admin_page):
-    admin_page.goto(URL + '#align=start&data=equipes&course=e2e&course=e2estats')
+    admin_page.goto(URL + '#align=start&data=equipes&course=e2e/e2e&course=e2estats/e2estats')
     expect(admin_page.locator('[name=align][value=start]')).to_be_checked()
     expect(admin_page.locator('[name=data][value=equipes]')).to_be_checked()
     admin_page.wait_for_function("window.Chart && Object.keys(Chart.instances).length === 1")
@@ -35,7 +35,7 @@ def test_adding_a_course_redraws_and_updates_the_hash(admin_page):
     admin_page.select_option('#add_course', 'e2estats/e2estats')
     admin_page.wait_for_function(LAST + ".data.datasets.length >= 2")
     assert 'e2estats/e2estats' in datasets(admin_page)
-    expect(admin_page.locator('#add_course option[value=e2estats]')).to_have_count(0)
+    expect(admin_page.locator('#add_course option[value="e2estats/e2estats"]')).to_have_count(0)
     assert 'course=e2estats' in admin_page.evaluate('location.hash')
 
 
@@ -64,13 +64,13 @@ def lines(page):
 
 def test_one_annotation_per_price_change_date(admin_page):
     # e2e: ouverture/fermeture/course + 1 augmentation ; e2estats: idem + 3 augmentations
-    admin_page.goto(URL + '#align=course&data=equipes&course=e2e&course=e2estats')
+    admin_page.goto(URL + '#align=course&data=equipes&course=e2e/e2e&course=e2estats/e2estats')
     wait_chart(admin_page, 2)
     assert lines(admin_page) == 4 + 6
 
 
 def test_nth_price_change_alignment(admin_page):
-    admin_page.goto(URL + '#align=augmentation:2&data=equipes&course=e2e&course=e2estats')
+    admin_page.goto(URL + '#align=augmentation:2&data=equipes&course=e2e/e2e&course=e2estats/e2estats')
     wait_chart(admin_page, 2)
     expect(admin_page.locator('[name=align][value=augmentation]')).to_be_checked()
     select = admin_page.locator('#augmentation_n')
@@ -85,7 +85,7 @@ def test_nth_price_change_alignment(admin_page):
 
 
 def test_single_price_change_hides_the_selector(admin_page):
-    admin_page.goto(URL + '#align=augmentation&data=equipes&course=e2e')
+    admin_page.goto(URL + '#align=augmentation&data=equipes&course=e2e/e2e')
     admin_page.wait_for_function("window.Chart && Object.keys(Chart.instances).length >= 1")
     expect(admin_page.locator('#augmentation_n')).to_be_hidden()
     assert lines(admin_page) == 4
@@ -93,6 +93,6 @@ def test_single_price_change_hides_the_selector(admin_page):
 
 def test_start_alignment_draws_the_curves(admin_page):
     # regression: `delta.start` did not exist, labels were empty (NaN)
-    admin_page.goto(URL + '#align=start&data=equipes&course=e2e&course=e2estats')
+    admin_page.goto(URL + '#align=start&data=equipes&course=e2e/e2e&course=e2estats/e2estats')
     wait_chart(admin_page, 2)
     assert admin_page.evaluate(LAST + ".data.labels.length") > 10

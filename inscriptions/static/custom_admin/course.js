@@ -1,6 +1,6 @@
 $(function() {
     var mode = '';
-    if(!$('#course_form').length) return;
+    if(!$('#edition_form').length) return;
     $('.field-stripe_public>div').append($('<div id="stripe">'));
     var change = ask => {
         var sk = $('#id_stripe_secret').val();
@@ -13,7 +13,7 @@ $(function() {
         if (!/^pk_(live|test)_/.test(pk)) {
             return $('#stripe').text('Erreur: la clef public Stripe doit être entrée');
         }
-        var url = location.origin + '/' + $('#id_uid').val() + '/stripe/webhook/';
+        var url = location.origin + '/' + COURSE_UID + '/stripe/webhook/';
         $.ajax('https://api.stripe.com/v1/webhook_endpoints', {
             beforeSend: function (xhr) {
                 xhr.setRequestHeader ("Authorization", "Bearer " + sk );
@@ -57,7 +57,7 @@ $(function() {
                 },
             });
         }
-        var url = location.origin + '/' + $('#id_uid').val() + '/stripe/webhook/';
+        var url = location.origin + '/' + COURSE_UID + '/stripe/webhook/';
         $.ajax('https://api.stripe.com/v1/webhook_endpoints', {
             method: 'post',
             beforeSend: function (xhr) {

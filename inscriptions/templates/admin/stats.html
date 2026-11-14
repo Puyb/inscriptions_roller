@@ -83,7 +83,7 @@ let courses = [];
 const addCourse = async uid => {
     if (!uid) return;
 
-    $('#add_course option[value=' + uid + ']').remove();
+    $('#add_course option').filter((i, o) => o.value === uid).remove();
     const response = await fetch(`${uid}/`);
     const data = await response.json();
     // repères (date + décalage) : ouverture, fermeture, course et chaque augmentation
@@ -288,9 +288,9 @@ const init = async () => {
     if (location.hash) {
         const hash = new URLSearchParams(location.hash.slice(1));
         const [align, n] = (hash.get('align') || '').split(':');
-        $('[name=align][value=' + align + ']').attr('checked', true);
+        $('[name=align]').filter((i, o) => o.value === align).attr('checked', true);
         hashN = n;
-        $('[name=data][value=' + hash.get('data') + ']').attr('checked', true);
+        $('[name=data]').filter((i, o) => o.value === hash.get('data')).attr('checked', true);
         wantedUids = hash.getAll('course');
     }
     const promises = [];

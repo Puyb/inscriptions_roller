@@ -38,7 +38,7 @@ def test_models_are_loaded_and_include_own_courses(admin_page):
     assert {'paris', 'grol', 'centre'} <= set(values)
     # the organizer's own course can be cloned: its id is a numeric value
     assert any(v.isdigit() for v in values), values
-    expect(admin_page.get_by_text('Course E2E')).to_be_visible()
+    expect(admin_page.get_by_text(re.compile(r'^\s*Course E2E \('))).to_be_visible()
 
 
 def test_no_price_table_until_a_model_is_chosen(admin_page):
@@ -84,7 +84,7 @@ def test_create_course_end_to_end_with_edited_price(admin_page):
 
     expect(admin_page).to_have_url(re.compile(r'/course/$'))
     cookies = {c['name']: c['value'] for c in admin_page.context.cookies()}
-    assert cookies['course_uid'] == 'e2enew/2099'
+    assert cookies['course_uid'].strip('"') == 'e2enew/2099'
 
     admin_page.goto('/course/inscriptions/categorie/')
     admin_page.locator('#result_list tbody tr', has_text='IDH').locator('a').first.click()

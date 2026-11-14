@@ -18,7 +18,7 @@ def test_choosing_a_course_sets_cookies_and_opens_its_dashboard(bare_admin_page)
     page.get_by_role('link', name=re.compile('Course E2E')).click()
     expect(page).to_have_url(re.compile(r'/course/$'))
     cookies = {c['name']: c['value'] for c in page.context.cookies()}
-    assert cookies['course_uid'] == 'e2e/e2e'
+    assert cookies['course_uid'].strip('"') == 'e2e/e2e'
     assert cookies['course_nom']
     expect(page.locator('#site-name')).to_contain_text('Course E2E')
 

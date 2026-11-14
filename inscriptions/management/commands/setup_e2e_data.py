@@ -12,7 +12,7 @@ from inscriptions.factories import (
     CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory, ExtraQuestionFactory,
 )
 from inscriptions.models import (
-    Accreditation, Challenge, ChallengeCategorie, CodePostal, Edition, Mail, Paiement, PaiementRepartition, TemplateMail,
+    Accreditation, Challenge, ChallengeCategorie, CodePostal, Course, Edition, Mail, Paiement, PaiementRepartition, TemplateMail,
 )
 
 COURSE_UID = 'e2e'
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         Challenge.objects.filter(uid__in=['e2echal', 'e2enewchal']).delete()
-        Edition.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID, STRIPE_UID, NOGEO_UID]).delete()  # e2enew: made by tests
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID, STRIPE_UID, NOGEO_UID]).delete()  # cascade sur les editions ; e2enew: made by tests
         CodePostal.objects.filter(pays__in=['FR', 'BE']).delete()
         for pays, cp, nom, region, lat, lng in [
                 ('FR', '75000', 'Paris', 'Île-de-France', '48.8566', '2.3522'),

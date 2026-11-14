@@ -1314,6 +1314,7 @@ class CourseAdmin(admin.ModelAdmin):
             }
 
         models['_order'] = ordre
+        models['_preselect'] = bool(parente and editions)
         return HttpResponse(json.dumps(models))
 
 site.register(Edition, CourseAdmin)
