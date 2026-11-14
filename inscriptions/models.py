@@ -21,7 +21,6 @@ from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
 from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
 from django import forms
-from django.contrib.postgres.fields import JSONField
 from django.contrib.contenttypes.models import ContentType
 from django_resized import ResizedImageField
 from pathlib import Path
@@ -622,7 +621,7 @@ class Equipe(models.Model):
     temps              = models.DecimalField(_('Temps (en secondes)'), max_digits=9, decimal_places=3, null=True, blank=True)
     position_generale  = models.IntegerField(_('Position générale'), blank=True, null=True)
     position_categorie = models.IntegerField(_('Position catégorie'), blank=True, null=True)
-    extra              = JSONField(default=dict)
+    extra              = models.JSONField(default=dict)
     verrou             = models.BooleanField(_('Equipe verrouillée (modifiable uniquement par l\'organisateur)'), default=False)
 
     class Meta:
@@ -877,7 +876,7 @@ Vous pourrez aussi la télécharger plus tard, ou l'envoyer par courrier (%(link
     num_licence       = models.CharField(_(u'Numéro de licence'), max_length=15, blank=True)
     piece_jointe      = models.FileField(_(u'Certificat ou licence'), upload_to=equipier_piece_jointe_filename, blank=True)
     piece_jointe_valide  = models.BooleanField(_(u'Certificat ou licence valide'), null=True)
-    extra             = JSONField(default=dict)
+    extra             = models.JSONField(default=dict)
 
     # Pre-calculated fields
     verifier               = models.BooleanField(_(u'Verifier'), editable=False)
