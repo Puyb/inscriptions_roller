@@ -845,7 +845,6 @@ def equipier_piece_jointe_filename(instance, filename):
     name = instance.justificatif
     pj = Path(filename)
     dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
-    dest.mkdir(parents=True, exist_ok=True)
     new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
     return new_pj
 
@@ -853,7 +852,6 @@ def equipier_autorisation_filename(instance, filename):
     name = 'autorisation'
     pj = Path(filename)
     dest = Path('course_%d' % instance.equipe.course_id) / ('equipe_%s_%s' % (instance.equipe.id, instance.equipe.password))
-    dest.mkdir(parents=True, exist_ok=True)
     new_pj = dest / ('%s_%s%s' % (name, instance.numero, pj.suffix))
     return new_pj
 
