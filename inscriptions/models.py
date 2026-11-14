@@ -115,6 +115,8 @@ REGION_NORMALISATION = {
     'Nord-Pas-de-Calais and Picardy': 'Hauts-de-France',
 }
 
+PAYS_INCONNU = '?'
+
 #class Chalenge(model.Model):
 #    nom = models.CharField(_('Nom'), max=200)
 
@@ -189,9 +191,14 @@ class Course(models.Model):
         return self.date_fermeture - timedelta(days=1)
 
     @property
+    def augmentations(self):
+        """Dates de changement de tarif (liste triee, jamais None)."""
+        return sorted(self.dates_augmentation or [])
+
+    @property
     def dernier_jour_tarif_reduit(self):
         d = date.today()
-        for date_augmentation in self.dates_augmentation:
+        for date_augmentation in self.augmentations:
             if date_augmentation > d:
                 return date_augmentation - timedelta(days=1)
         return None
@@ -199,11 +206,11 @@ class Course(models.Model):
     @property
     def dernier_jours_tarif_reduit(self):
         return [ date_augmentation - timedelta(days=1)
-            for date_augmentation in self.dates_augmentation]
+            for date_augmentation in self.augmentations]
 
     @property
     def date_augmentation(self):
-        return self.dates_augmentation[0] if len(self.dates_augmentation) else None
+        return self.augmentations[0] if self.augmentations else None
 
     def save(self, *args, **kwargs):
         if not self.uid:
@@ -305,7 +312,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             keys = {
                 "categories": equipe.categorie_id and equipe.categorie.code or '',
                 "jours": (equipe.date.astimezone(tz).date() - self.date_ouverture).days,
-                "pays":    '',
+                "pays":    PAYS_INCONNU,
                 "clubs": normalize_club(equipe.club),
             }
             if equipe.gerant_ville2:
@@ -340,7 +347,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             stats['prix'] = float(equipe.prix_reel)
             stats['reste_a_payer'] = float(equipe.reste_a_payer)
             stats['nbcertifenattente'] = equipe.licence_manquantes_count + equipe.certificat_manquants_count + equipe.autorisation_manquantes_count
-            stats[equipe.categorie.code] += 1;
+            if equipe.categorie_id:
+                stats[equipe.categorie.code] += 1
 
             for key, index in keys.items():
                 if index not in result[key]:
@@ -365,6 +373,14 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             if ville.count > 0 ]
         sorted(result['villes'], key=itemgetter('nom'))
         sorted(result['villes'], key=itemgetter('count'), reverse=True)
+
+        result['course']['paiements_par_type'] = {
+            row['paiement__type']: row['n']
+            for row in (PaiementRepartition.objects
+                .filter(equipe__course=self, paiement__montant__isnull=False)
+                .values('paiement__type')
+                .annotate(n=Count('equipe', distinct=True)))
+        }
 
         result['course']['documents'] = 0
         result['course']['documents_electroniques'] = 0
@@ -486,7 +502,7 @@ class Categorie(models.Model):
         d = d or date.today()
         prix_base = self.prices_base[0] if len(self.prices_base) else 0
         prix_equipier = self.prices_equipier[0] if len(self.prices_equipier) else 0
-        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+        for (i, date_augmentation) in enumerate(self.course.augmentations):
             if date_augmentation <= d and len(self.prices_base) > i + 1:
                 prix_base = self.prices_base[i + 1]
             if date_augmentation <= d and len(self.prices_equipier) > i + 1:
@@ -498,7 +514,7 @@ class Categorie(models.Model):
             d = d.date()
         d = d or date.today()
         prix_base = self.prices_base[0] if len(self.prices_base) else 0
-        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+        for (i, date_augmentation) in enumerate(self.course.augmentations):
             if date_augmentation <= d and len(self.prices_base) > i + 1:
                 prix_base = self.prices_base[i + 1]
         return prix_base
@@ -508,7 +524,7 @@ class Categorie(models.Model):
             d = d.date()
         d = d or date.today()
         prix_equipier = self.prices_equipier[0] if len(self.prices_equipier) else 0
-        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+        for (i, date_augmentation) in enumerate(self.course.augmentations):
             if date_augmentation <= d and len(self.prices_equipier) > i + 1:
                 prix_equipier = self.prices_equipier[i + 1]
         return prix_equipier
@@ -521,7 +537,7 @@ class Categorie(models.Model):
     def prices(self):
         base = list(self.prices_base)
         equipier = list(self.prices_equipier)
-        dates = len(self.course.dates_augmentation) + 1
+        dates = len(self.course.augmentations) + 1
         lastBase = base[-1] if len(base) else 0
         for i in range(len(base), dates):
             base.append(lastBase)
@@ -971,7 +987,7 @@ class ExtraQuestion(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.prices[0] if len(self.prices) else 0
-        for (i, date_augmentation) in enumerate(self.course.dates_augmentation):
+        for (i, date_augmentation) in enumerate(self.course.augmentations):
             if date_augmentation <= d and len(self.prices) > i + 1:
                 price = self.prices[i + 1]
         return price
@@ -1021,7 +1037,7 @@ class ExtraQuestionChoice(models.Model):
             d = d.date()
         d = d or date.today()
         price = self.prices[0] if len(self.prices) else 0
-        for (i, date_augmentation) in enumerate(self.question.course.dates_augmentation):
+        for (i, date_augmentation) in enumerate(self.question.course.augmentations):
             if date_augmentation <= d and len(self.prices) > i + 1:
                 price = self.prices[i + 1]
         return price

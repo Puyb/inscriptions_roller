@@ -1702,8 +1702,8 @@ msgid "Origine des participants"
 msgstr "Members' origin"
 
 #: inscriptions/templates/stats.html:75
-msgid "Villes des participants"
-msgstr "Teams' origin"
+msgid "Villes des responsables d'équipe"
+msgstr "Team managers' cities"
 
 #: inscriptions/templates/stats.html:81
 #, python-format
@@ -2186,3 +2186,11 @@ msgstr ""
 
 #~ msgid "Super Vétéran"
 #~ msgstr "Super Veteran"
+
+#: inscriptions/templates/stats.html
+msgid "Non localisé"
+msgstr "Unknown location"
+
+#: inscriptions/templates/stats.html
+msgid "Localisation indisponible"
+msgstr "Location unavailable"

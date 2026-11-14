@@ -1634,7 +1634,7 @@ msgid "Origine des participants"
 msgstr ""
 
 #: inscriptions/templates/stats.html:75
-msgid "Villes des participants"
+msgid "Villes des responsables d'équipe"
 msgstr ""
 
 #: inscriptions/templates/stats.html:81

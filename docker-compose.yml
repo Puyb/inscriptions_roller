@@ -37,7 +37,6 @@ services:
       EMAIL_HOST_USER: "donotreply@enduroller.fr"
       EMAIL_HOST_PASSWORD: "4i3y4Xbsqos6xqKh"
       DEFAULT_FROM_MAIL: "donotreply@enduroller.fr"
-      MAPQUEST_API_KEY: "Fmjtd|luub2d6ynd%2C25%3Do5-9u22ha"
       CONTACT_MAIL: "contact@enduroller.fr"
       DB_NAME: "enduroller"
       DB_USER: "enduroller"

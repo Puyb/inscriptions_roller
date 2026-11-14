@@ -72,7 +72,7 @@
         <div class="panel-body">
             <div class="col-md-3">
                 <table>
-                    <tr><th>{% trans "Villes des participants" %}</th><th>#</th><th>%</th></tr>
+                    <tr><th>{% trans "Villes des responsables d'équipe" %}</th><th>#</th><th>%</th></tr>
                     {% for ville in stats.villes|slice:":20" %}
                     <tr><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio ville.count stats.course.equipiers 100 %}%</td></tr>
                     {% endfor %}
@@ -99,7 +99,7 @@
                     <tr><th>{% trans "Origine des équipes" %}</th><th>#</th><th>%</th></tr>
                     {% with stats.pays|pertinent_values:"equipes" as pays %}
                     {% for key in pays %}
-                    <tr><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    <tr><td>{% if key == "?" %}{% trans "Non localisé" %}{% else %}<img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}{% endif %}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
                     {% endfor %}
                     {% endwith %}
                     {% with stats.pays|other_values:"equipes" as pays %}
@@ -115,7 +115,7 @@
                     </tr>
                     <tr></tr>
                     {% for key in pays %}
-                    <tr style="display:none"><td><img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
+                    <tr style="display:none"><td>{% if key == "?" %}{% trans "Non localisé" %}{% else %}<img src="/static/flags/{{ stats.pays|get:key|get:"pays"|lower }}.png" alt="{{ stats.pays|get:key|get:"pays"|lower }}" /> {{ key }}{% endif %}</td><td>{{ stats.pays|get:key|get:"equipes" }}</td><td>{% widthratio stats.pays|get:key|get:"equipes" stats.course.equipes 100 %}%</td></tr>
                     {% endfor %}
                     {% endwith %}
                 </table>
@@ -123,12 +123,18 @@
             <div class="col-md-6">
                 <canvas id="canvas_pays"></canvas>
             </div>
+            {% if stats.villes %}
             <div class="col-md-12">
                 <div id="map"></div>
             </div>
             <div class="col-md-12">
                 <canvas id="canvas_distance"></canvas>
             </div>
+            {% else %}
+            <div class="col-md-12">
+                <p id="no-map">{% trans "Localisation indisponible" %}</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -201,9 +207,9 @@
             <div class="col-md-8">
                 <canvas id="canvas_licencies"></canvas>
             </div>
+            {% endif %}
         </div>
     </div>
-    {% endif %}
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.5/leaflet.js"></script>
@@ -227,14 +233,15 @@
 
         
         // map
+        var points = [], distances = {};
+        var tranche = parseFloat(args.tranche) || 10;
+        if (document.getElementById('map')) {
         var map = L.map('map').setView([51.505, -0.09], 13);
-        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        var points = [], point;
-        var distances = {};
-        var tranche = parseFloat(args.tranche) || 10;
+        var point;
         var origine = new L.LatLng(48.852775, 2.247415);
         {% localize off %}
         {% for ville in stats.villes %}
@@ -246,6 +253,7 @@
         distances[distance] = (distances[distance] || 0) + {{ ville.count }};
         {% endif %}{% endfor %}
         {% endlocalize %}
+        if (points.length) {
         var bounds = [[points[0][0], points[0][1]], [points[0][0], points[0][1]]];
         points.forEach(function(point) {
             if(point[0] < bounds[0][0])
@@ -264,6 +272,8 @@
         bounds[0][1] -= marginY;
         bounds[1][1] += marginY;
         map.fitBounds(bounds);
+        }
+        }
     </script>
     <script>
         var colors = {};
@@ -277,7 +287,7 @@
         var autre = {{ stats.course.equipes }};
         {% with stats.pays|pertinent_values:"equipes,2%" as pays %}
         {% for key in pays %}
-        g.data("{{ key }}", {{ stats.pays|get:key|get:"equipes" }}, colors.pays && colors.pays[i["{{ key }}"]]);
+        g.data("{% if key == "?" %}{% trans "Non localisé" %}{% else %}{{ key }}{% endif %}", {{ stats.pays|get:key|get:"equipes" }});
         autre -= {{ stats.pays|get:key|get:"equipes" }};
         {% endfor %}
         {% endwith %}
@@ -376,6 +386,7 @@
         g.draw();
 
 
+        if (document.getElementById('canvas_distance') && points.length) {
         var g = new Bluff.StackedBar('canvas_distance', 900);
         g.theme_pastel();
         g.title = '';
@@ -401,6 +412,7 @@
         g.labels[d - 1] = i * tranche;
         g.data('Pourcentage de particpants en fonction de la distance', data.map(function(i) { return i / {{ stats.course.equipiers }} * 100; }));
         g.draw();
+        }
     </script>
     {% if user.is_staff %}
     <script>
@@ -412,9 +424,11 @@
         g.tooltips = true;
         g.sort = false;
         g.zero_degree = -90;
-        g.data("Paypal (" + Math.round( {{ stats.course.paiement_paypal }} / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.paiement_paypal }});
-        g.data("Autre ("  + Math.round(({{ stats.course.p }} - {{ stats.course.paiement_paypal }}) / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.p }} - {{ stats.course.paiement_paypal }});
-        g.data("Impaye (" + Math.round(({{ stats.course.equipes }} - {{ stats.course.p }}) / {{ stats.course.equipes }} * 100) + "%)", {{ stats.course.equipes }} - {{ stats.course.p }});
+        var total = {{ stats.course.equipes }} || 1;
+        {% for type, n in stats.course.paiements_par_type.items %}
+        g.data("{{ type|escapejs }} (" + Math.round({{ n }} / total * 100) + "%)", {{ n }});
+        {% endfor %}
+        g.data("Impayé (" + Math.round(({{ stats.course.equipes }} - {{ stats.course.p }}) / total * 100) + "%)", {{ stats.course.equipes }} - {{ stats.course.p }});
         g.draw();
     </script>
     <script>
