@@ -2,7 +2,7 @@
 import operator
 from functools import reduce, update_wrapper
 from inscriptions.models import *
-from django.conf.urls import url
+from django.urls import re_path
 from django.contrib import admin
 from django.forms import CharField, HiddenInput
 from django.http import HttpResponse
@@ -66,24 +66,24 @@ class CourseAdminSite(admin.sites.AdminSite):
         return request.user.accreditations.filter(course__uid=course_uid).exclude(role='').count() > 0
 
     def get_urls(self):
-        from django.conf.urls import url
+        from django.urls import re_path
         urls = [
-            url(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
-            url(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
-            url(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
-            url(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
-            url(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
-            url(r'^dossards/$', self.admin_view(self.dossards), name='course_dossards'),
-            url(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
-            url(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
-            url(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
-            url(r'^transpondeurs/$', self.admin_view(self.transpondeurs), name='course_transpondeurs'),
-            url(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
-            url(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
-            url(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
-            url(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
-            url(r'^stats/$', self.admin_view(self.stats), name='course_stats'),
-            url(r'^stats/(?P<course_uid>[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
+            re_path(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
+            re_path(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
+            re_path(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
+            re_path(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
+            re_path(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
+            re_path(r'^dossards/$', self.admin_view(self.dossards), name='course_dossards'),
+            re_path(r'^anomalies/$', self.admin_view(self.anomalies), name='course_anomalies'),
+            re_path(r'^anniversaires/$', self.admin_view(self.anniversaires), name='course_anniversaires'),
+            re_path(r'^resultats/$', self.admin_view(self.resultats), name='course_resultats'),
+            re_path(r'^transpondeurs/$', self.admin_view(self.transpondeurs), name='course_transpondeurs'),
+            re_path(r'^inscriptions/paiement/add/$', self.admin_view(self.paiement_change), name='paiement_add'),
+            re_path(r'^inscriptions/paiement/(?P<id>\d+)/change/$', self.admin_view(self.paiement_change), name='paiement_change'),
+            re_path(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
+            re_path(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
+            re_path(r'^stats/$', self.admin_view(self.stats), name='course_stats'),
+            re_path(r'^stats/(?P<course_uid>[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
         ] + super().get_urls()
         return urls
 
@@ -914,12 +914,12 @@ class EquipeAdmin(CourseFilteredObjectAdmin):
             wrapper.model_admin = self
             return update_wrapper(wrapper, view)
         my_urls = [
-            url(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
-            url(r'^export/$', wrap(self.export), name='equipe_export'),
-            url(r'^download/$', wrap(self.download), name='equipe_downloads'),
-            url(r'^send/preview/$', wrap(self.preview_mail), name='equipe_preview_mail'),
-            url(r'^(?P<id>\d+)/send/(?P<template>.*)/$', wrap(self.send_mail), name='equipe_send_mail'),
-            url(r'^(?P<id>\d+)/autre/$', wrap(self.autre), name='equipe_autre'),
+            re_path(r'^send/$', wrap(self.send_mails), name='equipe_send_mails'),
+            re_path(r'^export/$', wrap(self.export), name='equipe_export'),
+            re_path(r'^download/$', wrap(self.download), name='equipe_downloads'),
+            re_path(r'^send/preview/$', wrap(self.preview_mail), name='equipe_preview_mail'),
+            re_path(r'^(?P<id>\d+)/send/(?P<template>.*)/$', wrap(self.send_mail), name='equipe_send_mail'),
+            re_path(r'^(?P<id>\d+)/autre/$', wrap(self.autre), name='equipe_autre'),
         ]
         return my_urls + urls
 
@@ -1182,7 +1182,7 @@ class TranspondeurAdmin(CourseFilteredObjectAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            url(r'^reset/$', self.admin_site.admin_view(self.reset_view), name='course_transpondeurs_reset'),
+            re_path(r'^reset/$', self.admin_site.admin_view(self.reset_view), name='course_transpondeurs_reset'),
         ]
         return my_urls + urls
 
@@ -1248,7 +1248,7 @@ class CourseAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            url(r'^models/$', self.get_models, name='models'),
+            re_path(r'^models/$', self.get_models, name='models'),
         ]
         return my_urls + urls
 
@@ -1422,7 +1422,7 @@ class PaiementAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            url(r'^total/$', self.total, name='paiements_total'),
+            re_path(r'^total/$', self.total, name='paiements_total'),
         ]
         return my_urls + urls
 

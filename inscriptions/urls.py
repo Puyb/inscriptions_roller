@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.urls import path
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.views.generic import ListView
@@ -15,9 +15,9 @@ urlpatterns = static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += [
     path(r'admin/', admin.main_site.urls),
-    url(r"^account/signup/$", views.SignupView.as_view(), name="account_signup"),
-    url(r"account/", include("account.urls")),
-    url(r'i18n/', include('django.conf.urls.i18n')),
+    re_path(r"^account/signup/$", views.SignupView.as_view(), name="account_signup"),
+    re_path(r"account/", include("account.urls")),
+    re_path(r'i18n/', include('django.conf.urls.i18n')),
     path(r'jsi18n/', JavaScriptCatalog.as_view(), { 'packages': 'inscriptions', 'domain': 'djangojs' }, name='javascript_catalog'),
     path(r'<str:course_uid>/admin/', admin.course_setter, name='admin_course_setter'),
     path(r'course/', admin.course_site.urls),
@@ -72,5 +72,5 @@ urlpatterns += [
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
-        url(r'__debug__/', include(debug_toolbar.urls)),
+        re_path(r'__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns

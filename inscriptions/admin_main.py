@@ -97,10 +97,10 @@ class ChallengeAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def get_urls(self):
-        from django.conf.urls import url
+        from django.urls import re_path
         urls = super().get_urls()
         my_urls = [
-            url(r'^send/$', self.manage_courses, name='challenge_courses'),
+            re_path(r'^send/$', self.manage_courses, name='challenge_courses'),
         ]
         return my_urls + urls
 
