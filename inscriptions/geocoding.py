@@ -44,7 +44,6 @@ def normaliser_cp(cp, pays):
 Resultat = namedtuple('Resultat', 'nom pays region lat lng approximatif')
 
 SEUIL_NOM = 0.6
-SEUIL_NOM_PAYS = 0.8  # plus strict quand on cherche dans tout un pays (sans code postal fiable)
 RAYON_HOMONYMES_KM = 25
 
 
@@ -75,35 +74,36 @@ def _par_code_postal(candidats, nom_n):
     return None  # code postal partage et nom sans rapport : on prefere ne pas deviner
 
 
-def _ratio(c, nom_n):
-    return SequenceMatcher(None, c.nom_normalise, nom_n).ratio()
-
-
-def _meilleur_proche(communes, nom_n, seuil):
-    """Commune au nom le plus proche (>= seuil), `None` si aucune ou si des homonymes eloignes
-    se disputent la premiere place."""
-    notes = sorted(((_ratio(c, nom_n), c) for c in communes), key=lambda x: -x[0])
-    if not notes or notes[0][0] < seuil:
+def _plus_proches(communes, nom_n, divisant):
+    """Communes au nom le plus proche selon `levenshtein` (PostgreSQL, extension fuzzystrmatch,
+    comme `CompareNames` pour les challenges). Distance max : un `divisant`-ieme de la longueur
+    du nom. `None` si aucune, ou si des homonymes eloignes se disputent la premiere place."""
+    from django.db.models import IntegerField, Value
+    from .models import Levenshtein
+    maxi = max(1, len(nom_n) // divisant)
+    proches = list(communes.annotate(
+        d=Levenshtein('nom_normalise', Value(nom_n), output_field=IntegerField()),
+    ).filter(d__lte=maxi).order_by('d', 'id')[:20])
+    if not proches:
         return None
-    meilleure, premiere = notes[0]
-    ex_aequo = [c for note, c in notes if note >= meilleure - 0.02]
-    if all(_distance_km(premiere, c) <= RAYON_HOMONYMES_KM for c in ex_aequo):
-        return premiere
+    ex_aequo = [c for c in proches if c.d == proches[0].d]
+    if all(_distance_km(proches[0], c) <= RAYON_HOMONYMES_KM for c in ex_aequo):
+        return proches[0]
     return None
 
 
 def _par_nom_approx(pays, cp, nom_n):
     """Le code postal ne donne rien : nom de ville approchant (fautes de frappe), d'abord dans
-    le departement du code postal (FR), puis dans le pays. Toujours approximatif."""
+    le departement du code postal (FR, plus tolerant), puis dans tout le pays. Approximatif."""
     if len(nom_n) < 3:
         return None
-    modele = CodePostalModel().objects.filter(pays=pays)
+    communes = CodePostalModel().objects.filter(pays=pays)
     if pays == 'FR' and re.fullmatch(r'\d{5}', cp):
         prefixe = cp[:3] if cp[:2] in ('97', '98') else cp[:2]
-        commune = _meilleur_proche(list(modele.filter(code_postal__startswith=prefixe)), nom_n, SEUIL_NOM)
+        commune = _plus_proches(communes.filter(code_postal__startswith=prefixe), nom_n, 3)
         if commune:
             return commune
-    return _meilleur_proche(list(modele.filter(nom_normalise__startswith=nom_n[:1])), nom_n, SEUIL_NOM_PAYS)
+    return _plus_proches(communes, nom_n, 4)
 
 
 def _par_nom(pays, nom_n):

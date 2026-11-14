@@ -174,6 +174,8 @@ class LookupTestCase(TestCase):
         self.assertEqual((r.nom, r.approximatif), ('Troyes', True))
         r = trouver('Troyez', '99999', 'FR')  # code postal faux : recherche dans le pays
         self.assertEqual((r.nom, r.approximatif), ('Troyes', True))
+        r = trouver('Proyes', '99999', 'FR')  # faute sur l'initiale
+        self.assertEqual((r.nom, r.approximatif), ('Troyes', True))
         r = trouver('Sainte Savinne', '', 'FR')
         self.assertEqual(r.nom, 'Sainte-Savine')
 
