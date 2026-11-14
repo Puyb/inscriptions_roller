@@ -16,6 +16,10 @@ x-test-env: &test-env
   LOCAL_SETTINGS: ".docker"
   TURNSTILE_SITEKEY: ""
   TURNSTILE_SECRET: ""
+  # Cles Stripe de TEST pour e2e/test_stripe_payment.py (a definir dans .env, non versionne) ;
+  # sans elles, ces tests sont ignores.
+  E2E_STRIPE_PUBLIC: "${E2E_STRIPE_PUBLIC:-}"
+  E2E_STRIPE_SECRET: "${E2E_STRIPE_SECRET:-}"
 
 services:
   django:
@@ -127,6 +131,8 @@ services:
       - ./:/app
     environment:
       BASE_URL: "http://django-e2e:29000"
+      E2E_STRIPE_PUBLIC: "${E2E_STRIPE_PUBLIC:-}"
+      STRIPE_ENDPOINT_SECRET: "whsec_e2e_local"
     depends_on:
       - django-e2e
 

@@ -1,3 +1,4 @@
+import os
 from datetime import date, timedelta
 from django.core.files.base import ContentFile
 from decimal import Decimal
@@ -15,6 +16,9 @@ from inscriptions.models import (
 
 COURSE_UID = 'e2e'
 STATS_UID = 'e2estats'  # second accredited course, to compare in the stats page
+STRIPE_UID = 'e2estripe'  # course with Stripe test keys (only seeded when E2E_STRIPE_* are set)
+STRIPE_TEAMS = 8  # "Stripe 1".."Stripe 8", price 40, one per test
+STRIPE_ENDPOINT_SECRET = 'whsec_e2e_local'  # webhooks are signed locally by the tests
 OTHER_UID = 'e2eother'  # course the organizer has NO accreditation on
 ADMIN_USERNAME = 'e2e-admin'
 SUPER_USERNAME = 'e2e-super'
@@ -37,7 +41,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         Challenge.objects.filter(uid__in=['e2echal', 'e2enewchal']).delete()
-        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID]).delete()  # e2enew: made by tests
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID, STRIPE_UID]).delete()  # e2enew: made by tests
         Ville.objects.get_or_create(nom='paris', defaults=dict(
             region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
         ))
@@ -133,5 +137,23 @@ class Command(BaseCommand):
                       date=date.today() + timedelta(days=90),
                       date_ouverture=date.today() - timedelta(days=1),
                       date_fermeture=date.today() + timedelta(days=60))
+
+        stripe_public = os.environ.get('E2E_STRIPE_PUBLIC')
+        stripe_secret = os.environ.get('E2E_STRIPE_SECRET')
+        if stripe_public and stripe_secret:
+            stripe_course = CourseFactory(
+                uid=STRIPE_UID, nom='Course Stripe E2E',
+                date=date.today() + timedelta(days=90),
+                date_ouverture=date.today() - timedelta(days=1),
+                date_fermeture=date.today() + timedelta(days=60),
+                stripe_public=stripe_public, stripe_secret=stripe_secret,
+                stripe_endpoint_secret=STRIPE_ENDPOINT_SECRET)
+            stripe_categorie = CategorieFactory(
+                course=stripe_course, code='SOLO', nom='Solo', numero_debut=1, numero_fin=99,
+                prices_base=[Decimal('40.00')], prices_equipier=[])
+            for i in range(1, STRIPE_TEAMS + 1):
+                EquipeFactory(course=stripe_course, categorie=stripe_categorie,
+                              nom='Stripe %d' % i, numero=i, password='e2e-pass', prix=Decimal('40.00'))
+            Accreditation.objects.create(user=user, course=stripe_course, role='admin')
 
         self.stdout.write(self.style.SUCCESS('e2e course ready: /%s/' % COURSE_UID))
