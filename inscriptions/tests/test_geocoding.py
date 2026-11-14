@@ -160,7 +160,25 @@ class LookupTestCase(TestCase):
         cp('FR', '58000', 'Challuy', '46.95', '3.12')
         self.assertEqual(self.nom('Challuy', '58000', 'FR'), 'Challuy')
         self.assertEqual(self.nom('Chaluy', '58000', 'FR'), 'Challuy')  # proche
-        self.assertEqual(self.nom('Zzz', '58000', 'FR'), 'Challuy')  # repli alphabetique
+
+    def test_code_postal_partage_nom_sans_rapport_pas_de_devinette(self):
+        cp('FR', '58000', 'Challuy', '46.95', '3.12')
+        r = trouver('Zzz', '58000', 'FR')
+        self.assertTrue(r.approximatif)  # repli departement, pas une commune au hasard
+        self.assertNotIn(r.nom, ('Nevers', 'Challuy'))
+
+    def test_nom_approchant_quand_le_code_postal_ne_matche_pas(self):
+        r = trouver('Zorglub', '10999', 'FR')  # aucun nom proche
+        self.assertEqual(r.nom, 'Aube')
+        r = trouver('Troyez', '10999', 'FR')  # faute de frappe, code postal inconnu du departement
+        self.assertEqual((r.nom, r.approximatif), ('Troyes', True))
+        r = trouver('Troyez', '99999', 'FR')  # code postal faux : recherche dans le pays
+        self.assertEqual((r.nom, r.approximatif), ('Troyes', True))
+        r = trouver('Sainte Savinne', '', 'FR')
+        self.assertEqual(r.nom, 'Sainte-Savine')
+
+    def test_nom_approchant_homonymes_eloignes_pas_de_devinette(self):
+        self.assertIsNone(trouver('Saint Deni', '', 'FR'))
 
     def test_nom_sans_code_postal(self):
         self.assertEqual(self.nom('Troyes', '', 'FR'), 'Troyes')

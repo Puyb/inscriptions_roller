@@ -44,6 +44,7 @@ def normaliser_cp(cp, pays):
 Resultat = namedtuple('Resultat', 'nom pays region lat lng approximatif')
 
 SEUIL_NOM = 0.6
+SEUIL_NOM_PAYS = 0.8  # plus strict quand on cherche dans tout un pays (sans code postal fiable)
 RAYON_HOMONYMES_KM = 25
 
 
@@ -71,7 +72,38 @@ def _par_code_postal(candidats, nom_n):
     meilleur = max(candidats, key=lambda c: SequenceMatcher(None, c.nom_normalise, nom_n).ratio())
     if SequenceMatcher(None, meilleur.nom_normalise, nom_n).ratio() >= SEUIL_NOM:
         return meilleur
-    return min(candidats, key=lambda c: c.nom_normalise)
+    return None  # code postal partage et nom sans rapport : on prefere ne pas deviner
+
+
+def _ratio(c, nom_n):
+    return SequenceMatcher(None, c.nom_normalise, nom_n).ratio()
+
+
+def _meilleur_proche(communes, nom_n, seuil):
+    """Commune au nom le plus proche (>= seuil), `None` si aucune ou si des homonymes eloignes
+    se disputent la premiere place."""
+    notes = sorted(((_ratio(c, nom_n), c) for c in communes), key=lambda x: -x[0])
+    if not notes or notes[0][0] < seuil:
+        return None
+    meilleure, premiere = notes[0]
+    ex_aequo = [c for note, c in notes if note >= meilleure - 0.02]
+    if all(_distance_km(premiere, c) <= RAYON_HOMONYMES_KM for c in ex_aequo):
+        return premiere
+    return None
+
+
+def _par_nom_approx(pays, cp, nom_n):
+    """Le code postal ne donne rien : nom de ville approchant (fautes de frappe), d'abord dans
+    le departement du code postal (FR), puis dans le pays. Toujours approximatif."""
+    if len(nom_n) < 3:
+        return None
+    modele = CodePostalModel().objects.filter(pays=pays)
+    if pays == 'FR' and re.fullmatch(r'\d{5}', cp):
+        prefixe = cp[:3] if cp[:2] in ('97', '98') else cp[:2]
+        commune = _meilleur_proche(list(modele.filter(code_postal__startswith=prefixe)), nom_n, SEUIL_NOM)
+        if commune:
+            return commune
+    return _meilleur_proche(list(modele.filter(nom_normalise__startswith=nom_n[:1])), nom_n, SEUIL_NOM_PAYS)
 
 
 def _par_nom(pays, nom_n):
@@ -107,7 +139,8 @@ def trouver(nom, cp, pays):
     """Commune la plus probable pour (nom, code postal, pays), ou `None`.
 
     Paliers : code postal + nom exact, nom proche, code postal seul, nom seul
-    (sans homonyme eloigne), barycentre du departement (FR). Voir la spec.
+    (sans homonyme eloigne), nom approchant (fuzzy), barycentre du departement (FR).
+    Voir la spec.
     """
     pays = (pays or '').strip().upper()
     nom = (nom or '').strip()
@@ -118,10 +151,14 @@ def trouver(nom, cp, pays):
     cp_n = '' if cp in VALEURS_VIDES else normaliser_cp(cp, pays)
     if cp_n:
         candidats = list(CodePostalModel().objects.filter(pays=pays, code_postal=cp_n).order_by('nom_normalise', 'id'))
-        if candidats:
-            return _resultat(_par_code_postal(candidats, nom_n))
+        commune = _par_code_postal(candidats, nom_n) if candidats else None
+        if commune:
+            return _resultat(commune)
     if nom_n:
         commune = _par_nom(pays, nom_n)
         if commune:
             return _resultat(commune)
+        commune = _par_nom_approx(pays, cp_n, nom_n)
+        if commune:
+            return _resultat(commune, approximatif=True)
     return _par_departement(pays, cp_n)
