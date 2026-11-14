@@ -25,20 +25,44 @@ class HttpResponsePermanentRedirect308(HttpResponseRedirectBase):
 CHEMINS_WEBHOOKS = ('ipn/', 'stripe/webhook/', 'helloasso/webhook/')
 
 
+_legacy_cache = None
+
+
+def _legacy_keys():
+    """{ancien uid: cle course/edition}, charge une fois (le legacy_uid n'est pas editable)."""
+    global _legacy_cache
+    if _legacy_cache is None:
+        from .models import Edition
+        _legacy_cache = {
+            e.legacy_uid: e.key
+            for e in Edition.objects.select_related('course').exclude(legacy_uid__isnull=True)
+        }
+    return _legacy_cache
+
+
+def _invalider_legacy(**kwargs):
+    global _legacy_cache
+    _legacy_cache = None
+
+
 def legacy_uid_middleware(get_response):
     """Anciennes URLs /<uid>/... (un uid par edition) -> /<course>/<edition>/...
 
     GET/HEAD : redirection permanente ; autres methodes : 308 (conserve la
     methode et le corps) ; webhooks : reecriture interne, sans redirection."""
-    from .models import Edition, UIDS_RESERVES
+    from django.db.models.signals import post_delete, post_save
+    from .models import Course, Edition, UIDS_RESERVES
+    for modele in (Edition, Course):  # la cle depend aussi de l'uid de la course
+        post_save.connect(_invalider_legacy, sender=modele, weak=False, dispatch_uid='legacy_save_%s' % modele.__name__)
+        post_delete.connect(_invalider_legacy, sender=modele, weak=False, dispatch_uid='legacy_delete_%s' % modele.__name__)
 
     def middleware(request):
         segments = request.path_info.split('/')
         if len(segments) > 2 and segments[1] and segments[1] not in UIDS_RESERVES:
-            edition = Edition.objects.select_related('course').filter(legacy_uid=segments[1]).first()
-            if edition:
+            cle = _legacy_keys().get(segments[1])
+            if cle:
                 reste = '/'.join(segments[2:])
-                nouveau = '/%s/%s' % (edition.key, reste)
+                nouveau = '/%s/%s' % (cle, reste)
                 if reste in CHEMINS_WEBHOOKS:
                     request.path_info = nouveau
                     request.path = nouveau
