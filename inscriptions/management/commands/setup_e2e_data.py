@@ -6,8 +6,12 @@ from django.core.management.base import BaseCommand
 
 from django.contrib.auth.models import User
 
-from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory
-from inscriptions.models import Accreditation, Course, Paiement, PaiementRepartition, Ville
+from inscriptions.factories import (
+    CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory, ExtraQuestionFactory,
+)
+from inscriptions.models import (
+    Accreditation, Course, Paiement, PaiementRepartition, TemplateMail, Ville,
+)
 
 COURSE_UID = 'e2e'
 OTHER_UID = 'e2eother'  # course the organizer has NO accreditation on
@@ -77,6 +81,15 @@ class Command(BaseCommand):
             equipe = EquipeFactory(course=course, categorie=categorie, nom='Document %d' % i)
             equipier = EquipierFactory(equipe=equipe, numero=1, piece_jointe_valide=None)
             equipier.piece_jointe.save('certificat%d.pdf' % i, ContentFile(b'%PDF-1.4\n%%EOF\n'))
+
+        # A mail template, and a team that answered an extra question
+        TemplateMail.objects.create(
+            course=course, nom='e2e', sujet='Bonjour {{ instance.nom }}',
+            message='<p>Equipe numero {{ instance.numero }}</p>')
+        question = ExtraQuestionFactory(course=course, label='Taille t-shirt', page='Equipe')
+        EquipeFactory(
+            course=course, categorie=categorie, nom='Extra 1',
+            extra={'extra%d' % question.id: 'XL'})
 
         # An existing payment (20 EUR by cheque) on "Paiement 8", to edit
         paiement = Paiement.objects.create(type='chèque', montant=Decimal('20.00'))
