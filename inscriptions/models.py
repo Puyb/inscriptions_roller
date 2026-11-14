@@ -602,6 +602,13 @@ def edition_lookup(key, prefixe=''):
     return {prefixe + 'course__uid': uid_course, prefixe + 'uid': uid_edition}
 
 
+def est_organisateur(user, key):
+    """`user` est organisateur accredite (role non vide) de la course de la cle « course/edition »."""
+    if not user or not user.is_authenticated:
+        return False
+    return user.accreditations.filter(course__uid=key.partition('/')[0]).exclude(role='').exists()
+
+
 def get_edition(key, queryset=None):
     from django.shortcuts import get_object_or_404
     if queryset is None:

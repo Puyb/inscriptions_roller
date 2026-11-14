@@ -23,7 +23,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from .decorators import open_closed
 from .forms import EquipeForm, EquipierFormset, ContactForm, SignupForm
-from .models import edition_lookup, get_edition, Course, Equipe, Equipier, Categorie, Edition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
+from .models import edition_lookup, est_organisateur, get_edition, Course, Equipe, Equipier, Categorie, Edition, NoPlaceLeftException, TemplateMail, ExtraQuestion, Challenge, ParticipationChallenge, EquipeChallenge, ParticipationEquipier, CompareNames, Paiement, Tour, MIXITE_CHOICES
 from .utils import send_mail, jsonDate, repartition_frais
 from django_countries.data import COUNTRIES
 import stripe
@@ -178,7 +178,7 @@ def form(request, course_uid, numero=None, code=None):
         "course": course,
         "message": message,
         "extra_categorie": extra_categorie,
-        "is_staff": request.user.is_staff and request.user.accreditations.filter(course=course.course).exclude(role='').count() > 0,
+        "is_staff": request.user.is_staff and est_organisateur(request.user, course_uid),
     })
 
 @open_closed
@@ -385,8 +385,7 @@ def _list(course_uid, equipes, request, template, sorts, show_stats=True):
         except ValueError:
             pass
 
-    user_is_staff = (request.user and request.user.is_staff and
-        request.user.accreditations.filter(course__editions__uid=course_uid.partition('/')[2], course__uid=course_uid.partition('/')[0]).exclude(role='').count() > 0)
+    user_is_staff = bool(request.user and request.user.is_staff and est_organisateur(request.user, course_uid))
     stats = None
     if show_stats:
         stats = equipes.aggregate(

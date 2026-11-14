@@ -65,7 +65,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         if 'course_uid' not in request.COOKIES:
             return False
         course_uid = request.COOKIES['course_uid']
-        return request.user.accreditations.filter(course__editions__in=Edition.objects.filter(**edition_lookup(course_uid))).exclude(role='').count() > 0
+        return est_organisateur(request.user, course_uid)
 
     def get_urls(self):
         from django.urls import re_path
