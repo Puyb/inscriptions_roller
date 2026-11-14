@@ -45,16 +45,42 @@ class LogAdmin(admin.ModelAdmin):
 site.register(LogEntry, LogAdmin)
 
 
+class EditionInline(admin.TabularInline):
+    model = Edition
+    fields = ('uid', 'nom', 'date', 'active')
+    readonly_fields = fields
+    extra = 0
+    can_delete = False
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+
 class CourseAdmin(admin.ModelAdmin):
+    """Validation d'une course par un superutilisateur (champ `active`)."""
+    list_display = ('uid', 'nom', 'organisateur', 'ville', 'active2', )
+    list_filter = ('active', )
+    search_fields = ('uid', 'nom', 'organisateur', )
+    inlines = (EditionInline, )
+
+    def active2(self, obj):
+        return obj.active and ICON_OK or ICON_KO
+    active2.short_description = 'Active'
+
+site.register(Course, CourseAdmin)
+
+
+class EditionAdmin(admin.ModelAdmin):
     exclude = ('transpondeur_mode', )
-    list_display = ('uid', 'nom', 'date', 'active2', )
+    list_display = ('uid', 'nom', 'course', 'date', 'active2', )
     list_filter = ('active', )
 
     def active2(self, obj):
         return obj.active and ICON_OK or ICON_KO
     active2.short_description = 'Active'
 
-site.register(Edition, CourseAdmin)
+site.register(Edition, EditionAdmin)
 
 class AccreditationAdmin(admin.ModelAdmin):
     list_display = ('user', 'course', 'role', )

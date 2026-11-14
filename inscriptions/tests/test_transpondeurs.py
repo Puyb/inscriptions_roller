@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 
 from inscriptions.admin_course import CategorieAdmin
 from inscriptions.admin_course import CourseAdmin as OrganizerCourseAdmin
-from inscriptions.admin_main import CourseAdmin as SuperuserCourseAdmin
+from inscriptions.admin_main import EditionAdmin as SuperuserCourseAdmin
 from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory
 from inscriptions.models import (
     Accreditation, Edition, DuplicateTranspondeurException,

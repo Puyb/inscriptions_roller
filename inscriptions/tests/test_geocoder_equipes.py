@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 
 from inscriptions.factories import CourseFactory, EquipeFactory
-from inscriptions.models import CodePostal, Equipe, Ville
+from inscriptions.models import CodePostal, Course, Equipe, Ville
 from inscriptions.tests.base import BaseTestCase
 
 
@@ -56,10 +56,10 @@ class GeocoderEquipesTestCase(BaseTestCase):
 
     def test_localise_aussi_les_courses(self):
         self.c1.ville = 'Paris'
-        type(self.c1).objects.filter(pk=self.c1.pk).update(ville='Paris', ville2=None)
+        Course.objects.filter(pk=self.c1.course_id).update(ville='Paris', ville2=None)
         out = self.run_cmd('--course', 'geo1')
         self.assertIn('1 courses localisees', out)
-        self.assertEqual(type(self.c1).objects.get(pk=self.c1.pk).ville2.nom, 'Paris')
+        self.assertEqual(Course.objects.get(pk=self.c1.course_id).ville2.nom, 'Paris')
 
     def test_force_recalcule_et_sans_force_conserve(self):
         ancienne = Ville.objects.create(nom='Ancienne', pays='FR', region='X', lat=1, lng=1)

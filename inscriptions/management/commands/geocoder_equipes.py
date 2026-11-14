@@ -10,7 +10,9 @@ Utilise `lookup_ville()` (referentiel local `CodePostal`, voir
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from inscriptions.models import Edition, Equipe, lookup_ville
+from django.db.models import Q
+
+from inscriptions.models import Course, Equipe, lookup_ville
 
 
 class Command(BaseCommand):
@@ -31,9 +33,9 @@ class Command(BaseCommand):
         if not options['force']:
             equipes = equipes.filter(gerant_ville2__isnull=True)
 
-        courses = Edition.objects.all()
+        courses = Course.objects.all()
         if options['course']:
-            courses = courses.filter(uid__in=options['course'])
+            courses = courses.filter(Q(uid__in=options['course']) | Q(editions__uid__in=options['course'])).distinct()
         if not options['force']:
             courses = courses.filter(ville2__isnull=True)
 
@@ -59,7 +61,7 @@ class Command(BaseCommand):
                     a_ecrire.append(equipe)
             if not options['dry_run']:
                 Equipe.objects.bulk_update(a_ecrire, ['gerant_ville2'], batch_size=500)
-                Edition.objects.bulk_update(courses_ecrire, ['ville2'])
+                Course.objects.bulk_update(courses_ecrire, ['ville2'])
             else:
                 transaction.set_rollback(True)  # annule aussi les Ville creees
 

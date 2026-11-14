@@ -8,7 +8,7 @@ from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import gettext_lazy as _
-from .models import Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
+from .models import COURSE_FIELDS, Course, Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from turnstile.fields import TurnstileField
@@ -55,10 +55,48 @@ class EquipierForm(ExtraModelForm):
 EquipierFormset = formset_factory(EquipierForm, formset=BaseModelFormSet, extra=settings.MAX_EQUIPIERS)
 EquipierFormset.model = Equipier
 
-class CourseForm(ModelForm):
+class CourseFieldsMixin:
+    """Ajoute au formulaire d'une Edition les champs de sa Course (organisateur,
+    ville, paiement...) et les enregistre sur la Course, creee si besoin."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            for nom in COURSE_FIELDS:
+                self.initial.setdefault(nom, getattr(self.instance.course, nom + ('_id' if nom == 'ville2' else '')))
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        course = instance.course if instance.course_id else Course(uid=instance.uid, nom=instance.nom)
+        for nom in COURSE_FIELDS:
+            setattr(course, nom, self.cleaned_data[nom])
+        course.save()
+        instance.course = course
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+
+def _champs_course():
+    return {nom: Course._meta.get_field(nom).formfield() for nom in COURSE_FIELDS}
+
+
+class CourseFieldsForm(CourseFieldsMixin, ModelForm):
+    """Formulaire d'edition (admin organisateur) : champs de l'edition + de sa course."""
+    locals().update(_champs_course())
+
     class Meta:
         model = Edition
-        exclude = ('active', )
+        exclude = ('course', )
+
+
+class CourseForm(CourseFieldsMixin, ModelForm):
+    locals().update(_champs_course())
+
+    class Meta:
+        model = Edition
+        exclude = ('active', 'course')
         widgets = {
             'date': AdminDateWidget(),
             'date_ouverture': AdminDateWidget(),

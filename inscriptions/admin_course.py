@@ -19,7 +19,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingH
 from decimal import InvalidOperation
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
+from .forms import CourseForm, CourseFieldsForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
 from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -1210,7 +1210,8 @@ site.register(Transpondeur, TranspondeurAdmin)
 class CourseAdmin(admin.ModelAdmin):
     class Media:
         js = ('custom_admin/course.js', )
-    exclude = ('active', 'transpondeur_mode')
+    form = CourseFieldsForm
+    exclude = ('course', 'transpondeur_mode')
     def get_fieldsets(self, request, obj=None):
         return (
             (None, {

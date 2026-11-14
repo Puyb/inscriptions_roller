@@ -129,23 +129,29 @@ def normalize_club(club):
     }
     return table.get(club, club)
 
-class Edition(models.Model):
+COURSE_UID_VALIDATOR = RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))
+
+# Champs portes par la Course (l'evenement annuel) et exposes en lecture/ecriture
+# par chaque Edition via des proprietes (voir Edition.__init_subclass__ plus bas).
+COURSE_FIELDS = (
+    'organisateur', 'ville', 'ville2', 'url',
+    'paypal', 'frais_paypal_inclus',
+    'stripe_secret', 'stripe_public', 'stripe_endpoint_secret', 'frais_stripe_inclus',
+    'helloasso_organisation', 'helloasso_id', 'helloasso_secret', 'helloasso_sandbox',
+    'ordre', 'adresse',
+)
+
+
+class Course(models.Model):
+    """Evenement annuel (ex. « 6 Heures de Paris »). Les occurrences datees sont
+    les `Edition`. Porte l'identite, les informations de paiement et les acces."""
     nom                 = models.CharField(_(u'Nom'), max_length=200)
-    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
+    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[COURSE_UID_VALIDATOR], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
     ville2              = models.ForeignKey('Ville', null=True, blank=True, on_delete=models.SET_NULL, related_name='+', verbose_name=_('Localisation'), help_text=_("Origine du calcul des distances dans les statistiques. Renseignée automatiquement d'après la ville (France) ; à modifier pour une course à l'étranger."))
-    date                = models.DateField(_(u'Date'))
     url                 = models.URLField(_(u'URL'))
-    url_reglement       = models.URLField(_(u'URL Réglement'))
-    email_contact       = models.EmailField(_(u'Email contact'))
     logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
-    fond_dossard        = models.ImageField(_(u'Image de fond des dossards'), upload_to='fond_dossard', null=True, blank=True)
-    date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
-    dates_augmentation  = ArrayField(models.DateField(), default=list, null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
-    date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
-    date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
-    limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
     paypal              = models.EmailField(_(u'Adresse paypal'), blank=True)
     frais_paypal_inclus = models.BooleanField(_(u'Frais paypal inclus'))
     stripe_secret       = models.CharField(_('Stripe Secret Key'), max_length=200, blank=True, null=True)
@@ -158,6 +164,69 @@ class Edition(models.Model):
     helloasso_sandbox   = models.BooleanField(_('HelloAsso sandbox'))
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
+    active              = models.BooleanField(_(u'Activée'), default=False)
+
+    def __str__(self):
+        return self.nom
+
+    @property
+    def paiement_internet(self):
+        return self.paypal or self.stripe_secret or self.helloasso_organisation
+
+    @property
+    def derniere_edition(self):
+        return self.editions.order_by('-date').first()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            send_mail(
+                subject='Nouvelle course %s' % self.nom,
+                body="""%s.
+""" % self.nom,
+                to=(('', settings.CONTACT_MAIL), ),
+                content_type='plain',
+            )
+        elif self.active and not Course.objects.get(pk=self.pk).active:
+            edition = self.derniere_edition
+            if edition:
+                send_mail(
+                    subject='Votre course %s est activée' % self.nom,
+                    body="""Votre course %s est activée.
+Les inscriptions pourront commencer à la date que vous avez choisi.
+""" % self.nom,
+                    to=[edition.email_contact],
+                    content_type='text',
+                )
+        if not self.ville2_id and self.ville:
+            self.ville2 = lookup_ville(self.ville, '', 'FR')
+        super().save(*args, **kwargs)
+
+
+def _course_property(nom):
+    def getter(self):
+        return getattr(self.course, nom)
+
+    def setter(self, valeur):
+        setattr(self.course, nom, valeur)
+        self._course_modifiee = True
+    return property(getter, setter)
+
+
+class Edition(models.Model):
+    course              = models.ForeignKey(Course, related_name='editions', on_delete=models.CASCADE)
+    nom                 = models.CharField(_(u'Nom'), max_length=200)
+    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[COURSE_UID_VALIDATOR], unique=True)
+    legacy_uid          = models.CharField(_('uid historique'), max_length=200, unique=True, null=True, blank=True, editable=False)
+    date                = models.DateField(_(u'Date'))
+    url_reglement       = models.URLField(_(u'URL Réglement'))
+    email_contact       = models.EmailField(_(u'Email contact'))
+    logo                = ResizedImageField(_('Logo'), size=[600,600], force_format=None, keep_meta=False, quality=85, upload_to='logo', null=True, blank=True)
+    fond_dossard        = models.ImageField(_(u'Image de fond des dossards'), upload_to='fond_dossard', null=True, blank=True)
+    date_ouverture      = models.DateField(_(u"Date d'ouverture des inscriptionss"))
+    dates_augmentation  = ArrayField(models.DateField(), default=list, null=True, blank=True, verbose_name=_("Date d'augmentation des tarifs"))
+    date_fermeture      = models.DateField(_(u"Date de fermeture des inscriptions"))
+    date_age            = models.DateField(_(u"Date calcul ages"), default=None, blank=True, null=True, help_text=_('Date à utiliser pour le calcul des ages. Laisser vide pour utiliser la date de la course'))
+    limite_participants = models.DecimalField(_(u"Limite du nombre de participants"), max_digits=6, decimal_places=0)
     delai_paiement      = models.IntegerField(_('Délai de paiement avant annulation'), default=31, help_text=_('En jours. Ce délai est affiché purement à titre indicatif. La suppression devra être faite manuellement (ou pas).'))
     active              = models.BooleanField(_(u'Activée'), default=False)
     distance            = models.DecimalField(_(u'Distance d\'un tour (en km)'), max_digits=6, decimal_places=3, blank=True, null=True)
@@ -174,17 +243,24 @@ class Edition(models.Model):
                                             max_length=10, choices=TRANSPONDEUR_MODE_CHOICES,
                                             null=True, blank=True)
 
+    _course_modifiee = False
+
+    for _nom in COURSE_FIELDS:
+        locals()[_nom] = _course_property(_nom)
+    del _nom
+    ville2_id = _course_property('ville2_id')
+
     @property
     def paiement_internet(self):
-        return self.paypal or self.stripe_secret or self.helloasso_organisation
+        return self.course.paiement_internet
 
     @property
     def ouverte(self):
-        return self.active and self.date_ouverture <= date.today()
+        return self.active and self.course.active and self.date_ouverture <= date.today()
 
     @property
     def fermee(self):
-        return not self.active or self.date_fermeture <= date.today()
+        return not self.active or not self.course.active or self.date_fermeture <= date.today()
 
     @property
     def dernier_jour_inscription(self):
@@ -215,26 +291,10 @@ class Edition(models.Model):
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.nom.lower().replace(' ', '_')
-        if not self.id:
-            send_mail(
-                subject='Nouvelle course %s' % self.nom,
-                body="""%s.
-""" % self.nom,
-                to=(('', settings.CONTACT_MAIL), ),
-                content_type='plain',
-            )
-        if self.active and self.id  and not Edition.objects.get(id=self.id).active:
-            send_mail(
-                subject='Votre course %s est activée' % self.nom,
-                body="""Votre course %s est activée.
-Les inscriptions pourront commencer à la date que vous avez choisi.
-""" % self.nom,
-                to=[self.email_contact],
-                content_type='text',
-            )
-        if not self.ville2_id and self.ville:
-            self.ville2 = lookup_ville(self.ville, '', 'FR')
-        super(Edition, self).save(*args, **kwargs)
+        if self._course_modifiee:
+            self.course.save()
+            self._course_modifiee = False
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.nom, self.date)
@@ -376,7 +436,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         result['villes'].sort(key=itemgetter('nom'))
         result['villes'].sort(key=itemgetter('count'), reverse=True)
         result['origine'] = None
-        if self.ville2_id:
+        if self.course.ville2_id:
             result['origine'] = {
                 'nom': self.ville2.nom,
                 'lat': float(self.ville2.lat),

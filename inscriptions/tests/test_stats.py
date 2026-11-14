@@ -70,7 +70,7 @@ class StatsPageTestCase(BaseTestCase):
         self.assertNotIn('flags/.png', html)
 
 
-from inscriptions.models import CodePostal, REGION_NORMALISATION  # noqa: E402
+from inscriptions.models import CodePostal, Course, REGION_NORMALISATION  # noqa: E402
 
 
 def commune(pays, code, nom, lat, lng, region):
@@ -137,7 +137,7 @@ class StatsGeographieTestCase(BaseTestCase):
 
     def test_page_sans_origine_pas_de_graphique_distance(self):
         self.course.ville2 = None
-        type(self.course).objects.filter(pk=self.course.pk).update(ville2=None)
+        Course.objects.filter(pk=self.course.course_id).update(ville2=None)
         html = self.client.get(reverse('inscriptions_stats', kwargs={'course_uid': 'geo'})).content.decode()
         self.assertNotIn('id="canvas_distance"', html)
         self.assertIn('id="map"', html)

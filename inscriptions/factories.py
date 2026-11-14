@@ -13,25 +13,44 @@ from factory.django import DjangoModelFactory
 from .models import Categorie, Equipe, Equipier, ExtraQuestion, ExtraQuestionChoice, Ville
 
 
-class CourseFactory(DjangoModelFactory):
+class CourseEntiteFactory(DjangoModelFactory):
+    """La Course (evenement annuel) parente d'une Edition."""
     class Meta:
-        model = 'inscriptions.Edition'
+        model = 'inscriptions.Course'
 
     nom = factory.Sequence(lambda n: 'Course %d' % n)
     uid = factory.Sequence(lambda n: 'course%d' % n)
     organisateur = 'Club Test'
     ville = 'Paris'
-    date = factory.LazyFunction(lambda: date.today() + timedelta(days=60))
     url = 'http://example.com'
+    frais_paypal_inclus = False
+    frais_stripe_inclus = False
+    helloasso_sandbox = True
+    ordre = 'Club Test'
+    active = True
+
+
+class CourseFactory(DjangoModelFactory):
+    """Fabrique une Edition (et sa Course). Les champs de la Course passes en
+    argument (organisateur, ville, stripe_secret...) sont transmis a la Course
+    par les proprietes de l'Edition. Le nom et l'uid de l'edition sont
+    reutilises pour la Course sauf si `course` est fourni."""
+    class Meta:
+        model = 'inscriptions.Edition'
+
+    nom = factory.Sequence(lambda n: 'Course %d' % n)
+    uid = factory.Sequence(lambda n: 'course%d' % n)
+    course = factory.SubFactory(
+        CourseEntiteFactory,
+        nom=factory.SelfAttribute('..nom'),
+        uid=factory.SelfAttribute('..uid'),
+    )
+    date = factory.LazyFunction(lambda: date.today() + timedelta(days=60))
     url_reglement = 'http://example.com/reglement'
     email_contact = 'organisation@example.com'
     date_ouverture = factory.LazyFunction(lambda: date.today() - timedelta(days=1))
     date_fermeture = factory.LazyFunction(lambda: date.today() + timedelta(days=30))
     limite_participants = 700
-    frais_paypal_inclus = False
-    frais_stripe_inclus = False
-    helloasso_sandbox = True
-    ordre = 'Club Test'
     active = True
 
 
