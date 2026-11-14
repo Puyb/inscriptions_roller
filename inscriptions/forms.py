@@ -222,6 +222,10 @@ class CourseForm(CourseFieldsMixin, ModeleEditionMixin, ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.save()
+        course = instance.course
+        if instance.logo and not course.logo:  # repli du logo pour les editions futures sans logo
+            course.logo = instance.logo.name
+            course.save(update_fields=['logo'])
         self.copier_modele(instance)
         return instance
 

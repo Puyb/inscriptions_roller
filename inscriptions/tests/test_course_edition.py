@@ -210,6 +210,22 @@ class CreationEditionTestCase(BaseTestCase):
         self.assertEqual(TemplateMail.objects.filter(course=edition, nom='inscription').count(), 1)
         self.assertEqual(Course.objects.count(), 1)
 
+    def test_nouvelle_course_reprend_le_logo_de_sa_premiere_edition(self):
+        import io
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        buf = io.BytesIO()
+        Image.new('RGB', (4, 4), 'red').save(buf, 'PNG')
+        admin = User.objects.create_superuser('root', 'root@example.com', 'x')
+        self.client.force_login(admin)
+        reponse = self.client.post(ADD, donnees_edition(
+            course_nom='Nouvelle', course_uid='nouvelle', course_model=str(self.precedente.id),
+            organisateur='Orga', ville='Paris', url='http://example.com', ordre='1',
+            logo=SimpleUploadedFile('logo.png', buf.getvalue(), content_type='image/png')))
+        self.assertEqual(reponse.status_code, 302, getattr(reponse, 'context', None) and reponse.context['adminform'].form.errors)
+        course = Course.objects.get(uid='nouvelle')
+        self.assertTrue(course.logo)
+
     def test_creation_depuis_un_modele_json_sans_edition_precedente(self):
         autre = CourseEntiteFactory(uid='sansedition')
         Accreditation.objects.create(user=self.user, course=autre, role='admin')
