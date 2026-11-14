@@ -334,7 +334,13 @@ class Edition(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.uid:
-            self.uid = str(self.date.year)
+            base = candidat = str(self.date.year)
+            autres = Edition.objects.filter(course_id=self.course_id).exclude(pk=self.pk)
+            n = 2
+            while autres.filter(uid=candidat).exists():  # ex. 3h et 6h la meme annee
+                candidat = '%s-%d' % (base, n)
+                n += 1
+            self.uid = candidat
         if self._course_modifiee:
             self.course.save()
             self._course_modifiee = False

@@ -45,6 +45,16 @@ class EditionKeyTestCase(BaseTestCase):
         self.assertEqual(self.client.get('/inconnu/2025/').status_code, 404)
 
 
+class UidEditionParDefautTestCase(BaseTestCase):
+    def test_uid_par_defaut_est_l_annee_puis_suffixe(self):
+        course = CourseEntiteFactory(uid='3h6h')
+        uids = []
+        for _ in range(3):
+            e = CourseFactory(course=course, uid='', date=date(2026, 5, 1))
+            uids.append(e.uid)
+        self.assertEqual(uids, ['2026', '2026-2', '2026-3'])
+
+
 class UidCourseTestCase(BaseTestCase):
     def test_mot_reserve_refuse(self):
         for uid in ('admin', 'course', 'challenges', 'static'):
