@@ -7,7 +7,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.validators import RegexValidator
 from django.template import Template, Context
-import os, re, requests, json, sys
+import os, re, json, sys
 from django.db import models, transaction
 from django.db.models.query import prefetch_related_objects
 from datetime import datetime, date, timedelta
@@ -19,7 +19,7 @@ from django.db.models import Count, Sum, Value, F, Q, When, Case, Prefetch, Func
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import Coalesce, Lower
 from django.contrib.sites.models import Site
-from .utils import iriToUri, send_mail, ChallengeInscriptionEquipe
+from .utils import send_mail, ChallengeInscriptionEquipe
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django_resized import ResizedImageField
@@ -577,58 +577,18 @@ class CodePostal(models.Model):
 
 
 def lookup_ville(nom, cp, pays):
-    nom = nom.lower()
-    nom = re.sub('[- ,/]+', ' ', nom)
-    try:
-        return Ville.objects.get(nom=nom)
-    except Ville.DoesNotExist as e:
-        pass
-    except Ville.MultipleObjectsReturned as e:
-        pass
-
-    try:
-        response = requests.get(iriToUri('http://open.mapquestapi.com/geocoding/v1/address?key=%s&location=%s' % (settings.MAPQUEST_API_KEY, nom + ' ' + cp + ', ' + str(pays))))
-        data = response.json()
-
-        if('results' not in data or
-           not len(data['results']) or
-           'locations' not in data['results'][0] or
-           not len(data['results'][0]['locations']) or
-           data['results'][0]['locations'][0].get('adminArea5', '') == ''
-           ):
-            response = requests.get(iriToUri('http://open.mapquestapi.com/geocoding/v1/address?key=%s&location=%s' % (settings.MAPQUEST_API_KEY, nom + ', ' + str(pays))))
-            data = response.json()
-
-            if('results' not in data or
-               not len(data['results']) or
-               'locations' not in data['results'][0] or
-               not len(data['results'][0]['locations']) or
-               data['results'][0]['locations'][0].get('adminArea5', '') == ''
-               ):
-                return None
-
-        data = data['results'][0]['locations'][0]
-        data['latLng']['lat'] = str(data['latLng']['lat'])
-        data['latLng']['lng'] = str(data['latLng']['lng'])
-        try:
-            return Ville.objects.get(lat=data['latLng']['lat'], lng=data['latLng']['lng'])
-        except Ville.DoesNotExist as e:
-            pass
-        obj = Ville(
-            lat      = data['latLng']['lat'],
-            lng      = data['latLng']['lng'],
-            nom      = data['adminArea5'],
-            region   = data['adminArea3'],
-            pays     = data['adminArea1']
-        )
-        obj.save()
-        return obj
-    except ValueError as e:
-        print(response.text)
-        traceback.print_exc()
-    except Exception as e:
-        traceback.print_exc()
+    """Ville (commune) correspondant a une adresse, resolue hors-ligne via `CodePostal`
+    (voir `inscriptions/geocoding.py`). `None` si la localisation n'est pas fiable."""
+    from .geocoding import nom_affichage, trouver
+    resultat = trouver(nom, cp, pays)
+    if resultat is None:
         return None
+    nom_ville = nom_affichage(resultat.nom)
+    ville = Ville.objects.filter(nom=nom_ville, pays=resultat.pays, region=resultat.region).first()
+    if ville:
+        return ville
+    return Ville.objects.create(
+        nom=nom_ville, pays=resultat.pays, region=resultat.region, lat=resultat.lat, lng=resultat.lng)
 
 class Equipe(models.Model):
     nom                = models.CharField(_(u"Nom d'équipe"), max_length=30)
@@ -799,10 +759,25 @@ class Equipe(models.Model):
             if not self.numero:
                 self.numero = self.getNumero()
 
-        if not self.gerant_ville2_id:
+        origine = getattr(self, '_adresse_gerant_origine', None)
+        if not self.gerant_ville2_id or (origine is not None and origine != self._adresse_gerant()):
             self.gerant_ville2 = lookup_ville(self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
-        return super(Equipe, self).save(*args, **kwargs)
+        result = super(Equipe, self).save(*args, **kwargs)
+        self._adresse_gerant_origine = self._adresse_gerant()
+        return result
 
+
+    def _adresse_gerant(self):
+        return (self.gerant_ville, self.gerant_code_postal, self.gerant_pays)
+
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        # permet a save() de re-geocoder quand l'adresse du gerant change
+        champs = ('gerant_ville', 'gerant_code_postal', 'gerant_pays')
+        if all(c in instance.__dict__ for c in champs):  # pas de champ differe (.only/.defer)
+            instance._adresse_gerant_origine = instance._adresse_gerant()
+        return instance
 
     def send_mail(self, nom):
         self.course.send_mail(nom, [self])

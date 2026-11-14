@@ -19,7 +19,6 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '')
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', '')
 
-MAPQUEST_API_KEY = os.environ.get('MAPQUEST_API_KEY', '')
 
 CONTACT_MAIL = os.environ.get('CONTACT_MAIL', '')
 

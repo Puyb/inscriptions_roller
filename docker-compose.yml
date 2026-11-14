@@ -6,7 +6,6 @@ x-test-env: &test-env
   EMAIL_HOST_USER: ""
   EMAIL_HOST_PASSWORD: ""
   DEFAULT_FROM_MAIL: "test@example.com"
-  MAPQUEST_API_KEY: ""
   CONTACT_MAIL: "test@example.com"
   DB_USER: "enduroller"
   DB_PASSWORD: "jirshIgViax0"

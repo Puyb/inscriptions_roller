@@ -218,7 +218,6 @@ LOCALE_PATHS = (os.path.join(PROJECT_ROOT , 'inscriptions/locale'), )
 PAYPAL_URL = 'https://www.paypal.com/cgi-bin/webscr'
 # PAYPAL_URL = 'https://www.sandbox.paypal.com/cgi-bin/webscr'
 
-MAPQUEST_API_KEY = ''
 
 FACEBOOK_APPID = ''
 

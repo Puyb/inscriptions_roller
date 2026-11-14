@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-from unittest import mock
 
 from django.test import TestCase, override_settings
 
@@ -8,10 +7,9 @@ from django.test import TestCase, override_settings
 class BaseTestCase(TestCase):
     """Common setup for tests that go through `Equipe.save()`/`Equipier.save()`.
 
-    - `Equipe.save()` calls `models.lookup_ville()` whenever `gerant_ville2` is
-      not already set, which issues a real HTTP request to the MapQuest API.
-      That's an existing production behaviour we don't want to touch here, but
-      it must not turn every test that creates an `Equipe` into a network call.
+    - `Equipe.save()` geocode la ville du gerant via `models.lookup_ville()`, qui ne lit que
+      la table locale `CodePostal` (aucun appel reseau) : vide par defaut dans les tests, donc
+      `gerant_ville2` reste nul sauf si le test cree des `CodePostal`.
     - Uploaded files (`Equipier.piece_jointe`/`autorisation`) are written under
       `MEDIA_ROOT`, which in dev is the bind-mounted `inscriptions/uploads/`.
       Redirect it to a throwaway directory so tests never leave files behind
@@ -30,12 +28,6 @@ class BaseTestCase(TestCase):
         cls._media_root_override.disable()
         shutil.rmtree(cls._media_root, ignore_errors=True)
         super().tearDownClass()
-
-    def setUp(self):
-        super().setUp()
-        patcher = mock.patch('inscriptions.models.lookup_ville', return_value=None)
-        patcher.start()
-        self.addCleanup(patcher.stop)
 
 
 def equipier_formset_data(equipiers, total_forms=None):
