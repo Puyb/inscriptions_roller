@@ -141,15 +141,7 @@ INSTALLED_APPS = [
 
     'django.contrib.sites.apps.SitesConfig',
     'django.contrib.humanize.apps.HumanizeConfig',
-    'django_nyt.apps.DjangoNytConfig',
-    'mptt',
     'sekizai',
-    'sorl.thumbnail',
-    'wiki.apps.WikiConfig',
-    'wiki.plugins.attachments.apps.AttachmentsConfig',
-    'wiki.plugins.notifications.apps.NotificationsConfig',
-    'wiki.plugins.images.apps.ImagesConfig',
-    'wiki.plugins.macros.apps.MacrosConfig',
     'channels',
 
     "inscriptions",
@@ -235,9 +227,6 @@ FACEBOOK_APPID = ''
 
 MAX_EQUIPIERS = 8
 
-WIKI_ACCOUNT_HANDLING = False
-WIKI_CHECK_SLUG_URL_AVAILABLE  = False
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -246,7 +235,6 @@ CHANNEL_LAYERS = {
         },
     },
 }
-NYT_CHANNELS_DISABLE = True
 
 CONTACT_MAIL = 'contact@enduroller.fr'
 with (Path(PACKAGE_ROOT) / 'static' / 'course_models.json').open() as f:

@@ -1694,8 +1694,8 @@ msgid "Organisateurs"
 msgstr "Organisators"
 
 #: inscriptions/templates/site_base.html:29
-msgid "Wiki organisateurs"
-msgstr "Organisators wiki"
+msgid "Documentation organisateurs"
+msgstr "Organisers documentation"
 
 #: inscriptions/templates/stats.html:71
 msgid "Origine des participants"

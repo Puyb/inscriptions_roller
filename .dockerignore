@@ -4,3 +4,8 @@ _static
 **/node_modules
 inscriptions/uploads
 env
+.git
+*.sql
+course_*
+docker-compose*.yml
+e2e

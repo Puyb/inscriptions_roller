@@ -1,0 +1,23 @@
+site_name: Enduroller – documentation organisateurs
+site_url: https://enduroller.fr/documentation/
+use_directory_urls: false
+repo_url: https://github.com/Puyb/inscriptions_roller
+docs_dir: docs/wiki
+theme:
+  name: material
+  language: fr
+nav:
+  - Accueil: index.md
+  - Mise en place:
+      - creation-dune-course.md
+      - parametres-de-la-course.md
+      - categories.md
+      - questions-supplementaires.md
+      - mails.md
+      - composition-page-equipe.md
+  - Paiements:
+      - multipaiement.md
+      - procedure-creation-stripe.md
+  - Aide:
+      - bon-savoir.md
+      - faq-pour-inscriptions.md

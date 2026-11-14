@@ -48,12 +48,15 @@ npm run build     # one-off production build (webpack -p)
 npm run watch     # rebuild on change
 ```
 
+### Documentation (organizer docs)
+The former django-wiki was replaced by static docs: Markdown in `docs/wiki/`, built by mkdocs (`mkdocs.yml`, `requirements_docs.txt`). The `Dockerfile` has a separate `docs` stage (python 3.12, mkdocs-material) whose output is copied to `/srv/documentation` and served by uwsgi under `/documentation` (see `docker-start.sh`). A doc change therefore ships with the next image build. Local preview: `pip install -r requirements_docs.txt && mkdocs serve`.
+
 ### Background workers
 The app sends email through a Django Channels worker, not synchronously in the request:
 ```
 ./manage.py runworker mail       # consumes the "mail" channel (inscriptions/consumers.py, routing.py)
 ```
-`docker-start.sh` runs this in a loop alongside the web process. `start-consumers.sh` / `start-bounce.sh` are the equivalent entry points used by systemd units in `deploy.sh` (`django-consumers@`, `django-bounce@`, `uwsgi@`).
+`docker-start.sh` runs this in a loop alongside the web process. `start-bounce.sh` is the entry point of the `bounce` compose service.
 
 The `bounce-service/` directory is a separate Node service (IMAP + `bounce-handler` + `knex`/Postgres) that reads bounce notifications from the mailbox and writes them back to the same database (`Mail` model). It's deployed and run independently of the Django app.
 

@@ -19,6 +19,8 @@ else
           -b 32768 \
           --static-map /static=/app/_static \
           --static-map /uploads=/app/inscriptions/uploads \
+          --static-map /documentation=/srv/documentation \
+          --static-index index.html \
           --wsgi inscriptions.wsgi:application
     # /usr/local/bin/uwsgi --emperor docker/uwsgi --gid www-data --logto /var/log/uwsgi/emperor.log
 fi
