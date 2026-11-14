@@ -23,6 +23,7 @@ TRUNCATE inscriptions_challenge_courses CASCADE;
 TRUNCATE inscriptions_challengecategorie CASCADE;
 TRUNCATE inscriptions_challengecategorie_categories CASCADE;
 TRUNCATE inscriptions_course CASCADE;
+TRUNCATE inscriptions_edition CASCADE;
 TRUNCATE inscriptions_equipe CASCADE;
 TRUNCATE inscriptions_equipechallenge CASCADE;
 TRUNCATE inscriptions_equipier CASCADE;

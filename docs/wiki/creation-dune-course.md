@@ -10,7 +10,13 @@ Dans cette page, vous y trouverez les renseignements de la course comme suit :
 
 **Nom :** le nom de la course Il apparaîtra sur toutes les pages du site et les mails concernant votre course
 
-**UiD :** l identifiant de la course sur le serveur Il apparaitra dans certains mails uniquement.
+**Course et éditions :** une *course* est l'événement annuel (par exemple « 6 Heures de Paris ») ; une *édition* est une de ses occurrences datées (2025, 2026…). L'organisateur, la ville, le logo, l'adresse du site et les informations de paiement sont ceux de la course ; les dates, les tarifs, les catégories et les mails sont ceux de chaque édition. Les accès (accréditations) se donnent pour la course et valent pour toutes ses éditions.
+
+**Identifiant de la course :** premier élément de l'adresse internet (par exemple `6hdeparis`). Lettres minuscules et chiffres.
+
+**Identifiant de l'édition (UiD) :** deuxième élément de l'adresse, par exemple l'année (`2026`). Lorsqu'une course propose plusieurs épreuves la même année, ajoutez un suffixe (`2026-3h`). Les adresses de la forme `/6hdeparis/2026/` remplacent les anciennes `/6hdeparis2026/`, qui redirigent vers les nouvelles.
+
+**Nouvelle édition :** depuis la page de sélection de la course, « Nouvelle édition » reprend les informations, les catégories, les mails et les questions de l'édition précédente (ou des modèles pour une première édition). Une nouvelle édition n'est pas publiée : cochez « Activée » quand elle est prête. La création d'une course elle-même reste soumise à validation.
 
 **L’organisateur :** le nom de l’organisateur qui sera en signature des mails essentiellement
 

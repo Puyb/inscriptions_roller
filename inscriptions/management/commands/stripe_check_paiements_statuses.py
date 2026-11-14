@@ -1,17 +1,20 @@
 from django.core.management.base import BaseCommand, CommandError
-from inscriptions.models import Paiement, Edition
+from inscriptions.models import Paiement, Edition, edition_lookup
 from decimal import Decimal
 import requests
 from datetime import datetime
 
 class Command(BaseCommand):
-    help = 'Check the statuses of the stripe paiements for the given Course'
+    help = 'Check the statuses of the stripe paiements for the given edition (course/edition)'
 
     def add_arguments(self, parser):
-        parser.add_argument('course_uid', type=str)
+        parser.add_argument('course_uid', type=str, help="cle de l'edition : <uid course>/<uid edition>")
 
     def handle(self, *args, **options):
-        course = Edition.objects.get(uid=options['course_uid'])
+        try:
+            course = Edition.objects.select_related('course').get(**edition_lookup(options['course_uid']))
+        except Edition.DoesNotExist:
+            raise CommandError('Edition inconnue : %s' % options['course_uid'])
 
         if not course.stripe_secret:
             self.stdout.write(self.style.ERROR('Stripe is not configured for this course'))
