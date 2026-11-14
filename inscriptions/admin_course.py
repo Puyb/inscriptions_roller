@@ -153,7 +153,7 @@ class CourseAdminSite(admin.sites.AdminSite):
 
 
         return TemplateResponse(request, 'admin/document_review.html', dict(self.each_context(request),
-            count=equipier.count(),
+            count=equipier.count() + len(skip),
             index=len(skip) + 1,
             equipier=equipier[0],
             skip=','.join(skip)

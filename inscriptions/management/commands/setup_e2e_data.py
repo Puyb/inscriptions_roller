@@ -1,19 +1,23 @@
 from datetime import date, timedelta
+from django.core.files.base import ContentFile
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
 
 from django.contrib.auth.models import User
 
-from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory
+from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory
 from inscriptions.models import Accreditation, Course, Paiement, PaiementRepartition, Ville
 
 COURSE_UID = 'e2e'
+OTHER_UID = 'e2eother'  # course the organizer has NO accreditation on
 ADMIN_USERNAME = 'e2e-admin'
+SUPER_USERNAME = 'e2e-super'
 ADMIN_PASSWORD = 'e2e-password'
 # Teams reserved for the backoffice payment tests: "Paiement 1".."Paiement 8",
 # price 40 for odd numbers, 60 for even ones. Each test uses its own teams.
 PAIEMENT_TEAMS = 8
+DOCUMENT_TEAMS = 5  # "Document N" teams, pending document review
 
 
 class Command(BaseCommand):
@@ -27,7 +31,7 @@ class Command(BaseCommand):
     help = "Seed a fixed 'e2e' course + categories for the Playwright suite."
 
     def handle(self, *args, **options):
-        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew']).delete()  # e2enew: made by tests
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID]).delete()  # e2enew: made by tests
         Ville.objects.get_or_create(nom='paris', defaults=dict(
             region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
         ))
@@ -68,6 +72,12 @@ class Command(BaseCommand):
                 prix=Decimal('40.00') if i % 2 else Decimal('60.00'),
             )
 
+        # Teams whose equipier has an uploaded document waiting for review
+        for i in range(1, DOCUMENT_TEAMS + 1):
+            equipe = EquipeFactory(course=course, categorie=categorie, nom='Document %d' % i)
+            equipier = EquipierFactory(equipe=equipe, numero=1, piece_jointe_valide=None)
+            equipier.piece_jointe.save('certificat%d.pdf' % i, ContentFile(b'%PDF-1.4\n%%EOF\n'))
+
         # An existing payment (20 EUR by cheque) on "Paiement 8", to edit
         paiement = Paiement.objects.create(type='chèque', montant=Decimal('20.00'))
         PaiementRepartition.objects.create(
@@ -79,5 +89,11 @@ class Command(BaseCommand):
         user = User.objects.create_user(
             ADMIN_USERNAME, 'e2e-admin@example.com', ADMIN_PASSWORD)
         Accreditation.objects.create(user=user, course=course, role='admin')
+        User.objects.filter(username=SUPER_USERNAME).delete()
+        User.objects.create_superuser(SUPER_USERNAME, 'e2e-super@example.com', ADMIN_PASSWORD)
+        CourseFactory(uid=OTHER_UID, nom='Course Autre E2E',
+                      date=date.today() + timedelta(days=90),
+                      date_ouverture=date.today() - timedelta(days=1),
+                      date_fermeture=date.today() + timedelta(days=60))
 
         self.stdout.write(self.style.SUCCESS('e2e course ready: /%s/' % COURSE_UID))

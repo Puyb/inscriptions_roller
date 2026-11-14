@@ -5,7 +5,7 @@ $(function() {
         document.cookie = "course_uid=; expires=" + date.toGMTString() + "; path=/";
     }
 
-    if (/^\/admin\//.test(location.href))
+    if (/^\/admin\//.test(location.pathname))
         resetCookie();
     if (COURSES_UID !== false && !~COURSES_UID.indexOf(COURSE_UID) && !/^\/((course\/(login|choose|inscriptions\/course\/add|ask)\/$)|admin)/.test(location.pathname))
         location.href = '/course/choose/';
