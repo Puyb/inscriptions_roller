@@ -72,7 +72,7 @@
         <div class="panel-body">
             <div class="col-md-3">
                 <table>
-                    <tr><th>{% trans "Villes des responsables d'équipe" %}</th><th>#</th><th>%</th></tr>
+                    <tr><th>{% trans "Villes des participants" %}</th><th>#</th><th>%</th></tr>
                     {% for ville in stats.villes|slice:":20" %}
                     <tr><td>{{ ville.nom }}</td><td>{{ ville.count }}</td><td>{% widthratio ville.count stats.course.equipiers 100 %}%</td></tr>
                     {% endfor %}
