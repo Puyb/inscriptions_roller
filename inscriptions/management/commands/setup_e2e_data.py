@@ -7,15 +7,17 @@ from django.core.management.base import BaseCommand
 
 from django.contrib.auth.models import User
 
+from inscriptions.geocoding import normaliser_nom
 from inscriptions.factories import (
     CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory, ExtraQuestionFactory,
 )
 from inscriptions.models import (
-    Accreditation, Challenge, ChallengeCategorie, Course, Mail, Paiement, PaiementRepartition, TemplateMail, Ville,
+    Accreditation, Challenge, ChallengeCategorie, CodePostal, Course, Mail, Paiement, PaiementRepartition, TemplateMail,
 )
 
 COURSE_UID = 'e2e'
 STATS_UID = 'e2estats'  # second accredited course, to compare in the stats page
+NOGEO_UID = 'e2enogeo'  # public stats page of a course whose teams have no known city
 STRIPE_UID = 'e2estripe'  # course with Stripe test keys (only seeded when E2E_STRIPE_* are set)
 STRIPE_TEAMS = 8  # "Stripe 1".."Stripe 8", price 40, one per test
 STRIPE_ENDPOINT_SECRET = 'whsec_e2e_local'  # webhooks are signed locally by the tests
@@ -33,18 +35,23 @@ class Command(BaseCommand):
     """(Re)create a known-good 'e2e' course for the Playwright suite to run
     against. Idempotent: safe to run before every e2e run.
 
-    Also seeds a `Ville` matching the city the e2e tests type into the
-    registration form ("Paris"), so `Equipe.save()` -> `lookup_ville()`
-    hits the DB cache instead of calling the real MapQuest API.
+    Also seeds a few `CodePostal` rows (local geocoding reference, normally
+    loaded by `import_codes_postaux`) so teams get a city on the stats pages.
     """
     help = "Seed a fixed 'e2e' course + categories for the Playwright suite."
 
     def handle(self, *args, **options):
         Challenge.objects.filter(uid__in=['e2echal', 'e2enewchal']).delete()
-        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID, STRIPE_UID]).delete()  # e2enew: made by tests
-        Ville.objects.get_or_create(nom='paris', defaults=dict(
-            region='Ile-de-France', pays='FR', lat=Decimal('48.8566'), lng=Decimal('2.3522'),
-        ))
+        Course.objects.filter(uid__in=[COURSE_UID, 'e2enew', OTHER_UID, STATS_UID, STRIPE_UID, NOGEO_UID]).delete()  # e2enew: made by tests
+        CodePostal.objects.filter(pays__in=['FR', 'BE']).delete()
+        for pays, cp, nom, region, lat, lng in [
+                ('FR', '75000', 'Paris', 'Île-de-France', '48.8566', '2.3522'),
+                ('FR', '10000', 'Troyes', 'Grand Est', '48.2973', '4.0744'),
+                ('FR', '58000', 'Nevers', 'Bourgogne-Franche-Comté', '46.9894', '3.1581'),
+                ('BE', '1000', 'Bruxelles', 'Bruxelles-Capitale', '50.8466', '4.3517')]:
+            CodePostal.objects.create(
+                pays=pays, code_postal=cp, nom=nom, nom_normalise=normaliser_nom(nom), region=region,
+                departement='', lat=Decimal(lat), lng=Decimal(lng))
 
         course = CourseFactory(
             uid=COURSE_UID,
@@ -130,7 +137,21 @@ class Command(BaseCommand):
             date_fermeture=date.today() + timedelta(days=90),
             dates_augmentation=[date.today() + timedelta(days=d) for d in (20, 45, 70)])
         stats_categorie = CategorieFactory(course=stats_course, code='S', nom='S', numero_debut=1, numero_fin=99)
-        EquipeFactory(course=stats_course, categorie=stats_categorie, nom='Stats 1')
+        EquipierFactory(equipe=EquipeFactory(course=stats_course, categorie=stats_categorie, nom='Stats 1',
+                                             club='Club Paris'), numero=1)
+        # geocoded teams (local CodePostal reference): France, Belgium, and an unknown city
+        for nom, ville, cp, pays in [('Stats 2', 'Troyes', '10000', 'FR'), ('Stats 3', 'St Troyes Cedex', '10000', 'FR'),
+                                     ('Stats 4', 'Bruxelles', '1000', 'BE'), ('Stats 5', '?', '?', 'FR')]:
+            EquipierFactory(equipe=EquipeFactory(
+                course=stats_course, categorie=stats_categorie, nom=nom, club='Club ' + ville,
+                gerant_ville=ville, gerant_code_postal=cp, gerant_pays=pays), numero=1)
+        nogeo = CourseFactory(uid=NOGEO_UID, nom='Course Sans Ville E2E', ville='Zzzzz',
+                              date=date.today() + timedelta(days=60),
+                              date_ouverture=date.today() - timedelta(days=5),
+                              date_fermeture=date.today() + timedelta(days=30))
+        nogeo_categorie = CategorieFactory(course=nogeo, code='N', nom='N', numero_debut=1, numero_fin=99)
+        EquipierFactory(equipe=EquipeFactory(course=nogeo, categorie=nogeo_categorie, nom='Sans ville',
+                                             gerant_ville='?', gerant_code_postal='?'), numero=1)
         Accreditation.objects.create(user=user, course=stats_course, role='admin')
         User.objects.filter(username=SUPER_USERNAME).delete()
         User.objects.create_superuser(SUPER_USERNAME, 'e2e-super@example.com', ADMIN_PASSWORD)
