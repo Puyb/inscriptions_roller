@@ -35,14 +35,16 @@
     {% csrf_token %}
 </form>
 <script>
-(function($) {
-    function upd() {
-        $('#id_courses option').each(function() {
-            $('#course_' + this.value)[this.selected ? 'show' : 'hide']()
-        });
-    }
-    $('#id_courses').change(upd)
-    upd();
-})(django.jQuery);
+    // plain DOM: the jQuery globals are not reliable on this page
+    (function() {
+        var select = document.getElementById('id_courses');
+        function upd() {
+            Array.prototype.forEach.call(select.options, function(option) {
+                document.getElementById('course_' + option.value).style.display = option.selected ? '' : 'none';
+            });
+        }
+        select.addEventListener('change', upd);
+        upd();
+    })();
 </script>
 {% endblock %}
