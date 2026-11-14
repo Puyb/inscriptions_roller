@@ -9,7 +9,7 @@
         const urlParam = function (name) {
             var results = new RegExp('[\?&]' + name + '=([^&#]*)')
                         .exec(window.location.search);
-            return (results !== null) ? results[1] || 0 : false;
+            return (results !== null) ? decodeURIComponent(results[1]) || 0 : false;
         };
 
         const data = urlParam('data') || 'equipes';
@@ -38,7 +38,7 @@
         for(var i = min; i < max; i++) {
             if (align === 'course') 
                 labels.push(i - {{ d.delta }})
-            if (align === 'augment') 
+            if (align.startsWith('augment')) 
                 labels.push(i - {{ d.delta }})
             if (align === 'start') 
                 labels.push(i - {{ d.delta }})
@@ -81,7 +81,7 @@
                             const label = data[0].label;
                             if (align === 'course') 
                                 return label + ' jours avant la course';
-                            if (align === 'augment') 
+                            if (align.startsWith('augment')) 
                                 if (label < 0) 
                                     return label + ' jours avant l\'augmentation des tarifs';
                                 else
@@ -152,7 +152,9 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{% trans "Point de comparaison" %} <span class="caret"></span></a>
           <ul class="dropdown-menu">
             <li><a data-name="align" data-value="">{% if request.GET.align == "" %}<strong>{% endif %}{% trans "Date de la course" %}{% if request.GET.align == "" %}</strong>{% endif %}</a></li>
-            <li><a data-name="align" data-value="augment">{% if request.GET.align == "augment" %}<strong>{% endif %}{% trans "Date d'augmentation" %}{% if request.GET.align == "augment" %}</strong>{% endif %}</a></li>
+            {% for opt in augment_options %}
+            <li><a data-name="align" data-value="{{ opt.value }}">{% if opt.selected %}<strong>{% endif %}{% if augment_options|length == 1 %}{% trans "Date d'augmentation" %}{% else %}{% blocktrans with n=opt.n %}Augmentation n° {{ n }}{% endblocktrans %}{% endif %}{% if opt.selected %}</strong>{% endif %}</a></li>
+            {% endfor %}
             <li><a data-name="align" data-value="start">{% if request.GET.align == "start" %}<strong>{% endif %}{% trans "Date d'ouverture" %}{% if request.GET.align == "start" %}</strong>{% endif %}</a></li>
           </ul>
         </li>

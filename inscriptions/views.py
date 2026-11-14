@@ -433,29 +433,49 @@ def stats(request, course_uid):
         'json': json.dumps(stats),
     })
 
+def parse_align(align):
+    """`augment` -> ('augment', 1), `augment:2` -> ('augment', 2), autre -> (align, None)."""
+    if align == 'augment' or align.startswith('augment:'):
+        try:
+            n = int(align.partition(':')[2] or 1)
+        except ValueError:
+            n = 1
+        return 'augment', max(n, 1)
+    return align, None
+
+def jours_augmentation(course, n):
+    """Jours entre l'ouverture et la n-ieme date d'augmentation (la derniere si la
+    course en a moins), ou None si la course n'a aucune augmentation."""
+    dates = course.augmentations
+    if not dates:
+        return None
+    return (dates[min(n, len(dates)) - 1] - course.date_ouverture).days
+
 def stats_compare(request, course_uid, course_uid2):
     uids = [ course_uid ]
     uids.extend(course_uid2.split(','))
 
     align = request.GET.get('align', '')
+    mode, n = parse_align(align)
     course1 = get_object_or_404(Course, uid=course_uid)
     duree1 = (course1.date - course1.date_ouverture).days
-    # FIXME support multiple date of augmentation
-    if align == "augment" and course1.augmentations:
-        duree1 = (course1.augmentations[0] - course1.date_ouverture).days
+    if mode == "augment" and course1.augmentations:
+        duree1 = jours_augmentation(course1, n)
 
     res = []
     i = 0;
+    max_augmentations = len(course1.augmentations)
     for uid in uids:
         course = get_object_or_404(Course, uid=uid)
         stats = course.stats()
-        
+        max_augmentations = max(max_augmentations, len(course.augmentations))
+
         duree = (course.date - course.date_ouverture).days
-        if align == "augment" and course.augmentations:
-            duree = (course.augmentations[0] - course.date_ouverture).days
+        if mode == "augment" and course.augmentations:
+            duree = jours_augmentation(course, n)
 
         delta = duree1 - duree
-        if align == 'start':
+        if mode == 'start':
             delta = 0
         res.append({
             'index': i,
@@ -463,14 +483,19 @@ def stats_compare(request, course_uid, course_uid2):
             'course': course,
             'json': json.dumps(stats),
             'delta': delta,
-            'augment': (course.augmentations[0] - course.date_ouverture).days if course.augmentations else 0,
+            'augment': jours_augmentation(course, 1) or 0,
         });
-        i += 1;
+        i += 1
 
     return TemplateResponse(request, 'stats_compare.html', {
         'data': res,
         'today': (date.today() - course1.date_ouverture).days,
-        'align': request.GET.get('align', '')
+        'align': align,
+        'augment_options': [
+            {'n': k, 'value': 'augment' if k == 1 else 'augment:%d' % k,
+             'selected': (mode == 'augment' and n == k)}
+            for k in range(1, max(max_augmentations, 1) + 1)
+        ],
     });
 
 def index(request):

@@ -619,7 +619,8 @@ class StatsTestCase(ExportBaseTestCase):
         data = json.loads(response.content)
         self.assertEqual(data['uid'], self.course.uid)
         self.assertEqual(data['course'], self.course.nom)
-        self.assertEqual(set(data['date']), {'ouverture', 'fermeture', 'augmentation', 'course'})
+        self.assertEqual(set(data['date']), {'ouverture', 'fermeture', 'course'})
+        self.assertEqual(len(data['augmentations']), len(self.course.augmentations))
         self.assertEqual(data['delta']['ouverture'], 0)
         self.assertEqual(data['delta']['course'], (self.course.date - self.course.date_ouverture).days)
         totals = {'equipes': 0, 'equipiers': 0}

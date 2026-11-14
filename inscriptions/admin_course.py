@@ -671,6 +671,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         def iso(d):
             return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
             
+        augmentations = course.augmentations
         return HttpResponse(json.dumps({
             'stats': {
                 k: {
@@ -684,15 +685,18 @@ class CourseAdminSite(admin.sites.AdminSite):
             'date': {
                 'ouverture': iso(course.date_ouverture),
                 'fermeture': iso(course.date_fermeture - timedelta(days=1)),
-                'augmentation': iso((course.date_augmentation or course.date_fermeture) - timedelta(days=1)),
                 'course': iso(course.date),
             },
             'delta': {
                 'ouverture': 0,
                 'fermeture': (course.date_fermeture - course.date_ouverture).days - 1,
-                'augmentation': ((course.date_augmentation or course.date_fermeture) - course.date_ouverture).days - 1,
                 'course': (course.date - course.date_ouverture).days,
             },
+            # une entree par date de changement de tarif, dans l'ordre chronologique
+            'augmentations': [{
+                'date': iso(d - timedelta(days=1)),
+                'delta': (d - course.date_ouverture).days - 1,
+            } for d in augmentations],
         }), content_type='application/json')
 
 

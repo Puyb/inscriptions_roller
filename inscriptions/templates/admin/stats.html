@@ -24,6 +24,7 @@
     <span>Aligner les comparaison sur :</span>
     <label><input type="radio" name="align" value="course" checked> Date de la course</label>
     <label><input type="radio" name="align" value="augmentation"> Date d'augmentation</label>
+    <select id="augmentation_n" name="n" title="Si une course a moins d'augmentations, sa dernière est utilisée" style="display: none"></select>
     <label><input type="radio" name="align" value="start"> Date de début</label>
     <span>Comparer :</span>
     <label><input type="radio" name="data" value="equipes"> Nombre d'équipes</label>
@@ -39,14 +40,40 @@ const getSettings = () => {
     const settings = {
         align: params.get('align'),
         data: params.get('data'),
+        n: parseInt(params.get('n')) || 1,
     };
     return settings;
 };
 
+// Décalage (en jours depuis l'ouverture) du point d'alignement d'une course.
+// Une course qui a moins de `n` augmentations est alignée sur sa dernière ;
+// sans aucune augmentation, sur la fermeture.
+const deltaOf = (course, settings) => {
+    if (settings.align === 'start') return course.delta.ouverture;
+    if (settings.align === 'augmentation') {
+        const augs = course.augmentations;
+        if (!augs.length) return course.delta.fermeture;
+        return augs[Math.min(settings.n, augs.length) - 1].delta;
+    }
+    return course.delta[settings.align];
+};
+
+const updateAugmentationChoices = () => {
+    const max = Math.max(1, ...courses.map(c => c.augmentations.length));
+    const select = $('#augmentation_n');
+    const current = parseInt(select.val()) || 1;
+    select.empty();
+    for (let i = 1; i <= max; i++)
+        select.append($('<option>').val(i).text('n° ' + i));
+    select.val(Math.min(current, max));
+    select.toggle(max > 1);
+};
+
 const setHash = () => {
+    const settings = getSettings();
     const hash = new URLSearchParams();
-    for(const [k, v] of Object.entries(getSettings()))
-        hash.append(k, v);
+    hash.append('align', settings.align === 'augmentation' && settings.n > 1 ? 'augmentation:' + settings.n : settings.align);
+    hash.append('data', settings.data);
     for (const course of courses)
         hash.append('course', course.uid);
     location.hash = '#' + hash.toString();
@@ -59,11 +86,20 @@ const addCourse = async uid => {
     $('#add_course option[value=' + uid + ']').remove();
     const response = await fetch(`${uid}/`);
     const data = await response.json();
+    // repères (date + décalage) : ouverture, fermeture, course et chaque augmentation
+    data.deltas = {...data.delta};
+    data.dates = {...data.date};
+    data.augmentations.forEach((a, i) => {
+        const key = data.augmentations.length > 1 ? 'augmentation ' + (i + 1) : 'augmentation';
+        data.deltas[key] = a.delta;
+        data.dates[key] = a.date;
+    });
     courses.push(data);
 };
 const draw = () => {
     $('#canvas_time').remove();
     $('#settings').append('<canvas id="canvas_time"></canvas>');
+    updateAugmentationChoices();
     const settings = getSettings();
 
     const colors = Object.values({
@@ -76,9 +112,8 @@ const draw = () => {
         grey: 'rgb(201, 203, 207)'
     });
 
-    const maxDelta = Math.max(...courses.map(c => c.delta[settings.align]));
-    const maxAfterDelta = Math.max(...courses.map(c => c.delta.course - c.delta[settings.align]));
-    console.log(courses, maxDelta, maxAfterDelta);
+    const maxDelta = Math.max(...courses.map(c => deltaOf(c, settings)));
+    const maxAfterDelta = Math.max(...courses.map(c => c.delta.course - deltaOf(c, settings)));
     const config = {
         type: 'line',
         data: {
@@ -112,10 +147,10 @@ const draw = () => {
                         const course = courses[index] || courses[0]; // projection
                         let label = data.datasets[index].label || '';
                         const d = new Date(course.date.ouverture);
-                        d.setDate(d.getDate() + parseFloat(tooltip.label) + course.delta[settings.align]);
+                        d.setDate(d.getDate() + parseFloat(tooltip.label) + deltaOf(course, settings));
                         label += ' au ' + d.toLocaleDateString();
                         label += ' : ' + Math.round(tooltip.yLabel);
-                        for (const [key, date] of Object.entries(course.date)) {
+                        for (const [key, date] of Object.entries(course.dates)) {
                             if (d.getTime() === new Date(date).getTime()) {
                                 label += ' (' + key + ')';
                             }
@@ -157,7 +192,7 @@ const draw = () => {
     }
     let todayIndex;
     for (const course of courses) {
-        const delta = maxDelta - course.delta[settings.align];
+        const delta = maxDelta - deltaOf(course, settings);
         const color = colors.shift();
         dataset = {
             label: course.uid,
@@ -189,7 +224,7 @@ const draw = () => {
             }
         }
         config.data.datasets.push(dataset);
-        for (const [label, value] of Object.entries(course.delta)) {
+        for (const [label, value] of Object.entries(course.deltas)) {
             config.options.annotation.annotations.push({
                 type: 'line',
                 mode: 'vertical',
@@ -200,7 +235,6 @@ const draw = () => {
             });
         }
     }
-    console.log(todayIndex, courses)
     if (todayIndex) {
         config.options.annotation.annotations.push({
             type: 'line',
@@ -250,9 +284,12 @@ const init = async () => {
     }
     const existingUids = courses.map(c => c.uid);
     let wantedUids = [];
+    let hashN = null;
     if (location.hash) {
         const hash = new URLSearchParams(location.hash.slice(1));
-        $('[name=align][value=' + hash.get('align') + ']').attr('checked', true);
+        const [align, n] = (hash.get('align') || '').split(':');
+        $('[name=align][value=' + align + ']').attr('checked', true);
+        hashN = n;
         $('[name=data][value=' + hash.get('data') + ']').attr('checked', true);
         wantedUids = hash.getAll('course');
     }
@@ -264,6 +301,8 @@ const init = async () => {
     }
     await Promise.all(promises);
     courses = courses.filter(c => wantedUids.includes(c.uid) || c.uid === '{{ course.uid }}');
+    updateAugmentationChoices();
+    if (hashN) $('#augmentation_n').val(Math.min(hashN, $('#augmentation_n option').length));
     draw();
 }
 init().catch(console.error);
@@ -283,6 +322,10 @@ $('#add_course').change(async function() {
     }
 });
 $('input').click(function() {
+    draw();
+    setHash();
+});
+$('#augmentation_n').change(function() {
     draw();
     setHash();
 });

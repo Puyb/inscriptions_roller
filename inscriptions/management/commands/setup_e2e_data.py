@@ -127,7 +127,8 @@ class Command(BaseCommand):
             uid=STATS_UID, nom='Course Stats E2E',
             date=date.today() + timedelta(days=120),
             date_ouverture=date.today() - timedelta(days=5),
-            date_fermeture=date.today() + timedelta(days=90))
+            date_fermeture=date.today() + timedelta(days=90),
+            dates_augmentation=[date.today() + timedelta(days=d) for d in (20, 45, 70)])
         stats_categorie = CategorieFactory(course=stats_course, code='S', nom='S', numero_debut=1, numero_fin=99)
         EquipeFactory(course=stats_course, categorie=stats_categorie, nom='Stats 1')
         Accreditation.objects.create(user=user, course=stats_course, role='admin')

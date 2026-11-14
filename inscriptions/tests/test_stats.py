@@ -141,3 +141,78 @@ class StatsGeographieTestCase(BaseTestCase):
         self.assertNotIn('id="canvas_distance"', html)
         self.assertIn('id="map"', html)
         self.assertIn('var origine = null', html)
+
+
+import json  # noqa: E402
+
+from django.contrib.auth.models import User  # noqa: E402
+
+
+class AugmentationsMultiplesTestCase(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+        today = date.today()
+        self.today = today
+        self.c1 = CourseFactory(
+            uid='aug3', date=today + timedelta(days=100), date_ouverture=today - timedelta(days=20),
+            date_fermeture=today + timedelta(days=90),
+            dates_augmentation=[today + timedelta(days=30), today + timedelta(days=10), today + timedelta(days=60)])
+        self.c0 = CourseFactory(
+            uid='aug0', date=today + timedelta(days=100), date_ouverture=today - timedelta(days=20),
+            date_fermeture=today + timedelta(days=90), dates_augmentation=[])
+        self.c1b = CourseFactory(
+            uid='aug1', date=today + timedelta(days=100), date_ouverture=today - timedelta(days=20),
+            date_fermeture=today + timedelta(days=90), dates_augmentation=[today + timedelta(days=5)])
+        for c in (self.c1, self.c0, self.c1b):
+            CategorieFactory(course=c)
+        su = User.objects.create_superuser('su', 'su@example.com', 'x')
+        self.client.force_login(su)
+        self.client.cookies['course_uid'] = self.c1.uid
+        self.client.cookies['course_id'] = str(self.c1.id)
+
+    def api(self, uid):
+        response = self.client.get('/course/stats/%s/' % uid)
+        self.assertEqual(response.status_code, 200)
+        return json.loads(response.content)
+
+    def test_api_liste_toutes_les_augmentations_dans_l_ordre(self):
+        data = self.api('aug3')
+        self.assertEqual([a['delta'] for a in data['augmentations']], [29, 49, 79])  # jours depuis l'ouverture - 1
+        self.assertNotIn('augmentation', data['delta'])
+        self.assertNotIn('augmentation', data['date'])
+        self.assertEqual(data['delta']['course'], 120)
+
+    def test_api_sans_augmentation(self):
+        self.assertEqual(self.api('aug0')['augmentations'], [])
+
+    def test_compare_alignement_sur_la_nieme_augmentation(self):
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'aug3', 'course_uid2': 'aug1,aug0'})
+        # n = 1 : aug3 -> 30 j, aug1 -> 25 j ; la course sans augmentation reste alignee sur sa date (120 j)
+        data = self.client.get(url, {'align': 'augment'}).context['data']
+        self.assertEqual([d['delta'] for d in data], [0, 30 - 25, 30 - 120])
+        # n = 2 : aug3 -> 50 j ; aug1 n'a qu'une augmentation : sa derniere (25 j) est utilisee
+        data = self.client.get(url, {'align': 'augment:2'}).context['data']
+        self.assertEqual([d['delta'] for d in data], [0, 50 - 25, 50 - 120])
+        # n = 3 -> 80
+        data = self.client.get(url, {'align': 'augment:3'}).context['data']
+        self.assertEqual(data[0]['delta'], 0)
+        self.assertEqual(data[1]['delta'], 80 - 25)
+
+    def test_compare_align_invalide_ou_hors_borne(self):
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'aug3', 'course_uid2': 'aug1'})
+        for align in ('augment:abc', 'augment:0', 'augment:99', 'augment:-3'):
+            self.assertEqual(self.client.get(url, {'align': align}).status_code, 200)
+
+    def test_compare_menu_une_entree_par_augmentation(self):
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'aug3', 'course_uid2': 'aug1'})
+        response = self.client.get(url, {'align': 'augment:2'})
+        self.assertEqual([o['value'] for o in response.context['augment_options']],
+                         ['augment', 'augment:2', 'augment:3'])
+        self.assertEqual([o['selected'] for o in response.context['augment_options']], [False, True, False])
+        html = response.content.decode()
+        self.assertIn('data-value="augment:3"', html)
+        # une seule augmentation : libelle historique
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'aug1', 'course_uid2': 'aug0'})
+        html = self.client.get(url).content.decode()
+        self.assertIn("Date d'augmentation", html)
+        self.assertNotIn('data-value="augment:2"', html)
