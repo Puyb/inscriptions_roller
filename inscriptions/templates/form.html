@@ -72,7 +72,7 @@
                         {% endif %}{% endif %}{% endif %}
                         {% blocktrans %}Une fois votre inscription terminée, vous recevrez un email de confirmation.{% endblocktrans%}<br />
                         {% blocktrans with date=COURSE.dernier_jour_inscription %}Vous pouvez modifier votre inscription, ajouter ou enlever des coéquipiers, envoyer les certificats, changer de catégorie jusqu'au {{ date }} inclus.{% endblocktrans%}<br />
-                        {% url "contact" course_uid=COURSE.uid as url_contact %}
+                        {% url "contact" course_uid=COURSE.key as url_contact %}
                         {% blocktrans with url_reglement=COURSE.url_reglement %}Vous pouvez consulter le règlement de la course en <a href="{{ url_reglement }}">cliquant ici</a>.{% endblocktrans %}<br />
                         {% blocktrans with url_contact=url_contact %}Si vous rencontrez des problèmes lors de votre inscription, <a href="{{ url_contact }}">contactez nous</a>{% endblocktrans%}<br />
                     </div>
@@ -176,8 +176,8 @@
         CATEGORIE: {{ instance.categorie_id }},
         CATEGORIE_CODE: '{{ instance.categorie.code }}'
     }{% endif %};
-    var CHECK_URL = '{% url "inscriptions_check_name" course_uid=COURSE.uid %}';
-    var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions_find_challenges_categories" course_uid=COURSE.uid %}';
+    var CHECK_URL = '{% url "inscriptions_check_name" course_uid=COURSE.key %}';
+    var CHALLENGES_CATEGORIES_URL = '{% url "inscriptions_find_challenges_categories" course_uid=COURSE.key %}';
     var UPDATE = {{ update|yesno:"true,false" }};
     var STAFF = false;
     {% if is_staff %}

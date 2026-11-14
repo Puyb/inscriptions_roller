@@ -1,5 +1,7 @@
 from datetime import datetime
 from django.db.models import F
+from django.http import HttpResponsePermanentRedirect
+from django.http.response import HttpResponseRedirectBase
 from django.db.models.functions import Coalesce
 from inscriptions.models import Mail
 
@@ -9,6 +11,44 @@ def tracking_middleware(get_response):
         if message_id:
             Mail.objects.filter(uid=message_id).update(read=Coalesce(F('read'), datetime.utcnow()))
 
+        return get_response(request)
+
+    return middleware
+
+
+class HttpResponsePermanentRedirect308(HttpResponseRedirectBase):
+    status_code = 308
+
+
+# Chemins appeles par des services externes (qui ne suivent pas les redirections) :
+# les anciennes URLs sont reecrites en interne au lieu d'etre redirigees.
+CHEMINS_WEBHOOKS = ('ipn/', 'stripe/webhook/', 'helloasso/webhook/')
+
+
+def legacy_uid_middleware(get_response):
+    """Anciennes URLs /<uid>/... (un uid par edition) -> /<course>/<edition>/...
+
+    GET/HEAD : redirection permanente ; autres methodes : 308 (conserve la
+    methode et le corps) ; webhooks : reecriture interne, sans redirection."""
+    from .models import Edition, UIDS_RESERVES
+
+    def middleware(request):
+        segments = request.path_info.split('/')
+        if len(segments) > 2 and segments[1] and segments[1] not in UIDS_RESERVES:
+            edition = Edition.objects.select_related('course').filter(legacy_uid=segments[1]).first()
+            if edition:
+                reste = '/'.join(segments[2:])
+                nouveau = '/%s/%s' % (edition.key, reste)
+                if reste in CHEMINS_WEBHOOKS:
+                    request.path_info = nouveau
+                    request.path = nouveau
+                else:
+                    cible = nouveau
+                    if request.META.get('QUERY_STRING'):
+                        cible += '?' + request.META['QUERY_STRING']
+                    if request.method in ('GET', 'HEAD'):
+                        return HttpResponsePermanentRedirect(cible)
+                    return HttpResponsePermanentRedirect308(cible)
         return get_response(request)
 
     return middleware

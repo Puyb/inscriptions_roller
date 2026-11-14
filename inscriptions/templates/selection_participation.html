@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load stats %}
-<input type="hidden" name="course_uid" value="{{ course.uid }}"/>
+<input type="hidden" name="course_uid" value="{{ course.key }}"/>
 <table class="table table-striped" style="width: 100%">
 {% for participation in participations %}
     {% if forloop.first %}
@@ -9,8 +9,8 @@
             <th>Pos.</th>
             <th>Courses</th>
             {% for c in challenge.courses.all %}
-            {% if c.uid != course.uid %}
-            <th>{{ c.uid }}</th>{% endif %}
+            {% if c.key != course.key %}
+            <th>{{ c.key }}</th>{% endif %}
             {% endfor %}
             {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
             <th>Points</th>
@@ -20,7 +20,7 @@
             <td></td>
             <td></td>
             {% for c in challenge.courses.all %}
-            {% if c.uid != course.uid %}
+            {% if c.key != course.key %}
             <td></td>{% endif %}
             {% endfor %}
             {% if challenge.mode == 'nord2018' %}<td></td>{% endif %}
@@ -39,7 +39,7 @@
                 <th>{% trans "Tours" %}</th>
                 <th>{% trans "Temps" %}</th>
                 {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
-            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
+            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.key %}
             <tr>
                 <th>{{ c.nom }}</th>
                 <td>{{ e.equipe.numero|default_if_none:"" }}</td>
@@ -56,7 +56,7 @@
             <tr>
                 <th>{% trans "Équipier" %}</th>
                 {% for c in challenge.courses.all %}
-                <th>{{ c.uid }}</th>
+                <th>{{ c.key }}</th>
                 {% endfor %}
             </tr>{% for e in participation.equipiers.all %}
             <tr>
@@ -74,8 +74,8 @@
         <td>{{ participation.position|default_if_none:"" }}</td>
         <td>{{ participation.count }}</td>
         {% for c in challenge.courses.all %}
-        {% if c.uid != course.uid %}
-        <td {% if not participation.equipes_dict|get:c.uid %}class="bg-info"{% endif %}>{% if participation.equipes_dict|get:c.uid %}{{ participation.equipes_dict|get:c.uid|get:"points"|default:"Inscrit" }}{% endif %}</td>{% endif %}
+        {% if c.key != course.key %}
+        <td {% if not participation.equipes_dict|get:c.key %}class="bg-info"{% endif %}>{% if participation.equipes_dict|get:c.key %}{{ participation.equipes_dict|get:c.key|get:"points"|default:"Inscrit" }}{% endif %}</td>{% endif %}
         {% endfor %}
         {% if challenge.mode == 'nord2018' %}<td>{{ participation.distance|default_if_none:"" }}</td>{% endif %}
         <td>{{ participation.points }}</td>

@@ -8,7 +8,7 @@
         </div>
         <div class="media-body">
             <h2>{% trans "Cette inscription est verrouillée. Vous ne pouvez pas la modifier." %}</h2>
-            {% url "contact" course_uid=COURSE.uid as url_contact %}
+            {% url "contact" course_uid=COURSE.key as url_contact %}
             <p>{% blocktrans %}Si vous avez des modifications à faire, veuillez <a href="{{ url_contact }}">contacter l'organisateur de la course</a>.{% endblocktrans %}</p>
         </div>
     </div>

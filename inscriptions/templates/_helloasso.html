@@ -1,5 +1,5 @@
 {% load i18n %}
-<form method="post" action="{% url "inscriptions_intent_paiement" course_uid=COURSE.uid methode="helloasso" %}?equipe={{ instance.numero }}">
+<form method="post" action="{% url "inscriptions_intent_paiement" course_uid=COURSE.key methode="helloasso" %}?equipe={{ instance.numero }}">
     {% csrf_token %}
   <div class="HaPay">
     <button class="HaPayButton">

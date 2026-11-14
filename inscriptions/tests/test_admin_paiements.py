@@ -29,7 +29,7 @@ def login_as_organizer(client, course, role='admin', username=None):
 
 
 def set_course_cookie(client, course):
-    client.cookies['course_uid'] = course.uid
+    client.cookies['course_uid'] = course.key
     client.cookies['course_id'] = str(course.id)
 
 
@@ -525,7 +525,7 @@ class PaiementAdminListTestCase(PaiementChangeBaseTestCase):
     def test_equipes_column_several_teams_grouped_by_course(self):
         p = make_paiement([(self.e1, '50.00'), (self.e2, '30.00')])
         out = course_site._registry[Paiement].equipes(p)
-        self.assertIn(self.course.uid, out)
+        self.assertIn(self.course.key, out)
         self.assertIn(str(self.e1.numero), out)
         self.assertIn(str(self.e2.numero), out)
 

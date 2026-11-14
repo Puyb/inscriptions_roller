@@ -129,7 +129,25 @@ def normalize_club(club):
     }
     return table.get(club, club)
 
+# Premiers segments d'URL deja utilises par le site : interdits comme uid de course.
+UIDS_RESERVES = frozenset((
+    'admin', 'course', 'account', 'i18n', 'jsi18n', 'challenges', 'organisteurs',
+    'blank.gif', 'countries.json', 'static', 'media', 'documentation', '__debug__',
+))
+
+
+def valide_uid_course(valeur):
+    """L'uid d'une course est le premier segment de ses URLs : il ne doit ni etre
+    reserve, ni etre l'ancien uid d'une edition (les anciennes URLs sont redirigees)."""
+    from django.core.exceptions import ValidationError
+    if valeur in UIDS_RESERVES:
+        raise ValidationError(_("Cet identifiant est réservé."), code='reserve')
+    if Edition.objects.filter(legacy_uid=valeur).exists():
+        raise ValidationError(_("Cet identifiant est déjà utilisé par une ancienne édition."), code='legacy')
+
+
 COURSE_UID_VALIDATOR = RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))
+EDITION_UID_VALIDATOR = RegexValidator(regex="^[a-z0-9][a-z0-9-]*$", message=_("Ne doit contenir que des lettres minuscules, des chiffres ou des tirets"))
 
 # Champs portes par la Course (l'evenement annuel) et exposes en lecture/ecriture
 # par chaque Edition via des proprietes (voir Edition.__init_subclass__ plus bas).
@@ -146,7 +164,7 @@ class Course(models.Model):
     """Evenement annuel (ex. « 6 Heures de Paris »). Les occurrences datees sont
     les `Edition`. Porte l'identite, les informations de paiement et les acces."""
     nom                 = models.CharField(_(u'Nom'), max_length=200)
-    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[COURSE_UID_VALIDATOR], unique=True)
+    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[COURSE_UID_VALIDATOR, valide_uid_course], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
     ville               = models.CharField(_(u'Ville'), max_length=200)
     ville2              = models.ForeignKey('Ville', null=True, blank=True, on_delete=models.SET_NULL, related_name='+', verbose_name=_('Localisation'), help_text=_("Origine du calcul des distances dans les statistiques. Renseignée automatiquement d'après la ville (France) ; à modifier pour une course à l'étranger."))
@@ -215,7 +233,7 @@ def _course_property(nom):
 class Edition(models.Model):
     course              = models.ForeignKey(Course, related_name='editions', on_delete=models.CASCADE)
     nom                 = models.CharField(_(u'Nom'), max_length=200)
-    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[COURSE_UID_VALIDATOR], unique=True)
+    uid                 = models.CharField(_(u'uid'), max_length=200, validators=[EDITION_UID_VALIDATOR], help_text=_("Identifiant de l'édition dans l'adresse internet, par exemple l'année (2026). Unique pour une course."))
     legacy_uid          = models.CharField(_('uid historique'), max_length=200, unique=True, null=True, blank=True, editable=False)
     date                = models.DateField(_(u'Date'))
     url_reglement       = models.URLField(_(u'URL Réglement'))
@@ -244,6 +262,14 @@ class Edition(models.Model):
                                             null=True, blank=True)
 
     _course_modifiee = False
+
+    class Meta:
+        unique_together = (('course', 'uid'), )
+
+    @property
+    def key(self):
+        """Identifiant d'URL « course/edition », passe aux vues dans `course_uid`."""
+        return '%s/%s' % (self.course.uid, self.uid)
 
     for _nom in COURSE_FIELDS:
         locals()[_nom] = _course_property(_nom)
@@ -290,7 +316,7 @@ class Edition(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.uid:
-            self.uid = self.nom.lower().replace(' ', '_')
+            self.uid = str(self.date.year)
         if self._course_modifiee:
             self.course.save()
             self._course_modifiee = False
@@ -541,6 +567,20 @@ class Edition(models.Model):
                 i += 1
                 objs.append(Transpondeur(course=self, ordre=i, numero=code))
             Transpondeur.objects.bulk_create(objs)
+
+def edition_lookup(key, prefixe=''):
+    """Filtres ORM pour la cle d'URL « course/edition » ; `prefixe` est le chemin
+    depuis le modele filtre vers l'Edition (ex. 'course__' pour une Equipe)."""
+    uid_course, _sep, uid_edition = key.partition('/')
+    return {prefixe + 'course__uid': uid_course, prefixe + 'uid': uid_edition}
+
+
+def get_edition(key, queryset=None):
+    from django.shortcuts import get_object_or_404
+    if queryset is None:
+        queryset = Edition.objects.all()
+    return get_object_or_404(queryset.select_related('course'), **edition_lookup(key))
+
 
 class Categorie(models.Model):
     course          = models.ForeignKey(Edition, related_name='categories', on_delete=models.CASCADE)
@@ -1314,7 +1354,7 @@ class Challenge(models.Model):
     def compute_challenge(self):
         cats = defaultdict(lambda: 0)
         if self.mode == 'nord2017': 
-            courses_points = [ ('position_%s' % c.uid, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
+            courses_points = [ ('position_%d' % c.id, Sum(Case(When(equipes__equipe__course=c, then='equipes__equipe__position_generale'), default=Value(0), output_field=models.IntegerField()))) for c in self.courses.order_by('date') ]
             previous_position = defaultdict(lambda: None)
             for p in self.participations.select_related('categorie').annotate(p=Sum('equipes__points'), c=Count('equipes'), **dict(courses_points)).order_by('-p', '-c', *[k for k, v in courses_points]):
                 if p.c == 0:
@@ -1493,7 +1533,7 @@ class ParticipationChallenge(models.Model):
     nom = models.CharField(_(u"Nom d'équipe"), max_length=30)
 
     def equipes_dict(self):
-        return { e.equipe.course.uid: e for e in self.equipes.all() }
+        return { e.equipe.course.key: e for e in self.equipes.all() }
 
     def add_equipe(self, equipe, points=0):
         EquipeChallenge.objects.filter(participation__challenge=self.challenge, equipe=equipe).delete()

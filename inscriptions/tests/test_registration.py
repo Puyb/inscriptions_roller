@@ -51,7 +51,7 @@ class RegistrationTestCase(BaseTestCase):
         self.course.date_fermeture = TOMORROW + timedelta(days=1)
         self.course.save()
 
-        response = self.client.get('/course1/')
+        response = self.client.get('/course1/course1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'not_opened_yet.html')
 
@@ -60,12 +60,12 @@ class RegistrationTestCase(BaseTestCase):
         self.course.date_fermeture = YESTERDAY
         self.course.save()
 
-        response = self.client.get('/course1/')
+        response = self.client.get('/course1/course1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'closed.html')
 
     def test_open_registration_form(self):
-        response = self.client.get('/course1/')
+        response = self.client.get('/course1/course1/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'form.html')
         self.assertIsNone(response.context['instance'])
@@ -73,9 +73,9 @@ class RegistrationTestCase(BaseTestCase):
         self.assertEqual(response.context['nombres_par_tranche'], {})
 
     def test_create_inscription(self):
-        response = self.client.post('/course1/', self._duo_payload())
+        response = self.client.post('/course1/course1/', self._duo_payload())
         equipe = self.course.equipe_set.get(nom='Equipe 1')
-        self.assertRedirects(response, '/course1/%s/done/' % equipe.numero)
+        self.assertRedirects(response, '/course1/course1/%s/done/' % equipe.numero)
         self.assertEqual(equipe.numero, 300)
         self.assertEqual(equipe.categorie, self.duo)
         self.assertEqual(equipe.equipier_set.count(), 2)
@@ -85,19 +85,19 @@ class RegistrationTestCase(BaseTestCase):
         self.assertIn(response.cookies['code_%s' % equipe.id].value, equipe.password)
 
     def test_price_is_not_trusted_from_the_client(self):
-        response = self.client.post('/course1/', self._duo_payload(prix='1'))
+        response = self.client.post('/course1/course1/', self._duo_payload(prix='1'))
         equipe = self.course.equipe_set.get(nom='Equipe 1')
-        self.assertRedirects(response, '/course1/%s/done/' % equipe.numero)
+        self.assertRedirects(response, '/course1/course1/%s/done/' % equipe.numero)
         self.assertEqual(equipe.prix, Decimal('70.00'))
 
     def test_wrong_password_is_404(self):
         equipe = EquipeFactory(course=self.course, categorie=self.solo, nombre=1, numero=201, password='123456')
-        response = self.client.get('/course1/%s/wrong/' % equipe.numero)
+        response = self.client.get('/course1/course1/%s/wrong/' % equipe.numero)
         self.assertEqual(response.status_code, 404)
 
     def test_edit_page_shows_existing_team(self):
         equipe = EquipeFactory(course=self.course, categorie=self.solo, nombre=1, numero=201, password='123456')
-        response = self.client.get('/course1/%s/123456/' % equipe.numero)
+        response = self.client.get('/course1/course1/%s/123456/' % equipe.numero)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'form.html')
         self.assertEqual(response.context['instance'], equipe)
@@ -105,7 +105,7 @@ class RegistrationTestCase(BaseTestCase):
 
     def test_locked_equipe_cannot_be_edited_by_the_public(self):
         equipe = EquipeFactory(course=self.course, categorie=self.solo, nombre=1, numero=201, password='123456', verrou=True)
-        response = self.client.get('/course1/%s/123456/' % equipe.numero)
+        response = self.client.get('/course1/course1/%s/123456/' % equipe.numero)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.templates[0].name, 'locked.html')
 
@@ -122,9 +122,9 @@ class RegistrationTestCase(BaseTestCase):
             dict(nom='Joplin', prenom='Janis', sexe='F', date_de_naissance=date(1980, 1, 1), justificatif='licence', num_licence='123456'),
         ]))
 
-        response = self.client.post('/course1/%s/123456/' % equipe.numero, data)
+        response = self.client.post('/course1/course1/%s/123456/' % equipe.numero, data)
         equipe.refresh_from_db()
-        self.assertRedirects(response, '/course1/%s/done/' % equipe.numero)
+        self.assertRedirects(response, '/course1/course1/%s/done/' % equipe.numero)
         self.assertEqual(equipe.categorie, self.duo)
         self.assertEqual(equipe.numero, 300)
         self.assertEqual(equipe.equipier_set.count(), 2)
@@ -136,7 +136,7 @@ class RegistrationTestCase(BaseTestCase):
         data.update(equipier_formset_data([
             dict(nom='Dylan', prenom='Bob', sexe='H', date_de_naissance=date(1989, 1, 1), justificatif='certificat'),
         ]))
-        response = self.client.post('/course1/', data)
+        response = self.client.post('/course1/course1/', data)
         self.assertEqual(response.context['message'], "Désolé, il n'y a plus de place dans cette catégorie")
         self.assertFalse(Equipe.objects.filter(nom='Equipe 1').exists())
 
@@ -145,7 +145,7 @@ class RegistrationTestCase(BaseTestCase):
         self.course.save()
         EquipeFactory(course=self.course, categorie=self.duo, nombre=2, numero=300)
 
-        response = self.client.post('/course1/', self._duo_payload())
+        response = self.client.post('/course1/course1/', self._duo_payload())
         self.assertRedirects(response, '/')
         self.assertFalse(Equipe.objects.filter(nom='Equipe 1').exists())
 
@@ -159,6 +159,6 @@ class RegistrationTestCase(BaseTestCase):
         data.update(equipier_formset_data([
             dict(nom='Dylan', prenom='Bob', sexe='H', date_de_naissance=date(1989, 1, 1), justificatif='certificat'),
         ]))
-        self.client.post('/course1/', data)
+        self.client.post('/course1/course1/', data)
         equipe = self.course.equipe_set.get(nom='Equipe 1')
         self.assertEqual(equipe.prix, Decimal('55.00'))  # 40 (IDH) + 15 (t-shirt)

@@ -30,7 +30,7 @@
                                 <p>
                                     {% blocktrans with date=course.date ville=course.ville %}le {{date }} à {{ ville }}{% endblocktrans %}<br />
                                 </p>
-                                {% with participation.equipes_dict|get:course.uid as ec2 %}
+                                {% with participation.equipes_dict|get:course.key as ec2 %}
                                     {% if ec2 %}
                                         <p class="bg-info">
                                         {% if ec2.points %}{% blocktrans with points=ec2.points %}Vous y avez déjà gagné {{ points }} points.{% endblocktrans %}
@@ -45,7 +45,7 @@
                                         {% else  %}
                                             {% if course.ouverte %}
                                             {% if not create and not update and request.COOKIES|get:instance.cookie_key %}
-                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions_create" course_uid=course.uid %}?course={{ COURSE.uid }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
+                                            <a class="btn btn-lg btn-block btn-primary" role="button" href="{% url "inscriptions_create" course_uid=course.key %}?course={{ COURSE.key }}&numero={{ instance.numero }}">{% trans "Inscription" %}</a><br />
                                             {% endif %}
                                             <p>
                                                 {% blocktrans with date=course.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}<br />

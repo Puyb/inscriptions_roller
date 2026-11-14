@@ -44,10 +44,11 @@ ICON_LOCK = '🔒'
 ICON_GIFT = '🎁'
 
 def getCourse(request, qs=Edition.objects.all()):
-    uid = request.COOKIES['course_uid']
+    lookup = edition_lookup(request.COOKIES['course_uid'])
+    qs = qs.select_related('course')
     if request.user.is_superuser:
-        return qs.get(uid=uid)
-    return qs.get(uid=uid, course__accreditations__user=request.user)
+        return qs.get(**lookup)
+    return qs.get(course__accreditations__user=request.user, **lookup)
 
 class CourseAdminSite(admin.sites.AdminSite):
     def has_permission(self, request):
@@ -58,18 +59,18 @@ class CourseAdminSite(admin.sites.AdminSite):
             return True
         if request.user.is_superuser:
             return True
-        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
+        if request.path == '/course/' or request.path.endswith('/choose/') or request.path.endswith('/ask/') or re.search(r'/ask/[^/]+/[^/]+/$', request.path) or request.path.endswith('/inscriptions/course/add/') or request.path.endswith('/course/jsi18n/'):
             return True
         if 'course_uid' not in request.COOKIES:
             return False
         course_uid = request.COOKIES['course_uid']
-        return request.user.accreditations.filter(course__editions__uid=course_uid).exclude(role='').count() > 0
+        return request.user.accreditations.filter(course__editions__in=Edition.objects.filter(**edition_lookup(course_uid))).exclude(role='').count() > 0
 
     def get_urls(self):
         from django.urls import re_path
         urls = [
             re_path(r'^choose/$', self.admin_view(self.course_choose), name='course_choose'),
-            re_path(r'^ask/(?P<course_uid>[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
+            re_path(r'^ask/(?P<course_uid>[^/]+/[^/]+)/$', self.admin_view(self.course_ask_accreditation), name='course_ask_acreditation'),
             re_path(r'^ask/$', self.admin_view(self.course_ask_accreditation),    name='course_ask_acreditation'),
             re_path(r'^document/review/$', self.admin_view(self.document_review), name='course_document_review'),
             re_path(r'^listing/dossards/$', self.admin_view(self.listing_dossards), name='course_listing_dossards'),
@@ -83,7 +84,7 @@ class CourseAdminSite(admin.sites.AdminSite):
             re_path(r'^inscriptions/paiement/search/equipe/$', self.admin_view(self.paiement_search_equipe), name='paiement_search_equipe'),
             re_path(r'^inscriptions/categorie/test/$', self.admin_view(self.test_categories), name='test_categories'),
             re_path(r'^stats/$', self.admin_view(self.stats), name='course_stats'),
-            re_path(r'^stats/(?P<course_uid>[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
+            re_path(r'^stats/(?P<course_uid>[^/]+/[^/]+)/$', self.admin_view(self.get_stats_api), name='course_stats_api'),
         ] + super().get_urls()
         return urls
 
@@ -102,7 +103,7 @@ class CourseAdminSite(admin.sites.AdminSite):
     def course_ask_accreditation(self, request, course_uid=None):
         request.current_app = self.name
         if course_uid:
-            course = get_object_or_404(Edition, uid=course_uid)
+            course = get_edition(course_uid)
             accreditation, created = Accreditation.objects.get_or_create(
                 user=request.user,
                 course=course.course,
@@ -666,7 +667,7 @@ class CourseAdminSite(admin.sites.AdminSite):
         })
 
     def get_stats_api(self, request, course_uid):
-        course = get_object_or_404(Edition, uid=course_uid)
+        course = get_edition(course_uid)
         stats = course.stats()
         def iso(d):
             return datetime.combine(d, datetime.min.time()).astimezone(timezone('Europe/Paris')).strftime('%Y-%m-%dT%H:%M:%S%z')
@@ -680,7 +681,7 @@ class CourseAdminSite(admin.sites.AdminSite):
                     'prix': v['prix'],
                 } for k, v in stats['jours'].items()
             },
-            'uid': course.uid,
+            'uid': course.key,
             'course': course.nom,
             'date': {
                 'ouverture': iso(course.date_ouverture),
@@ -709,7 +710,7 @@ class CourseFilteredObjectAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(course__uid=course_uid)
+        qs = qs.filter(**edition_lookup(course_uid, 'course__'))
         if not request.user.is_superuser:
             qs = qs.filter(course__course__accreditations__user=request.user)
         return qs
@@ -812,7 +813,7 @@ class CategorieFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [
             (c.code, u'%s - %s' % (c.code, c.nom))
-            for c in Categorie.objects.filter(course__uid=request.COOKIES['course_uid']).order_by('max_equipiers', 'code')
+            for c in Categorie.objects.filter(**edition_lookup(request.COOKIES['course_uid'], 'course__')).order_by('max_equipiers', 'code')
         ]
     def queryset(self, request, queryset):
         if self.value():
@@ -1223,7 +1224,7 @@ class CourseAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(uid=course_uid)
+        qs = qs.filter(**edition_lookup(course_uid))
         if not request.user.is_superuser:
             qs = qs.filter(course__accreditations__user=request.user)
         return qs
@@ -1245,7 +1246,7 @@ class CourseAdmin(admin.ModelAdmin):
     def response_add(self, request, obj, post_url_continue=None):
         response = super().response_add(request, obj, post_url_continue=post_url_continue)
         response = HttpResponseRedirect('/course/')
-        response.set_cookie('course_uid', obj.uid)
+        response.set_cookie('course_uid', obj.key)
         response.set_cookie('course_id',  obj.id)
         response.set_cookie('course_nom', obj.nom)
         return response
@@ -1303,7 +1304,7 @@ class AccreditationAdmin(CourseFilteredObjectAdmin):
     def get_queryset(self, request):
         # les accreditations portent sur la Course ; le cookie designe une edition
         qs = admin.ModelAdmin.get_queryset(self, request)
-        qs = qs.filter(course__editions__uid=request.COOKIES['course_uid'])
+        qs = qs.filter(course__editions__in=Edition.objects.filter(**edition_lookup(request.COOKIES['course_uid'])))
         if not request.user.is_superuser:
             qs = qs.filter(course__accreditations__user=request.user)
         return qs.distinct()
@@ -1331,7 +1332,7 @@ class EquipeFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [
             (e.id, u'%s - %s - %s' % (e.numero, e.nom, e.categorie.code))
-            for e in Equipe.objects.select_related('categorie').filter(course__uid=request.COOKIES['course_uid']).order_by('numero')
+            for e in Equipe.objects.select_related('categorie').filter(**edition_lookup(request.COOKIES['course_uid'], 'course__')).order_by('numero')
         ]
     def queryset(self, request, queryset):
         if self.value():
@@ -1344,7 +1345,7 @@ class TemplateMailFilter(SimpleListFilter):
     def lookups(self, request, model_admin):
         return [('', _('Aucun'))] + [
             (t.id, t.nom)
-            for t in TemplateMail.objects.filter(course__uid=request.COOKIES['course_uid']).order_by('nom')
+            for t in TemplateMail.objects.filter(**edition_lookup(request.COOKIES['course_uid'], 'course__')).order_by('nom')
         ]
     def queryset(self, request, queryset):
         if self.value():
@@ -1419,7 +1420,7 @@ class PaiementAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         course_uid = request.COOKIES['course_uid']
-        qs = qs.filter(equipes__equipe__course__uid=course_uid).distinct()
+        qs = qs.filter(**edition_lookup(course_uid, 'equipes__equipe__course__')).distinct()
         if not request.user.is_superuser:
             qs = qs.filter(equipes__equipe__course__course__accreditations__user=request.user)
         qs = qs.prefetch_related(Prefetch('equipes', PaiementRepartition.objects.select_related('equipe', 'equipe__course', 'equipe__categorie')))
@@ -1471,7 +1472,7 @@ class PaiementAdmin(admin.ModelAdmin):
             return str(equipes[0].equipe)
         courses = defaultdict(lambda: [])
         for e in equipes:
-            courses[e.equipe.course.uid].append(str(e.equipe.numero))
+            courses[e.equipe.course.key].append(str(e.equipe.numero))
         if len(equipes) < 4:
             return ', '.join('%s: [%s]' % (uid, ', '.join(numeros)) for uid, numeros in courses.items())
         return str(len(equipes))

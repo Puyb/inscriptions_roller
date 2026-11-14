@@ -44,7 +44,7 @@ def login_organizer(client, course, role='admin', username=None):
 
 
 def set_course_cookie(client, course):
-    client.cookies['course_uid'] = course.uid
+    client.cookies['course_uid'] = course.key
     client.cookies['course_id'] = str(course.id)
 
 
@@ -152,7 +152,7 @@ class IsolationTestCase(AdminTestCase):
         stranger = User.objects.create_user('stranger', 's@example.com', 'x')
         e = self.equipe()
         request = RequestFactory().get(CHANGELIST)
-        request.COOKIES['course_uid'] = self.course.uid
+        request.COOKIES['course_uid'] = self.course.key
         request.user = stranger
         qs = EquipeAdmin(Equipe, course_site).get_queryset(request)
         self.assertNotIn(e.id, [x.id for x in qs])
@@ -228,9 +228,9 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_course_setter_sets_cookies(self):
         self.client.cookies.clear()
-        r = self.client.get('/%s/admin/' % self.course.uid)
+        r = self.client.get('/%s/admin/' % self.course.key)
         self.assertEqual(r.status_code, 302)
-        self.assertEqual(r.cookies['course_uid'].value, self.course.uid)
+        self.assertEqual(r.cookies['course_uid'].value, self.course.key)
         self.assertEqual(r.cookies['course_id'].value, str(self.course.id))
 
     def test_ask_list_excludes_already_requested_courses(self):
@@ -241,7 +241,7 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_ask_creates_pending_accreditation_and_notifies_organizer(self):
         with mock.patch('inscriptions.admin_course.send_mail') as sm:
-            r = self.client.get('/course/ask/%s/' % self.other_course.uid)
+            r = self.client.get('/course/ask/%s/' % self.other_course.key)
         self.assertEqual(r.status_code, 302)
         acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         self.assertEqual(acc.role, '')
@@ -250,7 +250,7 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_pending_accreditation_still_does_not_grant_access(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.uid)
+            self.client.get('/course/ask/%s/' % self.other_course.key)
         e = self.equipe(course=self.other_course, categorie=self.other_cat)
         set_course_cookie(self.client, self.other_course)
         r = self.client.get(CHANGELIST)
@@ -263,20 +263,20 @@ class CourseChooseAskTestCase(AdminTestCase):
 
     def test_demandes_listed_in_ask_page(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.uid)
+            self.client.get('/course/ask/%s/' % self.other_course.key)
         r = self.client.get('/course/ask/')
         self.assertIn(self.other_course, list(r.context['demandes']))
 
     def test_ask_twice_for_same_course_is_handled(self):
         """unique_together(user, course) : une seconde demande ne doit pas provoquer de 500."""
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.uid)
-            r = self.client.get('/course/ask/%s/' % self.other_course.uid)
+            self.client.get('/course/ask/%s/' % self.other_course.key)
+            r = self.client.get('/course/ask/%s/' % self.other_course.key)
         self.assertLess(r.status_code, 500)
 
     def test_accreditation_granted_sends_mail_to_user(self):
         with mock.patch('inscriptions.admin_course.send_mail'):
-            self.client.get('/course/ask/%s/' % self.other_course.uid)
+            self.client.get('/course/ask/%s/' % self.other_course.key)
         acc = Accreditation.objects.get(user=self.user, course=self.other_course.course)
         with mock.patch('inscriptions.models.send_mail') as sm:
             acc.role = 'admin'
@@ -325,7 +325,7 @@ class FiltersTestCase(AdminTestCase):
         duo = self.equipe(categorie=other_cat)
         self.assertEqual(self.ids_for(categorie='DUO') & {solo.id, duo.id}, {duo.id})
         request = RequestFactory().get(CHANGELIST)
-        request.COOKIES['course_uid'] = self.course.uid
+        request.COOKIES['course_uid'] = self.course.key
         f = CategorieFilter(request, {}, Equipe, EquipeAdmin(Equipe, course_site))
         codes = [code for code, label in f.lookup_choices]
         self.assertIn('SOLO', codes)
@@ -708,7 +708,7 @@ class EquipeSendAdminMailTestCase(BaseTestCase):
             'nom': 'Martin', 'prenom': 'Luc', 'sexe': 'H', 'justificatif': 'certificat',
             'date_de_naissance': date(1990, 1, 1)}]))
         with mock.patch('inscriptions.models.send_mail'):
-            self.client.post('/reg/', data)
+            self.client.post('/reg/reg/', data)
         self.assertEqual(Mail.objects.filter(destinataires=['orga2@example.com']).count(), 1)
 
 
@@ -852,7 +852,7 @@ class TrackingTestCase(BaseTestCase):
         self.assertIsNotNone(self.mail.read)
 
     def test_any_page_with_message_id_marks_read(self):
-        r = self.client.get('/%s/' % self.course.uid, {'message_id': 'trk1@example.com'})
+        r = self.client.get('/%s/' % self.course.key, {'message_id': 'trk1@example.com'})
         self.assertLess(r.status_code, 500)
         self.mail.refresh_from_db()
         self.assertIsNotNone(self.mail.read)

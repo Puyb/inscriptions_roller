@@ -25,7 +25,7 @@
         {% for d in data %}
         color = colors.shift();
         dataset = {
-            label: '{{ d.course.uid }}',
+            label: '{{ d.course.key }}',
             fill: false,
             backgroundColor: color,
             borderColor: color,
@@ -56,7 +56,7 @@
         console.log(labels);
         const offsets = {};
         {% for d in data %}
-        offsets['{{ d.course.uid }}'] = {
+        offsets['{{ d.course.key }}'] = {
             date: new Date({{ d.course.date_ouverture.year }}, {{ d.course.date_ouverture.month }} - 1, {{ d.course.date_ouverture.day }} + min - {{ d.delta }}),
         };
         {% endfor %}

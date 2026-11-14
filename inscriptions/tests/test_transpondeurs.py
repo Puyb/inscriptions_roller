@@ -27,7 +27,7 @@ def login_as_organizer(client, course, role='admin'):
     )
     Accreditation.objects.create(user=user, course=course.course, role=role)
     client.force_login(user)
-    client.cookies['course_uid'] = course.uid
+    client.cookies['course_uid'] = course.key
     client.cookies['course_id'] = str(course.id)
     return user
 
@@ -265,7 +265,7 @@ class TranspondeurAccessTestCase(BaseTestCase):
         self.course = CourseFactory()
 
     def test_anonymous_user_is_redirected_to_login(self):
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         response = self.client.get('/course/inscriptions/transpondeur/')
         self.assertEqual(response.status_code, 302)
 
@@ -274,7 +274,7 @@ class TranspondeurAccessTestCase(BaseTestCase):
         # the same as "not logged in": redirect_to_login(), not a 403.
         user = User.objects.create_user('outsider', 'outsider@example.com', 'pass1234')
         self.client.force_login(user)
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         response = self.client.get('/course/inscriptions/transpondeur/')
         self.assertEqual(response.status_code, 302)
         self.assertIn('/course/login/', response.url)
@@ -332,7 +332,7 @@ class TranspondeursCSVExportTestCase(BaseTestCase):
         self.course = CourseFactory()
 
     def csv_rows(self):
-        response = self.client.get('/%s/transpondeurs.csv' % self.course.uid)
+        response = self.client.get('/%s/transpondeurs.csv' % self.course.key)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/csv')
         lines = response.content.decode('utf-8').splitlines()
@@ -392,9 +392,9 @@ class DashboardTranspondeursCSVIconTestCase(BaseTestCase):
 
     def test_icon_hidden_when_no_transpondeurs(self):
         response = self.client.get('/course/')
-        self.assertNotContains(response, '/%s/transpondeurs.csv' % self.course.uid)
+        self.assertNotContains(response, '/%s/transpondeurs.csv' % self.course.key)
 
     def test_icon_shown_when_transpondeurs_exist(self):
         Transpondeur.objects.create(course=self.course, ordre=1, numero='T1')
         response = self.client.get('/course/')
-        self.assertContains(response, '/%s/transpondeurs.csv' % self.course.uid)
+        self.assertContains(response, '/%s/transpondeurs.csv' % self.course.key)

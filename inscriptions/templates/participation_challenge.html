@@ -50,7 +50,7 @@
                 <th>{% trans "Temps" %}</th>
                 {% if challenge.mode == 'nord2018' %}<th>Distance</th>{% endif %}
                 {% if request.user.is_superuser %}<th>Actions</th>{% endif %}
-            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.uid %}
+            </tr>{% for c in challenge.courses.all %}{% with e=participation.equipes_dict|get:c.key %}
             <tr>
                 <th>{{ c.nom }}</th>
                 <td title="{{ e.equipe.nom }}">{{ e.equipe.numero|default_if_none:"" }}</td>
@@ -61,7 +61,7 @@
                 <td>{{ e.equipe.tours|default_if_none:"" }}</td>
                 <td>{{ e.equipe.temps_humain|default_if_none:"" }}</td>
                 {% if challenge.mode == 'nord2018' %}<td>{{ e.equipe.distance|default_if_none:"" }}</td>{% endif %}
-                {% if request.user.is_superuser %}<td>{% if e %}<button class="action-move" data-course="{{ c.uid }}">Déplacer</button>{% endif %}</td>{% endif %}
+                {% if request.user.is_superuser %}<td>{% if e %}<button class="action-move" data-course="{{ c.key }}">Déplacer</button>{% endif %}</td>{% endif %}
             </tr>{% endwith %}{% endfor %}
         </table>
     </div>
@@ -73,7 +73,7 @@
             <tr>
                 <th>{% trans "Équipier" %}</th>
                 {% for c in challenge.courses.all %}
-                <th>{{ c.uid }}</th>
+                <th>{{ c.key }}</th>
                 {% endfor %}
             </tr>{% for e in participation.equipiers.all %}
             <tr>

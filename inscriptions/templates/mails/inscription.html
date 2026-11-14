@@ -3,7 +3,7 @@
 <p>Bonjour, {{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br /> Votre &eacute;quipe <strong>{{ instance.nom }}</strong> est inscrite aux {{ instance.course.nom }}, le {{ instance.course.date }}, sous r&eacute;serve de la r&eacute;ception et de la validation du paiement et des justificatifs.</p>
 {% if not instance.paiement_complet %}
     <p>Pour r&eacute;gler votre inscription vous pouvez 
-    {% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">payer par internet</a> ou
+    {% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.key numero=instance.numero %}">payer par internet</a> ou
     {% endif %}envoyer un ch&egrave;que de {{ instance.prix }} &euro; &agrave; l'ordre de "{{ instance.course.ordre }}".</p>
 {% else %}
     <p>Votre paiement de {{ instance.montant_paiements }} &euro; &agrave; bien &eacute;t&eacute; re&ccedil;u.</p>
@@ -17,7 +17,7 @@
     </ul>
 {% endif %}
 {% if instance.certificat_manquantes %}
-<p>Il manque les certificats m&eacute;dicaux de (<a href="{{ ROOT_URL }}{% url "inscriptions_model_autorisation" course_uid=instance.course.uid %}" target="_blank">mod&egrave;le</a>):</p>
+<p>Il manque les certificats m&eacute;dicaux de (<a href="{{ ROOT_URL }}{% url "inscriptions_model_autorisation" course_uid=instance.course.key %}" target="_blank">mod&egrave;le</a>):</p>
     <ul>
         {% for e in instance.certificat_manquantes %}
             <li>{{ e.prenom }} {{ e.nom }}</li>
@@ -25,7 +25,7 @@
     </ul>
 {% endif %}
 {% if instance.autorisation_manquantes %}
-    <p>Il manque les autorisations parentales (<a href="{{ ROOT_URL }}{% url "inscriptions_model_certificat" course_uid=instance.course.uid %}" target="_blank">mod&egrave;le</a>) :</p>
+    <p>Il manque les autorisations parentales (<a href="{{ ROOT_URL }}{% url "inscriptions_model_certificat" course_uid=instance.course.key %}" target="_blank">mod&egrave;le</a>) :</p>
     <ul>
         {% for e in instance.autorisation_manquantes %}
             <li>{{ e.prenom }} {{ e.nom }}</li>
@@ -38,14 +38,14 @@
     <p>En pr&eacute;cisant le nom de votre &eacute;quipe et le num&eacute;ro d'inscription <strong>{{ instance.numero }}</strong>.</p>
 {% endif %}
 <p>Nous vous tiendrons au courant d&egrave;s que votre inscription sera d&eacute;finitive.</p>
-<p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">cliquant ici</a>.</p>
+<p>Si vous souhaitez modifier une information ou joindre une licence ou un certificat m&eacute;dical manquant, vous pouvez le faire en <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.key numero=instance.numero code=instance.password %}">cliquant ici</a>.</p>
 <p>--<br />{{ instance.course.organisateur }}</p>
 <hr />
 <h1>Thank for registering at {{ instance.course.nom }}</h1>
 <p>Hi,{{ instance.gerant_prenom }} {{ instance.gerant_nom }}<br />
 <p>Your team <strong>{{ instance.nom }}</strong> is booked to the{{ instance.course.nom }}, on {{ instance.course.date }} under condition of good reception and validation of your paiment and justificatives.</p>
 {% if not instance.paiement_complet %}
-    <p>You can pay your registration {% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.uid numero=instance.numero %}">online</a> or {% endif %}send a &euro; {{ instance.prix }} check payable to "{{ instance.course.ordre }}".</p>
+    <p>You can pay your registration {% if instance.course.stripe_public or instance.course.paypal %}<a href="{{ ROOT_URL }}{% url "inscriptions_done" course_uid=instance.course.key numero=instance.numero %}">online</a> or {% endif %}send a &euro; {{ instance.prix }} check payable to "{{ instance.course.ordre }}".</p>
 {% else %}
     <p>Your payment of &euro; {{ instance.montant_paiements }} was received.</p>
 {% endif %}
@@ -79,5 +79,5 @@
     <p>Specifying the name of your team and the registration number <strong>{{ instance.numero }}</strong>.</p>
 {% endif %}
 <p>You'll be informed as soon your registration is complete.</p>
-<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.uid numero=instance.numero code=instance.password %}">clicking here</a>.</p>
+<p>If you wan't to modify an information or add a missing justificative, you can do it by <a href="{{ ROOT_URL }}{% url "inscriptions_edit" course_uid=instance.course.key numero=instance.numero code=instance.password %}">clicking here</a>.</p>
 <p>--<br />{{ instance.course.organisateur }}</p>

@@ -33,7 +33,7 @@ class StripeWebhookTestCase(BaseTestCase):
     def _post(self, event):
         with mock.patch('stripe.Webhook.construct_event', return_value=event):
             return self.client.post(
-                '/%s/stripe/webhook/' % self.course.uid,
+                '/%s/stripe/webhook/' % self.course.key,
                 data='{}', content_type='application/json',
                 HTTP_STRIPE_SIGNATURE='irrelevant-because-mocked',
             )
@@ -41,7 +41,7 @@ class StripeWebhookTestCase(BaseTestCase):
     def test_invalid_signature_is_rejected(self):
         with mock.patch('stripe.Webhook.construct_event', side_effect=stripe.SignatureVerificationError('bad sig', 'sig_header')):
             response = self.client.post(
-                '/%s/stripe/webhook/' % self.course.uid,
+                '/%s/stripe/webhook/' % self.course.key,
                 data='{}', content_type='application/json',
                 HTTP_STRIPE_SIGNATURE='wrong',
             )
@@ -82,7 +82,7 @@ class HelloAssoWebhookTestCase(BaseTestCase):
 
     def _post(self, body):
         return self.client.post(
-            '/%s/helloasso/webhook/' % self.course.uid,
+            '/%s/helloasso/webhook/' % self.course.key,
             data=json.dumps(body), content_type='application/json',
         )
 
@@ -128,7 +128,7 @@ class PaypalIpnTestCase(BaseTestCase):
         }
         data.update(overrides)
         with mock.patch('inscriptions.views.confirm_ipn_data', return_value=True):
-            return self.client.post('/%s/ipn/' % self.course.uid, data)
+            return self.client.post('/%s/ipn/' % self.course.key, data)
 
     def test_completed_payment_creates_a_paiement(self):
         response = self._post()
@@ -143,7 +143,7 @@ class PaypalIpnTestCase(BaseTestCase):
 
     def test_rejected_ipn_signature_is_ignored(self):
         with mock.patch('inscriptions.views.confirm_ipn_data', return_value=False):
-            self.client.post('/%s/ipn/' % self.course.uid, {
+            self.client.post('/%s/ipn/' % self.course.key, {
                 'payment_status': 'Completed',
                 'invoice': '%sXXXX' % self.equipe.id,
                 'mc_gross': '70.00',

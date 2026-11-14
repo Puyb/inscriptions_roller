@@ -64,7 +64,7 @@ class EquipeListTestCase(BaseTestCase):
         self.e1 = EquipeFactory(course=self.course, categorie=self.cat_a, nom='Zebres', club='Club Z')
         self.e2 = EquipeFactory(course=self.course, categorie=self.cat_b, nom='Alpagas', club='Club A')
         self.e3 = EquipeFactory(course=self.course, categorie=self.cat_a, nom='Mouettes', club='Club M')
-        self.url = reverse('inscriptions_list', kwargs={'course_uid': 'list'})
+        self.url = reverse('inscriptions_list', kwargs={'course_uid': 'list/list'})
 
     def names(self, response):
         return [e.nom for e in response.context['equipes']]
@@ -137,7 +137,7 @@ class EquipeListTestCase(BaseTestCase):
     def test_unknown_course_is_404(self):
         # BUG: no `get_object_or_404` on the course: the template is rendered
         # without `COURSE` and crashes (HTTP 500) instead of returning 404.
-        response = self.client.get(reverse('inscriptions_list', kwargs={'course_uid': 'nope'}))
+        response = self.client.get(reverse('inscriptions_list', kwargs={'course_uid': 'nope/nope'}))
         self.assertEqual(response.status_code, 404)
 
     def test_staff_with_accreditation_sees_payment_stats(self):
@@ -169,7 +169,7 @@ class StatsTestCase(BaseTestCase):
         EquipierFactory(equipe=equipe, numero=1)
 
     def test_stats_page(self):
-        response = self.client.get(reverse('inscriptions_stats', kwargs={'course_uid': 'stats1'}))
+        response = self.client.get(reverse('inscriptions_stats', kwargs={'course_uid': 'stats1/stats1'}))
         self.assertEqual(response.status_code, 200)
         self.assertIn('stats.html', template_names(response))
         self.assertEqual(response.context['course'], self.course)
@@ -178,7 +178,7 @@ class StatsTestCase(BaseTestCase):
         self.assertEqual(json.loads(response.context['json'])['course']['equipes'], 1)
 
     def test_stats_unknown_course_is_404(self):
-        response = self.client.get(reverse('inscriptions_stats', kwargs={'course_uid': 'nope'}))
+        response = self.client.get(reverse('inscriptions_stats', kwargs={'course_uid': 'nope/nope'}))
         self.assertEqual(response.status_code, 404)
 
     def _other_course(self, uid='stats2', **kw):
@@ -194,7 +194,7 @@ class StatsTestCase(BaseTestCase):
 
     def test_stats_compare(self):
         self._other_course()
-        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1', 'course_uid2': 'stats2'})
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1/stats1', 'course_uid2': 'stats2/stats2'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertIn('stats_compare.html', template_names(response))
@@ -206,7 +206,7 @@ class StatsTestCase(BaseTestCase):
 
     def test_stats_compare_align_start_and_augment(self):
         self._other_course()
-        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1', 'course_uid2': 'stats2'})
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1/stats1', 'course_uid2': 'stats2/stats2'})
         response = self.client.get(url, {'align': 'start'})
         self.assertEqual([d['delta'] for d in response.context['data']], [0, 0])
         response = self.client.get(url, {'align': 'augment'})
@@ -215,9 +215,9 @@ class StatsTestCase(BaseTestCase):
         self.assertEqual(response.context['data'][0]['delta'], 0)
 
     def test_stats_compare_unknown_course_is_404(self):
-        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1', 'course_uid2': 'nope'})
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1/stats1', 'course_uid2': 'nope/nope'})
         self.assertEqual(self.client.get(url).status_code, 404)
-        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'nope', 'course_uid2': 'stats1'})
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'nope/nope', 'course_uid2': 'stats1/stats1'})
         self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_stats_compare_course_without_augmentation_date(self):
@@ -225,7 +225,7 @@ class StatsTestCase(BaseTestCase):
         # the field defaults to `[]` -> IndexError (HTTP 500) for any course
         # without a price increase date.
         CourseFactory(uid='noaug')
-        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1', 'course_uid2': 'noaug'})
+        url = reverse('inscriptions_stats_compare', kwargs={'course_uid': 'stats1/stats1', 'course_uid2': 'noaug/noaug'})
         self.assertEqual(self.client.get(url).status_code, 200)
 
 
@@ -235,7 +235,7 @@ class CategoriesTestCase(BaseTestCase):
         CategorieFactory(course=course, code='GRD', nom='Grand', min_equipiers=4, max_equipiers=6)
         CategorieFactory(course=course, code='SOL', nom='Solo', min_equipiers=1, max_equipiers=1)
         CategorieFactory(nom='Categorie Autre Course')
-        response = self.client.get(reverse('categories', kwargs={'course_uid': 'cats'}))
+        response = self.client.get(reverse('categories', kwargs={'course_uid': 'cats/cats'}))
         self.assertEqual(response.status_code, 200)
         self.assertIn('categories.html', template_names(response))
         self.assertEqual(response.context['course'], course)
@@ -245,7 +245,7 @@ class CategoriesTestCase(BaseTestCase):
         self.assertIn('mixite_choices', response.context)
 
     def test_unknown_course_is_404(self):
-        self.assertEqual(self.client.get(reverse('categories', kwargs={'course_uid': 'nope'})).status_code, 404)
+        self.assertEqual(self.client.get(reverse('categories', kwargs={'course_uid': 'nope/nope'})).status_code, 404)
 
 
 class CheckNameTestCase(BaseTestCase):
@@ -254,7 +254,7 @@ class CheckNameTestCase(BaseTestCase):
         self.course = CourseFactory(uid='chk')
         self.equipe = EquipeFactory(course=self.course, nom='Les Rapides',
                                     categorie=CategorieFactory(course=self.course))
-        self.url = reverse('inscriptions_check_name', kwargs={'course_uid': 'chk'})
+        self.url = reverse('inscriptions_check_name', kwargs={'course_uid': 'chk/chk'})
 
     def test_counts_same_name_case_insensitive(self):
         response = self.client.post(self.url, {'nom': 'les rapides', 'id': '0'})
@@ -292,7 +292,7 @@ class ChangeTestCase(BaseTestCase):
         self.cat = CategorieFactory(course=self.course, numero_debut=1)
         self.e1 = EquipeFactory(course=self.course, categorie=self.cat, nom='Premiers')
         self.e2 = EquipeFactory(course=self.course, categorie=self.cat, nom='Seconds')
-        self.url = reverse('inscriptions_change', kwargs={'course_uid': 'chg'})
+        self.url = reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg'})
 
     def test_list_of_teams(self):
         response = self.client.get(self.url)
@@ -304,38 +304,38 @@ class ChangeTestCase(BaseTestCase):
         self.assertNotContains(response, 'Un email vient de vous être envoyé')
 
     def test_sent_variant_shows_notice(self):
-        response = self.client.get('/chg/change/sent/')
+        response = self.client.get('/chg/chg/change/sent/')
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context['sent'])
         self.assertContains(response, 'Un email vient de vous être envoyé')
 
     def test_question_page(self):
-        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': self.e1.numero}))
+        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': self.e1.numero}))
         self.assertEqual(response.status_code, 200)
         self.assertIn('change_numero.html', template_names(response))
         self.assertEqual(response.context['equipe'], self.e1)
 
     def test_unknown_numero_is_404(self):
-        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': 9999}))
+        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': 9999}))
         self.assertEqual(response.status_code, 404)
 
     def test_numero_of_other_course_is_404(self):
         other_cat = CategorieFactory(numero_debut=500, numero_fin=599)
         other = EquipeFactory(course=other_cat.course, categorie=other_cat)
         self.assertEqual(other.numero, 500)
-        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': 500}))
+        response = self.client.get(reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': 500}))
         self.assertEqual(response.status_code, 404)
 
     def test_wrong_answer_sends_nothing(self):
         with mock.patch('inscriptions.models.Equipe.send_mail') as send_mail:
             response = self.client.post(
-                reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': self.e1.numero}),
+                reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': self.e1.numero}),
                 {'question': '8'})
         self.assertEqual(response.status_code, 200)
         send_mail.assert_not_called()
 
     def test_right_answer_sends_change_request_mail(self):
-        url = reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': self.e1.numero})
+        url = reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': self.e1.numero})
         # the redirect afterwards is broken (see next test): don't let it
         # hide the part under test here
         with mock.patch('inscriptions.models.Equipe.send_mail') as send_mail:
@@ -349,22 +349,22 @@ class ChangeTestCase(BaseTestCase):
         # BUG: the view redirects to the URL name 'inscriptions_change_sent'
         # but urls.py registers it as 'inscriptions.change_sent' (dot) ->
         # NoReverseMatch (500) after the mail was sent.
-        url = reverse('inscriptions_change', kwargs={'course_uid': 'chg', 'numero': self.e1.numero})
+        url = reverse('inscriptions_change', kwargs={'course_uid': 'chg/chg', 'numero': self.e1.numero})
         with mock.patch('inscriptions.models.Equipe.send_mail'):
             response = self.client.post(url, {'question': '7'})
-        self.assertRedirects(response, '/chg/change/sent/', fetch_redirect_response=False)
+        self.assertRedirects(response, '/chg/chg/change/sent/', fetch_redirect_response=False)
 
 
 class StaticishPagesTestCase(BaseTestCase):
     def test_model_certificat_redirects_to_pdf(self):
         course = CourseFactory(uid='cert')
-        response = self.client.get(reverse('inscriptions_model_certificat', kwargs={'course_uid': course.uid}))
+        response = self.client.get(reverse('inscriptions_model_certificat', kwargs={'course_uid': course.key}))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response['Location'].endswith('certificat_medical.pdf'))
 
     def test_model_autorisation(self):
         CourseFactory(uid='auto')
-        response = self.client.get(reverse('inscriptions_model_autorisation', kwargs={'course_uid': 'auto'}))
+        response = self.client.get(reverse('inscriptions_model_autorisation', kwargs={'course_uid': 'auto/auto'}))
         self.assertEqual(response.status_code, 200)
         self.assertIn('autorisation.html', template_names(response))
 
@@ -417,7 +417,7 @@ class FindChallengesCategoriesTestCase(BaseTestCase):
             challenge=self.challenge, nom='Solo Homme', code='CSOLOH',
             min_equipiers=1, max_equipiers=1, min_age=18, sexe='H', validation='')
         self.cc.categories.add(self.cat)
-        self.url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fcc'})
+        self.url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fcc/fcc'})
 
     def _post_data(self, **kw):
         data = equipier_formset_data([{
@@ -431,19 +431,19 @@ class FindChallengesCategoriesTestCase(BaseTestCase):
         self.assertEqual(self.client.get(self.url).status_code, 405)
 
     def test_unknown_course_is_404(self):
-        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'nope'})
+        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'nope/nope'})
         self.assertEqual(self.client.post(url, self._post_data()).status_code, 404)
 
     def test_closed_course_shows_closed_page_to_anonymous(self):
         CourseFactory(uid='fccclosed', date_fermeture=date.today() - timedelta(days=1))
-        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fccclosed'})
+        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fccclosed/fccclosed'})
         response = self.client.post(url, self._post_data())
         self.assertEqual(response.status_code, 200)
         self.assertIn('closed.html', template_names(response))
 
     def test_not_yet_open_course(self):
         CourseFactory(uid='fccfuture', date_ouverture=date.today() + timedelta(days=5))
-        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fccfuture'})
+        url = reverse('inscriptions_find_challenges_categories', kwargs={'course_uid': 'fccfuture/fccfuture'})
         response = self.client.post(url, self._post_data())
         self.assertIn('not_opened_yet.html', template_names(response))
 
@@ -605,7 +605,7 @@ class ChallengeViewsTestCase(BaseTestCase):
     def test_challenge_participation_post_ignored_for_non_superuser(self):
         url = reverse('inscriptions_challenge_participation',
                       kwargs={'challenge_uid': 'grandchal', 'participation_id': self.p_dupont.id})
-        response = self.client.post(url, {'course_uid': 'cha', 'participation': ''})
+        response = self.client.post(url, {'course_uid': 'cha/cha', 'participation': ''})
         self.assertEqual(response.status_code, 200)  # falls through to the read-only page
         self.assertEqual(self.p_dupont.equipes.count(), 2)
 
@@ -616,7 +616,7 @@ class ChallengeViewsTestCase(BaseTestCase):
         lonely = ParticipationChallenge.objects.create(challenge=self.challenge, nom='Equipe Dupond', categorie=self.cc)
         lonely.add_equipe(self._solo(self.course_b, self.cat_b, 'Dupond', 'Equipe Dupond', position=3))
         url = reverse('inscriptions_get_participations_to_move', kwargs={
-            'challenge_uid': 'grandchal', 'participation_id': self.p_dupont.id, 'course_uid': 'cha'})
+            'challenge_uid': 'grandchal', 'participation_id': self.p_dupont.id, 'course_uid': 'cha/cha'})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertIn('selection_participation.html', template_names(response))
@@ -626,7 +626,7 @@ class ChallengeViewsTestCase(BaseTestCase):
         self.assertEqual(ids, [lonely.id])  # not itself, not Martin (already in "cha")
 
     def test_get_participations_to_move_unknown_objects_are_404(self):
-        base = {'challenge_uid': 'grandchal', 'participation_id': self.p_dupont.id, 'course_uid': 'cha'}
-        for key, value in (('challenge_uid', 'nope'), ('participation_id', 999999), ('course_uid', 'nope')):
+        base = {'challenge_uid': 'grandchal', 'participation_id': self.p_dupont.id, 'course_uid': 'cha/cha'}
+        for key, value in (('challenge_uid', 'nope'), ('participation_id', 999999), ('course_uid', 'nope/nope')):
             url = reverse('inscriptions_get_participations_to_move', kwargs=dict(base, **{key: value}))
             self.assertEqual(self.client.get(url).status_code, 404, key)

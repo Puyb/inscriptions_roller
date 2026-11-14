@@ -20,7 +20,7 @@ def login_as_organizer(client, course):
     )
     Accreditation.objects.create(user=user, course=course.course, role='admin')
     client.force_login(user)
-    client.cookies['course_uid'] = course.uid
+    client.cookies['course_uid'] = course.key
     client.cookies['course_id'] = str(course.id)
     return user
 
@@ -106,7 +106,7 @@ class EquipeResultsMethodsTestCase(ResultsTestCase):
 
 class PublicResultatsTestCase(ResultsTestCase):
     def url(self, **kw):
-        return reverse('inscriptions_resultats', kwargs={'course_uid': self.course.uid})
+        return reverse('inscriptions_resultats', kwargs={'course_uid': self.course.key})
 
     def test_only_teams_with_position_listed_ordered_by_position(self):
         e2 = EquipeFactory(course=self.course, categorie=self.cat, nom='Second',
@@ -167,15 +167,15 @@ class PublicResultatsEquipeTestCase(ResultsTestCase):
             position_generale=3, position_categorie=2, tours=10, penalite=-2,
             penalite_info='Depassement', temps=Decimal('3725'))
         self.url = reverse('inscriptions_resultats_equipe',
-                           kwargs={'course_uid': self.course.uid, 'numero': self.equipe.numero})
+                           kwargs={'course_uid': self.course.key, 'numero': self.equipe.numero})
 
     def test_404_unknown_numero_or_other_course(self):
         url = reverse('inscriptions_resultats_equipe',
-                      kwargs={'course_uid': self.course.uid, 'numero': 9999})
+                      kwargs={'course_uid': self.course.key, 'numero': 9999})
         self.assertEqual(self.client.get(url).status_code, 404)
         other = CourseFactory()
         url = reverse('inscriptions_resultats_equipe',
-                      kwargs={'course_uid': other.uid, 'numero': self.equipe.numero})
+                      kwargs={'course_uid': other.key, 'numero': self.equipe.numero})
         self.assertEqual(self.client.get(url).status_code, 404)
 
     def test_summary_without_tours(self):
@@ -255,7 +255,7 @@ class AdminResultatsImportTestCase(ResultsTestCase):
         self.assertEqual(response.status_code, 302)
         stranger = User.objects.create_user('x', 'x@example.com', 'pass1234', is_staff=True)
         self.client.force_login(stranger)
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         self.assertNotEqual(self.client.get(self.url).status_code, 200)
 
     def test_get_shows_form(self):

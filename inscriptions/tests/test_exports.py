@@ -21,7 +21,7 @@ def login_as_organizer(client, course, username='orga'):
     user = User.objects.create_user(username, username + '@example.com', 'pass1234')
     Accreditation.objects.create(user=user, course=course.course, role='admin')
     client.force_login(user)
-    client.cookies['course_uid'] = course.uid
+    client.cookies['course_uid'] = course.key
     client.cookies['course_id'] = str(course.id)
     return user
 
@@ -58,7 +58,7 @@ class DossardsCSVTestCase(ExportBaseTestCase):
                              date_de_naissance=date(1985, 3, 4), num_licence='L123')
         q2 = EquipierFactory(equipe=e1, numero=2, nom='Petit', prenom='Paul')
 
-        response = self.client.get('/%s/dossards.csv' % self.course.uid)
+        response = self.client.get('/%s/dossards.csv' % self.course.key)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/csv')
@@ -82,18 +82,18 @@ class DossardsCSVTestCase(ExportBaseTestCase):
         EquipierFactory(equipe=EquipeFactory(course=other, categorie=other_cat), numero=1, nom='Autre')
         EquipierFactory(equipe=EquipeFactory(course=self.course, categorie=self.categorie), numero=1, nom='Ici')
 
-        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.uid))
+        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.key))
         self.assertEqual([r[4] for r in rows[1:]], ['Ici'])
 
     def test_header_only_when_no_equipier(self):
-        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.uid))
+        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.key))
         self.assertEqual(len(rows), 1)
 
     def test_encoding_parameter_and_non_ascii(self):
         equipe = EquipeFactory(course=self.course, categorie=self.categorie, nom='Équipe Été')
         EquipierFactory(equipe=equipe, numero=1, nom='Müller', prenom='Zoë')
 
-        response = self.client.get('/%s/dossards.csv?code=iso-8859-1' % self.course.uid)
+        response = self.client.get('/%s/dossards.csv?code=iso-8859-1' % self.course.key)
         # NB: le charset n'est pas annoncé dans Content-Type (content_type explicite écrase charset=)
         rows = parse_csv(response, 'iso-8859-1')
         self.assertEqual(rows[1][1], 'Équipe Été')
@@ -101,7 +101,7 @@ class DossardsCSVTestCase(ExportBaseTestCase):
         with self.assertRaises(UnicodeDecodeError):
             response.content.decode('utf-8')
 
-        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.uid))
+        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.key))
         self.assertEqual(rows[1][4:6], ['Müller', 'Zoë'])
 
     def test_equipiers_beyond_team_size_are_not_exported(self):
@@ -111,7 +111,7 @@ class DossardsCSVTestCase(ExportBaseTestCase):
         EquipierFactory(equipe=equipe, numero=1, nom='Actif')
         EquipierFactory(equipe=equipe, numero=2, nom='Reste')
 
-        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.uid))
+        rows = parse_csv(self.client.get('/%s/dossards.csv' % self.course.key))
         self.assertEqual([r[4] for r in rows[1:]], ['Actif'])
 
 
@@ -129,7 +129,7 @@ class DossardsEquipesCSVTestCase(ExportBaseTestCase):
         other = CourseFactory()
         EquipeFactory(course=other, categorie=CategorieFactory(course=other), nom='Intruse')
 
-        response = self.client.get('/%s/dossards_equipes.csv' % self.course.uid)
+        response = self.client.get('/%s/dossards_equipes.csv' % self.course.key)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/csv')
@@ -147,7 +147,7 @@ class DossardsEquipesCSVTestCase(ExportBaseTestCase):
 
     def test_encoding_parameter(self):
         EquipeFactory(course=self.course, categorie=self.categorie, nom='Été')
-        rows = parse_csv(self.client.get('/%s/dossards_equipes.csv?code=cp1252' % self.course.uid), 'cp1252')
+        rows = parse_csv(self.client.get('/%s/dossards_equipes.csv?code=cp1252' % self.course.key), 'cp1252')
         self.assertEqual(rows[1][1], 'Été')
 
 
@@ -162,7 +162,7 @@ class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
                              date_de_naissance=date(1985, 3, 4), num_licence='L123')
         q2 = EquipierFactory(equipe=e1, numero=2, nom='Petit', prenom='Paul')
 
-        response = self.client.get('/%s/dossards_equipiers.csv' % self.course.uid)
+        response = self.client.get('/%s/dossards_equipiers.csv' % self.course.key)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response['Content-Type'], 'text/csv')
@@ -181,7 +181,7 @@ class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
                         numero=1, nom='Autre')
         EquipierFactory(equipe=EquipeFactory(course=self.course, categorie=self.categorie),
                         numero=1, nom='Gaëtan')
-        response = self.client.get('/%s/dossards_equipiers.csv?code=iso-8859-1' % self.course.uid)
+        response = self.client.get('/%s/dossards_equipiers.csv?code=iso-8859-1' % self.course.key)
         rows = parse_csv(response, 'iso-8859-1')
         self.assertEqual([r[2] for r in rows[1:]], ['Gaëtan'])
 
@@ -189,7 +189,7 @@ class DossardsEquipiersCSVTestCase(ExportBaseTestCase):
         equipe = EquipeFactory(course=self.course, categorie=self.categorie, nombre=1)
         EquipierFactory(equipe=equipe, numero=1, nom='Actif')
         EquipierFactory(equipe=equipe, numero=2, nom='Reste')
-        rows = parse_csv(self.client.get('/%s/dossards_equipiers.csv' % self.course.uid))
+        rows = parse_csv(self.client.get('/%s/dossards_equipiers.csv' % self.course.key))
         self.assertEqual([r[2] for r in rows[1:]], ['Actif'])
 
 
@@ -206,7 +206,7 @@ class PersonalDataExportAccessTestCase(ExportBaseTestCase):
         EquipierFactory(equipe=equipe, numero=1, nom='Secret')
 
     def url(self, path):
-        return '/%s/%s' % (self.course.uid, path)
+        return '/%s/%s' % (self.course.key, path)
 
     def test_anonymous_is_redirected_to_login(self):
         for path in self.PATHS:
@@ -261,7 +261,7 @@ class EquipiersPageTestCase(ExportBaseTestCase):
         EquipierFactory(equipe=EquipeFactory(course=other, categorie=CategorieFactory(course=other)),
                         numero=1, nom='Ailleurs')
 
-        response = self.client.get('/%s/equipiers/' % self.course.uid)
+        response = self.client.get('/%s/equipiers/' % self.course.key)
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Dupuis')
@@ -269,12 +269,12 @@ class EquipiersPageTestCase(ExportBaseTestCase):
         self.assertNotContains(response, 'Ailleurs')
 
     def test_unknown_course_is_404(self):
-        self.assertEqual(self.client.get('/nope/equipiers/').status_code, 404)
+        self.assertEqual(self.client.get('/nope/nope/equipiers/').status_code, 404)
 
 
 class ListingViewTestCase(ExportBaseTestCase):
     def test_anonymous_redirected_to_login(self):
-        response = self.client.get('/%s/listing/' % self.course.uid)
+        response = self.client.get('/%s/listing/' % self.course.key)
         self.assertEqual(response.status_code, 302)
         self.assertIn('login', response.url)
 
@@ -285,31 +285,31 @@ class ListingViewTestCase(ExportBaseTestCase):
         EquipeFactory(course=other, categorie=CategorieFactory(course=other), nom='Intruse')
         login_as_organizer(self.client, self.course)
 
-        response = self.client.get('/%s/listing/' % self.course.uid)
+        response = self.client.get('/%s/listing/' % self.course.key)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['course'], self.course)
         self.assertEqual(list(response.context['equipes']), [e1, e2])
         self.assertEqual(response.context['order'], 'numero')
 
-        response = self.client.get('/%s/listing/?order=-numero' % self.course.uid)
+        response = self.client.get('/%s/listing/?order=-numero' % self.course.key)
         self.assertEqual(list(response.context['equipes']), [e2, e1])
 
-        response = self.client.get('/%s/listing/?order=nom' % self.course.uid)
+        response = self.client.get('/%s/listing/?order=nom' % self.course.key)
         self.assertEqual(list(response.context['equipes']), [e2, e1])
 
     def test_unknown_course_is_404(self):
         login_as_organizer(self.client, self.course)
-        self.assertEqual(self.client.get('/nope/listing/').status_code, 404)
+        self.assertEqual(self.client.get('/nope/nope/listing/').status_code, 404)
 
 
 class DossardsViewTestCase(ExportBaseTestCase):
     """`admin_views.dossards` n'est routée nulle part : appel direct de la vue."""
 
     def call(self, user=None, query=''):
-        request = RequestFactory().get('/%s/dossards/%s' % (self.course.uid, query))
+        request = RequestFactory().get('/%s/dossards/%s' % (self.course.key, query))
         from django.contrib.auth.models import AnonymousUser
         request.user = user or AnonymousUser()
-        return admin_views.dossards(request, self.course.uid)
+        return admin_views.dossards(request, self.course.key)
 
     def test_anonymous_redirected_to_login(self):
         response = self.call()
@@ -346,7 +346,7 @@ class OrganizerAccessTestCase(ExportBaseTestCase):
     ]
 
     def test_anonymous_redirected_to_login(self):
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         for path in self.PATHS:
             response = self.client.get(path)
             self.assertEqual(response.status_code, 302, path)
@@ -355,7 +355,7 @@ class OrganizerAccessTestCase(ExportBaseTestCase):
     def test_user_without_accreditation_redirected_to_login(self):
         user = User.objects.create_user('outsider', 'o@example.com', 'pass1234')
         self.client.force_login(user)
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         for path in self.PATHS:
             response = self.client.get(path)
             self.assertEqual(response.status_code, 302, path)
@@ -364,7 +364,7 @@ class OrganizerAccessTestCase(ExportBaseTestCase):
     def test_accreditation_for_another_course_does_not_give_access(self):
         other = CourseFactory()
         login_as_organizer(self.client, other)
-        self.client.cookies['course_uid'] = self.course.uid  # cookie pointe sur une autre course
+        self.client.cookies['course_uid'] = self.course.key  # cookie pointe sur une autre course
         for path in self.PATHS:
             response = self.client.get(path)
             self.assertEqual(response.status_code, 302, path)
@@ -374,12 +374,12 @@ class OrganizerAccessTestCase(ExportBaseTestCase):
         user = User.objects.create_user('pending', 'p@example.com', 'pass1234')
         Accreditation.objects.create(user=user, course=self.course.course, role='')
         self.client.force_login(user)
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         response = self.client.get('/course/anomalies/')
         self.assertEqual(response.status_code, 302)
 
     def test_post_actions_also_require_access(self):
-        self.client.cookies['course_uid'] = self.course.uid
+        self.client.cookies['course_uid'] = self.course.key
         response = self.client.post('/course/inscriptions/equipe/export/', {
             'ids': '[]', 'objet': 'equipes', 'colonnes': ['equipe.nom'],
         })
@@ -614,10 +614,10 @@ class StatsTestCase(ExportBaseTestCase):
         self.assertIn(other, response.context['courses_other'])
 
     def test_stats_api_returns_json(self):
-        response = self.client.get('/course/stats/%s/' % self.course.uid)
+        response = self.client.get('/course/stats/%s/' % self.course.key)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
-        self.assertEqual(data['uid'], self.course.uid)
+        self.assertEqual(data['uid'], self.course.key)
         self.assertEqual(data['course'], self.course.nom)
         self.assertEqual(set(data['date']), {'ouverture', 'fermeture', 'course'})
         self.assertEqual(len(data['augmentations']), len(self.course.augmentations))
@@ -634,8 +634,8 @@ class StatsTestCase(ExportBaseTestCase):
 
     def test_stats_api_requires_login(self):
         self.client.logout()
-        self.client.cookies['course_uid'] = self.course.uid
-        response = self.client.get('/course/stats/%s/' % self.course.uid)
+        self.client.cookies['course_uid'] = self.course.key
+        response = self.client.get('/course/stats/%s/' % self.course.key)
         self.assertEqual(response.status_code, 302)
 
 

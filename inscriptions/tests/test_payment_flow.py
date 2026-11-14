@@ -52,19 +52,19 @@ class IntentPaiementStripeTestCase(BaseTestCase):
 
     def _get(self, *equipes, methode='stripe'):
         qs = '&'.join('equipe=%d' % e.numero for e in equipes)
-        return self.client.get('/%s/intent/%s/?%s' % (self.course.uid, methode, qs))
+        return self.client.get('/%s/intent/%s/?%s' % (self.course.key, methode, qs))
 
     def test_no_equipe_is_404(self):
-        response = self.client.get('/%s/intent/stripe/' % self.course.uid)
+        response = self.client.get('/%s/intent/stripe/' % self.course.key)
         self.assertEqual(response.status_code, 404)
 
     def test_unknown_equipe_number_is_404(self):
-        response = self.client.get('/%s/intent/stripe/?equipe=99999' % self.course.uid)
+        response = self.client.get('/%s/intent/stripe/?equipe=99999' % self.course.key)
         self.assertEqual(response.status_code, 404)
 
     def test_equipe_of_another_course_is_ignored(self):
         other = make_equipe(prix=Decimal('40.00'), numero=555)
-        response = self.client.get('/%s/intent/stripe/?equipe=%d' % (self.course.uid, other.numero))
+        response = self.client.get('/%s/intent/stripe/?equipe=%d' % (self.course.key, other.numero))
         self.assertEqual(response.status_code, 404)
         self.create.assert_not_called()
 
@@ -123,7 +123,7 @@ class IntentPaiementStripeTestCase(BaseTestCase):
         pay(self.equipe, '40.00')
         response = self._get(self.equipe)
         self.assertRedirects(
-            response, '/%s/%d/done/' % (self.course.uid, self.equipe.numero),
+            response, '/%s/%d/done/' % (self.course.key, self.equipe.numero),
             fetch_redirect_response=False)
         self.create.assert_not_called()
         self.assertFalse(Paiement.objects.filter(type='stripe').exists())
@@ -195,7 +195,7 @@ class IntentPaiementHelloAssoTestCase(BaseTestCase):
 
     def _get(self, *equipes):
         qs = '&'.join('equipe=%d' % e.numero for e in equipes)
-        return self.client.get('/%s/intent/helloasso/?%s' % (self.course.uid, qs))
+        return self.client.get('/%s/intent/helloasso/?%s' % (self.course.key, qs))
 
     def test_redirects_to_helloasso_and_creates_pending_paiement(self):
         post = self._patch({'redirectUrl': 'https://pay.helloasso.example/checkout/1'})
@@ -213,7 +213,7 @@ class IntentPaiementHelloAssoTestCase(BaseTestCase):
         self.assertEqual(body['initialAmount'], 4000)
         self.assertEqual(body['payer']['email'], self.equipe.gerant_email)
         self.assertTrue(body['returnUrl'].startswith('https://'))
-        self.assertTrue(body['returnUrl'].endswith('/%s/%d/done/' % (self.course.uid, self.equipe.numero)))
+        self.assertTrue(body['returnUrl'].endswith('/%s/%d/done/' % (self.course.key, self.equipe.numero)))
 
         paiement = Paiement.objects.get()
         self.assertEqual(paiement.type, 'helloasso')
@@ -253,7 +253,7 @@ class IntentPaiementHelloAssoTestCase(BaseTestCase):
         self._patch({'errors': [{'message': 'Montant invalide'}]})
         response = self._get(self.equipe)
         self.assertEqual(response.status_code, 302)
-        self.assertIn('/%s/%d/' % (self.course.uid, self.equipe.numero), response.url)
+        self.assertIn('/%s/%d/' % (self.course.key, self.equipe.numero), response.url)
         self.assertIn(self.equipe.password, response.url)
         self.assertIn('message=Montant+invalide', response.url)
 
@@ -302,27 +302,27 @@ class DoneViewTestCase(BaseTestCase):
         self.equipe = make_equipe(course=self.course, prix=Decimal('40.00'))
 
     def _url(self, numero=None):
-        return '/%s/%d/done/' % (self.course.uid, numero or self.equipe.numero)
+        return '/%s/%d/done/' % (self.course.key, numero or self.equipe.numero)
 
     def test_renders_done_page(self):
         response = self.client.get(self._url())
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'done.html')
         self.assertEqual(response.context['instance'], self.equipe)
-        self.assertIn('/%s/%d/' % (self.course.uid, self.equipe.numero), response.context['url'])
+        self.assertIn('/%s/%d/' % (self.course.key, self.equipe.numero), response.context['url'])
         self.assertIn(self.equipe.password, response.context['url'])
-        self.assertTrue(response.context['paypal_ipn_url'].endswith('/%s/ipn/' % self.course.uid))
+        self.assertTrue(response.context['paypal_ipn_url'].endswith('/%s/ipn/' % self.course.key))
 
     def test_unknown_team_is_404(self):
         self.assertEqual(self.client.get(self._url(99999)).status_code, 404)
 
     def test_unknown_course_is_404(self):
-        self.assertEqual(self.client.get('/nope/1/done/').status_code, 404)
+        self.assertEqual(self.client.get('/nope/nope/1/done/').status_code, 404)
 
     def test_team_of_another_course_is_404(self):
         other = make_equipe(prix=Decimal('40.00'))
         course2 = CourseFactory()
-        response = self.client.get('/%s/%d/done/' % (course2.uid, other.numero))
+        response = self.client.get('/%s/%d/done/' % (course2.key, other.numero))
         self.assertEqual(response.status_code, 404)
 
     def test_closed_course_shows_closed_page_to_anonymous(self):
@@ -353,7 +353,7 @@ class EquipePayeeTestCase(BaseTestCase):
         self.equipe = make_equipe(course=self.course, prix=Decimal('40.00'))
 
     def _get(self, numero=None):
-        return self.client.get('/%s/%d/payee/' % (self.course.uid, numero or self.equipe.numero))
+        return self.client.get('/%s/%d/payee/' % (self.course.key, numero or self.equipe.numero))
 
     def test_unpaid(self):
         self.assertEqual(json.loads(self._get().content), {'success': False})
@@ -382,7 +382,7 @@ class EquipePayeeTestCase(BaseTestCase):
     def test_team_of_another_course_is_404(self):
         other = make_equipe(prix=Decimal('40.00'))
         course2 = CourseFactory()
-        response = self.client.get('/%s/%d/payee/' % (course2.uid, other.numero))
+        response = self.client.get('/%s/%d/payee/' % (course2.key, other.numero))
         self.assertEqual(response.status_code, 404)
 
 
@@ -391,7 +391,7 @@ class FactureViewTestCase(BaseTestCase):
         super().setUp()
         self.course = CourseFactory()
         self.equipe = make_equipe(course=self.course, prix=Decimal('40.00'))
-        self.base = '/%s/%d/facture/' % (self.course.uid, self.equipe.numero)
+        self.base = '/%s/%d/facture/' % (self.course.key, self.equipe.numero)
 
     def _template_mail(self):
         return TemplateMail.objects.create(
@@ -457,7 +457,7 @@ class FactureViewTestCase(BaseTestCase):
     def test_team_of_another_course_is_404(self):
         pay(self.equipe, '40.00')
         course2 = CourseFactory()
-        response = self.client.get('/%s/%d/facture/' % (course2.uid, self.equipe.numero))
+        response = self.client.get('/%s/%d/facture/' % (course2.key, self.equipe.numero))
         self.assertEqual(response.status_code, 404)
 
 
@@ -465,7 +465,7 @@ class ContactViewTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
         self.course = CourseFactory(email_contact='orga@example.com')
-        self.url = '/%s/contact/' % self.course.uid
+        self.url = '/%s/contact/' % self.course.key
         patcher = mock.patch('inscriptions.views.send_mail')
         self.send_mail = patcher.start()
         self.addCleanup(patcher.stop)
@@ -477,20 +477,20 @@ class ContactViewTestCase(BaseTestCase):
         self.send_mail.assert_not_called()
 
     def test_unknown_course_is_404(self):
-        self.assertEqual(self.client.get('/nope/contact/').status_code, 404)
+        self.assertEqual(self.client.get('/nope/nope/contact/').status_code, 404)
 
     def test_valid_post_sends_mail_to_organizer_and_redirects(self):
         response = self.client.post(self.url, {
             'name': 'Alice', 'email': 'alice@example.com',
             'subject': 'Question', 'message': 'Bonjour',
         })
-        self.assertRedirects(response, '/%s/contact/thankyou/' % self.course.uid,
+        self.assertRedirects(response, '/%s/contact/thankyou/' % self.course.key,
                              fetch_redirect_response=False)
         self.send_mail.assert_called_once()
         kwargs = self.send_mail.call_args[1]
         self.assertEqual(kwargs['to'], ['orga@example.com'])
         self.assertEqual(kwargs['reply_to'], ['alice@example.com'])
-        self.assertIn(self.course.uid, kwargs['subject'])
+        self.assertIn(self.course.key, kwargs['subject'])
         self.assertIn('Question', kwargs['subject'])
         self.assertIn('Bonjour', kwargs['body'])
         self.assertIn('alice@example.com', kwargs['body'])
@@ -507,10 +507,10 @@ class ContactViewTestCase(BaseTestCase):
         self.send_mail.assert_not_called()
 
     def test_contact_done_page(self):
-        response = self.client.get('/%s/contact/thankyou/' % self.course.uid)
+        response = self.client.get('/%s/contact/thankyou/' % self.course.key)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'contact_done.html')
         self.assertEqual(response.context['course'], self.course)
 
     def test_contact_done_unknown_course_is_404(self):
-        self.assertEqual(self.client.get('/nope/contact/thankyou/').status_code, 404)
+        self.assertEqual(self.client.get('/nope/nope/contact/thankyou/').status_code, 404)

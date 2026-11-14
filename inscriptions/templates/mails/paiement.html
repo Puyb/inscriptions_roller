@@ -7,7 +7,7 @@
 </ul>
 
 {% if instance.paiement_complet %}
-<p>Votre facture pour l'équipe {{ instance.numero }} {{ instance.nom }} est téléchargeable en cliquant sur <a href="{{ ROOT_URL }}/{{ instance.course.uid }}/{{ instance.numero }}/facture/{{ instance.password }}/">ce lien</a>.</p>
+<p>Votre facture pour l'équipe {{ instance.numero }} {{ instance.nom }} est téléchargeable en cliquant sur <a href="{{ ROOT_URL }}/{{ instance.course.key }}/{{ instance.numero }}/facture/{{ instance.password }}/">ce lien</a>.</p>
 {% endif %}
 <p>--<br />{{ instance.course.organisateur }}</p>
 <hr />

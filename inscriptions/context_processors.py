@@ -1,19 +1,22 @@
 from django.apps import apps
 from django.conf import settings
-from .models import Edition
+from .models import Edition, edition_lookup
 from django.db.models import Min, Max
 from django.contrib.sites.models import Site
 
 def course(request):
-    uid = request.path.split('/')[1]
-    if uid in ('course', 'admin'):
+    segments = request.path.split('/')
+    if segments[1] in ('course', 'admin'):
         if 'course_uid' not in request.COOKIES:
             return {
                 'COURSES': request.user.is_superuser and Edition.objects.all() or [],
             }
-        uid = request.COOKIES['course_uid']
+        key = request.COOKIES['course_uid']
+    else:
+        key = '/'.join(segments[1:3])
     course = (Edition.objects
-        .filter(uid=uid)
+        .select_related('course')
+        .filter(**edition_lookup(key))
         .prefetch_related('categories')
         .annotate(min_age=Min('categories__min_age'), max_equipiers=Max('categories__max_equipiers')))
     if not course.count():

@@ -5,7 +5,7 @@
 <ul>
     {% for course in courses %}
     <li>
-        <a href="{{ course.uid }}/">{{ course.nom }} ({{ course.date }})</a>
+        <a href="{{ course.key }}/">{{ course.nom }} ({{ course.date }})</a>
     </li>
     {% endfor %}
     {% for course in demandes %}

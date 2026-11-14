@@ -194,7 +194,7 @@ location.href = "choose/";
                         <i class="fa fa-eur"></i><br />
                         <label>{% blocktrans %}Paiements{% endblocktrans %}</a>
                     </a>
-                    <a href="/{{ COURSE.uid }}/stats/">
+                    <a href="/{{ COURSE.key }}/stats/">
                         <i class="fa fa-line-chart"></i><br />
                         <label>{% blocktrans %}Statistiques{% endblocktrans %}</a>
                     </a>
@@ -263,15 +263,15 @@ location.href = "choose/";
             </tr>
             <tr>
                 <td>
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/">
+                    <a target="_blank" href="/{{ COURSE.key }}/listing/">
                         <i class="fa fa-sort-numeric-asc"></i><br />
                         <label>{% blocktrans %}Par numéro{% endblocktrans %}</label>
                     </a>
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=nom">
+                    <a target="_blank" href="/{{ COURSE.key }}/listing/?order=nom">
                         <i class="fa fa-sort-alpha-asc"></i><br />
                         <label>{% blocktrans %}Par nom d'équipe{% endblocktrans %}</label>
                     </a>
-                    <a target="_blank" href="/{{ COURSE.uid }}/listing/?order=gerant_nom">
+                    <a target="_blank" href="/{{ COURSE.key }}/listing/?order=gerant_nom">
                         <i class="fa fa-long-arrow-down"></i>
                         <i class="fa fa-user"></i><br />
                         <label>{% blocktrans %}Par nom du gérant{% endblocktrans %}</label>
@@ -291,20 +291,20 @@ location.href = "choose/";
             </tr>
             <tr>
                 <td>
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards.csv">
+                    <a target="_blank" href="/{{ COURSE.key }}/dossards.csv">
                         <i class="fa fa-table"></i><br />
                         <label>{% blocktrans %}Equipes et équipiers{% endblocktrans %}</label>
                     </a>
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipes.csv">
+                    <a target="_blank" href="/{{ COURSE.key }}/dossards_equipes.csv">
                         <i class="fa fa-table"></i><br />
                         <label>{% blocktrans %}Equipes{% endblocktrans %}</label>
                     </a>
-                    <a target="_blank" href="/{{ COURSE.uid }}/dossards_equipiers.csv">
+                    <a target="_blank" href="/{{ COURSE.key }}/dossards_equipiers.csv">
                         <i class="fa fa-table"></i><br />
                         <label>{% blocktrans %}Equipiers{% endblocktrans %}</label>
                     </a>
                     {% if COURSE.transpondeurs.exists %}
-                    <a target="_blank" href="/{{ COURSE.uid }}/transpondeurs.csv">
+                    <a target="_blank" href="/{{ COURSE.key }}/transpondeurs.csv">
                         <i class="fa fa-microchip"></i><br />
                         <label>{% blocktrans %}Transpondeurs{% endblocktrans %}</label>
                     </a>

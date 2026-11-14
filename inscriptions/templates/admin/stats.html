@@ -13,11 +13,11 @@
     <select id="add_course">
         <option>Ajouter une course</option>
         <optgroup>
-        {% for c in courses %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        {% for c in courses %}<option value="{{ c.key }}">{{ c }}</option>{% endfor %}
         </optgroup>
         {% if request.user.is_superuser %}
         <optgroup label="Courses sans accreditations">
-        {% for c in courses_other %}<option value="{{ c.uid }}">{{ c }}</option>{% endfor %}
+        {% for c in courses_other %}<option value="{{ c.key }}">{{ c }}</option>{% endfor %}
         </optgroup>
         {% endif %}
     </select>
@@ -280,7 +280,7 @@ const draw = () => {
 }
 const init = async () => {
     if (!courses.length) {
-        await addCourse('{{ course.uid }}', false);
+        await addCourse('{{ course.key }}', false);
     }
     const existingUids = courses.map(c => c.uid);
     let wantedUids = [];
@@ -300,7 +300,7 @@ const init = async () => {
         }
     }
     await Promise.all(promises);
-    courses = courses.filter(c => wantedUids.includes(c.uid) || c.uid === '{{ course.uid }}');
+    courses = courses.filter(c => wantedUids.includes(c.uid) || c.uid === '{{ course.key }}');
     updateAugmentationChoices();
     if (hashN) $('#augmentation_n').val(Math.min(hashN, $('#augmentation_n option').length));
     draw();

@@ -6,9 +6,9 @@
         {% if request.user.is_superuser %}
 var COURSES_UID = false;
         {% else %}
-var COURSES_UID = [{% for a in request.user.accreditations.all %}{% if a.role %}{% for e in a.course.editions.all %}"{{ e.uid }}"{% if not forloop.last %},{% endif %}{% endfor %}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}];
+var COURSES_UID = [{% for a in request.user.accreditations.all %}{% if a.role %}{% for e in a.course.editions.all %}"{{ e.key }}"{% if not forloop.last %},{% endif %}{% endfor %}{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}];
         {% endif %}
-var COURSE_UID = "{{ COURSE.uid }}";
+var COURSE_UID = "{{ COURSE.key }}";
     </script>
     <script src="{{ STATIC_URL }}/admin/js/vendor/jquery/jquery.js"></script>
     <script src="{{ STATIC_URL }}/admin.js"></script>

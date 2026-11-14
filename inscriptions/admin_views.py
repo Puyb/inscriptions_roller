@@ -2,7 +2,7 @@
 import random
 import csv, io
 from functools import wraps
-from .models import Accreditation, Equipe, Equipier, TemplateMail, Edition, Transpondeur
+from .models import edition_lookup, get_edition, Accreditation, Equipe, Equipier, TemplateMail, Edition, Transpondeur
 from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
@@ -21,7 +21,7 @@ def organizer_required(view):
     @wraps(view)
     @login_required
     def wrapper(request, course_uid, *args, **kwargs):
-        course = get_object_or_404(Edition, uid=course_uid)
+        course = get_edition(course_uid)
         if not request.user.is_superuser and not Accreditation.objects.filter(
                 user=request.user, course=course.course).exclude(role='').exists():
             return HttpResponseForbidden()
@@ -31,22 +31,22 @@ def organizer_required(view):
 @login_required
 def dossards(request, course_uid):
     return TemplateResponse(request, 'dossards.html', {
-        'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid).order_by(*request.GET.get('order','equipe__numero,numero').split(','))
+        'equipiers': Equipier.objects.filter(**edition_lookup(course_uid, 'equipe__course__')).order_by(*request.GET.get('order','equipe__numero,numero').split(','))
     })
 
 @organizer_required
 def listing(request, course_uid, template='listing.html'):
     return TemplateResponse(request, template, {
-        'course': get_object_or_404(Edition, uid=course_uid),
-        'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
+        'course': get_edition(course_uid),
+        'equipes': Equipe.objects.filter(**edition_lookup(course_uid, 'course__')).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
     })
 
 @organizer_required
 def equipiers(request, course_uid):
     return TemplateResponse(request, 'equipiers.html', {
-        'course': get_object_or_404(Edition, uid=course_uid),
-        'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid)
+        'course': get_edition(course_uid),
+        'equipiers': Equipier.objects.filter(**edition_lookup(course_uid, 'equipe__course__'))
     })
 
 @organizer_required
@@ -70,7 +70,7 @@ def dossardsCSV(request, course_uid):
         'gerant_code_postal',
         'gerant_code_pays',
     ])
-    for e in Equipier.objects.filter(equipe__course__uid=course_uid, numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
+    for e in Equipier.objects.filter(**edition_lookup(course_uid, 'equipe__course__'), numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
         row = [
             e.equipe.numero,
             e.equipe.nom,
@@ -102,7 +102,7 @@ def transpondeursCSV(request, course_uid):
         'dossard',
         'id',
     ])
-    course = get_object_or_404(Edition, uid=course_uid)
+    course = get_edition(course_uid)
     transpondeurs = Transpondeur.objects.filter(course=course).exclude(equipe=None, equipier=None)
     compteurs = {}
     for t in transpondeurs:
@@ -134,7 +134,7 @@ def dossardsEquipesCSV(request, course_uid):
         'gerant_code_postal',
         'gerant_code_pays',
     ])
-    for e in Equipe.objects.filter(course__uid=course_uid):
+    for e in Equipe.objects.filter(**edition_lookup(course_uid, 'course__')):
         row = [
             e.numero,
             e.nom,
@@ -166,7 +166,7 @@ def dossardsEquipiersCSV(request, course_uid):
         'date_de_naissance',
         'num_licence',
     ])
-    for e in Equipier.objects.filter(equipe__course__uid=course_uid, numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
+    for e in Equipier.objects.filter(**edition_lookup(course_uid, 'equipe__course__'), numero__lte=F('equipe__nombre')).select_related('equipe', 'equipe__categorie').order_by('equipe__numero', 'numero'):
         row = [
             e.equipe.numero,
             e.dossard(),

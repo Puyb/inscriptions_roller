@@ -205,14 +205,14 @@ class LoginProtectsBackofficeTestCase(TestCase):
 
     def test_login_then_course_scoped_page(self):
         self.client.post(reverse('account_login'), {'username': 'alice', 'password': PASSWORD})
-        self.client.cookies['course_uid'] = 'authc'
+        self.client.cookies['course_uid'] = 'authc/authc'
         response = self.client.get('/course/')
         self.assertEqual(response.status_code, 200)
 
     def test_logout_closes_backoffice(self):
         self.client.post(reverse('account_login'), {'username': 'alice', 'password': PASSWORD})
         self.client.post(reverse('account_logout'))
-        self.client.cookies['course_uid'] = 'authc'
+        self.client.cookies['course_uid'] = 'authc/authc'
         response = self.client.get('/course/')
         self.assertEqual(response.status_code, 302)
 
