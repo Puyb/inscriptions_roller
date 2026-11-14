@@ -16,7 +16,7 @@ x-test-env: &test-env
   TURNSTILE_SITEKEY: ""
   TURNSTILE_SECRET: ""
   # Cles Stripe de TEST pour e2e/test_stripe_payment.py (a definir dans .env, non versionne) ;
-  # sans elles, ces tests sont ignores.
+  # sans elles, ces tests echouent.
   E2E_STRIPE_PUBLIC: "${E2E_STRIPE_PUBLIC:-}"
   E2E_STRIPE_SECRET: "${E2E_STRIPE_SECRET:-}"
 

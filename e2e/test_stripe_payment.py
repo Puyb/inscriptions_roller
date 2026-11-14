@@ -7,7 +7,7 @@ automatise.
 
 Necessite un acces reseau (js.stripe.com / api.stripe.com) et les cles de test
 `E2E_STRIPE_PUBLIC` / `E2E_STRIPE_SECRET` (fichier `.env`, voir docker-compose.yml) : sans
-elles le cours 'e2estripe' n'est pas seme et ces tests sont ignores.
+elles le cours 'e2estripe' n'est pas seme et ces tests echouent.
 
 Stripe ne peut pas joindre le serveur e2e : la confirmation (webhook
 `payment_intent.succeeded`) est simulee par un POST signe avec le secret d'endpoint du seed.
@@ -23,8 +23,13 @@ import time
 import pytest
 from playwright.sync_api import expect
 
-pytestmark = pytest.mark.skipif(
-    not os.environ.get('E2E_STRIPE_PUBLIC'), reason='cles Stripe de test (E2E_STRIPE_*) non definies')
+
+@pytest.fixture(autouse=True)
+def require_stripe_test_keys():
+    """Echoue (au lieu d'ignorer) si les cles de test ne sont pas fournies."""
+    if not os.environ.get('E2E_STRIPE_PUBLIC'):
+        pytest.fail('Cles Stripe de test absentes : definir E2E_STRIPE_PUBLIC et E2E_STRIPE_SECRET '
+                    'dans .env (voir docker-compose.yml)', pytrace=False)
 
 COURSE = 'e2estripe'
 ENDPOINT_SECRET = os.environ.get('STRIPE_ENDPOINT_SECRET', 'whsec_e2e_local')
