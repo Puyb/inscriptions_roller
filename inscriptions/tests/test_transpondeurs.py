@@ -10,7 +10,7 @@ from inscriptions.admin_course import CourseAdmin as OrganizerCourseAdmin
 from inscriptions.admin_main import CourseAdmin as SuperuserCourseAdmin
 from inscriptions.factories import CategorieFactory, CourseFactory, EquipeFactory, EquipierFactory
 from inscriptions.models import (
-    Accreditation, Course, DuplicateTranspondeurException,
+    Accreditation, Edition, DuplicateTranspondeurException,
     InvalidTranspondeurFileException, NotEnoughTranspondeursException,
     Transpondeur, parse_transpondeurs_file,
 )
@@ -61,21 +61,21 @@ class AssignTranspondeursEquipeModeTestCase(BaseTestCase):
         e1 = EquipeFactory(course=self.course, categorie=self.categorie)
         e2 = EquipeFactory(course=self.course, categorie=self.categorie)
 
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3', 'T4'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3', 'T4'])
 
         transpondeurs = list(Transpondeur.objects.filter(course=self.course).order_by('ordre'))
         self.assertEqual([t.numero for t in transpondeurs], ['T1', 'T2', 'T3', 'T4'])
         self.assertEqual([t.equipe_id for t in transpondeurs], [e1.id, e1.id, e2.id, e2.id])
         self.assertTrue(all(t.equipier_id is None for t in transpondeurs))
         self.course.refresh_from_db()
-        self.assertEqual(self.course.transpondeur_mode, Course.TRANSPONDEUR_MODE_EQUIPE)
+        self.assertEqual(self.course.transpondeur_mode, Edition.TRANSPONDEUR_MODE_EQUIPE)
 
     def test_category_with_zero_transpondeurs_gets_none(self):
         categorie0 = CategorieFactory(course=self.course, nombre_transpondeurs=0, numero_debut=500, numero_fin=599)
         EquipeFactory(course=self.course, categorie=categorie0)
         e2 = EquipeFactory(course=self.course, categorie=self.categorie)
 
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
 
         transpondeurs = list(Transpondeur.objects.filter(course=self.course).order_by('ordre'))
         self.assertEqual([t.equipe_id for t in transpondeurs], [e2.id, e2.id])
@@ -83,7 +83,7 @@ class AssignTranspondeursEquipeModeTestCase(BaseTestCase):
     def test_surplus_codes_are_created_unassigned(self):
         EquipeFactory(course=self.course, categorie=self.categorie)
 
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3'])
 
         transpondeurs = list(Transpondeur.objects.filter(course=self.course).order_by('ordre'))
         self.assertEqual(transpondeurs[-1].numero, 'T3')
@@ -93,7 +93,7 @@ class AssignTranspondeursEquipeModeTestCase(BaseTestCase):
         EquipeFactory(course=self.course, categorie=self.categorie)
 
         with self.assertRaises(DuplicateTranspondeurException):
-            self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T1', 'T2'])
+            self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T1', 'T2'])
         self.assertEqual(Transpondeur.objects.filter(course=self.course).count(), 0)
 
     def test_not_enough_codes_raise_and_nothing_is_created_or_modified(self):
@@ -101,20 +101,20 @@ class AssignTranspondeursEquipeModeTestCase(BaseTestCase):
         EquipeFactory(course=self.course, categorie=self.categorie)
 
         with self.assertRaises(NotEnoughTranspondeursException):
-            self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3'])
+            self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3'])
         self.assertEqual(Transpondeur.objects.filter(course=self.course).count(), 0)
         self.course.refresh_from_db()
         self.assertIsNone(self.course.transpondeur_mode)
 
     def test_reset_then_reupload_regenerates_the_full_list(self):
         EquipeFactory(course=self.course, categorie=self.categorie)
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
 
         self.course.transpondeurs.all().delete()
         self.course.transpondeur_mode = None
         self.course.save(update_fields=['transpondeur_mode'])
 
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['U1', 'U2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['U1', 'U2'])
 
         transpondeurs = list(Transpondeur.objects.filter(course=self.course).order_by('ordre'))
         self.assertEqual([t.numero for t in transpondeurs], ['U1', 'U2'])
@@ -136,14 +136,14 @@ class AssignTranspondeursEquipierModeTestCase(BaseTestCase):
         # leftover row beyond equipe.nombre must be ignored, like elsewhere in the codebase
         EquipierFactory(equipe=equipe, numero=3)
 
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPIER, ['A1', 'A2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPIER, ['A1', 'A2'])
 
         transpondeurs = list(Transpondeur.objects.filter(course=self.course).order_by('ordre'))
         self.assertEqual([t.numero for t in transpondeurs], ['A1', 'A2'])
         self.assertEqual([t.equipier_id for t in transpondeurs], [eq1.id, eq2.id])
         self.assertTrue(all(t.equipe_id is None for t in transpondeurs))
         self.course.refresh_from_db()
-        self.assertEqual(self.course.transpondeur_mode, Course.TRANSPONDEUR_MODE_EQUIPIER)
+        self.assertEqual(self.course.transpondeur_mode, Edition.TRANSPONDEUR_MODE_EQUIPIER)
 
 
 class TranspondeurUploadViewTestCase(BaseTestCase):
@@ -161,7 +161,7 @@ class TranspondeurUploadViewTestCase(BaseTestCase):
 
     def test_post_valid_file_assigns_and_redirects_to_changelist(self):
         response = self.client.post('/course/transpondeurs/', {
-            'mode': Course.TRANSPONDEUR_MODE_EQUIPE,
+            'mode': Edition.TRANSPONDEUR_MODE_EQUIPE,
             'fichier': uploaded_file('T1\n'),
             'nombre_transpondeurs_%d' % self.categorie.id: '1',
         })
@@ -172,7 +172,7 @@ class TranspondeurUploadViewTestCase(BaseTestCase):
 
     def test_post_insufficient_file_shows_error_and_creates_nothing(self):
         response = self.client.post('/course/transpondeurs/', {
-            'mode': Course.TRANSPONDEUR_MODE_EQUIPE,
+            'mode': Edition.TRANSPONDEUR_MODE_EQUIPE,
             'fichier': uploaded_file('T1\n'),
             'nombre_transpondeurs_%d' % self.categorie.id: '2',
         }, follow=True)
@@ -184,7 +184,7 @@ class TranspondeurUploadViewTestCase(BaseTestCase):
 
     def test_post_duplicate_codes_shows_error_and_creates_nothing(self):
         response = self.client.post('/course/transpondeurs/', {
-            'mode': Course.TRANSPONDEUR_MODE_EQUIPE,
+            'mode': Edition.TRANSPONDEUR_MODE_EQUIPE,
             'fichier': uploaded_file('T1\nT1\n'),
             'nombre_transpondeurs_%d' % self.categorie.id: '1',
         }, follow=True)
@@ -204,7 +204,7 @@ class TranspondeurAdminTestCase(BaseTestCase):
         self.categorie = CategorieFactory(course=self.course, nombre_transpondeurs=1)
         self.equipe = EquipeFactory(course=self.course, categorie=self.categorie)
         self.user = login_as_organizer(self.client, self.course)
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1'])
         self.transpondeur = Transpondeur.objects.get(course=self.course)
 
     def test_changelist_shows_the_list_once_assigned(self):
@@ -282,7 +282,7 @@ class TranspondeurAccessTestCase(BaseTestCase):
 
 class CourseCategorieFormNonRegressionTestCase(BaseTestCase):
     """`transpondeur_mode`/`nombre_transpondeurs` must stay out of the regular
-    Course/Categorie admin forms (they're only editable via the upload form
+    Edition/Categorie admin forms (they're only editable via the upload form
     and the `Transpondeur` admin, see docs/transpondeurs-plan.md §3.5)."""
 
     def test_organizer_course_admin_excludes_transpondeur_mode(self):
@@ -342,7 +342,7 @@ class TranspondeursCSVExportTestCase(BaseTestCase):
         categorie = CategorieFactory(course=self.course, nombre_transpondeurs=2)
         e1 = EquipeFactory(course=self.course, categorie=categorie)
         e2 = EquipeFactory(course=self.course, categorie=categorie)
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3', 'T4'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2', 'T3', 'T4'])
 
         rows = self.csv_rows()
         self.assertEqual(rows[0], ['dossard', 'id'])
@@ -358,7 +358,7 @@ class TranspondeursCSVExportTestCase(BaseTestCase):
         equipe = EquipeFactory(course=self.course, categorie=categorie, nombre=2)
         eq1 = EquipierFactory(equipe=equipe, numero=1)
         eq2 = EquipierFactory(equipe=equipe, numero=2)
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPIER, ['A1', 'A2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPIER, ['A1', 'A2'])
 
         rows = self.csv_rows()
         self.assertEqual(rows[0], ['dossard', 'id'])
@@ -370,7 +370,7 @@ class TranspondeursCSVExportTestCase(BaseTestCase):
     def test_unassigned_surplus_transpondeurs_are_excluded(self):
         categorie = CategorieFactory(course=self.course, nombre_transpondeurs=1)
         EquipeFactory(course=self.course, categorie=categorie)
-        self.course.assign_transpondeurs(Course.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
+        self.course.assign_transpondeurs(Edition.TRANSPONDEUR_MODE_EQUIPE, ['T1', 'T2'])
 
         rows = self.csv_rows()
         self.assertEqual(len(rows), 2)

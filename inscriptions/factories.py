@@ -15,7 +15,7 @@ from .models import Categorie, Equipe, Equipier, ExtraQuestion, ExtraQuestionCho
 
 class CourseFactory(DjangoModelFactory):
     class Meta:
-        model = 'inscriptions.Course'
+        model = 'inscriptions.Edition'
 
     nom = factory.Sequence(lambda n: 'Course %d' % n)
     uid = factory.Sequence(lambda n: 'course%d' % n)

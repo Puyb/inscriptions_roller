@@ -54,7 +54,7 @@ class CourseAdmin(admin.ModelAdmin):
         return obj.active and ICON_OK or ICON_KO
     active2.short_description = 'Active'
 
-site.register(Course, CourseAdmin)
+site.register(Edition, CourseAdmin)
 
 class AccreditationAdmin(admin.ModelAdmin):
     list_display = ('user', 'course', 'role', )
@@ -116,7 +116,7 @@ class ChallengeAdmin(admin.ModelAdmin):
             challenge = Challenge.objects.filter(id=int(request.POST['challenge_id'])).prefetch_related('categories__categories__course').get()
             challenge_categories = { c.id: c for c in challenge.categories.all() }
 
-            courses = Course.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories').order_by('date')
+            courses = Edition.objects.filter(id__in=request.POST.getlist('courses')).prefetch_related('categories').order_by('date')
             courses_by_id = { c.id: { 'course': c, 'categories': { cat.id: cat for cat in c.categories.all() } } for c in courses }
             categories = defaultdict(lambda: defaultdict(set)) # nested object, keys : Course, ChallengeCategorie, value: array of Categorie
             for key in request.POST.keys():
@@ -168,7 +168,7 @@ class ChallengeAdmin(admin.ModelAdmin):
 
         return TemplateResponse(request, 'admin/challenge/courses.html', dict(self.admin_site.each_context(request),
             challenge=challenge,
-            courses=Course.objects.prefetch_related('categories'),
+            courses=Edition.objects.prefetch_related('categories'),
         ))
     manage_courses.short_description = _(u'Gérer les courses')
 

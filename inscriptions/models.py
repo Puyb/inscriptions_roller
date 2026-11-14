@@ -129,7 +129,7 @@ def normalize_club(club):
     }
     return table.get(club, club)
 
-class Course(models.Model):
+class Edition(models.Model):
     nom                 = models.CharField(_(u'Nom'), max_length=200)
     uid                 = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     organisateur        = models.CharField(_(u'Organisateur'), max_length=200)
@@ -223,7 +223,7 @@ class Course(models.Model):
                 to=(('', settings.CONTACT_MAIL), ),
                 content_type='plain',
             )
-        if self.active and self.id  and not Course.objects.get(id=self.id).active:
+        if self.active and self.id  and not Edition.objects.get(id=self.id).active:
             send_mail(
                 subject='Votre course %s est activée' % self.nom,
                 body="""Votre course %s est activée.
@@ -234,7 +234,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             )
         if not self.ville2_id and self.ville:
             self.ville2 = lookup_ville(self.ville, '', 'FR')
-        super(Course, self).save(*args, **kwargs)
+        super(Edition, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.nom, self.date)
@@ -420,7 +420,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             p=Unaccent(Lower(RegexpReplace('prenom', Value('[ -]\\+'), Value(' ')))),
         )
         equipiers1 = equipiers.filter(equipe__course=self)
-        if isinstance(course2, Course):
+        if isinstance(course2, Edition):
             equipiers2 = equipiers.filter(equipe__course=course2)
         else:
             equipiers2 = equipiers.filter(equipe__course__in=course2)
@@ -447,7 +447,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
         if doublons:
             raise DuplicateTranspondeurException(doublons)
 
-        if mode == Course.TRANSPONDEUR_MODE_EQUIPE:
+        if mode == Edition.TRANSPONDEUR_MODE_EQUIPE:
             unites = list(self.equipe_set.order_by('numero').select_related('categorie'))
             compte = lambda e: e.categorie.nombre_transpondeurs
         else:
@@ -473,8 +473,8 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
                 for _n in range(compte(u)):
                     objs.append(Transpondeur(
                         course=self, ordre=i + 1, numero=codes[i],
-                        equipe=u if mode == Course.TRANSPONDEUR_MODE_EQUIPE else None,
-                        equipier=u if mode == Course.TRANSPONDEUR_MODE_EQUIPIER else None,
+                        equipe=u if mode == Edition.TRANSPONDEUR_MODE_EQUIPE else None,
+                        equipier=u if mode == Edition.TRANSPONDEUR_MODE_EQUIPIER else None,
                     ))
                     i += 1
             for code in codes[i:]:
@@ -483,7 +483,7 @@ Les inscriptions pourront commencer à la date que vous avez choisi.
             Transpondeur.objects.bulk_create(objs)
 
 class Categorie(models.Model):
-    course          = models.ForeignKey(Course, related_name='categories', on_delete=models.CASCADE)
+    course          = models.ForeignKey(Edition, related_name='categories', on_delete=models.CASCADE)
     nom             = models.CharField(_(u'Nom'), max_length=200)
     code            = models.CharField(_(u'Code'), max_length=200)
     prices_base     = ArrayField(models.DecimalField(max_digits=7, decimal_places=2), default=list, verbose_name=_("Prix de base") )
@@ -613,7 +613,7 @@ class Equipe(models.Model):
     password           = models.CharField(_(u'Mot de passe'), max_length=200, blank=True)
     gerant_telephone   = models.CharField(_(u'Téléphone'), max_length=200, blank=True)
     categorie          = models.ForeignKey(Categorie, on_delete=models.CASCADE)
-    course             = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course             = models.ForeignKey(Edition, on_delete=models.CASCADE)
     nombre             = models.IntegerField(_(u"Nombre d'équipiers"))
     prix               = models.DecimalField(_(u'Prix'), max_digits=5, decimal_places=2)
     dossier_complet    = models.BooleanField(_(u'Dossier complet'), null=True)
@@ -980,7 +980,7 @@ class ExtraQuestion(models.Model):
         ('list', _('Liste déroulante')),
         ('checkbox', _('Case à cocher')),
     )
-    course = models.ForeignKey(Course, related_name='extra', on_delete=models.CASCADE)
+    course = models.ForeignKey(Edition, related_name='extra', on_delete=models.CASCADE)
     page = models.CharField(_('Rattaché à'), max_length=20, choices=PAGE_CHOICES)
     type = models.CharField(max_length=200, choices=TYPE_CHOICES)
     label = models.CharField(max_length=200)
@@ -1074,7 +1074,7 @@ def parse_transpondeurs_file(f):
 
 
 class Transpondeur(models.Model):
-    course   = models.ForeignKey(Course, related_name='transpondeurs', on_delete=models.CASCADE)
+    course   = models.ForeignKey(Edition, related_name='transpondeurs', on_delete=models.CASCADE)
     ordre    = models.PositiveIntegerField(_(u'Ordre'))
     numero   = models.CharField(_(u'Numéro de transpondeur'), max_length=50)
     equipe   = models.ForeignKey(Equipe, null=True, blank=True,
@@ -1103,7 +1103,7 @@ class Transpondeur(models.Model):
 
 class Accreditation(models.Model):
     user = models.ForeignKey(User, related_name='accreditations', on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, related_name='accreditations', on_delete=models.CASCADE)
+    course = models.ForeignKey(Edition, related_name='accreditations', on_delete=models.CASCADE)
     role = models.CharField(_("Role"), max_length=20, choices=ROLE_CHOICES, default='', blank=True)
     class Meta:
         unique_together = (('user', 'course'), )
@@ -1122,7 +1122,7 @@ Connectez vous sur enduroller pour y accéder.
         super().save(*args, **kwargs)
 
 class TemplateMail(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Edition, on_delete=models.CASCADE)
     nom = models.CharField(_('Nom'), max_length=200)
     bcc = models.CharField(_(u'Copie cachée à'), max_length=1000, blank=True)
     sujet = models.CharField(_('Sujet'), max_length=200)
@@ -1167,7 +1167,7 @@ class TemplateMail(models.Model):
             m.send()
 
 class Mail(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Edition, on_delete=models.CASCADE)
     template = models.ForeignKey(TemplateMail, null=True, on_delete=models.SET_NULL)
     equipe = models.ForeignKey(Equipe, null=True, on_delete=models.SET_NULL)
     emetteur = models.EmailField()
@@ -1207,7 +1207,7 @@ class Challenge(models.Model):
     nom = models.CharField(max_length=200)
     uid = models.CharField(_(u'uid'), max_length=200, validators=[RegexValidator(regex="^[a-z0-9]{3,}$", message=_("Ne doit contenir que des lettres ou des chiffres"))], unique=True)
     logo = models.ImageField(_('Logo'), upload_to='logo', null=True, blank=True)
-    courses = models.ManyToManyField(Course, blank=True, related_name='challenges')
+    courses = models.ManyToManyField(Edition, blank=True, related_name='challenges')
     active = models.BooleanField(_(u'Activée'), default=False)
     mode = models.CharField(max_length=20, choices=MODE_CHOICES)
 
@@ -1585,7 +1585,7 @@ class Paiement(models.Model):
         if self.montant:
             try:
                 equipes = Equipe.objects.filter(paiements__paiement=self)
-                courses = Course.objects.filter(equipe__in=equipes).distinct()
+                courses = Edition.objects.filter(equipe__in=equipes).distinct()
                 for course in courses:
                     mail = TemplateMail.objects.select_related('course').get(course=course, nom='paiement')
                     mail.send(equipes.filter(course=course))
@@ -1597,7 +1597,7 @@ class Paiement(models.Model):
         message = render_to_string('mails/paiement_admin.html', {
             'paiement': self,
         })
-        dest = [ c.email_contact for c in Course.objects.filter(equipe__paiements__paiement=self) ]
+        dest = [ c.email_contact for c in Edition.objects.filter(equipe__paiements__paiement=self) ]
         send_mail(
             subject=subject,
             body=message,

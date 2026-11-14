@@ -2,7 +2,7 @@
 import random
 import csv, io
 from functools import wraps
-from .models import Accreditation, Equipe, Equipier, TemplateMail, Course, Transpondeur
+from .models import Accreditation, Equipe, Equipier, TemplateMail, Edition, Transpondeur
 from .settings import *
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
@@ -21,7 +21,7 @@ def organizer_required(view):
     @wraps(view)
     @login_required
     def wrapper(request, course_uid, *args, **kwargs):
-        course = get_object_or_404(Course, uid=course_uid)
+        course = get_object_or_404(Edition, uid=course_uid)
         if not request.user.is_superuser and not Accreditation.objects.filter(
                 user=request.user, course=course).exclude(role='').exists():
             return HttpResponseForbidden()
@@ -37,7 +37,7 @@ def dossards(request, course_uid):
 @organizer_required
 def listing(request, course_uid, template='listing.html'):
     return TemplateResponse(request, template, {
-        'course': get_object_or_404(Course, uid=course_uid),
+        'course': get_object_or_404(Edition, uid=course_uid),
         'equipes': Equipe.objects.filter(course__uid=course_uid).order_by(*request.GET.get('order','numero').split(',')),
         'order': request.GET.get('order','numero')
     })
@@ -45,7 +45,7 @@ def listing(request, course_uid, template='listing.html'):
 @organizer_required
 def equipiers(request, course_uid):
     return TemplateResponse(request, 'equipiers.html', {
-        'course': get_object_or_404(Course, uid=course_uid),
+        'course': get_object_or_404(Edition, uid=course_uid),
         'equipiers': Equipier.objects.filter(equipe__course__uid=course_uid)
     })
 
@@ -102,11 +102,11 @@ def transpondeursCSV(request, course_uid):
         'dossard',
         'id',
     ])
-    course = get_object_or_404(Course, uid=course_uid)
+    course = get_object_or_404(Edition, uid=course_uid)
     transpondeurs = Transpondeur.objects.filter(course=course).exclude(equipe=None, equipier=None)
     compteurs = {}
     for t in transpondeurs:
-        if course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPIER:
+        if course.transpondeur_mode == Edition.TRANSPONDEUR_MODE_EQUIPIER:
             dossard = t.equipier.dossard()
         else:
             compteurs[t.equipe_id] = compteurs.get(t.equipe_id, 0) + 1

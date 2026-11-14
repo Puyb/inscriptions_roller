@@ -10,7 +10,7 @@ from inscriptions.tests.base import BaseTestCase
 
 class CategoriePrixTestCase(BaseTestCase):
     """`Categorie.prix/price_base/price_equipier` apply a price tier per
-    `Course.dates_augmentation` threshold that's crossed."""
+    `Edition.dates_augmentation` threshold that's crossed."""
 
     def setUp(self):
         super().setUp()

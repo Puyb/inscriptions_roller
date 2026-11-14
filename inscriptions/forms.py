@@ -8,7 +8,7 @@ from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
 from django.utils.translation import gettext_lazy as _
-from .models import Equipe, Equipier, Course, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
+from .models import Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from turnstile.fields import TurnstileField
@@ -57,7 +57,7 @@ EquipierFormset.model = Equipier
 
 class CourseForm(ModelForm):
     class Meta:
-        model = Course
+        model = Edition
         exclude = ('active', )
         widgets = {
             'date': AdminDateWidget(),
@@ -87,7 +87,7 @@ class CourseForm(ModelForm):
         model = self.cleaned_data['course_model']
         prix = json.loads(self.cleaned_data['course_prix'])
         if re.match('^[0-9]+$', model):
-            course = Course.objects.get(id=model)
+            course = Edition.objects.get(id=model)
             original = course
             instance = super().save(commit=False)
             instance.is_active = False
@@ -153,13 +153,13 @@ class ImportResultatForm(Form):
     tours_timestamp_format = ChoiceField(label=_('Format du temps'), choices=(('float', _('Nombre de secondes')), ('HMS', _('HH:MM:SS.xxx'))))
 
 class TranspondeurUploadForm(Form):
-    mode = ChoiceField(label=_(u"Mode d'assignation"), choices=Course.TRANSPONDEUR_MODE_CHOICES, widget=RadioSelect())
+    mode = ChoiceField(label=_(u"Mode d'assignation"), choices=Edition.TRANSPONDEUR_MODE_CHOICES, widget=RadioSelect())
     fichier = FileField(label=_(u'Fichier des transpondeurs (1 code par ligne)'))
 
 
 class DossardFondForm(ModelForm):
     class Meta:
-        model = Course
+        model = Edition
         fields = ('fond_dossard', )
 
 
@@ -173,10 +173,10 @@ class TranspondeurForm(ModelForm):
         course = course or (self.instance.course if self.instance and self.instance.pk else None)
         self.fields['equipe'].queryset = Equipe.objects.filter(course=course)
         self.fields['equipier'].queryset = Equipier.objects.filter(equipe__course=course)
-        if course and course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPE:
+        if course and course.transpondeur_mode == Edition.TRANSPONDEUR_MODE_EQUIPE:
             self.fields['equipier'].widget = HiddenInput()
             self.fields['equipier'].required = False
-        elif course and course.transpondeur_mode == Course.TRANSPONDEUR_MODE_EQUIPIER:
+        elif course and course.transpondeur_mode == Edition.TRANSPONDEUR_MODE_EQUIPIER:
             self.fields['equipe'].widget = HiddenInput()
             self.fields['equipe'].required = False
 
