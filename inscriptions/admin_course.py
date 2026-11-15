@@ -20,7 +20,7 @@ from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingH
 from decimal import InvalidOperation
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .forms import CourseForm, EditionForm, CourseFieldsForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
+from .forms import CourseForm, EditionForm, CourseFieldsForm, CourseSettingsForm, ImportResultatForm, AdminPaiementForm, TranspondeurUploadForm, TranspondeurForm, DossardFondForm
 from .utils import ChallengeUpdateThread, send_mail, parse_csv_time
 from account.views import LogoutView
 from datetime import datetime, timedelta
@@ -1228,8 +1228,6 @@ class TranspondeurAdmin(CourseFilteredObjectAdmin):
 site.register(Transpondeur, TranspondeurAdmin)
 
 class CourseAdmin(admin.ModelAdmin):
-    class Media:
-        js = ('custom_admin/course.js', )
     form = CourseFieldsForm
     exclude = ('course', 'transpondeur_mode')
     def get_fieldsets(self, request, obj=None):
@@ -1326,6 +1324,49 @@ class CourseAdmin(admin.ModelAdmin):
         return HttpResponse(json.dumps(models))
 
 site.register(Edition, CourseAdmin)
+
+
+class CourseSettingsAdmin(admin.ModelAdmin):
+    """Reglages de la course (organisateur, ville, paiement, description...), distincts
+    de ceux de l'edition. Acces par accreditation, comme `est_organisateur`."""
+    form = CourseSettingsForm
+
+    class Media:
+        js = ('custom_admin/course.js', )
+
+    def get_fieldsets(self, request, obj=None):
+        return ((None, {'classes': ('wide', 'extrapretty'), 'fields': self.get_fields(request, obj)}), )
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request).filter(uid=request.COOKIES['course_uid'].partition('/')[0])
+        if not request.user.is_superuser:
+            qs = qs.filter(accreditations__user=request.user, accreditations__role__gt='')
+        return qs
+
+    def has_module_permission(self, request):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_change_permission(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        if 'course_uid' not in request.COOKIES:
+            return False
+        return request.user.is_superuser or est_organisateur(request.user, request.COOKIES['course_uid'])
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        return self.change_view(request, str(self.get_queryset(request)[0].id))
+
+    def response_change(self, request, obj):
+        return HttpResponseRedirect('/course/')
+
+site.register(Course, CourseSettingsAdmin)
 
 
 class CategorieAdmin(CourseFilteredObjectAdmin):

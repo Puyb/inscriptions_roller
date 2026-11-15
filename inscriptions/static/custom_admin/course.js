@@ -1,6 +1,6 @@
 $(function() {
     var mode = '';
-    if(!$('#edition_form').length) return;
+    if(!$('#course_form').length) return;
     $('.field-stripe_public>div').append($('<div id="stripe">'));
     var change = ask => {
         var sk = $('#id_stripe_secret').val();

@@ -904,3 +904,41 @@ class TrackingTestCase(BaseTestCase):
         mw(RequestFactory().get('/blank.gif', {'message_id': self.mail.uid}))
         self.mail.refresh_from_db()
         self.assertIsNotNone(self.mail.read)
+
+
+class ReglagesCourseEditionTest(BaseTestCase):
+    """Les reglages de la course (`/course/inscriptions/course/`) et ceux de l'edition
+    (`/course/inscriptions/edition/`) sont deux ecrans distincts."""
+
+    def test_ecrans_separes(self):
+        edition = CourseFactory()
+        login_organizer(self.client, edition)
+        r = self.client.get('/course/inscriptions/course/', follow=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('organisateur', r.context['adminform'].form.fields)
+        self.assertNotIn('date', r.context['adminform'].form.fields)
+        r = self.client.get('/course/inscriptions/edition/', follow=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertIn('date', r.context['adminform'].form.fields)
+        self.assertNotIn('organisateur', r.context['adminform'].form.fields)
+
+    def test_modification_de_la_course(self):
+        edition = CourseFactory()
+        login_organizer(self.client, edition)
+        url = '/course/inscriptions/course/%d/change/' % edition.course_id
+        form = self.client.get(url).context['adminform'].form
+        data = {k: (v if v is not None else '') for k, v in form.initial.items()
+                if k not in ('logo', 'ville2')}
+        data['organisateur'] = 'Nouvel organisateur'
+        r = self.client.post(url, data)
+        self.assertRedirects(r, '/course/', fetch_redirect_response=False)
+        edition.course.refresh_from_db()
+        self.assertEqual(edition.course.organisateur, 'Nouvel organisateur')
+
+    def test_refuse_sans_accreditation(self):
+        edition = CourseFactory()
+        autre = CourseFactory()
+        login_organizer(self.client, autre)
+        set_course_cookie(self.client, edition)
+        r = self.client.get('/course/inscriptions/course/%d/change/' % edition.course_id)
+        self.assertNotEqual(r.status_code, 200)

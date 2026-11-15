@@ -91,13 +91,28 @@ def _champs_course():
     return {nom: Course._meta.get_field(nom).formfield() for nom in COURSE_FIELDS}
 
 
-class CourseFieldsForm(CourseFieldsMixin, ModelForm):
-    """Formulaire d'edition (admin organisateur) : champs de l'edition + de sa course."""
-    locals().update(_champs_course())
+class CourseFieldsForm(ModelForm):
+    """Formulaire d'edition (admin organisateur) : champs propres a l'edition.
+    Les champs de la course se modifient via `CourseSettingsForm`."""
 
     class Meta:
         model = Edition
         exclude = ('course', )
+
+    def validate_unique(self):
+        super().validate_unique()
+        uid = self.cleaned_data.get('uid')
+        if uid and self.instance.course_id and Edition.objects.filter(
+                course_id=self.instance.course_id, uid=uid).exclude(pk=self.instance.pk).exists():
+            self.add_error('uid', _("Une édition de cette course a déjà cet identifiant."))
+
+
+class CourseSettingsForm(ModelForm):
+    """Formulaire de reglage de la course (admin organisateur)."""
+
+    class Meta:
+        model = Course
+        fields = ('nom', 'logo') + tuple(f for f in COURSE_FIELDS if f != 'ville2') + ('ville2', )
 
 
 def _un_an_plus_tard(valeur):

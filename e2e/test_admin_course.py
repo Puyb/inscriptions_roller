@@ -8,6 +8,7 @@ import re
 from playwright.sync_api import expect
 
 COURSE_URL = '/course/inscriptions/edition/'
+COURSE_SETTINGS_URL = '/course/inscriptions/course/'
 CORS = {
     'access-control-allow-origin': '*',
     'access-control-allow-headers': '*',
@@ -114,7 +115,7 @@ def test_increase_dates_are_saved_and_reloaded(admin_page):
 
 def test_stripe_no_keys_shows_nothing(admin_page):
     calls = stripe_mock(admin_page)
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     expect(admin_page.locator('#stripe')).to_have_text('')
     assert calls == []
 
@@ -122,7 +123,7 @@ def test_stripe_no_keys_shows_nothing(admin_page):
 def test_stripe_rejects_malformed_secret_key_without_calling_stripe(admin_page):
     calls = stripe_mock(admin_page)
     admin_page.on('dialog', lambda d: d.dismiss())
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     admin_page.fill('#id_stripe_secret', 'abc')
     admin_page.locator('#id_stripe_secret').dispatch_event('change')
     expect(admin_page.locator('#stripe')).to_contain_text('commence par sk_live_ ou sk_test_')
@@ -132,7 +133,7 @@ def test_stripe_rejects_malformed_secret_key_without_calling_stripe(admin_page):
 def test_stripe_requires_public_key(admin_page):
     stripe_mock(admin_page)
     admin_page.on('dialog', lambda d: d.dismiss())
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     set_stripe_keys(admin_page, 'sk_test_abc', '')
     expect(admin_page.locator('#stripe')).to_contain_text('clef public Stripe doit être entrée')
 
@@ -140,7 +141,7 @@ def test_stripe_requires_public_key(admin_page):
 def test_stripe_missing_webhook_can_be_installed_with_button(admin_page):
     calls = stripe_mock(admin_page, webhooks=[])
     admin_page.on('dialog', lambda d: d.dismiss())
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     set_stripe_keys(admin_page, 'sk_test_abc', 'pk_test_abc')
     expect(admin_page.locator('#stripe')).to_contain_text("n'est pas installé")
     expect(admin_page.locator('#stripe')).to_contain_text('(mode test)')
@@ -155,14 +156,14 @@ def test_stripe_confirm_dialog_installs_automatically(admin_page):
     stripe_mock(admin_page, webhooks=[])
     messages = []
     admin_page.on('dialog', lambda d: (messages.append(d.message), d.accept()))
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     set_stripe_keys(admin_page, 'sk_test_abc', 'pk_test_abc')
     expect(admin_page.locator('#id_stripe_endpoint_secret')).to_have_value('whsec_e2e')
     assert any('configurer le webhook' in m for m in messages)
 
 
 def test_stripe_existing_webhook_without_secret_offers_reinstall(admin_page):
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     url = '%s/e2e/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
     calls = stripe_mock(admin_page, webhooks=[{'id': 'we_123', 'url': url}], secret='whsec_new')
     admin_page.on('dialog', lambda d: d.dismiss())
@@ -176,7 +177,7 @@ def test_stripe_existing_webhook_without_secret_offers_reinstall(admin_page):
 
 
 def test_stripe_existing_webhook_with_secret_is_reported_installed(admin_page):
-    admin_page.goto(COURSE_URL)
+    admin_page.goto(COURSE_SETTINGS_URL)
     url = '%s/e2e/e2e/stripe/webhook/' % re.match(r'(https?://[^/]+)', admin_page.url).group(1)
     stripe_mock(admin_page, webhooks=[{'id': 'we_123', 'url': url}])
     admin_page.on('dialog', lambda d: d.dismiss())
