@@ -689,3 +689,15 @@ class ChallengeViewsTestCase(BaseTestCase):
         for key, value in (('challenge_uid', 'nope'), ('participation_id', 999999), ('course_uid', 'nope/nope')):
             url = reverse('inscriptions_get_participations_to_move', kwargs=dict(base, **{key: value}))
             self.assertEqual(self.client.get(url).status_code, 404, key)
+
+
+class LienResultatsCoursePageTest(BaseTestCase):
+    def test_lien_resultats_seulement_si_resultats(self):
+        edition = CourseFactory(date=date.today() - timedelta(days=30),
+                                date_fermeture=date.today() - timedelta(days=40))
+        edition.course.active = True
+        edition.course.save()
+        url = '/%s/' % edition.course.uid
+        self.assertNotContains(self.client.get(url), '/resultats/')
+        EquipeFactory(course=edition, position_generale=1)
+        self.assertContains(self.client.get(url), '/resultats/')

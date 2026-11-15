@@ -61,7 +61,7 @@
           <p>
             <a href="{% url "inscriptions_list" course_uid=edition.key %}">{% trans "Liste des inscrits" %}</a><br />
             <a href="{% url "inscriptions_stats" course_uid=edition.key %}">{% trans "Statistiques" %}</a>
-            {% if edition.fermee %}<br /><a href="{% url "inscriptions_resultats" course_uid=edition.key %}">{% trans "Résultats" %}</a>{% endif %}
+            {% if edition.fermee and edition.a_resultats %}<br /><a href="{% url "inscriptions_resultats" course_uid=edition.key %}">{% trans "Résultats" %}</a>{% endif %}
           </p>
           {% endif %}
         </div>

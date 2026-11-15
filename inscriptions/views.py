@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery
+from django.db.models import Count, Sum, Min, F, Q, Prefetch, Value, CharField, DecimalField, Case, When, IntegerField, OuterRef, Subquery, Exists
 from django.db.models.functions import Coalesce, Concat
 from django.db.models.query import prefetch_related_objects
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError, Http404
@@ -522,7 +522,8 @@ def index(request):
 def course_page(request, course_uid):
     """Page d'une course : ses editions publiees et leurs liens."""
     course = get_object_or_404(Course, uid=course_uid, active=True)
-    course.charge_editions_publiees(course.editions.filter(active=True).order_by('date').prefetch_related('challenges'))
+    course.charge_editions_publiees(course.editions.filter(active=True).order_by('date').prefetch_related('challenges').annotate(
+        a_resultats=Exists(Equipe.objects.filter(course=OuterRef('pk'), position_generale__isnull=False))))
     if not course.editions_publiees:
         raise Http404()
     return TemplateResponse(request, 'course.html', {

@@ -1,0 +1,7 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block content %}
+<p class="help">{% trans "Les accréditations sont communes à toutes les éditions de cette course." %}</p>
+{{ block.super }}
+{% endblock %}

@@ -1335,7 +1335,11 @@ class CourseSettingsAdmin(admin.ModelAdmin):
         js = ('custom_admin/course.js', )
 
     def get_fieldsets(self, request, obj=None):
-        return ((None, {'classes': ('wide', 'extrapretty'), 'fields': self.get_fields(request, obj)}), )
+        return ((None, {
+            'classes': ('wide', 'extrapretty'),
+            'description': _("Ces réglages sont communs à toutes les éditions de cette course. Les réglages propres à une édition (dates, limites…) se modifient dans « Réglages de l'édition »."),
+            'fields': self.get_fields(request, obj),
+        }), )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request).filter(uid=request.COOKIES['course_uid'].partition('/')[0])
@@ -1390,6 +1394,8 @@ site.register(TemplateMail, TemplateMailAdmin)
 
 
 class AccreditationAdmin(CourseFilteredObjectAdmin):
+    change_list_template = 'admin/inscriptions/accreditation/change_list.html'
+    change_form_template = 'admin/inscriptions/accreditation/change_form.html'
     def get_queryset(self, request):
         # les accreditations portent sur la Course ; le cookie designe une edition
         qs = admin.ModelAdmin.get_queryset(self, request)
