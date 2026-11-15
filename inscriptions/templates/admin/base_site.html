@@ -14,6 +14,37 @@ var COURSE_UID = "{{ COURSE.key }}";
     <script src="{{ STATIC_URL }}/admin.js"></script>
     {% include "admin/_scripts.html" %}
     {% include "admin/_styles.html" %}
+    <style>
+.uid-prefix-field { align-items: center; gap: 4px; }
+.uid-prefix-field .uid-prefix { white-space: nowrap; }
+#dates_augmentation_table { width: auto; }
+#dates_augmentation_table td { border: 0; padding: 4px 10px 4px 0; background: none; }
+#dates_augmentation_table + .add-row { margin: 4px 0 0; padding: 0; border: 0; background: none; }
+    </style>
+    <script>
+    // champs date : on garde le calendrier, sans le raccourci « Aujourd'hui »
+    (function () {
+        function sansAujourdhui() {
+            document.querySelectorAll('.datetimeshortcuts').forEach(function (sp) {
+                var liens = sp.querySelectorAll('a');
+                if (sp.querySelector('.clock-icon') || liens.length < 2) return;
+                var maintenant = liens[0];
+                if (maintenant.previousSibling) maintenant.previousSibling.remove();
+                if (maintenant.nextSibling) maintenant.nextSibling.remove();
+                maintenant.remove();
+            });
+        }
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                sansAujourdhui();
+                if (window.DateTimeShortcuts) {
+                    var addCalendar = DateTimeShortcuts.addCalendar;
+                    DateTimeShortcuts.addCalendar = function () { addCalendar.apply(this, arguments); sansAujourdhui(); };
+                }
+            }, 0);
+        });
+    })();
+    </script>
 {{ block.super }}
 {% endblock %}
 

@@ -119,7 +119,7 @@ $(function() {
         $('input[name=dates_augmentation]').each(function() {
             const input = $(this);
             input.attr('hidden', true);
-            input.before('<table id="dates_augmentation_table"></table><a href="#">Ajouter une date d\'augmentation</a>')
+            input.before('<table id="dates_augmentation_table"></table><p class="add-row"><a class="addlink" href="#">Ajouter une date d\'augmentation</a></p>')
             const values = input.val().split(',');
             function update() {
                 const res = [];
@@ -133,19 +133,21 @@ $(function() {
                 generate_prices($('[name=course_model]:checked').val());
             }
             function addDate(d = '') {
-                $('#dates_augmentation_table').append('<tr><td><input value="' + d + '"></td><td><button type="button">X</button></td></tr>')
+                $('#dates_augmentation_table').append('<tr><td><input size="10" value="' + d + '"></td><td><a href="#" class="deletelink">Supprimer</a></td></tr>')
                 $('#dates_augmentation_table tr:last input').each(function() {
                     DateTimeShortcuts.addCalendar(this);
                     $(this).blur(update);
                     $(this).change(update);
                 });
-                $('#dates_augmentation_table tr:last button').click(function() {
+                $('#dates_augmentation_table tr:last .deletelink').click(function(e) {
+                    e.preventDefault();
                     $(this).parents('tr').remove();
                     update();
                 });
             }
             values.map(addDate);
-            $('#dates_augmentation_table+a').click(function() {
+            $('#dates_augmentation_table + .add-row a').click(function(e) {
+                e.preventDefault();
                 addDate();
             });
         });

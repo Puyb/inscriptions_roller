@@ -100,7 +100,7 @@ class PrefixedTextInput(TextInput):
         self.prefix = prefix
 
     def render(self, name, value, attrs=None, renderer=None):
-        return format_html('<span class="uid-prefix">{}/</span> {}', self.prefix, super().render(name, value, attrs, renderer))
+        return format_html('<div class="flex-container uid-prefix-field"><span class="uid-prefix">{}/</span>{}</div>', self.prefix, super().render(name, value, attrs, renderer))
 
 
 class CourseFieldsForm(ModelForm):

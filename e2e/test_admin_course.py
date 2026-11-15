@@ -86,7 +86,7 @@ def test_invalid_date_is_ignored_and_remove_button_drops_the_row(admin_page):
     dates(admin_page).nth(1).fill('2099-03-03')
     dates(admin_page).nth(1).blur()
     expect(hidden_dates(admin_page)).to_have_value(before + ',2099-03-03')
-    admin_page.locator('#dates_augmentation_table tr').nth(1).locator('button').click()
+    admin_page.locator('#dates_augmentation_table tr').nth(1).locator('.deletelink').click()
     expect(dates(admin_page)).to_have_count(1)
     expect(hidden_dates(admin_page)).to_have_value(before)
 
@@ -105,7 +105,7 @@ def test_increase_dates_are_saved_and_reloaded(admin_page):
     expect(hidden_dates(admin_page)).to_have_value(original + ',2099-04-04')
 
     # restore
-    admin_page.locator('#dates_augmentation_table tr').nth(1).locator('button').click()
+    admin_page.locator('#dates_augmentation_table tr').nth(1).locator('.deletelink').click()
     admin_page.click('[name=_save]')
     admin_page.goto(COURSE_URL)
     expect(hidden_dates(admin_page)).to_have_value(original)
