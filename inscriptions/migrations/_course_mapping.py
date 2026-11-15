@@ -8,7 +8,7 @@ COURSES = {
         '6hdp13': '2013', '6hdp14': '2014', '6hdp15': '2015', '6hdp16': '2016',
         '6hdp17': '2017', '6hdeparis18': '2018', '6hdeparis2019': '2019',
         '6hdeparis2020': '2020', '6hdp21': '2021', '6hdp2022': '2022',
-        '6hdp2023': '2023', '6hdeparis25': '2025', '6hdeparis2026': '2026'}},
+        '6hdp2023': '2023', '6hdeparis25': '2025', '6hdeparis2026': '2026', '6hdeparis2027': '2027'}},
     'rollenseine': {'nom': "Roll'en Seine - 6h de Mont-Saint-Aignan", 'editions': {
         '6hmsa16': '2016', '6hmsa17': '2017', '6hmsa18': '2018', '6hmsa19': '2019'}},
     'rollersday': {'nom': 'Rollers Day de Sainte-Adresse', 'editions': {
