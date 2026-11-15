@@ -219,17 +219,15 @@ class CourseChooseAskTestCase(AdminTestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIn(self.other_course.course, [c['course'] for c in r.context['courses_admin']])
 
-    def test_course_choose_hides_old_courses_unless_old(self):
+    def test_course_choose_flags_old_editions(self):
         old = CourseFactory(date=date(2000, 1, 1))
         Accreditation.objects.create(user=self.user, course=old.course, role='admin')
-        def editions(r):
-            return [e for c in r.context['courses'] for e in c['editions']]
         r = self.client.get('/course/choose/')
-        self.assertNotIn(old, editions(r))
-        self.assertIn(old.course, [c['course'] for c in r.context['courses']])  # la course reste listee
+        editions = {e: e.ancienne for c in r.context['courses'] for e in c['editions']}
+        self.assertTrue(editions[old])
+        self.assertFalse(editions[self.course])
         self.assertEqual(sum(c['masquees'] for c in r.context['courses']), 1)
-        r = self.client.get('/course/choose/', {'old': ''})
-        self.assertIn(old, editions(r))
+        self.assertContains(r, 'edition-ancienne')
 
     def test_course_setter_sets_cookies(self):
         self.client.cookies.clear()

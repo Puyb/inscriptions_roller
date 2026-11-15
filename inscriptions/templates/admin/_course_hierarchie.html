@@ -8,9 +8,9 @@
         &middot; <a href="/course/inscriptions/edition/add/?course={{ entree.course.uid }}">{% trans "Nouvelle édition" %}</a>
         <ul>
             {% for edition in entree.editions %}
-            <li><a href="/{{ edition.key }}/admin/">{{ edition.nom }} ({{ edition.date }})</a>{% if not edition.active %} {% trans "(non publiée)" %}{% endif %}</li>
+            <li{% if edition.ancienne %} class="edition-ancienne" hidden{% endif %}><a href="/{{ edition.key }}/admin/">{{ edition.nom }} ({{ edition.date }})</a>{% if not edition.active %} {% trans "(non publiée)" %}{% endif %}</li>
             {% endfor %}
-            {% if entree.masquees %}<li><em>{% blocktrans count n=entree.masquees %}{{ n }} ancienne édition masquée{% plural %}{{ n }} anciennes éditions masquées{% endblocktrans %}</em></li>{% endif %}
+            {% if entree.masquees %}<li><a href="#" data-afficher-anciennes><em>{% blocktrans count n=entree.masquees %}{{ n }} ancienne édition masquée{% plural %}{{ n }} anciennes éditions masquées{% endblocktrans %}</em></a></li>{% endif %}
         </ul>
     </li>
     {% endfor %}

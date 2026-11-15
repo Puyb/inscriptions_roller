@@ -156,7 +156,7 @@ COURSE_FIELDS = (
     'paypal', 'frais_paypal_inclus',
     'stripe_secret', 'stripe_public', 'stripe_endpoint_secret', 'frais_stripe_inclus',
     'helloasso_organisation', 'helloasso_id', 'helloasso_secret', 'helloasso_sandbox',
-    'ordre', 'adresse',
+    'ordre', 'adresse', 'description',
 )
 
 
@@ -183,6 +183,8 @@ class Course(models.Model):
     ordre               = models.CharField(_(u'Ordre des chèques'), max_length=200)
     adresse             = models.TextField(_(u'Adresse'), blank=True)
     active              = models.BooleanField(_(u'Activée'), default=False)
+    description         = models.TextField(_('Description'), blank=True, help_text=_("Texte de présentation affiché sur la page de la course, à côté du logo, avant la liste des éditions."))
+    archive             = models.BooleanField(_('Archivée'), default=False, help_text=_("Course sans édition récente, listée dans « Anciennes courses ». Désactivé automatiquement à la création d'une nouvelle édition."))
 
     def __str__(self):
         return self.nom
@@ -341,6 +343,9 @@ class Edition(models.Model):
                 candidat = '%s-%d' % (base, n)
                 n += 1
             self.uid = candidat
+        if not self.pk and self.course.archive:  # nouvelle edition : la course sort des archives
+            self.course.archive = False
+            self._course_modifiee = True
         if self._course_modifiee:
             self.course.save()
             self._course_modifiee = False

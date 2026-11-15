@@ -59,8 +59,8 @@ class EditionInline(admin.TabularInline):
 
 class CourseAdmin(admin.ModelAdmin):
     """Validation d'une course par un superutilisateur (champ `active`)."""
-    list_display = ('uid', 'nom', 'organisateur', 'ville', 'active2', )
-    list_filter = ('active', )
+    list_display = ('uid', 'nom', 'organisateur', 'ville', 'active2', 'archive', )
+    list_filter = ('active', 'archive', )
     search_fields = ('uid', 'nom', 'organisateur', )
     inlines = (EditionInline, )
 

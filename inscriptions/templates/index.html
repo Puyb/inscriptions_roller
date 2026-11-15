@@ -5,14 +5,14 @@
 
 {% block body %}
 
-{% for course in prochaines_courses %}
+{% for course in courses %}
 {% if forloop.first %}
     <section class="container">
-      <h1>{% trans "Prochaines courses" %}</h1>
+      <h1>{% trans "Courses" %}</h1>
       <div class="row equal">{% endif %}
         <div class="col-md-4">
             <div class="thumbnail">
-                {% with edition=course.prochaine_edition %}
+                {% with edition=course.edition_affichee %}
                 <a href="{% url "course_page" course_uid=course.uid %}" style="background: url({{ MEDIA_URL }}{% if edition.logo %}{{ edition.logo }}{% else %}{{ course.logo }}{% endif %}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%; display: block">
                     {% for challenge in edition.challenges.all %}
                     <span class="badge" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 100px; width: 100px; display: block;"></span>

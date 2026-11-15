@@ -3,14 +3,31 @@
 {% block content %}
 {% include "admin/_course_hierarchie.html" with titre=_("Sélectionnez votre course :") liste=courses %}
 {% if request.user.is_superuser %}
+{% if courses_admin %}
+<p id="courses-admin-lien"><a href="#" data-afficher-courses-admin><em>{% blocktrans count n=courses_admin|length %}{{ n }} course sans accréditation masquée{% plural %}{{ n }} courses sans accréditation masquées{% endblocktrans %}</em></a></p>
+<div id="courses-admin" hidden>
 {% include "admin/_course_hierarchie.html" with titre=_("Courses sans accreditation :") liste=courses_admin %}
+</div>
+{% endif %}
 <a href="/admin/"><span>{% trans "Superadmin !" %}</span></a><br />
 {% endif %}
 <a href="/course/inscriptions/edition/add/"><span>{% trans "Créer une nouvelle course" %}</span></a><br />
 <a href="/course/ask"><span>{% trans "Demander à rejoindre l'équipe d'une course" %}</span></a><br />
-{% if 'old' in request.GET %}
-    <a href="/course/choose/"><span>{% trans "Cacher les anciennes éditions" %}</span></a>
-{% else%}
-    <a href="/course/choose/?old"><span>{% trans "Afficher les anciennes éditions" %}</span></a>
-{% endif %}
+<script>
+document.addEventListener('click', function (e) {
+    var lien = e.target.closest('[data-afficher-anciennes]');
+    if (lien) {
+        e.preventDefault();
+        lien.closest('ul').querySelectorAll('.edition-ancienne').forEach(function (li) { li.hidden = false; });
+        lien.closest('li').hidden = true;
+        return;
+    }
+    lien = e.target.closest('[data-afficher-courses-admin]');
+    if (lien) {
+        e.preventDefault();
+        document.getElementById('courses-admin').hidden = false;
+        document.getElementById('courses-admin-lien').hidden = true;
+    }
+});
+</script>
 {% endblock %}

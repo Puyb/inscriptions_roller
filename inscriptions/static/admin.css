@@ -1,16 +1,20 @@
 form .aligned p { font-size: 12px; margin-top: -1px; }
-.field-box.field-nombre label { width: 140px; }
-.field-box.field-nombre { width: 180px; }
+.fieldBox.field-nombre label { width: 140px; }
+.fieldBox.field-nombre { width: 180px; }
 
-.field-box.field-paiement label { color: red; font-weight: bold; }
-.field-box.field-piece_jointe_valide label { color: red; font-weight: bold; }
-.field-box.field-piece_jointe2_valide label { color: red; font-weight: bold; }
-.field-box.field-autorisation_valide label { color: red; font-weight: bold; }
+.fieldBox.field-paiement label { color: red; font-weight: bold; }
+.fieldBox.field-piece_jointe_valide label { color: red; font-weight: bold; }
+.fieldBox.field-piece_jointe2_valide label { color: red; font-weight: bold; }
+.fieldBox.field-autorisation_valide label { color: red; font-weight: bold; }
 
 .dashboard .module table td a {
     margin: 0 10px;
 }
 .dashboard #content { width: auto; }
+.dashboard .module.summary tr th { word-break: normal }
+.dashboard .module.icons label { color: var(--body-fg); }
 
-#equipier_set-group .add-row { display: none; }
-#equipier_set-group h3 .delete { display: none; }
+#equipier_set-group .add-row { display: none !important; }
+#equipier_set-group h3 .delete { display: none !important; }
+
+.aligned .checkbox-row .vCheckboxLabel { width: auto; min-width: 0; }

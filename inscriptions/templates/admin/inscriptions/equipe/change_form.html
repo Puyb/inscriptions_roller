@@ -16,8 +16,10 @@
             root.append(
 '    <div class="form-row">' +
 '        <div>' +
-'            <label>' + EXTRA[k] + '</label>' +
-'            <div class="readonly">' + v + '</div>' +
+'            <div class="flex-container">' +
+'                <label>' + EXTRA[k] + '</label>' +
+'                <div class="readonly">' + v + '</div>' +
+'            </div>' +
 '        </div>' +
 '    </div>');
         }
@@ -26,12 +28,16 @@
     {% for e in original.equipier_set.all %}
     build_extra($('#equipier_set-{{ forloop.counter0 }} fieldset:last'), {{ e.extra|json }});
     {% endfor %}
-    $('.form-row.field-prix>div').addClass('field-box');
-    $('.form-row.field-prix').append(
-'        <div class="field-box">' +
-'            <label>Payé</label>' +
-'            <div class="readonly"><a href="../../../paiement/?equipe_id={{ original.id }}">{% if original.offert %}Offert{% if original.montant_paiements %} ({{ original.montant_paiements }} payés){% endif %}{% else %}{{ original.montant_paiements }}{% endif %} (voir les paiements)</a> <button type="button" onclick="location.href=\'../../../paiement/add/?equipe_id={{ original.id }}\';">Ajouter un paiement</button></div>' +
-'        </div>')
+    // ligne "Prix / Payé" : structure multi-champs de l'admin Django (flex-container form-multiline)
+    var $prix = $('.form-row.field-prix');
+    $prix.addClass('field-paye');
+    $prix.find('.flex-container').addClass('fieldBox');
+    $prix.children('div').wrapAll('<div class="flex-container form-multiline"></div>');
+    $prix.find('.form-multiline').append(
+'<div><div class="flex-container fieldBox field-paye">' +
+'    <label class="inline">Payé :</label>' +
+'    <div class="readonly"><a href="../../../paiement/?equipe_id={{ original.id }}">{% if original.offert %}Offert{% if original.montant_paiements %} ({{ original.montant_paiements }} payés){% endif %}{% else %}{{ original.montant_paiements }}{% endif %} (voir les paiements)</a> <button type="button" onclick="location.href=\'../../../paiement/add/?equipe_id={{ original.id }}\';">Ajouter un paiement</button></div>' +
+'</div></div>');
 </script>
 {% endif %}
 {% endblock %}

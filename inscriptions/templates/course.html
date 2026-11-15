@@ -21,23 +21,51 @@
     </div>
 </div>
 
+{% if course_obj.description %}
+<section class="container">
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="media">
+        {% if course_obj.logo %}
+        <div class="media-left">
+          <img src="{{ MEDIA_URL }}{{ course_obj.logo }}" width="100" class="visible-xs" />
+          <img src="{{ MEDIA_URL }}{{ course_obj.logo }}" width="200" class="hidden-xs" />
+        </div>
+        {% endif %}
+        <div class="media-body">{{ course_obj.description|linebreaks }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="container">
   <h2>{% trans "Éditions" %}</h2>
-  <div class="list-group">
+  <div class="row equal">
     {% for edition in editions %}
-    <div class="list-group-item">
-      <h4 class="list-group-item-heading">{{ edition.nom }}</h4>
-      <p class="list-group-item-text">
-        {% blocktrans with date=edition.date %}le {{ date }}{% endblocktrans %}
-        {% if not edition.lien_externe %}
-        &middot; <a href="{% url "inscriptions_list" course_uid=edition.key %}">{% trans "Liste des inscrits" %}</a>
-        &middot; <a href="{% url "inscriptions_stats" course_uid=edition.key %}">{% trans "Statistiques" %}</a>
-        {% if edition.fermee %}&middot; <a href="{% url "inscriptions_resultats" course_uid=edition.key %}">{% trans "Résultats" %}</a>{% endif %}
-        {% endif %}
-        {% if edition.ouverte and not edition.fermee %}
-        &middot; <a href="{% if edition.lien_externe %}{{ edition.lien_externe }}{% else %}{% url "inscriptions_create" course_uid=edition.key %}{% endif %}"><strong>{% trans "Inscription" %}</strong></a>
-        {% endif %}
-      </p>
+    <div class="col-md-4">
+      <div class="thumbnail">
+        <div style="background: url({{ MEDIA_URL }}{% if edition.logo %}{{ edition.logo }}{% else %}{{ course_obj.logo }}{% endif %}) no-repeat 50% 50%; background-size: contain; height: 200px; width: 100%">
+          {% for challenge in edition.challenges.all %}
+          <span class="badge" style="background: url({{ MEDIA_URL }}{{ challenge.logo }}) no-repeat 50% 50%; background-size: contain; height: 100px; width: 100px; display: block;"></span>
+          {% endfor %}
+        </div>
+        <div class="caption">
+          <h3>{{ edition.nom }}</h3>
+          <p>{% blocktrans with date=edition.date %}le {{ date }}{% endblocktrans %}</p>
+          {% if edition.ouverte and not edition.fermee %}
+          <a class="btn btn-lg btn-block btn-primary" role="button" href="{% if edition.lien_externe %}{{ edition.lien_externe }}{% else %}{% url "inscriptions_create" course_uid=edition.key %}{% endif %}">{% trans "Inscription" %}</a><br />
+          <p>{% blocktrans with date=edition.dernier_jour_inscription %}Inscriptions jusqu'au {{ date }} inclus{% endblocktrans %}</p>
+          {% endif %}
+          {% if not edition.lien_externe %}
+          <p>
+            <a href="{% url "inscriptions_list" course_uid=edition.key %}">{% trans "Liste des inscrits" %}</a><br />
+            <a href="{% url "inscriptions_stats" course_uid=edition.key %}">{% trans "Statistiques" %}</a>
+            {% if edition.fermee %}<br /><a href="{% url "inscriptions_resultats" course_uid=edition.key %}">{% trans "Résultats" %}</a>{% endif %}
+          </p>
+          {% endif %}
+        </div>
+      </div>
     </div>
     {% endfor %}
   </div>

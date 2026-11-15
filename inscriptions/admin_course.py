@@ -52,6 +52,8 @@ def getCourse(request, qs=Edition.objects.all()):
     return qs.get(course__accreditations__user=request.user, **lookup)
 
 class CourseAdminSite(admin.sites.AdminSite):
+    enable_nav_sidebar = False
+
     def has_permission(self, request):
         if not request.user.is_authenticated:
             return False
@@ -92,22 +94,27 @@ class CourseAdminSite(admin.sites.AdminSite):
     def course_choose(self, request):
         request.current_app = self.name
         accreditees = Course.objects.filter(accreditations__user=request.user)
-        limite = (datetime.now() - timedelta(days=60)).date()
-        voir_tout = 'old' in request.GET
+        limite = (datetime.now() - timedelta(days=3 * 365)).date()
 
         def hierarchie(courses):
-            """[{course, editions (les plus recentes d'abord), masquees}] : sans ?old, les
-            editions de plus de 60 jours sont masquees (la course reste, pour y ajouter une edition)."""
+            """[{course, editions, masquees}] : toutes les editions (les plus recentes d'abord);
+            celles de plus de 3 ans sont marquees `ancienne` (masquees dans le template, revelees en JS)."""
             resultat = []
             for course in courses.prefetch_related('editions').order_by('nom'):
                 editions = sorted(course.editions.all(), key=lambda e: e.date, reverse=True)
-                visibles = [e for e in editions if voir_tout or e.date >= limite]
-                resultat.append({'course': course, 'editions': visibles, 'masquees': len(editions) - len(visibles)})
+                for e in editions:
+                    e.ancienne = e.date < limite
+                resultat.append({'course': course, 'editions': editions,
+                                 'masquees': sum(1 for e in editions if e.ancienne)})
             return resultat
+
+        courses_admin = None
+        if request.user.is_superuser:
+            courses_admin = hierarchie(Course.objects.exclude(pk__in=accreditees))
 
         return TemplateResponse(request, 'admin/course_choose.html', dict(self.each_context(request),
             courses=hierarchie(accreditees),
-            courses_admin=hierarchie(Course.objects.exclude(pk__in=accreditees)) if request.user.is_superuser else None,
+            courses_admin=courses_admin,
         ))
 
     @transaction.atomic

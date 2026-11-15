@@ -28,27 +28,31 @@
             <form method="post">
                 <fieldset class="module aligned ">
                     <div class="form-row field-numero field-nom field-club">
-                        <div class="field-box field-numero">
+                        <div class="flex-container form-multiline">
+                        <div><div class="flex-container fieldBox field-numero">
                             <label>Numéro:</label>
                             <p>{{ equipier.equipe.numero }}</p>
-                        </div>
-                        <div class="field-box field-nom">
+                        </div></div>
+                        <div><div class="flex-container fieldBox field-nom">
                             <label class="inline">Nom d'équipe:</label>
                             <p>{{ equipier.equipe.nom }}</p>
-                        </div>
-                        <div class="field-box field-club">
+                        </div></div>
+                        <div><div class="flex-container fieldBox field-club">
                             <label class="inline">Club:</label>
                             <p>{{ equipier.equipe.club }}</p>
+                        </div></div>
                         </div>
                     </div>
                     <div class="form-row field-categorie field-nombre">
-                        <div class="field-box field-categorie">
+                        <div class="flex-container form-multiline">
+                        <div><div class="flex-container fieldBox field-categorie">
                             <label>Categorie:</label>
                             <p>{{ equipier.equipe.categorie }}</p>
-                        </div>
-                        <div class="field-box field-nombre">
+                        </div></div>
+                        <div><div class="flex-container fieldBox field-nombre">
                             <label class="inline">Nombre d'équipiers:</label>
                             <p>{{ equipier.equipe.nombre }}</p>
+                        </div></div>
                         </div>
                     </div>
                     <div class="form-row field-commentaires">
@@ -62,39 +66,45 @@
                     <h2>Equipier {{ equipier.numero }} / {{ equipier.equipe.nombre }}</h2>
                     <fieldset class="module aligned ">
                         <div class="form-row field-nom field-prenom field-sexe">
-                            <div class="field-box field-nom">
+                            <div class="flex-container form-multiline">
+                            <div><div class="flex-container fieldBox field-nom">
                                 <label>Nom:</label>
                                 <p>{{ equipier.nom }}</p>
-                            </div>
-                            <div class="field-box field-prenom">
+                            </div></div>
+                            <div><div class="flex-container fieldBox field-prenom">
                                 <label class="inline">Prénom:</label>
                                 <p>{{ equipier.prenom }}</p>
-                            </div>
-                            <div class="field-box field-sexe">
+                            </div></div>
+                            <div><div class="flex-container fieldBox field-sexe">
                                 <label class="inline">Sexe:</label>
                                 <p>{{ equipier.sexe }}</p>
+                            </div></div>
                             </div>
                         </div>
                     </fieldset>
                     <fieldset class="module aligned wide">
                         <div class="form-row field-date_de_naissance field-age">
-                            <div class="field-box field-date_de_naissance">
+                            <div class="flex-container form-multiline">
+                            <div><div class="flex-container fieldBox field-date_de_naissance">
                                 <label>Date de naissance:</label>
                                 <p>{{ equipier.date_de_naissance }}</p>
-                            </div>
-                            <div class="field-box field-age">
+                            </div></div>
+                            <div><div class="flex-container fieldBox field-age">
                                 <label class="inline">Age:</label>
                                 <p>{{ equipier.age }}</p>
+                            </div></div>
                             </div>
                         </div>
                         <div class="form-row field-justificatif field-num_licence">
-                            <div class="field-box field-justificatif">
+                            <div class="flex-container form-multiline">
+                            <div><div class="flex-container fieldBox field-justificatif">
                                 <label>Justificatif:</label>
                                 <p>{{ equipier.justificatif }}</p>
-                            </div>
-                            <div class="field-box field-num_licence">
+                            </div></div>
+                            <div><div class="flex-container fieldBox field-num_licence">
                                 <label class="inline">Numéro de licence:</label>
                                 <p>{{ equipier.num_licence }}</p>
+                            </div></div>
                             </div>
                         </div>
                     </fieldset>

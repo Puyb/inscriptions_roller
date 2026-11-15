@@ -9,16 +9,18 @@
         {{ paiement_form|as_django_admin }}
         <fieldset class="module">
             <div class="form-row"{% if readonly %} style="display: none;"{% endif %}>
-                <div class="field-box">
-                    <label for="id_search">Ajouter une equipe</label>
-                    <input id="id_search" /><p>
-                </div>
-                <div class="field-box">
-                    <select name="course">
-                    {% for course in courses %}
-                        <option value="{{course.id}}">{{course.nom}}</option>
-                    {% endfor %}
-                    </select>
+                <div class="flex-container form-multiline">
+                    <div><div class="flex-container fieldBox">
+                        <label for="id_search">Ajouter une equipe</label>
+                        <input id="id_search" />
+                    </div></div>
+                    <div><div class="flex-container fieldBox">
+                        <select name="course">
+                        {% for course in courses %}
+                            <option value="{{course.id}}">{{course.nom}}</option>
+                        {% endfor %}
+                        </select>
+                    </div></div>
                 </div>
             </div>
             <div id="repartition-div">

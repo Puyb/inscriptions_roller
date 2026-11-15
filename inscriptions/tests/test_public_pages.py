@@ -18,7 +18,7 @@ from django.urls import reverse
 
 from inscriptions.factories import CategorieFactory, CourseEntiteFactory, CourseFactory, EquipeFactory, EquipierFactory
 from inscriptions.models import (
-    Accreditation, Challenge, ChallengeCategorie, ParticipationChallenge,
+    Accreditation, Challenge, Course, ChallengeCategorie, ParticipationChallenge,
 )
 from inscriptions.tests.base import BaseTestCase, equipier_formset_data
 
@@ -28,31 +28,32 @@ def template_names(response):
 
 
 class IndexTestCase(BaseTestCase):
-    def test_lists_active_courses_split_between_upcoming_and_past(self):
+    def test_lists_active_courses_split_between_current_and_archived(self):
         futur = CourseFactory(nom='Course Futur', date=date.today() + timedelta(days=30))
         passee = CourseFactory(nom='Course Passee', date=date.today() - timedelta(days=30))
+        Course.objects.filter(pk=passee.course_id).update(archive=True)
         inactive = CourseFactory(nom='Course Inactive', active=False)
 
         response = self.client.get(reverse('home'))
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('index.html', template_names(response))
-        self.assertEqual(list(response.context['prochaines_courses']), [futur.course])
+        self.assertEqual(list(response.context['courses']), [futur.course])
         self.assertEqual(list(response.context['anciennes_courses']), [passee.course])
         self.assertContains(response, 'Course Futur')
         self.assertContains(response, 'Course Passee')
         self.assertNotContains(response, inactive.nom)
 
-    def test_orders_by_date(self):
+    def test_orders_by_last_edition_date_desc(self):
         c2 = CourseFactory(date=date.today() + timedelta(days=90))
         c1 = CourseFactory(date=date.today() + timedelta(days=10))
         response = self.client.get(reverse('home'))
-        self.assertEqual(list(response.context['prochaines_courses']), [c1.course, c2.course])
+        self.assertEqual(list(response.context['courses']), [c2.course, c1.course])
 
     def test_empty(self):
         response = self.client.get(reverse('home'))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(list(response.context['prochaines_courses']), [])
+        self.assertEqual(list(response.context['courses']), [])
 
     def test_une_seule_edition_ouverte_lien_direct(self):
         edition = CourseFactory(nom='Seule', uid='2026')
@@ -70,14 +71,14 @@ class IndexTestCase(BaseTestCase):
         self.assertContains(response, 'Edition 3h')
         self.assertContains(response, 'href="/%s/"' % e6.key)
         self.assertContains(response, 'href="/%s/"' % e3.key)
-        self.assertEqual(list(response.context['prochaines_courses']), [course])
+        self.assertEqual(list(response.context['courses']), [course])
 
     def test_edition_non_publiee_absente(self):
         course = CourseEntiteFactory(uid='brouillon')
         CourseFactory(course=course, uid='2026', nom='Brouillon 2026', active=False)
         response = self.client.get(reverse('home'))
         self.assertNotContains(response, 'Brouillon 2026')
-        self.assertEqual(list(response.context['prochaines_courses']), [])
+        self.assertEqual(list(response.context['courses']), [])
         self.assertEqual(list(response.context['anciennes_courses']), [])
 
     def test_inscriptions_pas_encore_ouvertes_affiche_la_date_d_ouverture(self):

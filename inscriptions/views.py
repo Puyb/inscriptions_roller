@@ -500,32 +500,29 @@ def stats_compare(request, course_uid, course_uid2):
     });
 
 def index(request):
-    """Accueil : une carte par course. Les courses avec au moins une edition a venir
-    (ou en cours) d'abord, les autres ensuite ; un bouton d'inscription (direct s'il
-    n'y a qu'une edition ouverte, menu de choix sinon)."""
+    """Accueil : une carte par course non archivee (derniere edition publiee la plus
+    recente d'abord), puis la liste des courses archivees. Bouton d'inscription direct
+    s'il n'y a qu'une edition ouverte, menu de choix sinon."""
     courses = (Course.objects.filter(active=True)
         .prefetch_related(Prefetch('editions', Edition.objects.filter(active=True).order_by('date').prefetch_related('challenges'))))
-    prochaines, anciennes = [], []
-    aujourdhui = date.today()
+    courses_actuelles, anciennes = [], []
     for course in courses:
         course.charge_editions_publiees(course.editions.all())
         if not course.editions_publiees:
             continue
-        if course.prochaine_edition and course.prochaine_edition.date > aujourdhui:
-            prochaines.append(course)
-        else:
-            anciennes.append(course)
-    prochaines.sort(key=lambda c: c.prochaine_edition.date if c.prochaine_edition else aujourdhui)
-    anciennes.sort(key=lambda c: c.derniere_edition_publiee.date, reverse=True)
+        course.edition_affichee = course.prochaine_edition or course.derniere_edition_publiee
+        (anciennes if course.archive else courses_actuelles).append(course)
+    for liste in (courses_actuelles, anciennes):
+        liste.sort(key=lambda c: c.derniere_edition_publiee.date, reverse=True)
     return TemplateResponse(request, 'index.html', {
-        'prochaines_courses': prochaines,
+        'courses': courses_actuelles,
         'anciennes_courses': anciennes,
     })
 
 def course_page(request, course_uid):
     """Page d'une course : ses editions publiees et leurs liens."""
     course = get_object_or_404(Course, uid=course_uid, active=True)
-    course.charge_editions_publiees()
+    course.charge_editions_publiees(course.editions.filter(active=True).order_by('date').prefetch_related('challenges'))
     if not course.editions_publiees:
         raise Http404()
     return TemplateResponse(request, 'course.html', {
