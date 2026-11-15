@@ -7,6 +7,7 @@ from django.forms import ModelForm, CharField, HiddenInput, Select, RadioSelect,
 from django.forms.widgets import Textarea, SelectDateWidget
 from django.forms.formsets import formset_factory
 from django.forms.models import BaseModelFormSet
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from .models import COURSE_FIELDS, COURSE_UID_VALIDATOR, valide_uid_course, Course, Equipe, Equipier, Edition, Challenge, ChallengeCategorie, Paiement, PaiementRepartition, Transpondeur, SEXE_CHOICES, JUSTIFICATIF_CHOICES
 from django.conf import settings
@@ -91,6 +92,17 @@ def _champs_course():
     return {nom: Course._meta.get_field(nom).formfield() for nom in COURSE_FIELDS}
 
 
+class PrefixedTextInput(TextInput):
+    """Champ texte precede d'un prefixe fixe (ex. « 6hdeparis/ »)."""
+
+    def __init__(self, prefix='', attrs=None):
+        super().__init__(attrs)
+        self.prefix = prefix
+
+    def render(self, name, value, attrs=None, renderer=None):
+        return format_html('<span class="uid-prefix">{}/</span> {}', self.prefix, super().render(name, value, attrs, renderer))
+
+
 class CourseFieldsForm(ModelForm):
     """Formulaire d'edition (admin organisateur) : champs propres a l'edition.
     Les champs de la course se modifient via `CourseSettingsForm`."""
@@ -98,6 +110,11 @@ class CourseFieldsForm(ModelForm):
     class Meta:
         model = Edition
         exclude = ('course', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.course_id:
+            self.fields['uid'].widget = PrefixedTextInput(self.instance.course.uid, self.fields['uid'].widget.attrs)
 
     def validate_unique(self):
         super().validate_unique()
@@ -112,7 +129,7 @@ class CourseSettingsForm(ModelForm):
 
     class Meta:
         model = Course
-        fields = ('nom', 'logo') + tuple(f for f in COURSE_FIELDS if f != 'ville2') + ('ville2', )
+        fields = ('nom', 'logo') + tuple(f for f in COURSE_FIELDS if f != 'ville2')
 
 
 def _un_an_plus_tard(valeur):
@@ -265,6 +282,8 @@ class EditionForm(ModeleEditionMixin, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.course:
+            self.fields['uid'].widget = PrefixedTextInput(self.course.uid, self.fields['uid'].widget.attrs)
         precedente = self.course.derniere_edition if self.course else None
         if precedente and not self.instance.pk:
             for nom in self.REPRISE:

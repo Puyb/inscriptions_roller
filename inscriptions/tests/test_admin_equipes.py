@@ -942,3 +942,11 @@ class ReglagesCourseEditionTest(BaseTestCase):
         set_course_cookie(self.client, edition)
         r = self.client.get('/course/inscriptions/course/%d/change/' % edition.course_id)
         self.assertNotEqual(r.status_code, 200)
+
+    def test_uid_edition_prefixe_et_pas_de_ville2(self):
+        edition = CourseFactory()
+        login_organizer(self.client, edition)
+        r = self.client.get('/course/inscriptions/edition/', follow=True)
+        self.assertContains(r, '<span class="uid-prefix">%s/</span>' % edition.course.uid, html=False)
+        r = self.client.get('/course/inscriptions/course/', follow=True)
+        self.assertNotIn('ville2', r.context['adminform'].form.fields)
